@@ -119,25 +119,16 @@ async function googleLogin(idToken, isRegisterMode = false) {
             };
         }
 
-        // No account exists. Create directly if in register mode; otherwise ask the frontend to confirm.
-        if (isRegisterMode) {
-            return completeGoogleRegistration(
-                googleUser.sub,
-                googleUser.email,
-                googleUser.name,
-                googleUser.picture
-            );
-        }
-
-        return {
-            needsRegistration: true,
-            googleUser: {
-                email: googleUser.email,
-                name: googleUser.name,
-                picture: googleUser.picture,
-                sub: googleUser.sub
-            }
-        };
+        // No account exists. Magazine has no user types to choose between, so
+        // first-time Google sign-in creates the account and logs in immediately
+        // — no separate registration round-trip needed (which the magazine-front
+        // doesn't know how to handle anyway).
+        return completeGoogleRegistration(
+            googleUser.sub,
+            googleUser.email,
+            googleUser.name,
+            googleUser.picture
+        );
     } catch (error) {
         console.error('googleLogin error:', error.message);
         return { error: error.message || 'Error al autenticar con Google' };

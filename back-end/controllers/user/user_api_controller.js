@@ -240,9 +240,6 @@ async function googleAuth(req, res) {
                 existingAccounts: result.existingAccounts
             });
         }
-        if (result.needsRegistration) {
-            return res.json({ needsRegistration: true, googleUser: result.googleUser });
-        }
         res.json({ data: result.data, message: result.message });
     } catch (err) {
         console.error('Google OAuth error:', err);
