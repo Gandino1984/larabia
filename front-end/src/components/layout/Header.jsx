@@ -5,7 +5,7 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuthor } from '../../app_context/AuthorContext';
-import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, Globe } from 'lucide-react';
+import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, Globe, Shield } from 'lucide-react';
 import UserInfoCard from '../user/UserInfoCard';
 import LanguageSelector from './LanguageSelector';
 import MoreDropdown from './MoreDropdown';
@@ -42,8 +42,8 @@ function AuthorResultAvatar({ profile }) {
 
 function Header() {
   const { t } = useTranslation();
-  const { currentUser, isEditor, logout } = useAuth();
-  const { showArticleDetail, showAuthors, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToHumor, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
+  const { currentUser, isEditor, isSuperAdmin, logout } = useAuth();
+  const { showArticleDetail, showAuthors, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToHumor, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
   const [showUserCard, setShowUserCard] = useState(false);
@@ -157,6 +157,11 @@ function Header() {
   const handleEditorialClick = () => {
     // TODO: Navigate to Editorial section
     console.log('Editorial clicked');
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleAdminClick = () => {
+    navigateToAdmin();
     setIsMobileMenuOpen(false);
   };
 
@@ -476,6 +481,13 @@ function Header() {
 
           <LanguageSelector />
 
+          {isSuperAdmin && (
+            <button className="nav-link" onClick={handleAdminClick} title="Administración">
+              <Shield size={16} />
+              <span>Admin</span>
+            </button>
+          )}
+
           <div className="header-user">
             {currentUser && (
               <button className="logout-btn" onClick={handleLogout}>
@@ -661,6 +673,12 @@ function Header() {
                     <User size={18} />
                   )}
                 </button>
+                {isSuperAdmin && (
+                  <button className="mobile-nav-link" onClick={handleAdminClick}>
+                    <Shield size={18} />
+                    <span>Admin</span>
+                  </button>
+                )}
                 <button className="mobile-nav-link logout" onClick={handleLogout}>
                   <LogOut size={18} />
                   <span>{t('common.buttons.logout')}</span>

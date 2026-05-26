@@ -493,6 +493,31 @@ export const MagazineProvider = ({ children }) => {
     }
   }, [currentUser]);
 
+  // Submit a draft article for super-admin approval.
+  // Available to article authors + super admins. Used by the editor UI's
+  // "Publicar" button when the user isn't a super admin.
+  const submitForApproval = useCallback(async (id_article) => {
+    try {
+      const res = await axiosInstance.post(
+        `/magazine-article/submit-for-approval/${id_article}`,
+        {},
+        { headers: { 'x-user-id': currentUser?.id_user } }
+      );
+      if (res.data.error) {
+        showError(res.data.error);
+        return { error: res.data.error };
+      }
+      showSuccess(res.data.success || 'Artículo enviado para aprobación');
+      await Promise.all([fetchArticles(), fetchEditorArticles(), fetchAllArticles()]);
+      return { success: true, data: res.data.data };
+    } catch (err) {
+      console.error('Error submitting for approval:', err);
+      const msg = err.response?.data?.error || 'Error al enviar el artículo para aprobación';
+      showError(msg);
+      return { error: msg };
+    }
+  }, [currentUser, fetchArticles, fetchEditorArticles, fetchAllArticles, showSuccess, showError]);
+
   // Respond to a co-author invitation
   const respondToInvitation = useCallback(async (invitationId, response) => {
     try {
@@ -574,6 +599,7 @@ export const MagazineProvider = ({ children }) => {
     inviteCoAuthor,
     fetchPendingInvitations,
     respondToInvitation,
+    submitForApproval,
     // Block functions
     fetchBlocksByArticleId,
     createBlock,

@@ -19,6 +19,7 @@ export const UIProvider = ({ children }) => {
   const [showProjectDetail, setShowProjectDetail] = useState(false);
   const [showOpenMic, setShowOpenMic] = useState(false);
   const [showHumor, setShowHumor] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const [openEditorToEdit, setOpenEditorToEdit] = useState(false);
 
   // Selected data for views
@@ -96,6 +97,7 @@ export const UIProvider = ({ children }) => {
     setShowProjectDetail(false);
     setShowOpenMic(false);
     setShowHumor(false);
+    setShowAdmin(false);
   };
 
   const navigateToHome = () => {
@@ -242,6 +244,12 @@ export const UIProvider = ({ children }) => {
     setShowHumor(true);
   };
 
+  const navigateToAdmin = () => {
+    setPreviousView('home');
+    resetAllViews();
+    setShowAdmin(true);
+  };
+
   // Notification helpers
   const showSuccess = useCallback((message) => {
     setSuccess(prev => ({ ...prev, databaseResponseSuccess: message }));
@@ -327,6 +335,8 @@ export const UIProvider = ({ children }) => {
     navigateToOpenMic,
     showHumor,
     navigateToHumor,
+    showAdmin,
+    navigateToAdmin,
     navigateBack,
 
     // Card notifications
