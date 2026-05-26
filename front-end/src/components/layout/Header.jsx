@@ -5,6 +5,7 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuthor } from '../../app_context/AuthorContext';
+import { useMetadata } from '../../app_context/MetadataContext';
 import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, Globe, Shield } from 'lucide-react';
 import UserInfoCard from '../user/UserInfoCard';
 import LanguageSelector from './LanguageSelector';
@@ -46,6 +47,7 @@ function Header() {
   const { showArticleDetail, showAuthors, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToHumor, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
+  const { metadata, resolveLogoUrl } = useMetadata();
   const [showUserCard, setShowUserCard] = useState(false);
   const [isHeaderActive, setIsHeaderActive] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -310,8 +312,12 @@ function Header() {
         <div className="header-logo-user-container">
           <div className="header-logo" onClick={handleLogoClick}>
             <AnimatedLogo
-              src={isHeaderActive ? "/logoLaRabiaBlack.png" : "/LogoLaRabiaWhite.png"}
-              alt="La Rabia - Revista de Uribarri"
+              src={
+                isHeaderActive
+                  ? (resolveLogoUrl(metadata.logo_dark) || '/logoLaRabiaBlack.png')
+                  : (resolveLogoUrl(metadata.logo_light) || '/LogoLaRabiaWhite.png')
+              }
+              alt={`${metadata.name || 'La Rabia'}${metadata.slogan ? ' — ' + metadata.slogan : ''}`}
               className="logo-image"
             />
           </div>

@@ -1,18 +1,21 @@
 // magazine-front/src/components/layout/Footer.jsx
 import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext';
+import { useMetadata } from '../../app_context/MetadataContext';
 import './Footer.css';
 
 function Footer() {
   const { t } = useTranslation();
   const { openContactModal, openNewsletterModal } = useUI();
+  const { metadata, resolveLogoUrl } = useMetadata();
+  const logoSrc = resolveLogoUrl(metadata.logo_light) || '/LogoLaRabiaWhite.png';
 
   return (
     <footer className="footer">
       <div className="footer-container">
         <div className="footer-content">
           <div className="footer-section">
-            <img src="/LogoLaRabiaWhite.png" alt="La Rabia" className="footer-logo" />
+            <img src={logoSrc} alt={metadata.name || 'La Rabia'} className="footer-logo" />
             <p>{t('footer.description')}</p>
           </div>
 

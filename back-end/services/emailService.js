@@ -2,12 +2,55 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import config from '../config/environment.js';
+import magazine_metadata_model from '../models/magazine_metadata_model.js';
 
 dotenv.config();
 
-const BRAND = 'La Rabia';
 const BRAND_COLOR = '#111';
 const ACCENT_COLOR = '#9747ff';
+
+/**
+ * Resolve the current magazine identity for email rendering.
+ * Reads the singleton row each send; harmless cost given email volume.
+ * Falls back to defaults if the row (or the whole table) isn't present —
+ * lets the email subsystem keep working before migration 003 lands.
+ */
+async function getBrand() {
+    try {
+        const row = await magazine_metadata_model.findByPk(1);
+        if (row) {
+            return {
+                name: row.name || 'La Rabia',
+                slogan: row.slogan || '',
+                description: row.description || '',
+                logo_dark: row.logo_dark || '/logoLaRabiaBlack.png',
+                logo_light: row.logo_light || '/LogoLaRabiaWhite.png'
+            };
+        }
+    } catch (err) {
+        console.warn('[emailService] magazine_metadata lookup failed; using defaults:', err.message);
+    }
+    return {
+        name: 'La Rabia',
+        slogan: '',
+        description: '',
+        logo_dark: '/logoLaRabiaBlack.png',
+        logo_light: '/LogoLaRabiaWhite.png'
+    };
+}
+
+/**
+ * Email clients only honor absolute URLs. Stored paths can be either:
+ *   - "/uploads/..." (back-end, served by express.static) → prefix with API URL
+ *   - "/Foo.png"    (front-end public/ default seed)      → prefix with frontend URL
+ *   - "http(s)://"  (external)                             → use as-is
+ */
+function absolutizeLogoUrl(value) {
+    if (!value) return null;
+    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    if (value.startsWith('/uploads/')) return `${config.urls.api}${value}`;
+    return `${config.urls.frontend}${value}`;
+}
 
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -43,6 +86,7 @@ export const sendVerificationEmail = async (userEmail, userName, verificationTok
     const transporter = createTransporter();
     await transporter.verify();
 
+    const { name: BRAND, slogan: BRAND_SLOGAN } = await getBrand();
     const frontendUrl = config.urls.frontend;
     const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(userEmail)}`;
 
@@ -58,7 +102,7 @@ export const sendVerificationEmail = async (userEmail, userName, verificationTok
             <p style="word-break: break-all; background-color: #f5f5f5; padding: 10px; border-radius: 5px;">${verificationUrl}</p>
             <div class="warning"><strong>⚠️ Importante:</strong> Este enlace expirará en 24 horas. Si no solicitaste esta cuenta, puedes ignorar este correo.</div>
           </div>
-          <div class="footer"><p>© ${new Date().getFullYear()} ${BRAND} — revista comunitaria del distrito 02 de Bilbao</p></div>
+          <div class="footer"><p>© ${new Date().getFullYear()} ${BRAND}${BRAND_SLOGAN ? ' — ' + BRAND_SLOGAN : ''}</p></div>
         </div>
       </body></html>
     `;
@@ -84,6 +128,7 @@ export const sendWelcomeEmail = async (userEmail, userName) => {
   try {
     const transporter = createTransporter();
     const magazineUrl = config.urls.frontend;
+    const { name: BRAND } = await getBrand();
 
     const htmlContent = `
       <!DOCTYPE html><html><head><style>${baseStyles}</style></head><body>
@@ -116,6 +161,7 @@ export const sendPasswordResetEmail = async (userEmail, userName, resetToken) =>
     const transporter = createTransporter();
     await transporter.verify();
 
+    const { name: BRAND } = await getBrand();
     const frontendUrl = config.urls.frontend;
     const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(userEmail)}`;
 
@@ -158,6 +204,8 @@ export const sendContactToDevelopersEmail = async (senderName, senderEmail, mess
     const transporter = createTransporter();
     await transporter.verify();
 
+    const { name: BRAND } = await getBrand();
+
     const htmlContent = `
       <!DOCTYPE html><html><head><style>${baseStyles}</style></head><body>
         <div class="container">
@@ -196,6 +244,9 @@ export const sendNewsletterEmail = async (subscriberEmail, subscriberName, artic
   try {
     const transporter = createTransporter();
     const magazineUrl = config.urls.frontend;
+    const brand = await getBrand();
+    const BRAND = brand.name;
+    const logoUrl = absolutizeLogoUrl(brand.logo_dark);
 
     const articleCards = articles.map(article => {
       const authors = article.authors?.map(a => a.name_user).join(', ') || article.author_name || '';
@@ -218,7 +269,7 @@ export const sendNewsletterEmail = async (subscriberEmail, subscriberName, artic
       <body style="font-family:Arial,sans-serif; background:#f5f5f5; margin:0; padding:0;">
         <div style="max-width:620px; margin:0 auto; padding:32px 16px;">
           <div style="text-align:center; margin-bottom:32px;">
-            <img src="${magazineUrl}/logoLaRabiaBlack.png" alt="${BRAND}" style="height:60px; width:auto; display:inline-block; margin-bottom:8px;" />
+            <img src="${logoUrl}" alt="${BRAND}" style="height:60px; width:auto; display:inline-block; margin-bottom:8px;" />
             <p style="margin:0; font-size:13px; color:#888; letter-spacing:2px; text-transform:uppercase;">Recomendaciones</p>
           </div>
           ${introText ? `<div style="background:#fff; border-left:4px solid #111; padding:18px 24px; margin-bottom:28px; border-radius:0 8px 8px 0;"><p style="margin:0; font-size:15px; color:#333; line-height:1.7;">${introText.replace(/\n/g, '<br>')}</p></div>` : ''}

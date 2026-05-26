@@ -1,6 +1,18 @@
-// magazine-front/src/components/layout/LoadingScreen.jsx
+// front-end/src/components/layout/LoadingScreen.jsx
 import { useEffect, useState } from 'react';
+import { useMetadata } from '../../app_context/MetadataContext';
 import './LoadingScreen.css';
+
+/**
+ * Reads the magazine name + light logo from MetadataContext so a custom logo
+ * uploaded by the super admin shows on the splash. Falls back to LaRabia
+ * defaults via MetadataContext.DEFAULTS — animations are unchanged.
+ */
+function LoadingScreenLogo() {
+  const { metadata, resolveLogoUrl } = useMetadata();
+  const src = resolveLogoUrl(metadata.logo_light) || '/LogoLaRabiaWhite.png';
+  return <img src={src} alt={metadata.name || 'La Rabia'} className="logo-image" />;
+}
 
 function LoadingScreen({ isLoading, progress, onLoadingComplete }) {
   const [showSlogan, setShowSlogan] = useState(false);
@@ -40,11 +52,7 @@ function LoadingScreen({ isLoading, progress, onLoadingComplete }) {
     <div className={`loading-screen ${fadeOut ? 'fade-out' : ''}`}>
       <div className="loading-content">
         <div className="loading-logo fade-in">
-          <img
-            src="/LogoLaRabiaWhite.png"
-            alt="La Rabia"
-            className="logo-image"
-          />
+          <LoadingScreenLogo />
         </div>
 
         <p className={`loading-slogan ${showSlogan ? 'visible' : ''}`}>
