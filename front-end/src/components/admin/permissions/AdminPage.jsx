@@ -3,11 +3,13 @@ import { useAuth } from '../../../app_context/AuthContext';
 import { useUI } from '../../../app_context/UIContext';
 import AdminUsersTab from './AdminUsersTab';
 import AdminPendingTab from './AdminPendingTab';
+import AdminMetadataTab from './AdminMetadataTab';
 import './AdminPage.css';
 
 const TABS = [
   { key: 'users', label: 'Usuarios' },
-  { key: 'pending', label: 'Pendientes de aprobación' }
+  { key: 'pending', label: 'Pendientes de aprobación' },
+  { key: 'metadata', label: 'Datos de la revista' }
 ];
 
 function AdminPage() {
@@ -51,6 +53,7 @@ function AdminPage() {
       <main className="admin-page__body">
         {activeTab === 'users' && <AdminUsersTab />}
         {activeTab === 'pending' && <AdminPendingTab />}
+        {activeTab === 'metadata' && <AdminMetadataTab />}
       </main>
     </div>
   );

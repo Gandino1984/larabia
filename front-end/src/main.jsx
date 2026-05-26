@@ -8,16 +8,19 @@ import { AuthProvider } from './app_context/AuthContext.jsx';
 import { UIProvider } from './app_context/UIContext.jsx';
 import { MagazineProvider } from './app_context/MagazineContext.jsx';
 import { AuthorProvider } from './app_context/AuthorContext.jsx';
+import { MetadataProvider } from './app_context/MetadataContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
       <UIProvider>
-        <MagazineProvider>
-          <AuthorProvider>
-            <App />
-          </AuthorProvider>
-        </MagazineProvider>
+        <MetadataProvider>
+          <MagazineProvider>
+            <AuthorProvider>
+              <App />
+            </AuthorProvider>
+          </MagazineProvider>
+        </MetadataProvider>
       </UIProvider>
     </AuthProvider>
   </React.StrictMode>
