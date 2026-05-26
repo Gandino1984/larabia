@@ -177,6 +177,7 @@ async function login(userData) {
             email_verified: user.email_verified,
             is_editor: user.is_editor,
             is_super_admin: user.is_super_admin,
+            is_premium_reader: user.is_premium_reader,
             receives_newsletter: user.receives_newsletter,
             auth_provider: user.auth_provider,
             has_password: !!user.pass_user
@@ -489,6 +490,7 @@ async function update(id, userData) {
             email_verified: user.email_verified,
             is_editor: user.is_editor,
             is_super_admin: user.is_super_admin,
+            is_premium_reader: user.is_premium_reader,
             receives_newsletter: user.receives_newsletter,
             auth_provider: user.auth_provider,
             has_password: !!user.pass_user,

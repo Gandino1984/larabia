@@ -4,6 +4,7 @@ import article_author_model from "../../models/article_author_model.js";
 import magazine_article_model from "../../models/magazine_article_model.js";
 import article_author_invitation_model from "../../models/article_author_invitation_model.js";
 import user_model from "../../models/user_model.js";
+import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
 
 // Returns true if userId is an author of the given article (checks junction table + legacy author_id)
 async function isArticleAuthor(articleId, userId) {
@@ -34,7 +35,8 @@ async function getAll(req, res) {
         if (featured !== undefined) filters.featured = featured === 'true';
         if (project_id) filters.project_id = parseInt(project_id);
 
-        const { error, data } = await magazineArticleController.getAll(filters);
+        const callerUser = await getRequestUser(req);
+        const { error, data } = await magazineArticleController.getAll(filters, roleSnapshot(callerUser));
         res.json({ error, data });
     } catch (err) {
         console.error("-> magazine_article_api_controller.js - getAll() - Error =", err);
@@ -55,7 +57,8 @@ async function getById(req, res) {
             });
         }
 
-        const { error, data } = await magazineArticleController.getById(id_article);
+        const callerUser = await getRequestUser(req);
+        const { error, data } = await magazineArticleController.getById(id_article, roleSnapshot(callerUser));
 
         if (error) {
             return res.status(404).json({ error });
@@ -81,7 +84,8 @@ async function getByCategory(req, res) {
             });
         }
 
-        const { error, data, message } = await magazineArticleController.getByCategory(category);
+        const callerUser = await getRequestUser(req);
+        const { error, data, message } = await magazineArticleController.getByCategory(category, roleSnapshot(callerUser));
         res.json({ error, data, message });
     } catch (err) {
         console.error("-> magazine_article_api_controller.js - getByCategory() - Error =", err);
@@ -94,7 +98,8 @@ async function getByCategory(req, res) {
 
 async function getFeatured(req, res) {
     try {
-        const { error, data, message } = await magazineArticleController.getFeatured();
+        const callerUser = await getRequestUser(req);
+        const { error, data, message } = await magazineArticleController.getFeatured(roleSnapshot(callerUser));
         res.json({ error, data, message });
     } catch (err) {
         console.error("-> magazine_article_api_controller.js - getFeatured() - Error =", err);
@@ -120,7 +125,8 @@ async function create(req, res) {
             tags_article,
             date_published,
             status_article,
-            featured_article
+            featured_article,
+            is_premium
         } = req.body;
 
         if (!title_article || !content_article) {
@@ -146,10 +152,12 @@ async function create(req, res) {
             tags_article: tags_article || null,
             date_published: date_published || null,
             status_article: status_article || 'draft',
-            featured_article: featured_article || false
+            featured_article: featured_article || false,
+            is_premium: is_premium || false
         };
 
-        const { error, data, success } = await magazineArticleController.create(articleData);
+        const callerUser = await getRequestUser(req);
+        const { error, data, success } = await magazineArticleController.create(articleData, roleSnapshot(callerUser));
 
         if (error) {
             return res.status(400).json({ error, details: data });
@@ -195,7 +203,8 @@ async function update(req, res) {
             date_published,
             status_article,
             featured_article,
-            active_article
+            active_article,
+            is_premium
         } = req.body;
 
         const updateData = {};
@@ -213,8 +222,10 @@ async function update(req, res) {
         if (status_article !== undefined) updateData.status_article = status_article;
         if (featured_article !== undefined) updateData.featured_article = featured_article;
         if (active_article !== undefined) updateData.active_article = active_article;
+        if (is_premium !== undefined) updateData.is_premium = is_premium;
 
-        const { error, data, success } = await magazineArticleController.update(id_article, updateData);
+        const callerUser = await getRequestUser(req);
+        const { error, data, success } = await magazineArticleController.update(id_article, updateData, roleSnapshot(callerUser));
 
         if (error) {
             return res.status(400).json({ error });
@@ -550,6 +561,69 @@ async function respondToInvitation(req, res) {
     }
 }
 
+// ============================================================
+// Editorial approval workflow (Permissions C)
+// ============================================================
+
+async function submitForApproval(req, res) {
+    try {
+        const { id_article } = req.params;
+        if (!id_article) return res.status(400).json({ error: 'El ID del artículo es obligatorio' });
+
+        const callerUser = await getRequestUser(req);
+        if (!callerUser) return res.status(401).json({ error: 'Autenticación requerida' });
+
+        const result = await magazineArticleController.submitForApproval(id_article, roleSnapshot(callerUser));
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error('-> submitForApproval API - Error =', err);
+        res.status(500).json({ error: 'Error al enviar el artículo para aprobación', details: err.message });
+    }
+}
+
+async function approveArticle(req, res) {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return; // requireSuperAdmin already wrote 403
+        const { id_article } = req.params;
+        if (!id_article) return res.status(400).json({ error: 'El ID del artículo es obligatorio' });
+        const result = await magazineArticleController.approveArticle(id_article);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error('-> approveArticle API - Error =', err);
+        res.status(500).json({ error: 'Error al aprobar el artículo', details: err.message });
+    }
+}
+
+async function rejectArticle(req, res) {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return;
+        const { id_article } = req.params;
+        if (!id_article) return res.status(400).json({ error: 'El ID del artículo es obligatorio' });
+        const result = await magazineArticleController.rejectArticle(id_article);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error('-> rejectArticle API - Error =', err);
+        res.status(500).json({ error: 'Error al rechazar el artículo', details: err.message });
+    }
+}
+
+async function getPending(req, res) {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return;
+        const result = await magazineArticleController.getPending();
+        res.json({ error: null, ...result });
+    } catch (err) {
+        console.error('-> getPending API - Error =', err);
+        res.status(500).json({ error: 'Error al obtener artículos pendientes', details: err.message });
+    }
+}
+
 export default {
     getAll,
     getById,
@@ -565,5 +639,9 @@ export default {
     trackView,
     inviteCoAuthor,
     getPendingInvitations,
-    respondToInvitation
+    respondToInvitation,
+    submitForApproval,
+    approveArticle,
+    rejectArticle,
+    getPending
 };

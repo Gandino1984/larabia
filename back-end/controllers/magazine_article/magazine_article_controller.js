@@ -11,6 +11,88 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { deleteFile, cleanupArticleImages, cleanupBlockImages } from '../../utils/file_cleanup.js';
 
+const EMPTY_ROLE_CTX = Object.freeze({
+    userId: null,
+    isEditor: false,
+    isSuperAdmin: false,
+    isPremiumReader: false
+});
+
+/**
+ * Build the WHERE clause for article-list queries based on the caller's role.
+ *
+ * Rules (per design — see Permissions C):
+ *   - super_admin: sees every active article regardless of status / premium.
+ *   - editor: sees all published articles + their own drafts/pending.
+ *   - premium_reader: sees only published articles, including premium ones.
+ *   - visitor / authenticated regular user: sees only published, non-premium.
+ *
+ * `requestedStatus` corresponds to the optional ?status= query string. Only
+ * super admins can use it to surface non-published articles.
+ */
+async function buildVisibilityWhere(roleCtx, requestedStatus) {
+    const ctx = roleCtx || EMPTY_ROLE_CTX;
+    const where = { active_article: true };
+
+    if (ctx.isSuperAdmin) {
+        // Super admin sees everything; if they asked for a specific status filter, honor it.
+        if (requestedStatus && requestedStatus !== 'all') {
+            where.status_article = requestedStatus;
+        }
+        return where;
+    }
+
+    if (ctx.isEditor && ctx.userId) {
+        // Editor: published articles + their own drafts/pending.
+        const myArticles = await article_author_model.findAll({
+            where: { user_id: ctx.userId },
+            attributes: ['article_id']
+        });
+        const myArticleIds = myArticles.map((r) => r.article_id);
+        where[Op.or] = [
+            { status_article: 'published' },
+            ...(myArticleIds.length > 0
+                ? [{ id_article: myArticleIds, status_article: ['draft', 'pending_approval'] }]
+                : [])
+        ];
+        return where;
+    }
+
+    // Premium reader and visitor: only published. Premium readers see premium.
+    where.status_article = 'published';
+    if (!ctx.isPremiumReader) {
+        where.is_premium = false;
+    }
+    return where;
+}
+
+/**
+ * Whether `roleCtx` can see this specific article. Used by getById / single-record
+ * endpoints where we fetch first and gate after. Mirrors buildVisibilityWhere's rules.
+ */
+async function canReadArticle(article, roleCtx) {
+    const ctx = roleCtx || EMPTY_ROLE_CTX;
+    if (!article || !article.active_article) return false;
+    if (ctx.isSuperAdmin) return true;
+
+    // Is the caller a listed author of this article?
+    const isAuthor = ctx.userId
+        ? !!(await article_author_model.findOne({
+            where: { article_id: article.id_article, user_id: ctx.userId }
+        }))
+        : false;
+    if (isAuthor) return true;
+
+    // Non-author, non-super-admin: must be published.
+    if (article.status_article !== 'published') return false;
+
+    // Free article: anyone published-tier+ can read.
+    if (!article.is_premium) return true;
+
+    // Premium article: requires premium_reader / editor.
+    return ctx.isPremiumReader || ctx.isEditor;
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -112,19 +194,9 @@ async function loadBatchLegacyAuthors(articles, authorsMap) {
     }
 }
 
-async function getAll(filters = {}) {
+async function getAll(filters = {}, roleCtx = EMPTY_ROLE_CTX) {
     try {
-        const whereClause = { active_article: true };
-
-        // Apply status filter
-        if (filters.status === 'all') {
-            // No status filter - return all active articles (drafts + published)
-        } else if (filters.status) {
-            whereClause.status_article = filters.status;
-        } else {
-            // By default, only show published articles
-            whereClause.status_article = 'published';
-        }
+        const whereClause = await buildVisibilityWhere(roleCtx, filters.status);
 
         // Apply category filter
         if (filters.category) {
@@ -196,7 +268,7 @@ async function getAll(filters = {}) {
     }
 }
 
-async function getById(id_article) {
+async function getById(id_article, roleCtx = EMPTY_ROLE_CTX) {
     try {
         const article = await magazine_article_model.findByPk(id_article, {
             include: [{
@@ -213,7 +285,9 @@ async function getById(id_article) {
             return { error: "Artículo no encontrado" };
         }
 
-        if (!article.active_article) {
+        if (!(await canReadArticle(article, roleCtx))) {
+            // Return same opaque message whether the article is unpublished, premium-gated,
+            // or genuinely doesn't exist — don't leak metadata about its existence.
             return { error: "Artículo no disponible" };
         }
 
@@ -253,18 +327,17 @@ async function getById(id_article) {
     }
 }
 
-async function getByCategory(category) {
+async function getByCategory(category, roleCtx = EMPTY_ROLE_CTX) {
     try {
         if (!category) {
             return { error: "La categoría es obligatoria" };
         }
 
+        const whereClause = await buildVisibilityWhere(roleCtx);
+        whereClause.category_article = category;
+
         const articles = await magazine_article_model.findAll({
-            where: {
-                category_article: category,
-                status_article: 'published',
-                active_article: true
-            },
+            where: whereClause,
             order: [['date_published', 'DESC']]
         });
 
@@ -314,14 +387,13 @@ async function getByCategory(category) {
     }
 }
 
-async function getFeatured() {
+async function getFeatured(roleCtx = EMPTY_ROLE_CTX) {
     try {
+        const whereClause = await buildVisibilityWhere(roleCtx);
+        whereClause.featured_article = true;
+
         const articles = await magazine_article_model.findAll({
-            where: {
-                featured_article: true,
-                status_article: 'published',
-                active_article: true
-            },
+            where: whereClause,
             order: [['date_published', 'DESC']],
             limit: 5
         });
@@ -372,7 +444,7 @@ async function getFeatured() {
     }
 }
 
-async function create(articleData) {
+async function create(articleData, roleCtx = EMPTY_ROLE_CTX) {
     try {
         const validation = validateArticleData(articleData);
         if (!validation.isValid) {
@@ -388,6 +460,17 @@ async function create(articleData) {
             if (!author) {
                 return { error: "El autor especificado no existe" };
             }
+        }
+
+        // Enforce author-level restrictions on initial creation:
+        //   - non-super-admins can't create articles directly in 'published' state
+        //     (must go through draft → submit-for-approval → super-admin approve)
+        //   - non-super-admins can't mark an article premium (gating power belongs to admin)
+        if (!roleCtx.isSuperAdmin) {
+            if (articleData.status_article === 'published') {
+                articleData.status_article = 'draft';
+            }
+            articleData.is_premium = false;
         }
 
         // If status is 'published', set publish date
@@ -437,7 +520,7 @@ async function create(articleData) {
     }
 }
 
-async function update(id_article, articleData) {
+async function update(id_article, articleData, roleCtx = EMPTY_ROLE_CTX) {
     try {
         const article = await magazine_article_model.findByPk(id_article);
 
@@ -450,8 +533,19 @@ async function update(id_article, articleData) {
             return { error: "El título no puede exceder 255 caracteres" };
         }
 
+        // Status transitions: only super admins can move articles to/from 'published'
+        // or change to 'pending_approval' via this endpoint. Editors must use the
+        // dedicated /submit-for-approval, /approve, /reject endpoints instead.
+        if (!roleCtx.isSuperAdmin && articleData.status_article !== undefined) {
+            delete articleData.status_article;
+        }
+        // is_premium is super-admin-only (gating power).
+        if (!roleCtx.isSuperAdmin && articleData.is_premium !== undefined) {
+            delete articleData.is_premium;
+        }
+
         // If changing status to published, set publish date
-        if (articleData.status_article === 'published' && article.status_article === 'draft' && !articleData.date_published) {
+        if (articleData.status_article === 'published' && article.status_article !== 'published' && !articleData.date_published) {
             articleData.date_published = new Date();
         }
 
@@ -726,6 +820,122 @@ async function trackView(id_article) {
     }
 }
 
+/**
+ * Author/editor flow: move a draft into the super-admin review queue.
+ */
+async function submitForApproval(id_article, roleCtx) {
+    try {
+        const article = await magazine_article_model.findByPk(id_article);
+        if (!article) return { error: 'Artículo no encontrado' };
+
+        const isAuthor = roleCtx?.userId
+            ? !!(await article_author_model.findOne({
+                where: { article_id: article.id_article, user_id: roleCtx.userId }
+            }))
+            : false;
+
+        if (!isAuthor && !roleCtx?.isSuperAdmin) {
+            return { error: 'Solo el autor del artículo o el super-administrador pueden enviarlo para aprobación' };
+        }
+
+        if (article.status_article !== 'draft') {
+            return { error: `No se puede enviar para aprobación un artículo en estado '${article.status_article}'` };
+        }
+
+        await article.update({ status_article: 'pending_approval' });
+        return {
+            success: 'Artículo enviado para aprobación',
+            data: { id_article: article.id_article, status_article: 'pending_approval' }
+        };
+    } catch (err) {
+        console.error('-> submitForApproval() - Error =', err);
+        return { error: 'Error al enviar el artículo para aprobación' };
+    }
+}
+
+/**
+ * Super-admin flow: approve a pending article → published.
+ */
+async function approveArticle(id_article) {
+    try {
+        const article = await magazine_article_model.findByPk(id_article);
+        if (!article) return { error: 'Artículo no encontrado' };
+
+        if (article.status_article !== 'pending_approval') {
+            return { error: `Solo se pueden aprobar artículos en estado 'pending_approval' (estado actual: ${article.status_article})` };
+        }
+
+        const updates = { status_article: 'published' };
+        if (!article.date_published) updates.date_published = new Date();
+
+        await article.update(updates);
+        return {
+            success: 'Artículo aprobado y publicado',
+            data: { id_article: article.id_article, status_article: 'published' }
+        };
+    } catch (err) {
+        console.error('-> approveArticle() - Error =', err);
+        return { error: 'Error al aprobar el artículo' };
+    }
+}
+
+/**
+ * Super-admin flow: reject a pending article → draft (returned to author).
+ */
+async function rejectArticle(id_article) {
+    try {
+        const article = await magazine_article_model.findByPk(id_article);
+        if (!article) return { error: 'Artículo no encontrado' };
+
+        if (article.status_article !== 'pending_approval') {
+            return { error: `Solo se pueden rechazar artículos en estado 'pending_approval' (estado actual: ${article.status_article})` };
+        }
+
+        await article.update({ status_article: 'draft' });
+        return {
+            success: 'Artículo devuelto al autor',
+            data: { id_article: article.id_article, status_article: 'draft' }
+        };
+    } catch (err) {
+        console.error('-> rejectArticle() - Error =', err);
+        return { error: 'Error al rechazar el artículo' };
+    }
+}
+
+/**
+ * Super-admin flow: list every article currently awaiting approval.
+ */
+async function getPending() {
+    try {
+        const articles = await magazine_article_model.findAll({
+            where: { status_article: 'pending_approval', active_article: true },
+            order: [['updated_at', 'DESC']]
+        });
+        if (!articles || articles.length === 0) {
+            return { data: [], message: 'No hay artículos pendientes' };
+        }
+        const articleIds = articles.map((a) => a.id_article);
+        const authorsMap = await loadBatchArticleAuthors(articleIds);
+        const legacyMap = await loadBatchLegacyAuthors(articles, authorsMap);
+        const data = articles.map((article) => {
+            const authors = authorsMap.get(article.id_article) || [];
+            const legacy = authors.length === 0 && article.author_id ? legacyMap[article.author_id] : null;
+            return {
+                ...article.toJSON(),
+                authors,
+                author: authors.length > 0
+                    ? authors[0]
+                    : (legacy ? { id_user: legacy.id_user, name_user: legacy.name_user, image_user: legacy.image_user } : null),
+                author_name: authors.length > 0 ? authors[0].name_user : article.author_name
+            };
+        });
+        return { data };
+    } catch (err) {
+        console.error('-> getPending() - Error =', err);
+        return { error: 'Error al obtener artículos pendientes' };
+    }
+}
+
 export default {
     getAll,
     getById,
@@ -738,5 +948,9 @@ export default {
     removeCoverImage,
     deactivate,
     getEditors,
-    trackView
+    trackView,
+    submitForApproval,
+    approveArticle,
+    rejectArticle,
+    getPending
 };

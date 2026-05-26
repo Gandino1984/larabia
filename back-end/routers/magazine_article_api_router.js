@@ -8,6 +8,7 @@ const router = Router();
 // GET routes
 router.get("/", magazineArticleApiController.getAll);
 router.get("/featured", magazineArticleApiController.getFeatured);
+router.get("/pending", magazineArticleApiController.getPending);            // super-admin: approval queue
 router.get("/by-category/:category", magazineArticleApiController.getByCategory);
 router.get("/by-id/:id_article", magazineArticleApiController.getById);
 router.get("/editors", magazineArticleApiController.getEditors);
@@ -17,6 +18,7 @@ router.get("/pending-invitations", magazineArticleApiController.getPendingInvita
 router.post("/track-view/:id_article", magazineArticleApiController.trackView);
 router.post("/create", magazineArticleApiController.create);
 router.post("/invite-coauthor", magazineArticleApiController.inviteCoAuthor);
+router.post("/submit-for-approval/:id_article", magazineArticleApiController.submitForApproval);  // author/editor flow
 router.post(
     "/upload-cover-image",
     handleMagazineImageUpload,
@@ -25,6 +27,8 @@ router.post(
 
 // PATCH routes
 router.patch("/update/:id_article", magazineArticleApiController.update);
+router.patch("/approve/:id_article", magazineArticleApiController.approveArticle);   // super-admin
+router.patch("/reject/:id_article", magazineArticleApiController.rejectArticle);     // super-admin
 router.patch("/deactivate/:id_article", magazineArticleApiController.deactivate);
 router.patch("/invitation/:id/respond", magazineArticleApiController.respondToInvitation);
 
