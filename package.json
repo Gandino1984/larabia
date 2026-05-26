@@ -1,0 +1,29 @@
+{
+  "name": "larabia-magazine",
+  "version": "0.1.0",
+  "description": "La Rabia — revista comunitaria del distrito 02 de Bilbao (Uribarri). Backend Node.js/Express + MySQL.",
+  "main": "back-end/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon back-end/index.js",
+    "start": "node back-end/index.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "2.8.5",
+    "dotenv": "16.4.5",
+    "express": "^4.21.2",
+    "google-auth-library": "^10.5.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "3.11.4",
+    "nodemailer": "^6.9.7",
+    "sequelize": "6.37.5",
+    "sharp": "^0.33.5",
+    "validate-image-type": "^3.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "author": "German Andino",
+  "license": "ISC"
+}

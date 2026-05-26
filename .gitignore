@@ -1,0 +1,23 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+.DS_Store
+
+# Uploaded user content (kept out of git)
+back-end/uploads/magazine/*
+back-end/uploads/article_blocks/*
+back-end/uploads/author-profiles/*
+!back-end/uploads/magazine/.gitkeep
+!back-end/uploads/article_blocks/.gitkeep
+!back-end/uploads/author-profiles/.gitkeep
+
+# Build artifacts
+front-end/dist/
+front-end/node_modules/
+
+# Editor / OS
+.vscode/
+.idea/
