@@ -1,38 +1,30 @@
-# magazine-front/Dockerfile
+# front-end/Dockerfile for larabia-magazine.
+# Two stages: vite build → nginx static serve.
+
 FROM node:24.3.0 AS build
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy source code
 COPY . .
 
-# Accept build arguments from docker-compose
-ARG VITE_API_URL=https://api.uribarri.online
-ARG VITE_GOOGLE_CLIENT_ID=900987294540-hjhjhisdf8rteelki7hd030o2i8ku74p.apps.googleusercontent.com
+# Build-time configuration. Both come from docker-compose.yml via --build-arg.
+# VITE_API_URL is required; VITE_GOOGLE_CLIENT_ID is required for Google sign-in.
+ARG VITE_API_URL
+ARG VITE_GOOGLE_CLIENT_ID
 
-# Set environment variables for build
 ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
 
-# Build the application
 RUN npm run build
 
-# Production stage with nginx
+# --- production stage ---
 FROM nginx:latest
 
-# Copy built files to nginx
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copy nginx configuration
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]

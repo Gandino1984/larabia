@@ -1,0 +1,107 @@
+# ============================================================
+# larabia-magazine — docker-compose
+#
+# Three services: db (MySQL 8), back-end (Node/Express), front-end (nginx).
+# All three attach to the existing `nginx-proxy` network on the VPS so the
+# external reverse proxy + Let's Encrypt companion can route + issue certs.
+#
+# Stage 1 deployment (test on existing subdomain):
+#   FRONT_VIRTUAL_HOST=larabia.uribarri.online
+#   API_VIRTUAL_HOST=api.larabia.uribarri.online
+# Stage 2 (move to own domain): change the two VIRTUAL_HOST env vars in .env.
+# ============================================================
+services:
+  db:
+    container_name: larabia_db
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - larabia_mysql_data:/var/lib/mysql
+      # back-end/migrations is auto-applied by MySQL on first boot (only when the
+      # data volume is empty). To re-run migrations on an existing volume, drop
+      # the volume first: `docker compose down -v`.
+      - ./back-end/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - larabia_internal
+
+  back-end:
+    build: .
+    container_name: larabia_back-end
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - APP_PORT=3000
+      - MYSQL_HOST=larabia_db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - CONTACT_EMAIL=${CONTACT_EMAIL}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      # nginx-proxy + Let's Encrypt companion read these labels to route traffic + mint a cert.
+      - VIRTUAL_HOST=${API_VIRTUAL_HOST}
+      - VIRTUAL_PORT=3000
+      - LETSENCRYPT_HOST=${API_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      # File upload size limit, must match Express body limit.
+      - CLIENT_MAX_BODY_SIZE=20M
+    volumes:
+      # Bind uploads so writes survive container rebuilds.
+      - ./back-end/uploads:/app/back-end/uploads
+      - ./back-end/assets:/app/back-end/assets
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    networks:
+      - larabia_internal
+      - proxy
+
+  front-end:
+    build:
+      context: ./front-end
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+    container_name: larabia_front-end
+    restart: unless-stopped
+    depends_on:
+      - back-end
+    environment:
+      - VIRTUAL_HOST=${FRONT_VIRTUAL_HOST}
+      - LETSENCRYPT_HOST=${FRONT_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    networks:
+      - proxy
+
+volumes:
+  larabia_mysql_data:
+
+networks:
+  larabia_internal:
+    driver: bridge
+  proxy:
+    name: nginx-proxy
+    external: true
