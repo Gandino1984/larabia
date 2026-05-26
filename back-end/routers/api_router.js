@@ -6,6 +6,7 @@ import magazineArticleApiRouter from "./magazine_article_api_router.js";
 import articleBlocksApiRouter from "./article_blocks_api_router.js";
 import magazineProjectApiRouter from "./magazine_project_api_router.js";
 import authorProfileApiRouter from "./author_profile_api_router.js";
+import magazineMetadataApiRouter from "./magazine_metadata_api_router.js";
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.use("/contact", contactApiRouter);
 router.use("/magazine-article", magazineArticleApiRouter);
 router.use("/article-blocks", articleBlocksApiRouter);
 router.use("/magazine-project", magazineProjectApiRouter);
+router.use("/magazine-metadata", magazineMetadataApiRouter);
 
 // Author profile routes are defined with their full prefix (/author-profile/*) inside the router
 router.use("/", authorProfileApiRouter);

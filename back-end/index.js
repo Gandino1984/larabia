@@ -17,6 +17,7 @@ import './models/article_author_model.js';
 import './models/article_author_invitation_model.js';
 import './models/author_profile_model.js';
 import './models/project_author_model.js';
+import './models/magazine_metadata_model.js';
 
 dotenv.config();
 
