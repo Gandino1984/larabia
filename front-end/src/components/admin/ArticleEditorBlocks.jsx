@@ -33,7 +33,8 @@ function ArticleEditorBlocks() {
     deleteBlock,
     reorderBlocks,
     uploadBlockImage,
-    uploadPanelAudio
+    uploadPanelAudio,
+    submitForApproval
   } = useMagazine();
   const { showSuccess, showError, navigateToHome, showEditor, openEditorToEdit, setOpenEditorToEdit } = useUI();
   const { t } = useTranslation();
@@ -414,12 +415,21 @@ function ArticleEditorBlocks() {
     setSaving(true);
 
     try {
+      // Decide intent: did the user pick "submit for approval"?
+      // Non-super-admins use 'pending_approval' to mean "submit". The backend
+      // strips status_article from their direct updates anyway, so we save
+      // the article as 'draft' first and then call /submit-for-approval.
+      const wantsSubmission = !isSuperAdmin && formData.status_article === 'pending_approval';
+
       let articleResult;
       const articleData = {
         ...formData,
         author_id: currentUser.id_user,
         authors: formData.authors,
         project_id: formData.project_id || null,
+        // For non-super-admins, persist the editable fields with status=draft;
+        // the publication state-transition happens via /submit-for-approval below.
+        status_article: wantsSubmission ? 'draft' : formData.status_article,
         content_article: 'Block-based content' // Placeholder for backward compatibility
       };
 
@@ -449,7 +459,16 @@ function ArticleEditorBlocks() {
       // Save blocks
       await saveBlocks(article_id);
 
-      showSuccess(editingArticle ? t('messages.success.articleUpdated') : t('messages.success.articleCreated'));
+      // If the editor chose "Submit for approval", transition the article now.
+      if (wantsSubmission) {
+        const submitResult = await submitForApproval(article_id);
+        if (submitResult.error) {
+          // Article + blocks did save, but the transition failed. Tell user.
+          showError(submitResult.error);
+        }
+      } else {
+        showSuccess(editingArticle ? t('messages.success.articleUpdated') : t('messages.success.articleCreated'));
+      }
       await Promise.all([fetchArticles(), fetchEditorArticles()]);
       resetForm();
     } catch (err) {
@@ -777,7 +796,18 @@ function ArticleEditorBlocks() {
                 className={`project-selector-header ${formData.status_article === 'draft' ? 'select-placeholder' : ''}`}
               >
                 <option value="draft">{t('editor.status.draft')}</option>
-                <option value="published">{t('editor.status.published')}</option>
+                {isSuperAdmin ? (
+                  <option value="published">{t('editor.status.published')}</option>
+                ) : (
+                  <option value="pending_approval">Enviar para aprobación</option>
+                )}
+                {/* Show current pending/published state when editing — but non-super-admins can't transition back via the dropdown. */}
+                {editingArticle?.status_article === 'pending_approval' && !isSuperAdmin && (
+                  <option value="pending_approval" disabled>En revisión (pendiente)</option>
+                )}
+                {editingArticle?.status_article === 'published' && !isSuperAdmin && (
+                  <option value="published" disabled>Publicado</option>
+                )}
               </select>
             </div>
           </div>
@@ -981,7 +1011,11 @@ function ArticleEditorBlocks() {
           <div className="form-actions">
             <button type="submit" className="btn-save" disabled={saving}>
               <Save size={20} />
-              {saving ? t('editor.saving') : (editingArticle ? t('editor.updateArticle') : t('editor.publishArticle'))}
+              {saving
+                ? t('editor.saving')
+                : formData.status_article === 'pending_approval'
+                ? 'Enviar para aprobación'
+                : (editingArticle ? t('editor.updateArticle') : t('editor.publishArticle'))}
             </button>
             {editingArticle && (
               <button type="button" className="btn-cancel" onClick={resetForm}>
@@ -1008,7 +1042,11 @@ function ArticleEditorBlocks() {
                     <h4>{article.title_article}</h4>
                     <p className="article-meta">
                       <span className={`status status-${article.status_article}`}>
-                        {article.status_article === 'published' ? t('editor.status.published') : t('editor.status.draft')}
+                        {article.status_article === 'published'
+                          ? t('editor.status.published')
+                          : article.status_article === 'pending_approval'
+                          ? 'En revisión'
+                          : t('editor.status.draft')}
                       </span>
                       <span className="category-badge">{article.category_article}</span>
                     </p>
