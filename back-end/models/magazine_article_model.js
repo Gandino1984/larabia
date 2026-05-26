@@ -58,7 +58,7 @@ const magazine_article_model = sequelize.define(
             comment: 'Publication date - null for drafts'
         },
         status_article: {
-            type: DataTypes.ENUM('draft', 'published'),
+            type: DataTypes.ENUM('draft', 'pending_approval', 'published'),
             allowNull: false,
             defaultValue: 'draft'
         },
@@ -67,6 +67,12 @@ const magazine_article_model = sequelize.define(
             allowNull: false,
             defaultValue: false,
             comment: 'Featured articles appear prominently on homepage'
+        },
+        is_premium: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+            comment: 'When true, only premium_reader / editor / super_admin can read'
         },
         view_count_article: {
             type: DataTypes.INTEGER.UNSIGNED,

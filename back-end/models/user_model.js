@@ -75,6 +75,12 @@ const user_model = sequelize.define("user", {
         defaultValue: false,
         comment: 'Magazine super-admin: can edit/delete any article'
     },
+    is_premium_reader: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        comment: 'Subscriber-tier reader: can access articles with is_premium=1'
+    },
     receives_newsletter: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
@@ -87,6 +93,7 @@ const user_model = sequelize.define("user", {
         { unique: true, fields: ['email_user'], name: 'unique_email_user' },
         { fields: ['is_editor'], name: 'idx_is_editor' },
         { fields: ['is_super_admin'], name: 'idx_is_super_admin' },
+        { fields: ['is_premium_reader'], name: 'idx_is_premium_reader' },
         { fields: ['password_reset_token'], name: 'idx_password_reset_token' }
     ]
 });
