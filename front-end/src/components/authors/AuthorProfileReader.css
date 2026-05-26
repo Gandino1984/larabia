@@ -1,0 +1,284 @@
+/* magazine-front/src/components/authors/AuthorProfileReader.css */
+
+.author-profile-reader {
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 9rem 1rem 2rem;
+}
+
+.profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #000;
+}
+
+.btn-edit-profile-admin {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-edit-profile-admin:hover {
+  background: #333;
+}
+
+.profile-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+  color: #000;
+}
+
+
+.profile-content {
+  background: #ffffff;
+  position: relative;
+}
+
+.featured-badge-large {
+  position: absolute;
+  top: -10px;
+  right: 0;
+  background: #000;
+  color: #fff;
+  padding: 0.5rem 1.5rem;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 10;
+}
+
+.profile-main {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  padding-top: 1rem;
+}
+
+.profile-image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-image-section .profile-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #000;
+}
+
+.profile-image-placeholder {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  font-weight: bold;
+  border: 4px solid #000;
+}
+
+.profile-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.profile-name {
+  font-size: 3rem;
+  font-weight: bold;
+  margin: 0;
+  color: #000;
+  line-height: 1.2;
+}
+
+.profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.profile-tag {
+  background: #888;
+  color: #fff;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.profile-social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.profile-social-links .social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.profile-social-links .social-link:hover {
+  background: #f5f5f5;
+  transform: translateX(4px);
+}
+
+.btn-view-publications {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  width: fit-content;
+  margin-top: 1rem;
+  align-self: center;
+}
+
+.btn-view-publications:hover {
+  background: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.profile-bio-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid #000;
+}
+
+.profile-bio-section h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #000;
+}
+
+.profile-bio-text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #333;
+  white-space: pre-wrap;
+}
+
+.profile-error {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.profile-error p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #666;
+}
+
+
+/* Tablet */
+@media (max-width: 768px) {
+  .profile-main {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .profile-image-section {
+    justify-content: center;
+  }
+
+  .profile-info-section {
+    align-items: center;
+  }
+
+  .profile-name {
+    font-size: 2rem;
+  }
+
+  .profile-social-links {
+    align-items: center;
+  }
+
+  .btn-view-publications {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .author-profile-reader {
+    padding: 9rem 0.5rem 1rem;
+  }
+
+  .profile-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .profile-image-section .profile-image,
+  .profile-image-placeholder {
+    width: 150px;
+    height: 150px;
+  }
+
+  .profile-image-placeholder {
+    font-size: 3rem;
+  }
+
+  .profile-name {
+    font-size: 1.75rem;
+  }
+
+  .profile-bio-text {
+    font-size: 1rem;
+  }
+
+  .featured-badge-large {
+    font-size: 0.75rem;
+    padding: 0.4rem 1rem;
+  }
+}

@@ -1,0 +1,73 @@
+/* App.css - Loading and Entrance Animations */
+
+/* Hide all content during loading */
+.app {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+
+/* Show content with animations after loading */
+.app.content-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Header slide-down animation */
+.app.content-visible .header {
+  animation: slideDown 0.8s ease-out forwards;
+}
+
+/* Main content fade-in animation (delayed after header) */
+.app.content-visible .main-content,
+.app.content-visible .footer {
+  opacity: 0;
+  animation: fadeInContent 0.8s ease-out 0.4s forwards;
+}
+
+/* CardDisplay fade-in */
+.app.content-visible .card-display {
+  animation: fadeInContent 0.6s ease-out 0.6s forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Ensure header starts in correct position */
+.header {
+  opacity: 0;
+  transform: translate(-50%, -100%);
+}
+
+.app.content-visible .header {
+  opacity: 1;
+}
+
+/* Header slide-down when returning from editor */
+.app:not(.editor-active) .header {
+  animation: slideDown 0.8s ease-out forwards;
+}
+
+/* Prevent header animation during initial load if editor is active */
+.app.editor-active .header {
+  display: none;
+}

@@ -1,0 +1,140 @@
+/* magazine-front/src/components/openmic/OpenMicPublications.css */
+
+.openmic-page {
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 9rem 1rem 2rem;
+}
+
+.openmic-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.openmic-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #000;
+}
+
+.openmic-header-content {
+  flex: 1;
+}
+
+.openmic-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.openmic-title-row h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0;
+  color: #000;
+}
+
+.openmic-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0;
+}
+
+.openmic-loading {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.openmic-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #000;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: openmic-spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes openmic-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.openmic-loading p {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.openmic-empty {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: #999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.openmic-empty p {
+  font-size: 1.2rem;
+}
+
+.openmic-content {
+  margin-top: 2rem;
+}
+
+.openmic-count {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.openmic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .openmic-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .openmic-title-row h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .openmic-page {
+    padding: 9rem 0.5rem 1rem;
+  }
+
+  .openmic-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .openmic-title-row h1 {
+    font-size: 1.75rem;
+  }
+
+  .openmic-count {
+    font-size: 1rem;
+    width: 100%;
+    text-align: center;
+  }
+}

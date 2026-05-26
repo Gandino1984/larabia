@@ -1,0 +1,260 @@
+/* NewsletterTab.css */
+
+.newsletter-tab {
+  padding-bottom: 3rem;
+}
+
+.newsletter-tab-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+}
+
+.subscriber-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #111;
+  color: #fff;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.newsletter-tab-desc {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.nt-section {
+  margin-bottom: 2rem;
+}
+
+.nt-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+  font-family: 'Source Code Pro', sans-serif;
+  margin-bottom: 0.75rem;
+}
+
+.nt-label span {
+  font-weight: 400;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.nt-selected-count {
+  padding: 0.2rem 0.7rem;
+  background: #667eea;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.nt-intro {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: 'Source Code Pro', sans-serif;
+  resize: vertical;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.nt-intro:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.nt-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.nt-search:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.nt-search svg {
+  color: #aaa;
+  flex-shrink: 0;
+}
+
+.nt-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  font-family: 'Source Code Pro', sans-serif;
+  color: #333;
+  background: transparent;
+}
+
+.nt-article-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 420px;
+  overflow-y: auto;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.nt-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #aaa;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.nt-article-row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.nt-article-row:hover {
+  border-color: #667eea;
+  background: #fafafe;
+}
+
+.nt-article-row.selected {
+  border-color: #667eea;
+  background: #f0f2ff;
+}
+
+.nt-checkbox {
+  color: #ccc;
+  flex-shrink: 0;
+  display: flex;
+}
+
+.nt-article-row.selected .nt-checkbox {
+  color: #667eea;
+}
+
+.nt-article-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.nt-article-title {
+  font-weight: 600;
+  color: #1a1a2e;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nt-article-meta {
+  font-size: 0.8rem;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nt-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f0f0f0;
+}
+
+.nt-result {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #22c55e;
+}
+
+.nt-result strong {
+  font-weight: 700;
+}
+
+.nt-send-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Source Code Pro', monospace;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.nt-send-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.nt-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .newsletter-tab-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .nt-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nt-send-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

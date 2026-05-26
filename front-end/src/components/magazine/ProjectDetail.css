@@ -1,0 +1,153 @@
+/* ProjectDetail Styles */
+
+.project-detail-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10rem 1.5rem 4rem;
+  min-height: calc(100vh - 150px);
+}
+
+.project-detail-page > .btn-back-nav {
+  margin-bottom: 2rem;
+}
+
+/* Header */
+.project-detail-header {
+  display: flex;
+  gap: 2.5rem;
+  margin-bottom: 3rem;
+  align-items: flex-start;
+}
+
+.project-detail-cover {
+  flex-shrink: 0;
+  width: 240px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.project-detail-cover img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.project-detail-info {
+  flex: 1;
+  padding-top: 0.5rem;
+}
+
+.project-detail-format {
+  display: inline-block;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #888;
+  margin-bottom: 0.75rem;
+}
+
+.project-detail-title {
+  font-family: 'Alfa Slab One', serif;
+  font-size: 2.5rem;
+  color: #e0e0e0;
+  margin: 0 0 1rem;
+  line-height: 1.15;
+}
+
+.project-detail-description {
+  color: #b0b0b0;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+
+.project-detail-collaborators {
+  margin-top: 0.5rem;
+}
+
+.project-detail-collaborators-label {
+  display: block;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #666;
+  margin-bottom: 0.4rem;
+}
+
+.project-detail-authors-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.project-detail-author-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.project-author-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.project-author-icon {
+  color: #666;
+  flex-shrink: 0;
+}
+
+/* Articles section */
+.project-detail-articles {
+  border-top: 1px solid #333;
+  padding-top: 2rem;
+}
+
+.project-articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.project-detail-loading,
+.project-detail-empty {
+  color: #888;
+  font-size: 1rem;
+  text-align: center;
+  padding: 3rem 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .project-detail-page {
+    padding: 8rem 1rem 3rem;
+  }
+
+  .project-detail-header {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .project-detail-cover {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .project-detail-title {
+    font-size: 1.8rem;
+  }
+
+  .project-articles-grid {
+    grid-template-columns: 1fr;
+  }
+}

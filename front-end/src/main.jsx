@@ -1,0 +1,24 @@
+// magazine-front/src/main.jsx
+import './i18n/config';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
+import './index.css';
+import { AuthProvider } from './app_context/AuthContext.jsx';
+import { UIProvider } from './app_context/UIContext.jsx';
+import { MagazineProvider } from './app_context/MagazineContext.jsx';
+import { AuthorProvider } from './app_context/AuthorContext.jsx';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <AuthProvider>
+      <UIProvider>
+        <MagazineProvider>
+          <AuthorProvider>
+            <App />
+          </AuthorProvider>
+        </MagazineProvider>
+      </UIProvider>
+    </AuthProvider>
+  </React.StrictMode>
+);

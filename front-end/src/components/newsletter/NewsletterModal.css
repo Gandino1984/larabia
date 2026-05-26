@@ -1,0 +1,257 @@
+/* Newsletter Modal Styles */
+
+.newsletter-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  z-index: 10000;
+  padding: 40px 20px;
+  animation: newsletterFadeIn 0.2s ease-out;
+  pointer-events: auto;
+}
+
+@keyframes newsletterFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.newsletter-modal-container {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 460px;
+  margin: auto 0;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  animation: newsletterSlideUp 0.3s ease-out;
+  position: relative;
+}
+
+@keyframes newsletterSlideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.newsletter-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9f9f9;
+  border-radius: 16px 16px 0 0;
+}
+
+.newsletter-modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111;
+  font-family: 'Alfa Slab One', serif;
+}
+
+.newsletter-close-button {
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.2s ease;
+}
+
+.newsletter-close-button:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: #111;
+  transform: rotate(90deg);
+}
+
+.newsletter-modal-body {
+  padding: 28px 24px;
+}
+
+.newsletter-description {
+  margin: 0 0 24px;
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Login prompt (unauthenticated) */
+.newsletter-login-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.newsletter-bell-icon {
+  color: #888;
+}
+
+.newsletter-login-prompt p {
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.newsletter-login-btn {
+  padding: 10px 24px;
+  background: #111;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.newsletter-login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Subscription area (authenticated) */
+.newsletter-subscription {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.newsletter-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.newsletter-status-indicator.subscribed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.newsletter-status-indicator.unsubscribed {
+  background: #f3f4f6;
+  color: #555;
+}
+
+/* Feedback messages */
+.newsletter-feedback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.newsletter-feedback.success {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.newsletter-feedback.error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+/* Toggle button */
+.newsletter-toggle-btn {
+  padding: 11px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: flex-start;
+}
+
+.newsletter-toggle-btn.subscribe {
+  background: #111;
+  color: white;
+}
+
+.newsletter-toggle-btn.subscribe:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.newsletter-toggle-btn.unsubscribe {
+  background: #f3f4f6;
+  color: #555;
+  border: 1px solid #d1d5db;
+}
+
+.newsletter-toggle-btn.unsubscribe:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #333;
+}
+
+.newsletter-toggle-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.newsletter-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: newsletterSpin 0.8s linear infinite;
+  display: inline-block;
+}
+
+.newsletter-toggle-btn.unsubscribe .newsletter-spinner {
+  border-color: rgba(0, 0, 0, 0.15);
+  border-top-color: #555;
+}
+
+@keyframes newsletterSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .newsletter-modal-container {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+
+  .newsletter-modal-header {
+    border-radius: 16px 16px 0 0;
+    padding: 18px 20px;
+  }
+
+  .newsletter-modal-body {
+    padding: 22px 20px;
+  }
+
+  .newsletter-toggle-btn {
+    width: 100%;
+  }
+}

@@ -1,0 +1,348 @@
+/* magazine-front/src/components/authors/AuthorCard.css */
+
+.author-card {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.author-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Featured Badge */
+.featured-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+/* Profile Image */
+.author-card-image {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.author-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  font-weight: 700;
+  color: white;
+  font-family: 'Alfa Slab One', sans-serif;
+}
+
+/* Content */
+.author-card-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.author-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  font-family: 'Alfa Slab One', sans-serif;
+  line-height: 1.2;
+}
+
+.bio-preview {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #666;
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+/* Read More Button */
+.btn-read-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+}
+
+.btn-read-more:hover {
+  background: #000000;
+  border-color: #000000;
+  color: white;
+  transform: translateX(2px);
+}
+
+.btn-read-more svg {
+  transition: transform 0.3s ease;
+}
+
+.btn-read-more:hover svg {
+  transform: scale(1.1);
+}
+
+/* Expanded State */
+.author-card.expanded .author-card-image {
+  aspect-ratio: 3 / 4;
+  transition: aspect-ratio 0.3s ease;
+}
+
+.author-card.expanded .author-card-image img {
+  object-position: top;
+}
+
+/* Tags */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  background: #f0f0f0;
+  color: #666;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.tag:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+/* Social Links */
+.social-links {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  color: #666;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.social-link:hover {
+  background: #000000;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* View Publications Button */
+.btn-view-publications-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: #000000;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.btn-view-publications-card:hover {
+  background: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-view-publications-card svg {
+  transition: transform 0.3s ease;
+}
+
+.btn-view-publications-card:hover svg {
+  transform: translateX(3px);
+}
+
+/* Draft badge (super admin view) */
+.draft-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  padding: 0.3rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* No-profile card (super admin view) */
+.no-profile-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  background: rgba(200, 60, 60, 0.8);
+  color: #fff;
+  padding: 0.3rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.no-profile-card {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.no-profile-card:hover {
+  transform: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.no-profile-text {
+  color: #888;
+  font-style: italic;
+}
+
+/* Author name row with inline edit button */
+.author-name-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.author-name-row .author-name {
+  flex: 1;
+}
+
+/* Inline edit button on card (super admin) */
+.btn-edit-card-admin {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.4rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-top: 0.2rem;
+}
+
+.btn-edit-card-admin:hover {
+  background: #444;
+}
+
+/* Create profile button (no-profile card, super admin) */
+.btn-create-profile-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  margin-top: auto;
+}
+
+.btn-create-profile-admin:hover {
+  background: #444;
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+
+@media (max-width: 480px) {
+  .author-card-content {
+    padding: 1.25rem;
+  }
+
+  .author-name {
+    font-size: 1.25rem;
+  }
+
+  .bio-preview {
+    font-size: 0.9rem;
+  }
+
+  .featured-badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .author-card-content {
+    padding: 2rem;
+  }
+
+  .author-name {
+    font-size: 1.75rem;
+  }
+}

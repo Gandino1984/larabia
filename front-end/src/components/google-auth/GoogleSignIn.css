@@ -1,0 +1,141 @@
+/* magazine-front/src/components/google-auth/GoogleSignIn.css */
+
+.google-signin-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.google-button-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 48px;
+  transition: opacity 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Custom Google button styling */
+.custom-google-button {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #fff;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.custom-google-button:hover:not(:disabled) {
+  background: #f8f8f8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.custom-google-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.custom-google-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.google-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.button-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: 0.05rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loading-text {
+  text-align: center;
+  margin-top: 0.75rem;
+  color: #666;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .google-signin-container {
+    max-width: 100%;
+  }
+
+  .custom-google-button {
+    padding: 10px 16px;
+    gap: 8px;
+  }
+
+  .button-text {
+    font-size: 0.875rem;
+    letter-spacing: 0.03rem;
+  }
+
+  .google-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-google-button {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .button-text {
+    font-size: 0.8rem;
+    letter-spacing: 0.02rem;
+  }
+
+  .google-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (min-width: 769px) {
+  .custom-google-button {
+    padding: 0.75rem 1.5rem;
+  }
+
+  .button-text {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .custom-google-button {
+    padding: 0.85rem 1.75rem;
+  }
+
+  .button-text {
+    font-size: 1.05rem;
+  }
+}

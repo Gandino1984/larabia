@@ -1,0 +1,200 @@
+/* Mobile-First LoadingScreen Styles */
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: #252525;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 1s ease-out;
+}
+
+.loading-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.loading-logo {
+  opacity: 0;
+  animation: fadeInLogo 1.5s ease-in forwards;
+  will-change: opacity;
+  margin-bottom: 0.35rem;
+}
+
+.loading-logo .logo-image {
+  width: 200px;
+  height: auto;
+  max-width: 80vw;
+  display: block;
+  /* Prevent any layout shifts */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.loading-slogan {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+  font-style: italic;
+  font-weight: 400;
+  opacity: 0;
+  max-width: 90vw;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+  transition: opacity 1.5s ease-in;
+  /* Prevent any layout shifts */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.loading-slogan.visible {
+  opacity: 1;
+}
+
+/* Progress bar */
+.loading-progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.loading-progress {
+  width: 200px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loading-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ffffff, #e0e0e0);
+  border-radius: 2px;
+  transition: width 0.3s ease-out;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.loading-progress-pct {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 1px;
+}
+
+/* Logo fade-in - pure opacity, no transforms */
+@keyframes fadeInLogo {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Small Mobile: 480px and up */
+@media (min-width: 480px) {
+  .loading-logo {
+    margin-bottom: 0.45rem;
+  }
+
+  .loading-logo .logo-image {
+    width: 250px;
+  }
+
+  .loading-slogan {
+    font-size: 0.9rem;
+  }
+
+  .loading-progress {
+    width: 250px;
+  }
+
+  .loading-progress-pct {
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablet: 768px and up */
+@media (min-width: 768px) {
+  .loading-logo {
+    margin-bottom: 0.55rem;
+  }
+
+  .loading-logo .logo-image {
+    width: 300px;
+  }
+
+  .loading-slogan {
+    font-size: 1rem;
+  }
+
+  .loading-progress {
+    width: 300px;
+  }
+}
+
+/* Desktop: 1024px and up */
+@media (min-width: 1024px) {
+  .loading-logo {
+    margin-bottom: 0.65rem;
+  }
+
+  .loading-logo .logo-image {
+    width: 350px;
+  }
+
+  .loading-slogan {
+    font-size: 1.05rem;
+  }
+
+  .loading-progress {
+    width: 350px;
+  }
+}
+
+/* Large Desktop: 1200px and up */
+@media (min-width: 1200px) {
+  .loading-logo .logo-image {
+    width: 400px;
+  }
+
+  .loading-slogan {
+    font-size: 1.1rem;
+  }
+
+  .loading-progress {
+    width: 400px;
+  }
+}
+
+/* Landscape orientation for mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+  .loading-logo {
+    margin-bottom: 0.25rem;
+  }
+
+  .loading-logo .logo-image {
+    width: 150px;
+  }
+
+  .loading-slogan {
+    font-size: 0.75rem;
+  }
+}

@@ -1,0 +1,279 @@
+/* Mobile-First Footer Styles */
+
+.footer {
+  background: #252525;
+  color: white;
+  padding: 2.5rem 0 1rem;
+  margin-top: auto;
+}
+
+.footer-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+  margin-bottom: 1.75rem;
+  text-align: center;
+}
+
+.footer-section:first-child {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.footer-logo {
+  max-width: 120px;
+  height: auto;
+  margin: 0;
+}
+
+.footer-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.3rem;
+  font-family: 'Alfa Slab One', serif;
+}
+
+.footer-info {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.footer-subsection {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-subsection:last-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  padding-left: 2rem;
+}
+
+.footer-section h4 {
+  margin: 0 0 0.875rem;
+  font-size: 1rem;
+  color: #ffffff;
+  font-family: 'Alfa Slab One', serif;
+}
+
+.footer-section p {
+  margin: 0.5rem 0;
+  opacity: 0.85;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.footer-section a {
+  color: #cccccc;
+  text-decoration: none;
+  transition: opacity 0.3s;
+}
+
+.footer-section a:hover {
+  opacity: 1;
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.footer-contact-btn {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.45rem 1.1rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  font-family: 'Source Code Pro', monospace;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.footer-contact-btn:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
+  text-align: center;
+}
+
+.footer-bottom p {
+  margin: 0;
+  opacity: 0.6;
+  font-size: 0.8rem;
+}
+
+/* Small Mobile: 480px and up */
+@media (min-width: 480px) {
+  .footer {
+    padding: 2.75rem 0 1rem;
+  }
+
+  .footer-container {
+    max-width: 100%;
+    padding: 0 1.5rem;
+  }
+
+  .footer-content {
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .footer-section:first-child {
+    flex-direction: row;
+    gap: 1.25rem;
+  }
+
+  .footer-logo {
+    max-width: 140px;
+  }
+
+  .footer-info {
+    gap: 3rem;
+  }
+
+  .footer-section h3 {
+    font-size: 1.4rem;
+  }
+
+  .footer-section h4 {
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+  }
+
+  .footer-section p {
+    font-size: 0.9rem;
+  }
+
+  .footer-bottom p {
+    font-size: 0.825rem;
+  }
+}
+
+/* Tablet: 768px and up */
+@media (min-width: 768px) {
+  .footer {
+    padding: 3rem 0 1rem;
+  }
+
+  .footer-container {
+    max-width: 95%;
+    padding: 0 2rem;
+  }
+
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .footer-section:first-child {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+
+  .footer-logo {
+    max-width: 160px;
+  }
+
+  .footer-section h3 {
+    font-size: 1.5rem;
+  }
+
+  .footer-section h4 {
+    font-size: 1.1rem;
+  }
+
+  .footer-section p {
+    font-size: 0.92rem;
+  }
+
+  .footer-bottom p {
+    font-size: 0.85rem;
+  }
+}
+
+/* Desktop: 1024px and up */
+@media (min-width: 1024px) {
+  .footer-container {
+    max-width: 1100px;
+  }
+
+  .footer-content {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .footer-section p {
+    font-size: 0.95rem;
+  }
+}
+
+/* Large Desktop: 1200px and up */
+@media (min-width: 1200px) {
+  .footer-container {
+    max-width: 1200px;
+  }
+
+  .footer-content {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .footer-bottom p {
+    font-size: 0.875rem;
+  }
+}
+
+/* Extra Large Desktop: 1400px and up */
+@media (min-width: 1400px) {
+  .footer-container {
+    max-width: 1400px;
+  }
+}
+
+/* Landscape orientation for mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+  .footer {
+    padding: 1.5rem 0 0.75rem;
+  }
+
+  .footer-content {
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .footer-section h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .footer-section h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .footer-section p {
+    font-size: 0.8rem;
+    margin: 0.3rem 0;
+  }
+
+  .footer-bottom {
+    padding-top: 0.75rem;
+  }
+
+  .footer-bottom p {
+    font-size: 0.75rem;
+  }
+}

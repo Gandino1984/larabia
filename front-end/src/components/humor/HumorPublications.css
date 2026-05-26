@@ -1,0 +1,140 @@
+/* magazine-front/src/components/humor/HumorPublications.css */
+
+.humor-page {
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 9rem 1rem 2rem;
+}
+
+.humor-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.humor-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #000;
+}
+
+.humor-header-content {
+  flex: 1;
+}
+
+.humor-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.humor-title-row h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0;
+  color: #000;
+}
+
+.humor-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0;
+}
+
+.humor-loading {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.humor-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #000;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: humor-spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes humor-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.humor-loading p {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.humor-empty {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: #999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.humor-empty p {
+  font-size: 1.2rem;
+}
+
+.humor-content {
+  margin-top: 2rem;
+}
+
+.humor-count {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.humor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .humor-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .humor-title-row h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .humor-page {
+    padding: 9rem 0.5rem 1rem;
+  }
+
+  .humor-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .humor-title-row h1 {
+    font-size: 1.75rem;
+  }
+
+  .humor-count {
+    font-size: 1rem;
+    width: 100%;
+    text-align: center;
+  }
+}

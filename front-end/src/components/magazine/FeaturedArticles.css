@@ -1,0 +1,28 @@
+.featured-articles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.featured-article-wrapper {
+  position: relative;
+}
+
+.featured-article-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  border-radius: 16px;
+  z-index: -1;
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .featured-articles {
+    grid-template-columns: 1fr;
+  }
+}
