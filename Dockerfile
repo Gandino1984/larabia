@@ -16,6 +16,7 @@ RUN mkdir -p /app/back-end/uploads/magazine \
             /app/back-end/uploads/article_blocks \
             /app/back-end/uploads/author-profiles \
             /app/back-end/uploads/user-profiles \
+            /app/back-end/uploads/magazine-metadata \
             /app/back-end/assets/images/magazine/projects && \
     find /app/back-end/uploads -type d -exec chmod 755 {} + && \
     find /app/back-end/assets -type d -exec chmod 755 {} + && \

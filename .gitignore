@@ -11,10 +11,12 @@ back-end/uploads/magazine/*
 back-end/uploads/article_blocks/*
 back-end/uploads/author-profiles/*
 back-end/uploads/user-profiles/*
+back-end/uploads/magazine-metadata/*
 !back-end/uploads/magazine/.gitkeep
 !back-end/uploads/article_blocks/.gitkeep
 !back-end/uploads/author-profiles/.gitkeep
 !back-end/uploads/user-profiles/.gitkeep
+!back-end/uploads/magazine-metadata/.gitkeep
 
 # Build artifacts
 front-end/dist/
