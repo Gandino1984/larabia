@@ -2,6 +2,8 @@ import { Router } from "express";
 import userApiController from "../controllers/user/user_api_controller.js";
 import userController from "../controllers/user/user_controller.js";
 import { handleProfileImageUpload } from "../middleware/ProfileUploadMiddleware.js";
+import { requireSuperAdmin } from "../utils/authHelper.js";
+import { isSuperAdminEmail } from "../config/environment.js";
 import user_model from '../models/user_model.js';
 import magazine_article_model from '../models/magazine_article_model.js';
 import { sendNewsletterEmail } from '../services/emailService.js';
@@ -29,6 +31,100 @@ router.get('/editors', async (req, res) => {
     } catch (err) {
         console.error('Error fetching editors:', err);
         res.status(500).json({ error: 'Error al obtener los editores', details: err.message });
+    }
+});
+
+// ============================================================
+// Admin: user list + role management (super-admin only)
+// ============================================================
+
+// List all users with their role flags. Optionally filter by search term.
+// q=<text> matches name_user OR email_user (case-insensitive LIKE).
+router.get('/list', async (req, res) => {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return;
+
+        const q = (req.query.q || '').trim();
+        const where = q
+            ? {
+                [Op.or]: [
+                    { name_user: { [Op.like]: `%${q}%` } },
+                    { email_user: { [Op.like]: `%${q}%` } }
+                ]
+            }
+            : {};
+
+        const users = await user_model.findAll({
+            where,
+            attributes: [
+                'id_user', 'name_user', 'email_user', 'image_user',
+                'is_editor', 'is_super_admin', 'is_premium_reader',
+                'receives_newsletter', 'email_verified', 'auth_provider'
+            ],
+            order: [['id_user', 'ASC']],
+            limit: 500
+        });
+
+        res.json({ error: null, data: users });
+    } catch (err) {
+        console.error('Error fetching user list:', err);
+        res.status(500).json({ error: 'Error al obtener la lista de usuarios', details: err.message });
+    }
+});
+
+// Grant or revoke a role on a user. Body: { id_user, role, value }
+// role ∈ { 'is_editor', 'is_super_admin', 'is_premium_reader' }
+// Safety rules:
+//   - Cannot modify your own super_admin status (no self-demotion footgun)
+//   - Cannot revoke is_super_admin from any account whose email is in SUPER_ADMIN_EMAILS
+//     (it'd be re-granted on next login anyway, but we error early so the UI is honest)
+router.patch('/grant-role', async (req, res) => {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return;
+
+        const { id_user, role, value } = req.body || {};
+        const ALLOWED_ROLES = ['is_editor', 'is_super_admin', 'is_premium_reader'];
+
+        if (!id_user || !role || typeof value === 'undefined') {
+            return res.status(400).json({ error: 'Faltan campos: id_user, role, value' });
+        }
+        if (!ALLOWED_ROLES.includes(role)) {
+            return res.status(400).json({ error: `role debe ser uno de: ${ALLOWED_ROLES.join(', ')}` });
+        }
+
+        const target = await user_model.findByPk(id_user);
+        if (!target) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+        if (role === 'is_super_admin') {
+            if (parseInt(target.id_user) === parseInt(admin.id_user)) {
+                return res.status(400).json({ error: 'No puedes modificar tu propio estado de super-admin' });
+            }
+            if (!value && isSuperAdminEmail(target.email_user)) {
+                return res.status(400).json({
+                    error: `El email ${target.email_user} está en SUPER_ADMIN_EMAILS y será re-promovido en su próximo inicio de sesión. Quítalo de la variable de entorno primero.`
+                });
+            }
+        }
+
+        await target.update({ [role]: !!value });
+
+        res.json({
+            error: null,
+            success: `${role}=${!!value} aplicado a ${target.name_user}`,
+            data: {
+                id_user: target.id_user,
+                name_user: target.name_user,
+                email_user: target.email_user,
+                is_editor: target.is_editor,
+                is_super_admin: target.is_super_admin,
+                is_premium_reader: target.is_premium_reader
+            }
+        });
+    } catch (err) {
+        console.error('Error in grant-role:', err);
+        res.status(500).json({ error: 'Error al modificar el rol', details: err.message });
     }
 });
 
