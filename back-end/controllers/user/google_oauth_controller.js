@@ -2,8 +2,26 @@ import { OAuth2Client } from 'google-auth-library';
 import user_model from '../../models/user_model.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { isSuperAdminEmail } from '../../config/environment.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+/**
+ * Idempotent super-admin auto-promotion. See user_controller.js for full notes.
+ * Mirrored here so Google OAuth users get promoted on first sign-in without
+ * needing a separate login pass.
+ */
+async function ensureSuperAdminPromotion(user) {
+    if (!user || !isSuperAdminEmail(user.email_user)) return false;
+    if (user.is_super_admin && user.is_editor) return false;
+    await user.update({
+        is_super_admin: true,
+        is_editor: true,
+        email_verified: true
+    });
+    console.log(`[auth] auto-promoted ${user.email_user} to super_admin via SUPER_ADMIN_EMAILS`);
+    return true;
+}
 
 function sanitizeUserData(user) {
     return {
@@ -65,6 +83,7 @@ async function googleLogin(idToken, isRegisterMode = false) {
         // Already linked to this Google ID?
         const linked = await user_model.findOne({ where: { google_id: googleUser.sub } });
         if (linked) {
+            await ensureSuperAdminPromotion(linked);
             return {
                 data: sanitizeUserData(linked),
                 message: 'Login exitoso con Google'
@@ -77,6 +96,7 @@ async function googleLogin(idToken, isRegisterMode = false) {
             // If account is "google" auth_provider with no password, link automatically (legacy edge case)
             if (existingByEmail.auth_provider === 'google' && !existingByEmail.pass_user) {
                 await existingByEmail.update({ google_id: googleUser.sub, email_verified: true });
+                await ensureSuperAdminPromotion(existingByEmail);
                 return {
                     data: sanitizeUserData(existingByEmail),
                     message: 'Login exitoso con Google'
@@ -148,6 +168,7 @@ async function linkGoogleAccount(userId, googleId, password) {
         }
 
         await user.update({ google_id: googleId, email_verified: true });
+        await ensureSuperAdminPromotion(user);
 
         return { data: sanitizeUserData(user), message: 'Cuenta de Google vinculada exitosamente' };
     } catch (error) {
@@ -176,6 +197,7 @@ async function selectGoogleAccount(userId, googleId) {
         }
 
         await user.update({ google_id: googleId, email_verified: true });
+        await ensureSuperAdminPromotion(user);
 
         return { data: sanitizeUserData(user), message: 'Login exitoso con Google' };
     } catch (error) {
@@ -200,6 +222,9 @@ async function completeGoogleRegistration(googleId, email, name, picture) {
 
         const hashedPassword = await generateRandomPassword();
 
+        // Bootstrap super admin on first registration if the email is on the allowlist.
+        const promoteToAdmin = isSuperAdminEmail(email);
+
         const newUser = await user_model.create({
             name_user: username,
             email_user: email,
@@ -210,10 +235,14 @@ async function completeGoogleRegistration(googleId, email, name, picture) {
             location_user: '',
             image_user: picture || null,
             age_user: 18,
-            is_editor: false,
-            is_super_admin: false,
+            is_editor: promoteToAdmin,
+            is_super_admin: promoteToAdmin,
             receives_newsletter: false
         });
+
+        if (promoteToAdmin) {
+            console.log(`[auth] auto-promoted ${email} to super_admin on Google registration`);
+        }
 
         return {
             data: sanitizeUserData(newUser),

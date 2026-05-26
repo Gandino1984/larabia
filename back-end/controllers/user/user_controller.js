@@ -1,7 +1,25 @@
 import user_model from "../../models/user_model.js";
 import bcrypt from "bcrypt";
 import { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail } from "../../services/emailService.js";
+import { isSuperAdminEmail } from "../../config/environment.js";
 import { Op } from "sequelize";
+
+/**
+ * Idempotent super-admin auto-promotion. If the user's email is in the
+ * SUPER_ADMIN_EMAILS env list, ensure is_super_admin and is_editor are 1.
+ * Safe to call on every login. Mutates the user instance in place and persists.
+ */
+async function ensureSuperAdminPromotion(user) {
+    if (!user || !isSuperAdminEmail(user.email_user)) return false;
+    if (user.is_super_admin && user.is_editor) return false;
+    await user.update({
+        is_super_admin: true,
+        is_editor: true,
+        email_verified: true
+    });
+    console.log(`[auth] auto-promoted ${user.email_user} to super_admin via SUPER_ADMIN_EMAILS`);
+    return true;
+}
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -145,6 +163,9 @@ async function login(userData) {
 
         const isPasswordValid = await bcrypt.compare(userData.pass_user, user.pass_user);
         if (!isPasswordValid) return { error: "Contraseña incorrecta" };
+
+        // Auto-promote configured super-admin emails on every login (idempotent).
+        await ensureSuperAdminPromotion(user);
 
         const userResponse = {
             id_user: user.id_user,

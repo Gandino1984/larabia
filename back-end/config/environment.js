@@ -79,7 +79,20 @@ const config = {
     google: {
         clientId: process.env.GOOGLE_CLIENT_ID || '',
         clientSecret: process.env.GOOGLE_CLIENT_SECRET || ''
-    }
+    },
+
+    // Emails that are automatically promoted to super_admin (+ editor) on every
+    // login. Comma-separated, case-insensitive. The check runs on every login so
+    // a fresh database (or a manually-demoted account) re-promotes on next sign-in.
+    superAdminEmails: (process.env.SUPER_ADMIN_EMAILS || '')
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean)
+};
+
+export const isSuperAdminEmail = (email) => {
+    if (!email) return false;
+    return config.superAdminEmails.includes(email.toLowerCase());
 };
 
 export const logEnvironmentInfo = () => {
