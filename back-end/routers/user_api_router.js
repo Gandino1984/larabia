@@ -19,11 +19,19 @@ const router = Router();
 // ============================================================
 router.get("/", userApiController.getAll);
 
-// Editor directory — used by magazine-front to pick co-authors / show editor list
+// Creator directory — used by magazine-front for co-author selection + the author list.
+// Returns anyone with editor, admin, or super_admin role. Endpoint still called /editors
+// for back-compat with magazine-front (UI labels say "editores" generically).
 router.get('/editors', async (req, res) => {
     try {
         const editors = await user_model.findAll({
-            where: { is_editor: true },
+            where: {
+                [Op.or]: [
+                    { is_editor: true },
+                    { is_admin: true },
+                    { is_super_admin: true }
+                ]
+            },
             attributes: ['id_user', 'name_user', 'image_user'],
             order: [['name_user', 'ASC']]
         });
@@ -59,7 +67,7 @@ router.get('/list', async (req, res) => {
             where,
             attributes: [
                 'id_user', 'name_user', 'email_user', 'image_user',
-                'is_editor', 'is_super_admin', 'is_premium_reader',
+                'is_editor', 'is_admin', 'is_super_admin', 'is_premium_reader',
                 'receives_newsletter', 'email_verified', 'auth_provider'
             ],
             order: [['id_user', 'ASC']],
@@ -85,7 +93,7 @@ router.patch('/grant-role', async (req, res) => {
         if (!admin) return;
 
         const { id_user, role, value } = req.body || {};
-        const ALLOWED_ROLES = ['is_editor', 'is_super_admin', 'is_premium_reader'];
+        const ALLOWED_ROLES = ['is_editor', 'is_admin', 'is_super_admin', 'is_premium_reader'];
 
         if (!id_user || !role || typeof value === 'undefined') {
             return res.status(400).json({ error: 'Faltan campos: id_user, role, value' });
@@ -118,6 +126,7 @@ router.patch('/grant-role', async (req, res) => {
                 name_user: target.name_user,
                 email_user: target.email_user,
                 is_editor: target.is_editor,
+                is_admin: target.is_admin,
                 is_super_admin: target.is_super_admin,
                 is_premium_reader: target.is_premium_reader
             }

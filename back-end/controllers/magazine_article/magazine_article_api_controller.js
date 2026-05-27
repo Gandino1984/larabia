@@ -446,9 +446,13 @@ async function inviteCoAuthor(req, res) {
         }
 
         // Check invitee is an editor
-        const invitee = await user_model.findByPk(invitee_user_id, { attributes: ['id_user', 'is_editor', 'name_user'] });
-        if (!invitee || (!invitee.is_editor && invitee.is_editor !== 1)) {
-            return res.status(400).json({ error: 'Solo se puede invitar a editores registrados' });
+        const invitee = await user_model.findByPk(invitee_user_id, {
+            attributes: ['id_user', 'is_editor', 'is_admin', 'is_super_admin', 'name_user']
+        });
+        const truthy = (v) => v === true || v === 1;
+        const inviteeCanCreate = invitee && (truthy(invitee.is_editor) || truthy(invitee.is_admin) || truthy(invitee.is_super_admin));
+        if (!inviteeCanCreate) {
+            return res.status(400).json({ error: 'Solo se puede invitar a usuarios con rol de editor o admin' });
         }
 
         // Check invitee is not already an author

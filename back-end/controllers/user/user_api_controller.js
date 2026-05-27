@@ -77,7 +77,7 @@ async function update(req, res) {
     const {
         id_user, name_user, email_user, pass_user, location_user, image_user, age_user,
         email_verified, verification_token, verification_token_expires,
-        is_editor, is_super_admin, receives_newsletter
+        is_editor, is_admin, is_super_admin, is_premium_reader, receives_newsletter
     } = req.body;
 
     let hashedPassword = pass_user;
@@ -93,7 +93,7 @@ async function update(req, res) {
     const result = await userController.update(id_user, {
         name_user, email_user, pass_user: hashedPassword, location_user, image_user, age_user,
         email_verified, verification_token, verification_token_expires,
-        is_editor, is_super_admin, receives_newsletter
+        is_editor, is_admin, is_super_admin, is_premium_reader, receives_newsletter
     });
 
     res.json(result);

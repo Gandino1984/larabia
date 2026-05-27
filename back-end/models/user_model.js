@@ -67,7 +67,14 @@ const user_model = sequelize.define("user", {
     is_editor: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: false
+        defaultValue: false,
+        comment: 'Editor: create articles, must submit for approval'
+    },
+    is_admin: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        comment: 'Admin: create and publish articles directly (no approval needed)'
     },
     is_super_admin: {
         type: DataTypes.BOOLEAN,
@@ -92,6 +99,7 @@ const user_model = sequelize.define("user", {
     indexes: [
         { unique: true, fields: ['email_user'], name: 'unique_email_user' },
         { fields: ['is_editor'], name: 'idx_is_editor' },
+        { fields: ['is_admin'], name: 'idx_is_admin' },
         { fields: ['is_super_admin'], name: 'idx_is_super_admin' },
         { fields: ['is_premium_reader'], name: 'idx_is_premium_reader' },
         { fields: ['password_reset_token'], name: 'idx_password_reset_token' }

@@ -11,9 +11,12 @@ import { Op } from "sequelize";
  */
 async function ensureSuperAdminPromotion(user) {
     if (!user || !isSuperAdminEmail(user.email_user)) return false;
-    if (user.is_super_admin && user.is_editor) return false;
+    // Super admins are implicitly admins and editors too — set all three flags
+    // so they can use any creator-tier feature without a separate grant.
+    if (user.is_super_admin && user.is_admin && user.is_editor) return false;
     await user.update({
         is_super_admin: true,
+        is_admin: true,
         is_editor: true,
         email_verified: true
     });
@@ -43,6 +46,9 @@ const validateUserData = (userData, isPartialUpdate = false) => {
 
     if (userData.is_editor !== undefined && typeof userData.is_editor !== 'boolean') {
         errors.push('is_editor debe ser un valor booleano');
+    }
+    if (userData.is_admin !== undefined && typeof userData.is_admin !== 'boolean') {
+        errors.push('is_admin debe ser un valor booleano');
     }
     if (userData.is_super_admin !== undefined && typeof userData.is_super_admin !== 'boolean') {
         errors.push('is_super_admin debe ser un valor booleano');
@@ -176,6 +182,7 @@ async function login(userData) {
             age_user: user.age_user,
             email_verified: user.email_verified,
             is_editor: user.is_editor,
+            is_admin: user.is_admin,
             is_super_admin: user.is_super_admin,
             is_premium_reader: user.is_premium_reader,
             receives_newsletter: user.receives_newsletter,
@@ -193,6 +200,7 @@ async function login(userData) {
 async function register(userData) {
     try {
         if (userData.is_editor === undefined) userData.is_editor = false;
+        if (userData.is_admin === undefined) userData.is_admin = false;
         if (userData.is_super_admin === undefined) userData.is_super_admin = false;
 
         const validation = validateUserData(userData);
@@ -243,6 +251,7 @@ async function register(userData) {
             age_user: user.age_user,
             email_verified: user.email_verified,
             is_editor: user.is_editor,
+            is_admin: user.is_admin,
             is_super_admin: user.is_super_admin
         };
 
@@ -464,7 +473,7 @@ async function update(id, userData) {
         const allowedFields = [
             'name_user', 'email_user', 'pass_user', 'location_user', 'image_user',
             'age_user', 'email_verified', 'verification_token', 'verification_token_expires',
-            'is_editor', 'is_super_admin', 'receives_newsletter'
+            'is_editor', 'is_admin', 'is_super_admin', 'is_premium_reader', 'receives_newsletter'
         ];
 
         const fieldsToUpdate = {};
@@ -489,6 +498,7 @@ async function update(id, userData) {
             age_user: user.age_user,
             email_verified: user.email_verified,
             is_editor: user.is_editor,
+            is_admin: user.is_admin,
             is_super_admin: user.is_super_admin,
             is_premium_reader: user.is_premium_reader,
             receives_newsletter: user.receives_newsletter,

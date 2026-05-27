@@ -14,8 +14,10 @@ import { deleteFile, cleanupArticleImages, cleanupBlockImages } from '../../util
 const EMPTY_ROLE_CTX = Object.freeze({
     userId: null,
     isEditor: false,
+    isAdmin: false,
     isSuperAdmin: false,
-    isPremiumReader: false
+    isPremiumReader: false,
+    canPublishDirectly: false
 });
 
 /**
@@ -42,8 +44,8 @@ async function buildVisibilityWhere(roleCtx, requestedStatus) {
         return where;
     }
 
-    if (ctx.isEditor && ctx.userId) {
-        // Editor: published articles + their own drafts/pending.
+    if ((ctx.isAdmin || ctx.isEditor) && ctx.userId) {
+        // Admin / editor: published articles + their own drafts/pending.
         const myArticles = await article_author_model.findAll({
             where: { user_id: ctx.userId },
             attributes: ['article_id']
@@ -89,8 +91,8 @@ async function canReadArticle(article, roleCtx) {
     // Free article: anyone published-tier+ can read.
     if (!article.is_premium) return true;
 
-    // Premium article: requires premium_reader / editor.
-    return ctx.isPremiumReader || ctx.isEditor;
+    // Premium article: requires premium_reader / editor / admin.
+    return ctx.isPremiumReader || ctx.isEditor || ctx.isAdmin;
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -462,14 +464,16 @@ async function create(articleData, roleCtx = EMPTY_ROLE_CTX) {
             }
         }
 
-        // Enforce author-level restrictions on initial creation:
-        //   - non-super-admins can't create articles directly in 'published' state
-        //     (must go through draft → submit-for-approval → super-admin approve)
-        //   - non-super-admins can't mark an article premium (gating power belongs to admin)
-        if (!roleCtx.isSuperAdmin) {
+        // Enforce role-based restrictions on initial creation:
+        //   - admins + super-admins can publish directly (status='published' allowed)
+        //   - editors can only create as draft, then use /submit-for-approval
+        //   - is_premium remains super-admin-only (admins create articles but can't gate them)
+        if (!roleCtx.canPublishDirectly) {
             if (articleData.status_article === 'published') {
                 articleData.status_article = 'draft';
             }
+        }
+        if (!roleCtx.isSuperAdmin) {
             articleData.is_premium = false;
         }
 
@@ -533,13 +537,14 @@ async function update(id_article, articleData, roleCtx = EMPTY_ROLE_CTX) {
             return { error: "El título no puede exceder 255 caracteres" };
         }
 
-        // Status transitions: only super admins can move articles to/from 'published'
-        // or change to 'pending_approval' via this endpoint. Editors must use the
-        // dedicated /submit-for-approval, /approve, /reject endpoints instead.
-        if (!roleCtx.isSuperAdmin && articleData.status_article !== undefined) {
+        // Status transitions:
+        //   - admins + super-admins can transition to any status (incl. 'published')
+        //   - editors must use the dedicated /submit-for-approval endpoint
+        //     (status_article is dropped from their direct updates)
+        if (!roleCtx.canPublishDirectly && articleData.status_article !== undefined) {
             delete articleData.status_article;
         }
-        // is_premium is super-admin-only (gating power).
+        // is_premium remains super-admin-only.
         if (!roleCtx.isSuperAdmin && articleData.is_premium !== undefined) {
             delete articleData.is_premium;
         }
@@ -783,14 +788,21 @@ async function deactivate(id_article) {
 }
 
 async function getEditors() {
+    // Returns the list of users that can be selected as co-authors of an article —
+    // anyone with admin, editor, or super_admin role. (The endpoint is still called
+    // "getEditors" for back-compat with magazine-front; the result set is broader.)
     try {
         const editors = await user_model.findAll({
-            where: { is_editor: true },
+            where: {
+                [Op.or]: [
+                    { is_editor: true },
+                    { is_admin: true },
+                    { is_super_admin: true }
+                ]
+            },
             attributes: ['id_user', 'name_user', 'image_user'],
             order: [['name_user', 'ASC']]
         });
-
-        console.log(`-> magazine_article_controller.js - getEditors() - Encontrados ${editors.length} editores`);
 
         return { data: editors };
     } catch (err) {

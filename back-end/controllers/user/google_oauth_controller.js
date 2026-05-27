@@ -13,9 +13,10 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
  */
 async function ensureSuperAdminPromotion(user) {
     if (!user || !isSuperAdminEmail(user.email_user)) return false;
-    if (user.is_super_admin && user.is_editor) return false;
+    if (user.is_super_admin && user.is_admin && user.is_editor) return false;
     await user.update({
         is_super_admin: true,
+        is_admin: true,
         is_editor: true,
         email_verified: true
     });
@@ -33,6 +34,7 @@ function sanitizeUserData(user) {
         age_user: user.age_user,
         email_verified: user.email_verified,
         is_editor: user.is_editor,
+        is_admin: user.is_admin,
         is_super_admin: user.is_super_admin,
         is_premium_reader: user.is_premium_reader,
         receives_newsletter: user.receives_newsletter,
@@ -215,7 +217,8 @@ async function completeGoogleRegistration(googleId, email, name, picture) {
         const hashedPassword = await generateRandomPassword();
 
         // Bootstrap super admin on first registration if the email is on the allowlist.
-        const promoteToAdmin = isSuperAdminEmail(email);
+        // Super admins are implicitly admins + editors, so set all three flags together.
+        const promoteToSuperAdmin = isSuperAdminEmail(email);
 
         const newUser = await user_model.create({
             name_user: username,
@@ -227,12 +230,13 @@ async function completeGoogleRegistration(googleId, email, name, picture) {
             location_user: '',
             image_user: picture || null,
             age_user: 18,
-            is_editor: promoteToAdmin,
-            is_super_admin: promoteToAdmin,
+            is_editor: promoteToSuperAdmin,
+            is_admin: promoteToSuperAdmin,
+            is_super_admin: promoteToSuperAdmin,
             receives_newsletter: false
         });
 
-        if (promoteToAdmin) {
+        if (promoteToSuperAdmin) {
             console.log(`[auth] auto-promoted ${email} to super_admin on Google registration`);
         }
 
