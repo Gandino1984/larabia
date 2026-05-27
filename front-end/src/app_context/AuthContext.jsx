@@ -86,6 +86,13 @@ export const AuthProvider = ({ children }) => {
     return false;
   };
 
+  // Coerce 1/true into a real boolean — Sequelize returns booleans inconsistently.
+  const flag = (v) => v === true || v === 1;
+  const isEditor = flag(currentUser?.is_editor);
+  const isAdmin = flag(currentUser?.is_admin);
+  const isSuperAdmin = flag(currentUser?.is_super_admin);
+  const isPremiumReader = flag(currentUser?.is_premium_reader);
+
   const value = {
     currentUser,
     loading,
@@ -95,9 +102,15 @@ export const AuthProvider = ({ children }) => {
     setUser,
     setCurrentUser,
     isAuthenticated: !!currentUser,
-    isAdmin: currentUser?.type_user === 'admin' || currentUser?.type_user === 'seller',
-    isEditor: currentUser?.is_editor === true || currentUser?.is_editor === 1,
-    isSuperAdmin: currentUser?.is_super_admin === true || currentUser?.is_super_admin === 1,
+    isEditor,
+    isAdmin,
+    isSuperAdmin,
+    isPremiumReader,
+    // True if this user can publish without going through the approval flow.
+    // Admins and super admins publish directly; editors must submit for approval.
+    canPublishDirectly: isAdmin || isSuperAdmin,
+    // True if this user can create articles at all (admin, editor, or super admin).
+    canCreateContent: isEditor || isAdmin || isSuperAdmin,
     isArticleAuthor
   };
 

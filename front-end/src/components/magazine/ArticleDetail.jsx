@@ -26,7 +26,7 @@ function ArticleDetail() {
   const { t } = useTranslation();
   const { selectedArticle, setSelectedArticle, deleteArticle, fetchBlocksByArticleId, trackArticleView } = useMagazine();
   const { navigateBack, showSuccess, showError, navigateToHome, navigateToEditorForEdit, isFullscreen, setIsFullscreen, getCurrentLocale, navigateToAuthorProfile } = useUI();
-  const { isEditor, isArticleAuthor, isSuperAdmin } = useAuth();
+  const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
 
   useEffect(() => {
@@ -218,7 +218,7 @@ function ArticleDetail() {
           )}
 
           {/* Editor buttons (Edit and Delete) */}
-          {isEditor && (isSuperAdmin || isArticleAuthor(selectedArticle)) && (
+          {canCreateContent && (isSuperAdmin || isArticleAuthor(selectedArticle)) && (
             <>
               <button
                 className="article-detail-edit-btn"

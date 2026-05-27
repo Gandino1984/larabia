@@ -15,7 +15,7 @@ function AuthorsList() {
     loading, fetchAllProfiles, fetchAllProfilesAdmin, fetchEditorUsers, authorSearch
   } = useAuthor();
   const { navigateToAuthorEditor, showAuthors } = useUI();
-  const { isEditor, isSuperAdmin, currentUser } = useAuth();
+  const { canCreateContent, isSuperAdmin, currentUser } = useAuth();
 
   // Re-fetch whenever the authors list becomes visible (e.g. after editing a profile)
   useEffect(() => {
@@ -30,9 +30,9 @@ function AuthorsList() {
 
   // Check if current user already has a profile
   const hasOwnProfile = useMemo(() => {
-    if (!currentUser || !isEditor) return false;
+    if (!currentUser || !canCreateContent) return false;
     return authorProfiles.some(profile => profile.user_id === currentUser.id_user);
-  }, [currentUser, isEditor, authorProfiles]);
+  }, [currentUser, canCreateContent, authorProfiles]);
 
   // For super admin: compute editors without any profile
   const editorsWithoutProfile = useMemo(() => {
@@ -74,14 +74,14 @@ function AuthorsList() {
         <h1>{t('authors.title')}</h1>
         <p className="authors-subtitle">{t('authors.subtitle')}</p>
 
-        {isEditor && !isSuperAdmin && !hasOwnProfile && (
+        {canCreateContent && !isSuperAdmin && !hasOwnProfile && (
           <button onClick={handleCreateProfile} className="create-profile-btn">
             <Plus size={20} />
             <span>{t('authors.createProfile')}</span>
           </button>
         )}
 
-        {isEditor && !isSuperAdmin && hasOwnProfile && (
+        {canCreateContent && !isSuperAdmin && hasOwnProfile && (
           <button onClick={handleCreateProfile} className="edit-profile-btn">
             <span>{t('authors.editProfile')}</span>
           </button>
@@ -98,7 +98,7 @@ function AuthorsList() {
       {!loading && isEmpty && (
         <div className="empty-state">
           <p>{t('authors.emptyState')}</p>
-          {isEditor && (
+          {canCreateContent && (
             <p className="empty-hint">{t('authors.emptyHint')}</p>
           )}
         </div>

@@ -22,7 +22,7 @@ const getCategoryDisplay = (cat) => {
 function ArticleCard({ article }) {
   const { t } = useTranslation();
   const { setSelectedArticle, deleteArticle } = useMagazine();
-  const { isEditor, isArticleAuthor, isSuperAdmin } = useAuth();
+  const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { navigateToArticle, showSuccess, showError } = useUI();
 
   const handleClick = () => {
@@ -73,7 +73,7 @@ function ArticleCard({ article }) {
 
   return (
     <article className="article-card" onClick={handleClick}>
-      {isEditor && (isSuperAdmin || isArticleAuthor(article)) && (
+      {canCreateContent && (isSuperAdmin || isArticleAuthor(article)) && (
         <div className="article-action-buttons">
           <button className="article-delete-btn" onClick={handleDelete} title="Eliminar artículo">
             <Trash2 size={18} />

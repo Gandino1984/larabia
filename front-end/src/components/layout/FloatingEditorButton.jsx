@@ -7,11 +7,11 @@ import './FloatingEditorButton.css';
 
 function FloatingEditorButton() {
   const { t } = useTranslation();
-  const { isEditor } = useAuth();
+  const { canCreateContent } = useAuth();
   const { navigateToEditor, showEditor, showArticleDetail } = useUI();
 
-  // Don't render at all if user is not an editor
-  if (!isEditor) {
+  // Don't render at all if the user can't create content (reader / premium reader)
+  if (!canCreateContent) {
     return null;
   }
 

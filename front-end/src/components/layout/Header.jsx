@@ -43,7 +43,7 @@ function AuthorResultAvatar({ profile }) {
 
 function Header() {
   const { t } = useTranslation();
-  const { currentUser, isEditor, isSuperAdmin, logout } = useAuth();
+  const { currentUser, canCreateContent, isSuperAdmin, logout } = useAuth();
   const { showArticleDetail, showAuthors, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToHumor, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
@@ -345,7 +345,7 @@ function Header() {
         </div>
 
         {/* Article Actions - Only visible when viewing an article */}
-        {showArticleDetail && isEditor && (
+        {showArticleDetail && canCreateContent && (
           <div className="header-article-actions">
             <button className="article-action-btn create-project-btn" onClick={handleCreateProject} title={t('header.user.createArticle')}>
               <FolderPlus size={20} />

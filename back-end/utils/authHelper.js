@@ -36,19 +36,23 @@ export function roleSnapshot(user) {
             isAdmin: false,
             isSuperAdmin: false,
             isPremiumReader: false,
+            // Convenience: can create content (editor, admin, or super admin).
+            canCreateContent: false,
             // Convenience: can publish without approval. Super admin or admin.
             canPublishDirectly: false,
             userId: null
         };
     }
+    const isEditor = truthy(user.is_editor);
     const isAdmin = truthy(user.is_admin);
     const isSuperAdmin = truthy(user.is_super_admin);
     return {
         isAuthenticated: true,
-        isEditor: truthy(user.is_editor),
+        isEditor,
         isAdmin,
         isSuperAdmin,
         isPremiumReader: truthy(user.is_premium_reader),
+        canCreateContent: isEditor || isAdmin || isSuperAdmin,
         canPublishDirectly: isAdmin || isSuperAdmin,
         userId: user.id_user
     };

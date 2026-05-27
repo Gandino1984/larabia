@@ -15,7 +15,7 @@ import axios from 'axios';
 import './ArticleEditorBlocks.css';
 
 function ArticleEditorBlocks() {
-  const { currentUser, isEditor, isArticleAuthor, isSuperAdmin } = useAuth();
+  const { currentUser, isArticleAuthor, isSuperAdmin, canPublishDirectly, canCreateContent } = useAuth();
   const {
     editorArticles,
     fetchEditorArticles,
@@ -415,11 +415,10 @@ function ArticleEditorBlocks() {
     setSaving(true);
 
     try {
-      // Decide intent: did the user pick "submit for approval"?
-      // Non-super-admins use 'pending_approval' to mean "submit". The backend
-      // strips status_article from their direct updates anyway, so we save
-      // the article as 'draft' first and then call /submit-for-approval.
-      const wantsSubmission = !isSuperAdmin && formData.status_article === 'pending_approval';
+      // Decide intent: did an editor pick "Enviar para aprobación"?
+      // Only editors (non-admin, non-super-admin) go through the approval flow.
+      // Admins + super admins publish directly via the regular update endpoint.
+      const wantsSubmission = !canPublishDirectly && formData.status_article === 'pending_approval';
 
       let articleResult;
       const articleData = {
@@ -427,8 +426,8 @@ function ArticleEditorBlocks() {
         author_id: currentUser.id_user,
         authors: formData.authors,
         project_id: formData.project_id || null,
-        // For non-super-admins, persist the editable fields with status=draft;
-        // the publication state-transition happens via /submit-for-approval below.
+        // For editors who picked "submit", persist as draft first; the transition
+        // happens via /submit-for-approval below. Admins keep their chosen status.
         status_article: wantsSubmission ? 'draft' : formData.status_article,
         content_article: 'Block-based content' // Placeholder for backward compatibility
       };
@@ -625,7 +624,7 @@ function ArticleEditorBlocks() {
 
   const getAuthorDetails = (authorId) => editors.find(e => e.id_user === authorId);
 
-  if (!isEditor) {
+  if (!canCreateContent) {
     return (
       <div className="editor-unauthorized">
         <h2>{t('editor.unauthorized.title')}</h2>
@@ -796,16 +795,18 @@ function ArticleEditorBlocks() {
                 className={`project-selector-header ${formData.status_article === 'draft' ? 'select-placeholder' : ''}`}
               >
                 <option value="draft">{t('editor.status.draft')}</option>
-                {isSuperAdmin ? (
+                {canPublishDirectly ? (
+                  // Admin / super-admin: direct publish, no approval round-trip.
                   <option value="published">{t('editor.status.published')}</option>
                 ) : (
+                  // Editor: goes through pending_approval → super-admin approves.
                   <option value="pending_approval">Enviar para aprobación</option>
                 )}
-                {/* Show current pending/published state when editing — but non-super-admins can't transition back via the dropdown. */}
-                {editingArticle?.status_article === 'pending_approval' && !isSuperAdmin && (
+                {/* Show current state read-only for editors viewing their pending/published articles. */}
+                {editingArticle?.status_article === 'pending_approval' && !canPublishDirectly && (
                   <option value="pending_approval" disabled>En revisión (pendiente)</option>
                 )}
-                {editingArticle?.status_article === 'published' && !isSuperAdmin && (
+                {editingArticle?.status_article === 'published' && !canPublishDirectly && (
                   <option value="published" disabled>Publicado</option>
                 )}
               </select>

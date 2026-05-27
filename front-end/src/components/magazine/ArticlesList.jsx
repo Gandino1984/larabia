@@ -69,7 +69,7 @@ function getPageNumbers(currentPage, totalPages) {
 function ArticlesList() {
   const { t } = useTranslation();
   const { articles, loading, fetchArticles, setSelectedArticle, deleteArticle } = useMagazine();
-  const { isEditor, isArticleAuthor, isSuperAdmin } = useAuth();
+  const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError } = useUI();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -170,7 +170,7 @@ function ArticlesList() {
                 className="article-card"
                 onClick={() => handleArticleClick(article)}
               >
-                {isEditor && (isSuperAdmin || isArticleAuthor(article)) && (
+                {canCreateContent && (isSuperAdmin || isArticleAuthor(article)) && (
                   <button
                     className="list-delete-btn"
                     onClick={(e) => handleDelete(e, article)}

@@ -7,7 +7,7 @@ import { ArrowLeft, Upload } from 'lucide-react';
 import './AuthorProfileEditor.css';
 
 function AuthorProfileEditor() {
-  const { currentUser, isEditor, isSuperAdmin } = useAuth();
+  const { currentUser, canCreateContent, isSuperAdmin } = useAuth();
   const { navigateBack, showSuccess, showError, superAdminEditingProfile, setSuperAdminEditingProfile } = useUI();
   const { myProfile, fetchMyProfile, createProfile, updateProfile, uploadProfileImage, fetchAllProfilesAdmin } = useAuthor();
 
@@ -35,7 +35,7 @@ function AuthorProfileEditor() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    if (!isEditor && !isSuperAdmin) {
+    if (!canCreateContent) {
       showError('Solo los editores pueden crear perfiles de autor');
       navigateBack();
       return;
@@ -50,7 +50,7 @@ function AuthorProfileEditor() {
     if (currentUser?.id_user) {
       fetchMyProfile(currentUser.id_user);
     }
-  }, [currentUser, isEditor, isSuperAdmin, superAdminEditingProfile, fetchMyProfile, showError, navigateBack]);
+  }, [currentUser, canCreateContent, isSuperAdmin, superAdminEditingProfile, fetchMyProfile, showError, navigateBack]);
 
   useEffect(() => {
     if (targetProfile) {

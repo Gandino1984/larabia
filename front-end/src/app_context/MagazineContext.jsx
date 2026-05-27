@@ -8,7 +8,7 @@ const MagazineContext = createContext();
 
 export const MagazineProvider = ({ children }) => {
   const { showSuccess, showError } = useUI();
-  const { currentUser, isEditor, isSuperAdmin } = useAuth();
+  const { currentUser, canCreateContent } = useAuth();
 
   const [articles, setArticles] = useState([]);
   const [allArticles, setAllArticles] = useState([]);
@@ -555,12 +555,12 @@ export const MagazineProvider = ({ children }) => {
     fetchFeaturedArticles();
   }, [fetchFeaturedArticles]);
 
-  // Load editors only for authenticated editors/super-admins (not needed for regular visitors)
+  // Load editors only for users who can create content (not needed for regular visitors)
   useEffect(() => {
-    if (isEditor || isSuperAdmin) {
+    if (canCreateContent) {
       fetchEditors();
     }
-  }, [isEditor, isSuperAdmin, fetchEditors]);
+  }, [canCreateContent, fetchEditors]);
 
   // Load pending invitations when user changes
   useEffect(() => {

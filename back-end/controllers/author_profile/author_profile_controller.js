@@ -1,6 +1,7 @@
 // back-end/controllers/author_profile/author_profile_controller.js
 import author_profile_model from "../../models/author_profile_model.js";
 import user_model from "../../models/user_model.js";
+import { roleSnapshot } from "../../utils/authHelper.js";
 
 const authorProfileController = {
     /**
@@ -186,7 +187,7 @@ const authorProfileController = {
                 };
             }
 
-            // Check if user is an editor
+            // Check the user is a content creator (editor, admin, or super admin)
             const user = await user_model.findByPk(profileData.user_id);
             if (!user) {
                 return {
@@ -195,7 +196,7 @@ const authorProfileController = {
                 };
             }
 
-            if (!user.is_editor) {
+            if (!roleSnapshot(user).canCreateContent) {
                 return {
                     error: "Solo los editores pueden crear perfiles de autor",
                     data: null
