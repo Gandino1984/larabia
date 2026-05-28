@@ -1,7 +1,7 @@
 .info-card-container {
   display: flex;
   align-items: center;
-  background-color: white;
+  background-color: var(--surface-light, #ffffff);
   border-radius: 8px;
   border: none;
   padding: 0.75rem 1rem;
@@ -20,7 +20,7 @@
 }
 
 .info-item {
-  color: black;
+  color: var(--on-light, #1a1a1a);
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1.4;
@@ -36,9 +36,9 @@
   height: 40px;
   padding: 0;
   border-radius: 50%;
-  background-color: #000000;
-  color: #ffffff;
-  border: 2px solid #ffffff;
+  background-color: var(--on-light, #1a1a1a);
+  color: var(--surface-light, #ffffff);
+  border: 2px solid var(--surface-light, #ffffff);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   flex-shrink: 0;
 }
@@ -52,8 +52,8 @@
   padding: 0;
   border-radius: 50%;
   border: none;
-  background-color: black;
-  color: white;
+  background-color: var(--on-light, #1a1a1a);
+  color: var(--surface-light, #ffffff);
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
@@ -69,8 +69,8 @@
 }
 
 .info-pause-button.paused {
-  background-color: black;
-  color: white;
+  background-color: var(--on-light, #1a1a1a);
+  color: var(--surface-light, #ffffff);
 }
 
 .info-pause-button.paused:hover {

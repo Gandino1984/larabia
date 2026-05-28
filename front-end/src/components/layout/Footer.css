@@ -1,8 +1,8 @@
 /* Mobile-First Footer Styles */
 
 .footer {
-  background: #252525;
-  color: white;
+  background: var(--color-bg, #252525);
+  color: var(--color-text, #e0e0e0);
   padding: 2.5rem 0 1rem;
   margin-top: auto;
 }
@@ -61,7 +61,7 @@
 .footer-section h4 {
   margin: 0 0 0.875rem;
   font-size: 1rem;
-  color: #ffffff;
+  color: var(--color-text, #ffffff);
   font-family: 'Alfa Slab One', serif;
 }
 
@@ -73,14 +73,14 @@
 }
 
 .footer-section a {
-  color: #cccccc;
+  color: var(--color-text-muted, #cccccc);
   text-decoration: none;
   transition: opacity 0.3s;
 }
 
 .footer-section a:hover {
   opacity: 1;
-  color: #ffffff;
+  color: var(--color-text, #ffffff);
   text-decoration: underline;
 }
 
@@ -99,8 +99,8 @@
 }
 
 .footer-contact-btn:hover {
-  border-color: #ffffff;
-  color: #ffffff;
+  border-color: var(--color-text, #ffffff);
+  color: var(--color-text, #ffffff);
 }
 
 .footer-bottom {

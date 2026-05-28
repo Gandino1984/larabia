@@ -1,7 +1,7 @@
 .success-card-container {
   display: flex;
   align-items: center;
-  background-color: white;
+  background-color: var(--surface-light, #ffffff);
   border-radius: 8px;
   border: none;
   padding: 0.75rem 1rem;
@@ -20,7 +20,7 @@
 }
 
 .success-item {
-  color: black;
+  color: var(--on-light, #1a1a1a);
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1.4;
@@ -38,7 +38,7 @@
   border-radius: 50%;
   border: none;
   background-color: rgba(0, 0, 0, 0.1);
-  color: black;
+  color: var(--on-light, #1a1a1a);
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
@@ -54,8 +54,8 @@
 }
 
 .success-pause-button.paused {
-  background-color: black;
-  color: white;
+  background-color: var(--on-light, #1a1a1a);
+  color: var(--surface-light, #ffffff);
 }
 
 .success-pause-button.paused:hover {

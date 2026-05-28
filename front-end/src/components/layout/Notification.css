@@ -31,7 +31,7 @@
 }
 
 .notification-error {
-  background: #ef4444;
+  background: var(--color-danger, #ef4444);
   color: white;
 }
 
