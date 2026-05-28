@@ -4,12 +4,14 @@ import { useUI } from '../../../app_context/UIContext';
 import AdminUsersTab from './AdminUsersTab';
 import AdminPendingTab from './AdminPendingTab';
 import AdminMetadataTab from './AdminMetadataTab';
+import AdminAppearanceTab from './AdminAppearanceTab';
 import './AdminPage.css';
 
 const TABS = [
   { key: 'users', label: 'Usuarios' },
   { key: 'pending', label: 'Pendientes de aprobación' },
-  { key: 'metadata', label: 'Datos de la revista' }
+  { key: 'metadata', label: 'Datos de la revista' },
+  { key: 'appearance', label: 'Apariencia' }
 ];
 
 function AdminPage() {
@@ -54,6 +56,7 @@ function AdminPage() {
         {activeTab === 'users' && <AdminUsersTab />}
         {activeTab === 'pending' && <AdminPendingTab />}
         {activeTab === 'metadata' && <AdminMetadataTab />}
+        {activeTab === 'appearance' && <AdminAppearanceTab />}
       </main>
     </div>
   );

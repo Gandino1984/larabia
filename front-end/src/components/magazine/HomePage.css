@@ -2,7 +2,7 @@
 
 .home-page {
   min-height: 100vh;
-  background: #252525;
+  background: var(--landing-bg, #252525);
 }
 
 /* Hero Section with Slider - Mobile Base */
@@ -11,14 +11,14 @@
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background: #252525;
+  background: var(--landing-bg, #252525);
 }
 
 .hero-slider {
   width: 100%;
   height: 100%;
   position: relative;
-  background: #252525;
+  background: var(--landing-bg, #252525);
 }
 
 .hero-slide {
@@ -27,7 +27,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: #252525;
+  background-color: var(--landing-bg, #252525);
   cursor: pointer;
   position: relative;
   display: flex;
@@ -41,7 +41,7 @@
 }
 
 .hero-default {
-  background: #252525;
+  background: var(--landing-bg, #252525);
   cursor: default;
 }
 
@@ -250,13 +250,13 @@
 /* Articles Section - Mobile */
 .articles-section {
   padding: 5rem 0 2.5rem 0;
-  background: #252525;
+  background: var(--landing-bg, #252525);
 }
 
 .container h2 {
   margin: 0 0 1.5rem;
   font-size: 1.5rem;
-  color: #e0e0e0;
+  color: var(--color-text, #e0e0e0);
   font-family: 'Alfa Slab One', serif;
 }
 
