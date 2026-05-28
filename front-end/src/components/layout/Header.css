@@ -22,7 +22,7 @@
 
 /* Floating Header Bar - Mobile Base */
 .header-bar {
-  background: #000000;
+  background: var(--color-header-bg, #000000);
   border-radius: 8px;
   padding: 0.3rem 0.5rem;
   display: flex;
@@ -35,7 +35,7 @@
 
 /* Active state (on hover/click) */
 .header-bar.active {
-  background: #ffffff;
+  background: var(--color-header-bg-active, #ffffff);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -68,7 +68,7 @@
 .login-btn-header {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   cursor: pointer;
   padding: 0.4rem;
   border-radius: 50%;
@@ -87,7 +87,7 @@
 
 .header-bar.active .user-info-btn,
 .header-bar.active .login-btn-header {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .user-info-btn:hover,
@@ -111,7 +111,7 @@
 .article-action-btn {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 6px;
@@ -124,7 +124,7 @@
 }
 
 .header-bar.active .article-action-btn {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .article-action-btn:hover {
@@ -136,11 +136,11 @@
 }
 
 .article-action-btn.close-btn {
-  color: white;
+  color: var(--color-header-text, #ffffff);
 }
 
 .header-bar.active .article-action-btn.close-btn {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .article-action-btn.create-project-btn {
@@ -179,7 +179,7 @@
 .project-selector {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
+  color: var(--color-header-text, #ffffff);
   padding: 0.4rem 0.6rem;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -193,7 +193,7 @@
 .header-bar.active .project-selector {
   background: rgba(0, 0, 0, 0.05);
   border-color: rgba(0, 0, 0, 0.2);
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .project-selector:hover {
@@ -206,7 +206,7 @@
 
 .project-selector option {
   background: #000000;
-  color: white;
+  color: var(--color-header-text, #ffffff);
 }
 
 .logo-image {
@@ -233,7 +233,7 @@
 .mobile-login-btn {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   cursor: pointer;
   padding: 0.4rem;
   border-radius: 6px;
@@ -247,7 +247,7 @@
 
 .header-bar.active .mobile-user-btn,
 .header-bar.active .mobile-login-btn {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .mobile-user-btn:hover,
@@ -263,7 +263,7 @@
 .burger-menu-btn {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   cursor: pointer;
   padding: 0.4rem;
   border-radius: 6px;
@@ -276,7 +276,7 @@
 }
 
 .header-bar.active .burger-menu-btn {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .burger-menu-btn:hover {
@@ -329,7 +329,7 @@
 .mobile-nav-link {
   background: none;
   border: none;
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
   font-size: 1rem;
   font-family: 'Source Code Pro', monospace;
   cursor: pointer;
@@ -398,7 +398,7 @@
 .mobile-search-input {
   background: none;
   border: none;
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
   font-size: 0.9rem;
   font-family: 'Source Code Pro', monospace;
   outline: none;
@@ -466,7 +466,7 @@
   width: 100%;
   background: none;
   border: none;
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
   padding: 0.75rem;
   text-align: left;
   cursor: pointer;
@@ -486,7 +486,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   margin: 0 0 0.25rem 0;
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
   line-height: 1.3;
 }
 
@@ -553,7 +553,7 @@
 }
 
 .search-icon {
-  color: white;
+  color: var(--color-header-text, #ffffff);
   margin-right: 0.5rem;
   flex-shrink: 0;
 }
@@ -565,7 +565,7 @@
 .search-input {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   font-size: 0.85rem;
   font-family: 'Source Code Pro', monospace;
   outline: none;
@@ -574,7 +574,7 @@
 }
 
 .header-bar.active .search-input {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .search-input::placeholder {
@@ -598,7 +598,7 @@
 .search-clear-btn {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   cursor: pointer;
   padding: 0.2rem;
   display: flex;
@@ -674,7 +674,7 @@
   width: 100%;
   background: none;
   border: none;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   padding: 0.75rem 1rem;
   text-align: left;
   cursor: pointer;
@@ -683,7 +683,7 @@
 }
 
 .header-bar.active .search-result-item {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
   border-bottom-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -729,7 +729,7 @@
   justify-content: center;
   font-size: 0.8rem;
   font-weight: 700;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   flex-shrink: 0;
 }
 
@@ -749,12 +749,12 @@
   font-size: 0.9rem;
   font-weight: 600;
   margin: 0;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   line-height: 1.3;
 }
 
 .header-bar.active .search-result-title {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .search-result-category {
@@ -817,7 +817,7 @@
 .nav-link {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   font-size: 0.75rem;
   cursor: pointer;
   padding: 0.3rem 0.4rem;
@@ -831,7 +831,7 @@
 }
 
 .header-bar.active .nav-link {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .nav-link:hover {
@@ -858,7 +858,7 @@
 .user-info {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   cursor: pointer;
   padding: 0.3rem 0.4rem;
   border-radius: 6px;
@@ -871,7 +871,7 @@
 }
 
 .header-bar.active .user-info {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .user-info:hover {
@@ -901,7 +901,7 @@
 .logout-btn {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   cursor: pointer;
   padding: 0.3rem 0.4rem;
   border-radius: 6px;
@@ -914,7 +914,7 @@
 }
 
 .header-bar.active .logout-btn {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .logout-btn:hover {
@@ -929,7 +929,7 @@
 .login-btn {
   background: none;
   border: 1px solid white;
-  color: white;
+  color: var(--color-header-text, #ffffff);
   cursor: pointer;
   padding: 0.3rem 0.4rem;
   border-radius: 6px;
@@ -943,7 +943,7 @@
 
 .header-bar.active .login-btn {
   border-color: #000000;
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .login-btn:hover {
@@ -1180,7 +1180,7 @@
   background: transparent;
   border: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  color: white;
+  color: var(--color-header-text, #ffffff);
   cursor: pointer;
   font-size: 14px;
   text-align: left;
@@ -1247,7 +1247,7 @@
 }
 
 .mobile-project-item:hover {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .mobile-menu-overlay.active .mobile-project-item {
@@ -1255,7 +1255,7 @@
 }
 
 .mobile-menu-overlay.active .mobile-project-item:hover {
-  color: #000000;
+  color: var(--color-header-text-active, #000000);
 }
 
 .mobile-menu-overlay.active .projects-dropdown-empty {

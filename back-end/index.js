@@ -19,6 +19,7 @@ import './models/author_profile_model.js';
 import './models/project_author_model.js';
 import './models/magazine_metadata_model.js';
 import './models/magazine_theme_model.js';
+import './models/magazine_nav_model.js';
 
 dotenv.config();
 

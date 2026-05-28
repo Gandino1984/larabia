@@ -6,10 +6,13 @@ import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuthor } from '../../app_context/AuthorContext';
 import { useMetadata } from '../../app_context/MetadataContext';
+import { useNav } from '../../app_context/NavContext';
+import { useNavActions } from '../../app_context/navActions';
+import { navLabel, canSeeNavItem } from '../../app_context/navConfig';
 import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, Globe, Shield } from 'lucide-react';
 import UserInfoCard from '../user/UserInfoCard';
 import LanguageSelector from './LanguageSelector';
-import MoreDropdown from './MoreDropdown';
+import NavGroupDropdown from './NavGroupDropdown';
 import AnimatedLogo from './AnimatedLogo';
 import ContactModal from '../contact/ContactModal';
 import NewsletterModal from '../newsletter/NewsletterModal';
@@ -43,11 +46,13 @@ function AuthorResultAvatar({ profile }) {
 
 function Header() {
   const { t } = useTranslation();
-  const { currentUser, canCreateContent, isSuperAdmin, logout } = useAuth();
+  const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { showArticleDetail, showAuthors, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToHumor, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
   const { metadata, resolveLogoUrl } = useMetadata();
+  const { navConfig } = useNav();
+  const runNavAction = useNavActions();
   const [showUserCard, setShowUserCard] = useState(false);
   const [isHeaderActive, setIsHeaderActive] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -58,10 +63,22 @@ function Header() {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showProjectsDropdown, setShowProjectsDropdown] = useState(false);
   const [showMobileProjectsDropdown, setShowMobileProjectsDropdown] = useState(false);
-  const [showMobileMoreSection, setShowMobileMoreSection] = useState(false);
+  const [expandedMobileGroup, setExpandedMobileGroup] = useState(null);
   const searchRef = useRef(null);
   const mobileSearchRef = useRef(null);
   const projectsDropdownRef = useRef(null);
+
+  // Configurable top-bar items the current user may see (visibility + role).
+  const roleFlags = { isEditor, isAdmin, isSuperAdmin };
+  const visibleNavItems = (navConfig || []).filter(
+    (item) => item.visible !== false && canSeeNavItem(item, roleFlags)
+  );
+  // Run a link item's action (also used for group children); close the mobile menu.
+  const handleNavItemSelect = (item) => {
+    runNavAction(item.action);
+    setIsMobileMenuOpen(false);
+    setShowProjectsDropdown(false);
+  };
 
   // Reset image load error and update timestamp when user changes
   useEffect(() => {
@@ -443,47 +460,51 @@ function Header() {
 
         {/* Desktop Navigation */}
         <nav className="header-nav desktop-nav">
-          <button className="nav-link" onClick={handleArticlesClick}>
-            <span>{t('header.nav.articles')}</span>
-          </button>
-
-          <div className="projects-dropdown-wrapper" ref={projectsDropdownRef}>
-            <button className="nav-link" onClick={handleProyectosClick}>
-              <span>{t('header.nav.projects')}</span>
-              <ChevronDown size={14} className={`chevron-icon ${showProjectsDropdown ? 'rotated' : ''}`} />
-            </button>
-            {showProjectsDropdown && (
-              <div className="projects-dropdown-menu">
-                {projects.length > 0 ? (
-                  projects.map(project => (
-                    <button
-                      key={project.id_project}
-                      className="projects-dropdown-item"
-                      onClick={() => handleProjectSelect(project)}
-                    >
-                      {project.title_project}
-                    </button>
-                  ))
-                ) : (
-                  <span className="projects-dropdown-empty">{t('header.nav.noProjects')}</span>
-                )}
-              </div>
-            )}
-          </div>
-
-          <button className="nav-link" onClick={handleAutorasClick}>
-            <span>{t('header.nav.authors')}</span>
-          </button>
-
-          <MoreDropdown
-            onGaleriaClick={handleGaleriaClick}
-            onInternacionalClick={handleInternacionalClick}
-            onEditorialClick={handleEditorialClick}
-            onContactoClick={handleContactoClick}
-            onNewsletterClick={handleNewsletterClick}
-            onMicroAbiertoClick={handleMicroAbiertoClick}
-            onHumorClick={handleHumorClick}
-          />
+          {visibleNavItems.map((item) => {
+            if (item.kind === 'projects') {
+              return (
+                <div className="projects-dropdown-wrapper" ref={projectsDropdownRef} key={item.id}>
+                  <button className="nav-link" onClick={handleProyectosClick}>
+                    <span>{navLabel(item, currentLanguage)}</span>
+                    <ChevronDown size={14} className={`chevron-icon ${showProjectsDropdown ? 'rotated' : ''}`} />
+                  </button>
+                  {showProjectsDropdown && (
+                    <div className="projects-dropdown-menu">
+                      {projects.length > 0 ? (
+                        projects.map(project => (
+                          <button
+                            key={project.id_project}
+                            className="projects-dropdown-item"
+                            onClick={() => handleProjectSelect(project)}
+                          >
+                            {project.title_project}
+                          </button>
+                        ))
+                      ) : (
+                        <span className="projects-dropdown-empty">{t('header.nav.noProjects')}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            if (item.kind === 'group') {
+              return (
+                <NavGroupDropdown
+                  key={item.id}
+                  item={item}
+                  lang={currentLanguage}
+                  roles={roleFlags}
+                  onSelect={handleNavItemSelect}
+                />
+              );
+            }
+            return (
+              <button key={item.id} className="nav-link" onClick={() => handleNavItemSelect(item)}>
+                <span>{navLabel(item, currentLanguage)}</span>
+              </button>
+            );
+          })}
 
           <LanguageSelector />
 
@@ -582,69 +603,68 @@ function Header() {
 
             <div className="mobile-menu-divider"></div>
 
-            <button className="mobile-nav-link" onClick={handleArticlesClick}>
-              <span>{t('header.nav.articles')}</span>
-            </button>
-
-            <div className="mobile-projects-section">
-              <button className="mobile-nav-link" onClick={handleMobileProyectosClick}>
-                <span>{t('header.nav.projects')}</span>
-                <ChevronDown size={14} className={`chevron-icon ${showMobileProjectsDropdown ? 'rotated' : ''}`} />
-              </button>
-              {showMobileProjectsDropdown && (
-                <div className="mobile-projects-list">
-                  {projects.length > 0 ? (
-                    projects.map(project => (
-                      <button
-                        key={project.id_project}
-                        className="mobile-project-item"
-                        onClick={() => handleProjectSelect(project)}
-                      >
-                        {project.title_project}
-                      </button>
-                    ))
-                  ) : (
-                    <span className="projects-dropdown-empty">{t('header.nav.noProjects')}</span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <button className="mobile-nav-link" onClick={handleAutorasClick}>
-              {t('header.nav.authors')}
-            </button>
-
-            <div className="mobile-more-section">
-              <button className="mobile-nav-link" onClick={() => setShowMobileMoreSection(prev => !prev)}>
-                <span>{t('header.nav.more')}</span>
-                <ChevronDown size={14} className={`chevron-icon ${showMobileMoreSection ? 'rotated' : ''}`} />
-              </button>
-              {showMobileMoreSection && (
-                <div className="mobile-more-list">
-                  <button className="mobile-project-item" onClick={handleEditorialClick}>
-                    {t('header.nav.editorial')}
-                  </button>
-                  <button className="mobile-project-item" onClick={handleMicroAbiertoClick}>
-                    {t('header.nav.microAbierto')}
-                  </button>
-                  <button className="mobile-project-item" onClick={handleHumorClick}>
-                    {t('header.nav.humor')}
-                  </button>
-                  <button className="mobile-project-item" onClick={handleContactoClick}>
-                    {t('header.nav.contact')}
-                  </button>
-                  <button className="mobile-project-item" onClick={handleNewsletterClick}>
-                    {t('header.nav.newsletter')}
-                  </button>
-                  <button className="mobile-project-item" onClick={handleInternacionalClick}>
-                    {t('header.nav.internacional')}
-                  </button>
-                  <button className="mobile-project-item" onClick={handleGaleriaClick}>
-                    {t('header.nav.gallery')}
-                  </button>
-                </div>
-              )}
-            </div>
+            {visibleNavItems.map((item) => {
+              if (item.kind === 'projects') {
+                return (
+                  <div className="mobile-projects-section" key={item.id}>
+                    <button className="mobile-nav-link" onClick={handleMobileProyectosClick}>
+                      <span>{navLabel(item, currentLanguage)}</span>
+                      <ChevronDown size={14} className={`chevron-icon ${showMobileProjectsDropdown ? 'rotated' : ''}`} />
+                    </button>
+                    {showMobileProjectsDropdown && (
+                      <div className="mobile-projects-list">
+                        {projects.length > 0 ? (
+                          projects.map(project => (
+                            <button
+                              key={project.id_project}
+                              className="mobile-project-item"
+                              onClick={() => handleProjectSelect(project)}
+                            >
+                              {project.title_project}
+                            </button>
+                          ))
+                        ) : (
+                          <span className="projects-dropdown-empty">{t('header.nav.noProjects')}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              if (item.kind === 'group') {
+                const groupChildren = (item.children || []).filter(
+                  (c) => c.visible !== false && canSeeNavItem(c, roleFlags)
+                );
+                if (groupChildren.length === 0) return null;
+                const open = expandedMobileGroup === item.id;
+                return (
+                  <div className="mobile-more-section" key={item.id}>
+                    <button className="mobile-nav-link" onClick={() => setExpandedMobileGroup(open ? null : item.id)}>
+                      <span>{navLabel(item, currentLanguage)}</span>
+                      <ChevronDown size={14} className={`chevron-icon ${open ? 'rotated' : ''}`} />
+                    </button>
+                    {open && (
+                      <div className="mobile-more-list">
+                        {groupChildren.map((child) => (
+                          <button
+                            key={child.id}
+                            className="mobile-project-item"
+                            onClick={() => handleNavItemSelect(child)}
+                          >
+                            {navLabel(child, currentLanguage)}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              return (
+                <button key={item.id} className="mobile-nav-link" onClick={() => handleNavItemSelect(item)}>
+                  <span>{navLabel(item, currentLanguage)}</span>
+                </button>
+              );
+            })}
 
             <div className="mobile-menu-divider"></div>
 

@@ -10,19 +10,22 @@ import { MagazineProvider } from './app_context/MagazineContext.jsx';
 import { AuthorProvider } from './app_context/AuthorContext.jsx';
 import { MetadataProvider } from './app_context/MetadataContext.jsx';
 import { ThemeProvider } from './app_context/ThemeContext.jsx';
+import { NavProvider } from './app_context/NavContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
       <UIProvider>
         <ThemeProvider>
-          <MetadataProvider>
-            <MagazineProvider>
-              <AuthorProvider>
-                <App />
-              </AuthorProvider>
-            </MagazineProvider>
-          </MetadataProvider>
+          <NavProvider>
+            <MetadataProvider>
+              <MagazineProvider>
+                <AuthorProvider>
+                  <App />
+                </AuthorProvider>
+              </MagazineProvider>
+            </MetadataProvider>
+          </NavProvider>
         </ThemeProvider>
       </UIProvider>
     </AuthProvider>

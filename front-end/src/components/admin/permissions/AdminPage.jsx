@@ -5,13 +5,15 @@ import AdminUsersTab from './AdminUsersTab';
 import AdminPendingTab from './AdminPendingTab';
 import AdminMetadataTab from './AdminMetadataTab';
 import AdminAppearanceTab from './AdminAppearanceTab';
+import AdminNavTab from './AdminNavTab';
 import './AdminPage.css';
 
 const TABS = [
   { key: 'users', label: 'Usuarios' },
   { key: 'pending', label: 'Pendientes de aprobación' },
   { key: 'metadata', label: 'Datos de la revista' },
-  { key: 'appearance', label: 'Apariencia' }
+  { key: 'appearance', label: 'Apariencia' },
+  { key: 'navigation', label: 'Navegación' }
 ];
 
 function AdminPage() {
@@ -57,6 +59,7 @@ function AdminPage() {
         {activeTab === 'pending' && <AdminPendingTab />}
         {activeTab === 'metadata' && <AdminMetadataTab />}
         {activeTab === 'appearance' && <AdminAppearanceTab />}
+        {activeTab === 'navigation' && <AdminNavTab />}
       </main>
     </div>
   );

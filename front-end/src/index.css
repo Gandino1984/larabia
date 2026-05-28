@@ -30,6 +30,13 @@
   --on-light: #1a1a1a;          /* primary ink on light surfaces */
   --on-light-muted: #666666;    /* muted text on light surfaces */
 
+  /* Top bar — inverting scheme: black bar + white text by default, flips to
+     white bar + black text on hover/active. Each side is themeable. */
+  --color-header-bg: #000000;
+  --color-header-text: #ffffff;
+  --color-header-bg-active: #ffffff;
+  --color-header-text-active: #000000;
+
   /* Animation speed multiplier; durations may opt in via calc(var(--anim-scale)*Xs). */
   --anim-scale: 1;
 }

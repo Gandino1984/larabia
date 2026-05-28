@@ -20,7 +20,11 @@ const ALLOWED_TOKENS = new Set([
     '--surface-light-2',
     '--light-border',
     '--on-light',
-    '--on-light-muted'
+    '--on-light-muted',
+    '--color-header-bg',
+    '--color-header-text',
+    '--color-header-bg-active',
+    '--color-header-text-active'
 ]);
 
 const ALLOWED_PRESETS = new Set(['default', 'light', 'high-contrast']);

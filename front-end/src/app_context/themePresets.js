@@ -22,7 +22,11 @@ export const TOKEN_KEYS = [
   '--surface-light-2',
   '--light-border',
   '--on-light',
-  '--on-light-muted'
+  '--on-light-muted',
+  '--color-header-bg',
+  '--color-header-text',
+  '--color-header-bg-active',
+  '--color-header-text-active'
 ];
 
 // Human labels for the admin color pickers (Spanish UI).
@@ -41,7 +45,11 @@ export const TOKEN_LABELS = {
   '--surface-light-2': 'Páginas claras: superficie',
   '--light-border': 'Páginas claras: borde',
   '--on-light': 'Páginas claras: texto',
-  '--on-light-muted': 'Páginas claras: texto tenue'
+  '--on-light-muted': 'Páginas claras: texto tenue',
+  '--color-header-bg': 'Barra: fondo',
+  '--color-header-text': 'Barra: texto',
+  '--color-header-bg-active': 'Barra (hover): fondo',
+  '--color-header-text-active': 'Barra (hover): texto'
 };
 
 export const THEME_PRESETS = {
@@ -62,7 +70,11 @@ export const THEME_PRESETS = {
       '--surface-light-2': '#f5f5f5',
       '--light-border': '#e0e0e0',
       '--on-light': '#1a1a1a',
-      '--on-light-muted': '#666666'
+      '--on-light-muted': '#666666',
+      '--color-header-bg': '#000000',
+      '--color-header-text': '#ffffff',
+      '--color-header-bg-active': '#ffffff',
+      '--color-header-text-active': '#000000'
     },
     landing_bg: '#252525'
   },
@@ -83,7 +95,11 @@ export const THEME_PRESETS = {
       '--surface-light-2': '#f0f0f2',
       '--light-border': '#d6d6d9',
       '--on-light': '#1a1a1a',
-      '--on-light-muted': '#555555'
+      '--on-light-muted': '#555555',
+      '--color-header-bg': '#000000',
+      '--color-header-text': '#ffffff',
+      '--color-header-bg-active': '#ffffff',
+      '--color-header-text-active': '#000000'
     },
     landing_bg: '#ececee'
   },
@@ -104,7 +120,11 @@ export const THEME_PRESETS = {
       '--surface-light-2': '#ededed',
       '--light-border': '#000000',
       '--on-light': '#000000',
-      '--on-light-muted': '#333333'
+      '--on-light-muted': '#333333',
+      '--color-header-bg': '#000000',
+      '--color-header-text': '#ffffff',
+      '--color-header-bg-active': '#ffffff',
+      '--color-header-text-active': '#000000'
     },
     landing_bg: '#000000'
   }
