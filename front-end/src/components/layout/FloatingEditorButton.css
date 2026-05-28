@@ -1,16 +1,20 @@
-/* Floating Editor Button Styles */
+/* Floating Editor Button Styles — mobile-first.
+   Phones: a bottom-right FAB. Larger screens progressively move it to the
+   top-right and grow it. (Previously authored desktop-first with max-width
+   overrides; inverted so the mobile layout is the base.) */
 
 .floating-editor-btn {
   position: fixed;
-  right: 1.5rem;
-  top: 7.5rem;
+  right: 0.75rem;
+  bottom: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
-  width: 70px;
-  height: 70px;
+  width: 56px;
+  height: 56px;
+  padding: 0.875rem 1rem;
   background: white;
   color: black;
   border: 2px solid black;
@@ -21,7 +25,7 @@
   z-index: 999;
   font-family: 'Source Code Pro', monospace;
   font-weight: 600;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   letter-spacing: 0.05em;
   animation: float 3s ease-in-out infinite;
 }
@@ -60,67 +64,48 @@
   }
 }
 
-/* Responsive - adjust position */
-@media (max-width: 1200px) {
-  .floating-editor-btn {
-    right: 1.5rem;
-    top: 7rem;
-  }
-}
-
-@media (max-width: 1024px) {
-  .floating-editor-btn {
-    right: 1.25rem;
-    top: 6.5rem;
-    width: 65px;
-    height: 65px;
-    font-size: 0.6rem;
-  }
-}
-
-@media (max-width: 900px) {
-  .floating-editor-btn {
-    right: 1rem;
-    top: 6rem;
-  }
-}
-
-@media (max-width: 768px) {
+/* Large phones / small tablets: slightly larger, more inset. */
+@media (min-width: 481px) {
   .floating-editor-btn {
     right: 1rem;
     bottom: 2rem;
-    top: auto;
-    transform: none;
-    padding: 0.875rem 1rem;
-    border-radius: 50%;
     width: 60px;
     height: 60px;
-    justify-content: center;
-  }
-
-  .floating-editor-btn:hover {
-    transform: scale(1.05);
-  }
-
-  .floating-btn-text {
-    display: none;
-  }
-
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-8px);
-    }
   }
 }
 
-@media (max-width: 480px) {
+/* Tablet / desktop: anchor to the top-right instead of the bottom. */
+@media (min-width: 769px) {
   .floating-editor-btn {
-    right: 0.75rem;
-    bottom: 1.5rem;
-    width: 56px;
-    height: 56px;
+    top: 6rem;
+    bottom: auto;
+    right: 1rem;
+    width: 65px;
+    height: 65px;
+    padding: 0;
+  }
+}
+
+@media (min-width: 901px) {
+  .floating-editor-btn {
+    top: 6.5rem;
+    right: 1.25rem;
+  }
+}
+
+/* Large desktop: full size. */
+@media (min-width: 1025px) {
+  .floating-editor-btn {
+    top: 7rem;
+    right: 1.5rem;
+    width: 70px;
+    height: 70px;
+    font-size: 0.65rem;
+  }
+}
+
+@media (min-width: 1201px) {
+  .floating-editor-btn {
+    top: 7.5rem;
   }
 }

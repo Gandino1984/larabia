@@ -1,6 +1,7 @@
+/* Mobile-first: single column by default, multi-column grid on larger screens. */
 .featured-articles {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
   gap: 2rem;
 }
 
@@ -21,8 +22,9 @@
   opacity: 0.5;
 }
 
-@media (max-width: 768px) {
+/* Tablet and up: let cards flow into responsive columns. */
+@media (min-width: 769px) {
   .featured-articles {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }

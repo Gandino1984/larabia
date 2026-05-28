@@ -1,9 +1,9 @@
-/* H-Scroll Editor Styles */
+/* H-Scroll Editor Styles — mobile-first. */
 
 .hscroll-editor {
   background: #1a1a1a;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1rem;
   margin: 2rem 0;
   border: 2px solid #555555;
   box-shadow: 0 4px 24px rgba(255, 255, 255, 0.1);
@@ -32,7 +32,8 @@
 .hscroll-controls {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .btn-scroll {
@@ -40,8 +41,8 @@
   color: white;
   border: none;
   border-radius: 8px;
-  width: 48px;
-  height: 48px;
+  width: 100%;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -92,13 +93,13 @@
   display: flex;
   gap: 1.5rem;
   padding: 0.5rem;
-  min-height: 500px;
+  min-height: 400px;
 }
 
 .hscroll-panel {
   position: relative;
-  width: 350px;
-  height: 500px;
+  width: 250px;
+  height: 350px;
   background: #1a1a1a;
   border-radius: 12px;
   border: 2px solid rgba(255, 255, 255, 0.2);
@@ -198,8 +199,8 @@
   color: white;
   border: none;
   border-radius: 6px;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -280,48 +281,6 @@
   font-size: 1rem;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .hscroll-editor {
-    padding: 1rem;
-  }
-
-  .hscroll-controls {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .btn-scroll {
-    width: 100%;
-    height: 44px;
-  }
-
-  .hscroll-panels {
-    min-height: 400px;
-  }
-
-  .hscroll-panel {
-    width: 280px;
-    height: 400px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hscroll-panel {
-    width: 250px;
-    height: 350px;
-  }
-
-  .panel-actions {
-    opacity: 1;
-  }
-
-  .btn-panel-action {
-    width: 32px;
-    height: 32px;
-  }
-}
-
 /* Interactive Panel Styles */
 .hscroll-panel.interactive {
   border: 2px solid #555555;
@@ -369,7 +328,7 @@
 .modal-content {
   background: #1a1a1a;
   border-radius: 12px;
-  max-width: 600px;
+  max-width: 90%;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
@@ -423,7 +382,7 @@
 /* Panel Type Selection */
 .panel-type-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
@@ -718,13 +677,49 @@
   padding: 0.5rem 0;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .panel-type-options {
-    grid-template-columns: 1fr;
+/* Large phones / small tablets */
+@media (min-width: 481px) {
+  .hscroll-panel {
+    width: 280px;
+    height: 400px;
   }
-  
+
+  .btn-panel-action {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Tablet / desktop */
+@media (min-width: 769px) {
+  .hscroll-editor {
+    padding: 1.5rem;
+  }
+
+  .hscroll-controls {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .btn-scroll {
+    width: 48px;
+    height: 48px;
+  }
+
+  .hscroll-panels {
+    min-height: 500px;
+  }
+
+  .hscroll-panel {
+    width: 350px;
+    height: 500px;
+  }
+
+  .panel-type-options {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
   .modal-content {
-    max-width: 90%;
+    max-width: 600px;
   }
 }
