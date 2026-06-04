@@ -2,6 +2,14 @@ import sharp from 'sharp';
 import fs from 'fs/promises';
 import path from 'path';
 
+// Memory hints for small-VPS environments — comic panels can be very wide
+// (e.g. 10000+ px); without these sharp/libvips can spike memory enough to
+// OOM-kill the container between uploads.
+sharp.cache(false);          // don't retain decoded pixel buffers in process memory
+sharp.concurrency(1);        // process one image at a time
+// 80 megapixels = ~9000x9000 square; covers a long comic strip without unbounded risk
+const SHARP_INPUT_LIMIT = 80_000_000;
+
 /**
  * Process and optimize an uploaded image: convert to WebP and ensure size < maxSizeKB.
  */
@@ -33,7 +41,7 @@ export async function processUploadedImage(file, maxSizeKB = 1024) {
     const maxAttempts = 10;
     const maxSizeBytes = maxSizeKB * 1024;
 
-    const metadata = await sharp(originalPath).metadata();
+    const metadata = await sharp(originalPath, { limitInputPixels: SHARP_INPUT_LIMIT }).metadata();
 
     if (metadata.width > width || metadata.height > height) {
       const ratio = Math.min(width / metadata.width, height / metadata.height);
@@ -47,7 +55,7 @@ export async function processUploadedImage(file, maxSizeKB = 1024) {
     while (attempts < maxAttempts) {
       attempts++;
 
-      outputBuffer = await sharp(originalPath)
+      outputBuffer = await sharp(originalPath, { limitInputPixels: SHARP_INPUT_LIMIT })
         .resize(width, height, { fit: 'inside', withoutEnlargement: true })
         .webp({ quality })
         .toBuffer();
