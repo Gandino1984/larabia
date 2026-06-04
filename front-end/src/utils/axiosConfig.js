@@ -26,6 +26,14 @@ axiosInstance.interceptors.request.use(
         console.error('Error parsing user from localStorage:', err);
       }
     }
+
+    // Multipart uploads (block images, audio, covers, logos, theme background)
+    // include server-side sharp processing and can exceed the global 10s timeout
+    // on the VPS. Detect FormData and grant the upload 60s automatically.
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      config.timeout = 60000;
+    }
+
     return config;
   },
   (error) => {
