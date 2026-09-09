@@ -37,26 +37,30 @@ docker-compose.yml  Three services: db, back-end, front-end
 
 ## Deployment
 
-### Stage 1 — test on the existing `larabia.uribarri.online`
+Production runs on the VPS at **https://larabiamag.com** (+ `www.`), API at **https://api.larabiamag.com**, behind an external nginx-proxy + Let's Encrypt companion on the shared `nginx-proxy` docker network. Routing and TLS are driven by the `VIRTUAL_HOST` / `LETSENCRYPT_HOST` env on each service (from `.env`).
 
-The new stack will replace the current `magazine-front` container that lives in uribarri.online's docker-compose. The DNS for `larabia.uribarri.online` already points at the VPS; you've added an `api.larabia` DNS record for the new API subdomain.
+### First-time bring-up
 
-1. **Clone this repo onto the VPS** (e.g. `~/larabia-magazine`).
-2. **Copy `.env.example` to `.env`** and fill in real values. The Stage-1 defaults (`larabia.uribarri.online` + `api.larabia.uribarri.online`) are already in place.
-3. **Stop the old magazine-front container** so it doesn't conflict on `VIRTUAL_HOST=larabia.uribarri.online`:
-   ```bash
-   docker stop magazine-front && docker rm magazine-front
-   ```
-4. **Start the new stack:**
+1. **Clone this repo onto the VPS** (e.g. `~/larabia`).
+2. **Copy `.env.example` to `.env`** and fill in real values. The defaults already point at `larabiamag.com` / `api.larabiamag.com`.
+3. **Start the stack:**
    ```bash
    docker compose up -d --build
    ```
    The first DB boot runs `back-end/migrations/001_init_schema.sql` automatically.
-5. **Watch the Let's Encrypt companion** mint certs for `api.larabia.uribarri.online`:
+4. **Watch the Let's Encrypt companion** mint certs:
    ```bash
-   docker logs -f nginx-proxy-le | grep larabia
+   docker logs -f nginx-proxy-le | grep larabiamag
    ```
-6. **Sanity check:** visit `https://larabia.uribarri.online` and `https://api.larabia.uribarri.online/health`.
+5. **Sanity check:** visit `https://larabiamag.com` and `https://api.larabiamag.com/health`.
+
+### Routine deploy (already running)
+
+```bash
+cd ~/larabia && git pull origin main && docker compose up -d --build
+```
+
+Rebuild only the changed service to be quick (`… up -d --build front-end`). The front-end must be rebuilt whenever `VITE_API_URL` / `VITE_GOOGLE_CLIENT_ID` change — they are **baked at build time** (use `--no-cache` if a build-arg change isn't picked up).
 
 #### Promoting the first super admin
 
@@ -67,24 +71,25 @@ docker exec -it larabia_db mysql -u root -p larabia_db -e \
   "UPDATE user SET is_editor = 1, is_super_admin = 1 WHERE email_user = 'you@example.com';"
 ```
 
-### Stage 2 — move to its own domain
+### Changing the domain
 
-Whenever you're ready to move off the subdomain:
+The magazine moved from `larabia.uribarri.online` to `larabiamag.com` on 2026-09-09. To move to a different domain later:
 
-1. Point new DNS records (`yourmagazine.com` + `api.yourmagazine.com`) at the VPS IP.
-2. Edit `.env`:
+1. Point new DNS **A** records (`newdomain.com`, `www.newdomain.com`, `api.newdomain.com`) at the VPS IP and wait for propagation (`dig +short A newdomain.com`).
+2. Edit `.env` (comma-separate multiple front hosts for a SAN cert):
    ```
-   FRONT_VIRTUAL_HOST=yourmagazine.com
-   API_VIRTUAL_HOST=api.yourmagazine.com
-   FRONTEND_URL=https://yourmagazine.com
-   VITE_API_URL=https://api.yourmagazine.com
+   FRONT_VIRTUAL_HOST=newdomain.com,www.newdomain.com
+   API_VIRTUAL_HOST=api.newdomain.com
+   FRONTEND_URL=https://newdomain.com
+   VITE_API_URL=https://api.newdomain.com
    ```
-3. Rebuild the front-end so the new `VITE_API_URL` is baked in:
+3. Rebuild so the new `VITE_API_URL` is baked in and the back-end picks up the new env:
    ```bash
-   docker compose up -d --build front-end back-end
+   docker compose build --no-cache front-end && docker compose up -d
    ```
+4. **Add the new origins to the Google OAuth client** (`Authorized JavaScript origins`: `https://newdomain.com`, `https://www.newdomain.com`) or Google sign-in breaks on the new domain.
 
-That's it — no code changes.
+No code changes needed — CORS origins derive from `FRONTEND_URL` (the `www.` variant is added automatically). The Let's Encrypt companion mints certs automatically once DNS resolves to the VPS.
 
 ## Local development
 
