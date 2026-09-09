@@ -56,6 +56,8 @@ services:
       - EMAIL_USER=${EMAIL_USER}
       - EMAIL_PASS=${EMAIL_PASS}
       - CONTACT_EMAIL=${CONTACT_EMAIL}
+      # Comma-separated emails auto-promoted to super_admin (+ editor) on every login.
+      - SUPER_ADMIN_EMAILS=${SUPER_ADMIN_EMAILS}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       # nginx-proxy + Let's Encrypt companion read these labels to route traffic + mint a cert.
