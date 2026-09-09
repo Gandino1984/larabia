@@ -7,18 +7,15 @@
   align-items: center;
 }
 
-.google-button-wrapper {
+/* Positioned wrapper: the visible custom button and the real (transparent)
+   Google button are stacked here so a genuine tap lands on Google's button. */
+.google-button-stack {
+  position: relative;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 48px;
-  transition: opacity 0.3s ease;
-  border-radius: 8px;
-  overflow: hidden;
 }
 
-/* Custom Google button styling */
+/* Custom Google button styling (now purely decorative — see .google-button-overlay) */
 .custom-google-button {
   width: 100%;
   min-height: 48px;
@@ -33,22 +30,49 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  /* Taps must reach the transparent Google button layered on top. */
+  pointer-events: none;
+  user-select: none;
 }
 
-.custom-google-button:hover:not(:disabled) {
+/* Hover/active driven by the overlay above (:hover on the stack) */
+.google-button-stack:hover .custom-google-button:not(.disabled) {
   background: #f8f8f8;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
 
-.custom-google-button:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.custom-google-button:disabled {
+.custom-google-button.disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Real Google button, layered on top and made invisible. opacity:0 (NOT
+   display:none / visibility:hidden) keeps it fully interactive, so the user's
+   real tap is a trusted gesture on Google's own iframe → the popup opens,
+   including on mobile. */
+.google-button-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  overflow: hidden;
+}
+
+/* Stretch Google's rendered button to fill the whole tap target so there are
+   no dead zones around it. */
+.google-button-overlay > div,
+.google-button-overlay iframe {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 48px;
+}
+
+.google-button-overlay.disabled {
+  pointer-events: none;
 }
 
 .google-icon {
