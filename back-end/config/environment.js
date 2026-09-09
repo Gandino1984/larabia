@@ -6,6 +6,23 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const isProduction = NODE_ENV === 'production';
 const isDevelopment = NODE_ENV === 'development';
 
+// Build the allowed browser origins from FRONTEND_URL so a domain change only
+// needs the .env, not a code edit. Automatically adds the `www.` variant.
+const buildBrowserOrigins = (url) => {
+    const origins = new Set([url]);
+    try {
+        const u = new URL(url);
+        if (!u.hostname.startsWith('www.')) {
+            origins.add(`${u.protocol}//www.${u.host}`);
+        }
+    } catch {
+        // Malformed FRONTEND_URL: fall back to just the raw value.
+    }
+    return [...origins];
+};
+
+const prodFrontendUrl = process.env.FRONTEND_URL || 'https://larabiamag.com';
+
 const config = {
     env: NODE_ENV,
     isProduction,
@@ -17,8 +34,8 @@ const config = {
 
     urls: isProduction
         ? {
-            frontend: process.env.FRONTEND_URL || 'https://larabia.uribarri.online',
-            api: process.env.API_URL || 'https://api.larabia.uribarri.online'
+            frontend: prodFrontendUrl,
+            api: process.env.API_URL || 'https://api.larabiamag.com'
         }
         : {
             frontend: process.env.FRONTEND_URL || 'http://localhost:5174',
@@ -27,10 +44,7 @@ const config = {
 
     cors: {
         origin: isProduction
-            ? [
-                'https://larabia.uribarri.online',
-                'https://api.larabia.uribarri.online'
-            ]
+            ? buildBrowserOrigins(prodFrontendUrl)
             : [
                 'http://localhost:5174',
                 'http://localhost:3000',
