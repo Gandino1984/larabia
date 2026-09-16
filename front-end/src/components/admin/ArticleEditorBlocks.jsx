@@ -772,11 +772,18 @@ function ArticleEditorBlocks() {
                   className={`project-selector-header ${!formData.project_id ? 'select-placeholder' : ''}`}
                 >
                   <option value="">{t('editor.project.noProject')}</option>
-                  {projects.map(project => (
-                    <option key={project.id_project} value={project.id_project}>
-                      {project.title_project}
-                    </option>
-                  ))}
+                  {projects.map(project => {
+                    const statusTag = project.status_project === 'draft'
+                      ? ` · ${t('editor.status.draft')}`
+                      : project.status_project === 'pending_approval'
+                      ? ` · ${t('editor.review.statusShort')}`
+                      : '';
+                    return (
+                      <option key={project.id_project} value={project.id_project}>
+                        {project.title_project}{statusTag}
+                      </option>
+                    );
+                  })}
                 </select>
                 {formData.project_id && (() => {
                   const selectedProject = projects.find(p => p.id_project === parseInt(formData.project_id));
