@@ -62,6 +62,9 @@ function ArticleEditorBlocks() {
   const [showProjectModal, setShowProjectModal] = useState(false);
   // null = creating a new project; an id = editing/continuing an existing draft.
   const [editingProjectId, setEditingProjectId] = useState(null);
+  // Articles (incl. comics) that belong to the project being edited, so the
+  // author can jump straight into editing their panels in the article creator.
+  const [projectArticles, setProjectArticles] = useState([]);
   // Editor article-list filter: 'all' | 'draft' | 'pending_approval' | 'published'.
   const [articleListFilter, setArticleListFilter] = useState('all');
   // Ref to the create/edit form so "Edit" from the list scrolls straight to it
@@ -239,6 +242,7 @@ function ArticleEditorBlocks() {
   const resetProjectModal = () => {
     setShowProjectModal(false);
     setEditingProjectId(null);
+    setProjectArticles([]);
     setNewProjectAuthors(currentUser ? [{ id_user: currentUser.id_user, name_user: currentUser.name_user, image_user: currentUser.image_user }] : []);
     setSelectedProjectAuthorToAdd('');
     setNewProjectData({
@@ -270,7 +274,31 @@ function ArticleEditorBlocks() {
       : (currentUser ? [{ id_user: currentUser.id_user, name_user: currentUser.name_user, image_user: currentUser.image_user }] : []);
     setNewProjectAuthors(authors);
     setSelectedProjectAuthorToAdd('');
+    fetchProjectArticles(project.id_project);
     setShowProjectModal(true);
+  };
+
+  // Load the articles/comics that belong to a project so they can be opened for
+  // editing (their panels live in the article, not in the project).
+  const fetchProjectArticles = async (projectId) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+      const response = await axios.get(`${apiUrl}/magazine-article`, {
+        params: { project_id: projectId, status: 'all' },
+        headers: { 'x-user-id': currentUser?.id_user }
+      });
+      setProjectArticles(response.data?.data || []);
+    } catch (error) {
+      console.error('Error fetching project articles:', error);
+      setProjectArticles([]);
+    }
+  };
+
+  // Jump from the project modal into editing one of its articles (loads its
+  // blocks/panels in the article creator's edit mode).
+  const handleEditProjectArticle = (article) => {
+    resetProjectModal();
+    handleEdit(article);
   };
 
   // Save progress without submitting: persists (or updates) the project as a
@@ -1395,6 +1423,36 @@ function ArticleEditorBlocks() {
                   </select>
                 </div>
               </div>
+
+              {editingProjectId && projectArticles.length > 0 && (
+                <div className="form-group">
+                  <label>{t('editor.project.articlesLabel')}</label>
+                  <ul className="project-articles-list">
+                    {projectArticles.map(article => (
+                      <li key={article.id_article} className="project-article-item">
+                        <span className="project-article-title">
+                          {article.title_article}
+                          <span className={`status status-${article.status_article}`}>
+                            {article.status_article === 'published'
+                              ? t('editor.status.published')
+                              : article.status_article === 'pending_approval'
+                              ? t('editor.review.statusShort')
+                              : t('editor.status.draft')}
+                          </span>
+                        </span>
+                        <button
+                          type="button"
+                          className="btn-edit-project-article"
+                          onClick={() => handleEditProjectArticle(article)}
+                        >
+                          <Edit size={13} /> {t('common.buttons.edit')}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="project-articles-hint">{t('editor.project.articlesHint')}</p>
+                </div>
+              )}
             </div>
 
             <div className="modal-footer">

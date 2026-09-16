@@ -163,6 +163,8 @@
   "editor.project.submitReviewButton": "Enviar a revisión",
   "editor.project.publishButton": "Publicar",
   "editor.project.editTitle": "Editar proyecto",
+  "editor.project.articlesLabel": "Artículos y cómics de este proyecto",
+  "editor.project.articlesHint": "Para editar los paneles de un cómic, edita su artículo en el creador.",
   "editor.rejection.title": "Este contenido fue devuelto por un super-administrador. Motivo:",
   "editor.review.pendingTitle": "En revisión",
   "editor.review.pendingBody": "Este contenido está pendiente de que un super-administrador lo valide antes de publicarse.",

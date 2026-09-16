@@ -163,6 +163,8 @@
   "editor.project.submitReviewButton": "Send for review",
   "editor.project.publishButton": "Publish",
   "editor.project.editTitle": "Edit project",
+  "editor.project.articlesLabel": "Articles and comics in this project",
+  "editor.project.articlesHint": "To edit a comic's panels, edit its article in the creator.",
   "editor.rejection.title": "This content was returned by a super admin. Reason:",
   "editor.review.pendingTitle": "In review",
   "editor.review.pendingBody": "This content is awaiting super-admin validation before it goes public.",

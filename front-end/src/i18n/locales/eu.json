@@ -163,6 +163,8 @@
   "editor.project.submitReviewButton": "Bidali berrikuspenera",
   "editor.project.publishButton": "Argitaratu",
   "editor.project.editTitle": "Editatu proiektua",
+  "editor.project.articlesLabel": "Proiektu honetako artikuluak eta komikiak",
+  "editor.project.articlesHint": "Komiki baten panelak editatzeko, editatu bere artikulua sortzailean.",
   "editor.rejection.title": "Eduki hau super-administratzaile batek itzuli du. Arrazoia:",
   "editor.review.pendingTitle": "Berrikuspenean",
   "editor.review.pendingBody": "Eduki hau super-administratzaile batek balioztatzeko zain dago argitaratu aurretik.",
