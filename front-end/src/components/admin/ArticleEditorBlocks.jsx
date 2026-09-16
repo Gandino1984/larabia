@@ -1184,7 +1184,9 @@ function ArticleEditorBlocks() {
                 ? t('editor.saving')
                 : formData.status_article === 'pending_approval'
                 ? 'Enviar para aprobación'
-                : (editingArticle ? t('editor.updateArticle') : t('editor.publishArticle'))}
+                : formData.status_article === 'published'
+                ? (editingArticle ? t('editor.updateArticle') : t('editor.publishArticle'))
+                : t('editor.project.saveDraftButton') /* status = draft */}
             </button>
             {editingArticle && (
               <button type="button" className="btn-cancel" onClick={resetForm}>
