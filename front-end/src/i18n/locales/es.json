@@ -141,6 +141,7 @@
 
   "editor.coverImage.preview": "Vista previa de portada",
   "editor.coverImage.select": "Selecciona una imagen de portada para el artículo",
+  "editor.coverImage.mustBeImage": "La portada debe ser una imagen (JPG, PNG, WebP o AVIF), no un vídeo u otro tipo de archivo.",
 
   "editor.authors.label": "Autores",
   "editor.author.add": "+ Añadir autor/a",

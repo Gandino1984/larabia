@@ -141,6 +141,7 @@
 
   "editor.coverImage.preview": "Cover preview",
   "editor.coverImage.select": "Select a cover image for the article",
+  "editor.coverImage.mustBeImage": "The cover must be an image (JPG, PNG, WebP or AVIF), not a video or other file type.",
 
   "editor.authors.label": "Authors",
   "editor.author.add": "+ Add author",

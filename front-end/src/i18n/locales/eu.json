@@ -141,6 +141,7 @@
 
   "editor.coverImage.preview": "Azalaren aurrebista",
   "editor.coverImage.select": "Hautatu azaleko irudia artikulurako",
+  "editor.coverImage.mustBeImage": "Azalak irudia izan behar du (JPG, PNG, WebP edo AVIF), ez bideo edo bestelako fitxategi bat.",
 
   "editor.authors.label": "Egileak",
   "editor.author.add": "+ Gehitu egilea",

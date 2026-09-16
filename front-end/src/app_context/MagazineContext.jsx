@@ -293,8 +293,9 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error uploading cover image:', err);
-      showError('Error al subir la imagen');
-      return { error: 'Error al subir la imagen' };
+      const msg = err.response?.data?.error || err.response?.data?.details || 'Error al subir la imagen';
+      showError(msg);
+      return { error: msg };
     }
   }, [showSuccess, showError]);
 

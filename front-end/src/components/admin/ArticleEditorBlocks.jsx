@@ -178,16 +178,16 @@ function ArticleEditorBlocks() {
     });
   };
 
-  const handleAddProjectAuthor = () => {
-    if (!selectedProjectAuthorToAdd) return;
-    const authorId = parseInt(selectedProjectAuthorToAdd);
+  const handleAddProjectAuthor = (rawId) => {
+    const authorId = parseInt(rawId);
+    if (!authorId) return;
     if (newProjectAuthors.some(a => a.id_user === authorId)) {
       showError(t('editor.author.alreadyAdded'));
       return;
     }
     const editor = editors.find(e => e.id_user === authorId);
     if (editor) {
-      setNewProjectAuthors([...newProjectAuthors, { id_user: editor.id_user, name_user: editor.name_user, image_user: editor.image_user }]);
+      setNewProjectAuthors(prev => [...prev, { id_user: editor.id_user, name_user: editor.name_user, image_user: editor.image_user }]);
     }
     setSelectedProjectAuthorToAdd('');
   };
@@ -374,6 +374,16 @@ function ArticleEditorBlocks() {
   const handleCoverImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+
+      // The cover must be an image. accept="image/*" is not enforced on some
+      // (esp. mobile) file pickers, so validate here too — otherwise a video
+      // slips through and the server rejects it with a confusing 400.
+      if (!file.type.startsWith('image/')) {
+        showError(t('editor.coverImage.mustBeImage'));
+        e.target.value = '';
+        return;
+      }
+
       setCoverImageFile(file);
 
       // Create preview URL
@@ -694,14 +704,15 @@ function ArticleEditorBlocks() {
     setSelectedAuthorToAdd('');
   };
 
-  const handleAddAuthor = () => {
-    if (!selectedAuthorToAdd) return;
-    const authorId = parseInt(selectedAuthorToAdd);
+  const handleAddAuthor = (rawId) => {
+    const authorId = parseInt(rawId);
+    if (!authorId) return;
     if (formData.authors.includes(authorId)) {
       showError(t('editor.author.alreadyAdded'));
       return;
     }
-    setFormData({ ...formData, authors: [...formData.authors, authorId] });
+    // Functional update avoids stale-state loss when adding several in a row.
+    setFormData(prev => ({ ...prev, authors: [...prev.authors, authorId] }));
     setSelectedAuthorToAdd('');
   };
 
@@ -714,6 +725,14 @@ function ArticleEditorBlocks() {
   };
 
   const getAuthorDetails = (authorId) => editors.find(e => e.id_user === authorId);
+
+  // Google-auth users store a full avatar URL in image_user; local uploads store
+  // a filename served by the API. Resolve both so the thumbnail never breaks.
+  const resolveUserImage = (img) => {
+    if (!img) return null;
+    if (img.startsWith('http://') || img.startsWith('https://')) return img;
+    return `${import.meta.env.VITE_API_URL}/user/image/${img}`;
+  };
 
   if (!canCreateContent) {
     return (
@@ -818,7 +837,7 @@ function ArticleEditorBlocks() {
                       <span className="author-order">{index + 1}.</span>
                       {author?.image_user && (
                         <img
-                          src={`${import.meta.env.VITE_API_URL}/user/image/${author.image_user}`}
+                          src={resolveUserImage(author.image_user)}
                           alt={author.name_user}
                           className="author-avatar-tiny"
                         />
@@ -843,23 +862,14 @@ function ArticleEditorBlocks() {
               <div className="add-author-row-compact">
                 <select
                   className="author-selector-compact"
-                  value={selectedAuthorToAdd}
-                  onChange={(e) => setSelectedAuthorToAdd(e.target.value)}
+                  value=""
+                  onChange={(e) => { if (e.target.value) handleAddAuthor(e.target.value); }}
                 >
                   <option value="">{t('editor.author.add')}</option>
                   {editors.filter(e => !formData.authors.includes(e.id_user)).map(editor => (
                     <option key={editor.id_user} value={editor.id_user}>{editor.name_user}</option>
                   ))}
                 </select>
-                {selectedAuthorToAdd && (
-                  <button
-                    type="button"
-                    className="btn-add-author-compact"
-                    onClick={handleAddAuthor}
-                  >
-                    <Plus size={14} />
-                  </button>
-                )}
               </div>
               {fieldErrors.authors && (
                 <span className="field-error-msg">{fieldErrors.authors}</span>
@@ -1350,7 +1360,9 @@ function ArticleEditorBlocks() {
                 <div className="authors-list-compact">
                   {newProjectAuthors.map(author => (
                     <div key={author.id_user} className="author-tag-compact">
-                      <User size={12} />
+                      {author.image_user
+                        ? <img src={resolveUserImage(author.image_user)} alt={author.name_user} className="author-avatar-tiny" />
+                        : <User size={12} />}
                       <span>{author.name_user}</span>
                       <button
                         type="button"
@@ -1366,23 +1378,14 @@ function ArticleEditorBlocks() {
                 <div className="add-author-row-compact">
                   <select
                     className="author-selector-compact"
-                    value={selectedProjectAuthorToAdd}
-                    onChange={(e) => setSelectedProjectAuthorToAdd(e.target.value)}
+                    value=""
+                    onChange={(e) => { if (e.target.value) handleAddProjectAuthor(e.target.value); }}
                   >
                     <option value="">{t('editor.project.addCollaborator')}</option>
                     {editors.filter(e => !newProjectAuthors.some(a => a.id_user === e.id_user)).map(editor => (
                       <option key={editor.id_user} value={editor.id_user}>{editor.name_user}</option>
                     ))}
                   </select>
-                  {selectedProjectAuthorToAdd && (
-                    <button
-                      type="button"
-                      className="btn-add-author-compact"
-                      onClick={handleAddProjectAuthor}
-                    >
-                      +
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
