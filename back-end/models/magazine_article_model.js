@@ -62,6 +62,11 @@ const magazine_article_model = sequelize.define(
             allowNull: false,
             defaultValue: 'draft'
         },
+        rejection_reason: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            comment: 'Super-admin feedback when a submission is rejected back to draft'
+        },
         featured_article: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

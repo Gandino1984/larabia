@@ -607,7 +607,7 @@ async function rejectArticle(req, res) {
         if (!admin) return;
         const { id_article } = req.params;
         if (!id_article) return res.status(400).json({ error: 'El ID del artículo es obligatorio' });
-        const result = await magazineArticleController.rejectArticle(id_article);
+        const result = await magazineArticleController.rejectArticle(id_article, req.body?.reason);
         if (result.error) return res.status(400).json(result);
         res.json(result);
     } catch (err) {

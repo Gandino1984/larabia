@@ -854,7 +854,8 @@ async function submitForApproval(id_article, roleCtx) {
             return { error: `No se puede enviar para aprobación un artículo en estado '${article.status_article}'` };
         }
 
-        await article.update({ status_article: 'pending_approval' });
+        // Fresh submission: clear any prior rejection feedback.
+        await article.update({ status_article: 'pending_approval', rejection_reason: null });
         return {
             success: 'Artículo enviado para aprobación',
             data: { id_article: article.id_article, status_article: 'pending_approval' }
@@ -877,7 +878,7 @@ async function approveArticle(id_article) {
             return { error: `Solo se pueden aprobar artículos en estado 'pending_approval' (estado actual: ${article.status_article})` };
         }
 
-        const updates = { status_article: 'published' };
+        const updates = { status_article: 'published', rejection_reason: null };
         if (!article.date_published) updates.date_published = new Date();
 
         await article.update(updates);
@@ -892,9 +893,10 @@ async function approveArticle(id_article) {
 }
 
 /**
- * Super-admin flow: reject a pending article → draft (returned to author).
+ * Super-admin flow: reject a pending article → draft (returned to author),
+ * optionally with a reason the author will see.
  */
-async function rejectArticle(id_article) {
+async function rejectArticle(id_article, reason = null) {
     try {
         const article = await magazine_article_model.findByPk(id_article);
         if (!article) return { error: 'Artículo no encontrado' };
@@ -903,10 +905,11 @@ async function rejectArticle(id_article) {
             return { error: `Solo se pueden rechazar artículos en estado 'pending_approval' (estado actual: ${article.status_article})` };
         }
 
-        await article.update({ status_article: 'draft' });
+        const cleanReason = typeof reason === 'string' && reason.trim() ? reason.trim() : null;
+        await article.update({ status_article: 'draft', rejection_reason: cleanReason });
         return {
             success: 'Artículo devuelto al autor',
-            data: { id_article: article.id_article, status_article: 'draft' }
+            data: { id_article: article.id_article, status_article: 'draft', rejection_reason: cleanReason }
         };
     } catch (err) {
         console.error('-> rejectArticle() - Error =', err);

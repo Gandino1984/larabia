@@ -78,17 +78,80 @@ async function loadProjectAuthors(projectId) {
     }));
 }
 
-async function getAll(filters = {}) {
-    try {
-        const whereClause = { active_project: true };
+const EMPTY_ROLE_CTX = Object.freeze({
+    userId: null,
+    isEditor: false,
+    isAdmin: false,
+    isSuperAdmin: false,
+    isPremiumReader: false,
+    canPublishDirectly: false
+});
 
-        // Apply status filter
-        if (filters.status) {
-            whereClause.status_project = filters.status;
-        } else {
-            // By default, only show published projects
-            whereClause.status_project = 'published';
+// Collect the ids of projects the given user authors (junction table + legacy author_id).
+async function loadOwnProjectIds(userId) {
+    if (!userId) return [];
+    const [junction, legacy] = await Promise.all([
+        project_author_model.findAll({ where: { user_id: userId }, attributes: ['project_id'] }),
+        magazine_project_model.findAll({ where: { author_id: userId }, attributes: ['id_project'] })
+    ]);
+    const ids = new Set(junction.map((r) => r.project_id));
+    for (const p of legacy) ids.add(p.id_project);
+    return [...ids];
+}
+
+/**
+ * WHERE clause for project-list queries, mirroring the article rules:
+ *   - super_admin: every active project (optional ?status= filter honored).
+ *   - admin / editor: published projects + their own drafts/pending.
+ *   - everyone else: only published.
+ */
+async function buildProjectVisibilityWhere(roleCtx, requestedStatus) {
+    const ctx = roleCtx || EMPTY_ROLE_CTX;
+    const where = { active_project: true };
+
+    if (ctx.isSuperAdmin) {
+        if (requestedStatus && requestedStatus !== 'all') {
+            where.status_project = requestedStatus;
         }
+        return where;
+    }
+
+    if ((ctx.isAdmin || ctx.isEditor) && ctx.userId) {
+        const myProjectIds = await loadOwnProjectIds(ctx.userId);
+        where[Op.or] = [
+            { status_project: 'published' },
+            ...(myProjectIds.length > 0
+                ? [{ id_project: myProjectIds, status_project: ['draft', 'pending_approval'] }]
+                : [])
+        ];
+        return where;
+    }
+
+    where.status_project = 'published';
+    return where;
+}
+
+// Whether the caller may see a single project (used by getById).
+async function canReadProject(project, roleCtx) {
+    const ctx = roleCtx || EMPTY_ROLE_CTX;
+    if (!project || !project.active_project) return false;
+    if (ctx.isSuperAdmin) return true;
+    if (project.status_project === 'published') return true;
+
+    // Unpublished: only a listed author (or legacy author) may preview it.
+    if (!ctx.userId) return false;
+    if (project.author_id && project.author_id === ctx.userId) return true;
+    const isAuthor = !!(await project_author_model.findOne({
+        where: { project_id: project.id_project, user_id: ctx.userId }
+    }));
+    return isAuthor;
+}
+
+async function getAll(filters = {}, roleCtx = EMPTY_ROLE_CTX) {
+    try {
+        // Role-aware visibility: super admins (optionally filtered by ?status=),
+        // authors see their own drafts/pending, everyone else only published.
+        const whereClause = await buildProjectVisibilityWhere(roleCtx, filters.status);
 
         // Apply type filter
         if (filters.type) {
@@ -144,7 +207,7 @@ async function getAll(filters = {}) {
     }
 }
 
-async function getById(id_project) {
+async function getById(id_project, roleCtx = EMPTY_ROLE_CTX) {
     try {
         const project = await magazine_project_model.findByPk(id_project);
 
@@ -152,14 +215,17 @@ async function getById(id_project) {
             return { error: "Proyecto no encontrado" };
         }
 
-        if (!project.active_project) {
+        if (!(await canReadProject(project, roleCtx))) {
+            // Opaque message: don't reveal whether it's unpublished or nonexistent.
             return { error: "Proyecto no disponible" };
         }
 
-        // Increment view count
-        await project.update({
-            view_count_project: project.view_count_project + 1
-        });
+        // Only count public views — not an author previewing their own draft.
+        if (project.status_project === 'published') {
+            await project.update({
+                view_count_project: project.view_count_project + 1
+            });
+        }
 
         // Get authors
         const authors = await loadProjectAuthors(id_project);
@@ -326,7 +392,7 @@ async function getFeatured() {
     }
 }
 
-async function create(projectData) {
+async function create(projectData, roleCtx = EMPTY_ROLE_CTX) {
     try {
         const validation = validateProjectData(projectData);
         if (!validation.isValid) {
@@ -342,6 +408,12 @@ async function create(projectData) {
             if (!author) {
                 return { error: "El autor especificado no existe" };
             }
+        }
+
+        // Only super admins publish directly; everyone else creates a draft
+        // and must go through /submit-for-approval.
+        if (!roleCtx.canPublishDirectly && projectData.status_project === 'published') {
+            projectData.status_project = 'draft';
         }
 
         // If status is 'published', set publish date
@@ -464,7 +536,7 @@ async function create(projectData) {
     }
 }
 
-async function update(id_project, projectData) {
+async function update(id_project, projectData, roleCtx = EMPTY_ROLE_CTX) {
     try {
         const project = await magazine_project_model.findByPk(id_project);
 
@@ -475,6 +547,13 @@ async function update(id_project, projectData) {
         // Validate title length if provided
         if (projectData.title_project && projectData.title_project.length > 255) {
             return { error: "El título no puede exceder 255 caracteres" };
+        }
+
+        // Status transitions are super-admin-only through the direct update path;
+        // authors/admins move status via /submit-for-approval and the approve/reject
+        // endpoints. Drop any status they try to set here.
+        if (!roleCtx.canPublishDirectly && projectData.status_project !== undefined) {
+            delete projectData.status_project;
         }
 
         // If changing status to published, set publish date
@@ -798,6 +877,119 @@ async function deactivate(id_project) {
     }
 }
 
+// ============================================================
+// Editorial approval workflow (mirrors magazine_article_controller)
+// ============================================================
+
+/**
+ * Author/admin flow: move a draft project into the super-admin review queue.
+ */
+async function submitForApproval(id_project, roleCtx) {
+    try {
+        const project = await magazine_project_model.findByPk(id_project);
+        if (!project) return { error: 'Proyecto no encontrado' };
+
+        const ctx = roleCtx || EMPTY_ROLE_CTX;
+        const isAuthor = ctx.userId
+            ? ((project.author_id && project.author_id === ctx.userId)
+                || !!(await project_author_model.findOne({
+                    where: { project_id: project.id_project, user_id: ctx.userId }
+                })))
+            : false;
+
+        if (!isAuthor && !ctx.isSuperAdmin) {
+            return { error: 'Solo el autor del proyecto o el super-administrador pueden enviarlo para aprobación' };
+        }
+
+        if (project.status_project !== 'draft') {
+            return { error: `No se puede enviar para aprobación un proyecto en estado '${project.status_project}'` };
+        }
+
+        await project.update({ status_project: 'pending_approval', rejection_reason: null });
+        return {
+            success: 'Proyecto enviado para aprobación',
+            data: { id_project: project.id_project, status_project: 'pending_approval' }
+        };
+    } catch (err) {
+        console.error('-> submitForApproval() - Error =', err);
+        return { error: 'Error al enviar el proyecto para aprobación' };
+    }
+}
+
+/**
+ * Super-admin flow: approve a pending project → published.
+ */
+async function approveProject(id_project) {
+    try {
+        const project = await magazine_project_model.findByPk(id_project);
+        if (!project) return { error: 'Proyecto no encontrado' };
+
+        if (project.status_project !== 'pending_approval') {
+            return { error: `Solo se pueden aprobar proyectos en estado 'pending_approval' (estado actual: ${project.status_project})` };
+        }
+
+        const updates = { status_project: 'published', rejection_reason: null };
+        if (!project.date_published) updates.date_published = new Date();
+
+        await project.update(updates);
+        return {
+            success: 'Proyecto aprobado y publicado',
+            data: { id_project: project.id_project, status_project: 'published' }
+        };
+    } catch (err) {
+        console.error('-> approveProject() - Error =', err);
+        return { error: 'Error al aprobar el proyecto' };
+    }
+}
+
+/**
+ * Super-admin flow: reject a pending project → draft, optionally with a reason.
+ */
+async function rejectProject(id_project, reason = null) {
+    try {
+        const project = await magazine_project_model.findByPk(id_project);
+        if (!project) return { error: 'Proyecto no encontrado' };
+
+        if (project.status_project !== 'pending_approval') {
+            return { error: `Solo se pueden rechazar proyectos en estado 'pending_approval' (estado actual: ${project.status_project})` };
+        }
+
+        const cleanReason = typeof reason === 'string' && reason.trim() ? reason.trim() : null;
+        await project.update({ status_project: 'draft', rejection_reason: cleanReason });
+        return {
+            success: 'Proyecto devuelto al autor',
+            data: { id_project: project.id_project, status_project: 'draft', rejection_reason: cleanReason }
+        };
+    } catch (err) {
+        console.error('-> rejectProject() - Error =', err);
+        return { error: 'Error al rechazar el proyecto' };
+    }
+}
+
+/**
+ * Super-admin flow: list every project currently awaiting approval.
+ */
+async function getPending() {
+    try {
+        const projects = await magazine_project_model.findAll({
+            where: { status_project: 'pending_approval', active_project: true },
+            order: [['updated_at', 'DESC']]
+        });
+        if (!projects || projects.length === 0) {
+            return { data: [], message: 'No hay proyectos pendientes' };
+        }
+        const data = [];
+        for (const project of projects) {
+            const authors = await loadProjectAuthors(project.id_project);
+            data.push({ ...project.toJSON(), authors });
+        }
+        return { data };
+    } catch (err) {
+        console.error('-> getPending() - Error =', err);
+        return { error: 'Error al obtener proyectos pendientes' };
+    }
+}
+
 export default {
     getAll,
     getById,
@@ -809,5 +1001,9 @@ export default {
     removeById,
     uploadCoverImage,
     removeCoverImage,
-    deactivate
+    deactivate,
+    submitForApproval,
+    approveProject,
+    rejectProject,
+    getPending
 };

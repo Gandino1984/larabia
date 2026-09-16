@@ -1,5 +1,6 @@
 // back-end/controllers/magazine_project/magazine_project_api_controller.js
 import magazineProjectController from "./magazine_project_controller.js";
+import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
 
 async function getAll(req, res) {
     try {
@@ -11,7 +12,8 @@ async function getAll(req, res) {
         if (format) filters.format = format;
         if (featured !== undefined) filters.featured = featured === 'true';
 
-        const { error, data } = await magazineProjectController.getAll(filters);
+        const callerUser = await getRequestUser(req);
+        const { error, data } = await magazineProjectController.getAll(filters, roleSnapshot(callerUser));
         res.json({ error, data });
     } catch (err) {
         console.error("-> magazine_project_api_controller.js - getAll() - Error =", err);
@@ -32,7 +34,8 @@ async function getById(req, res) {
             });
         }
 
-        const { error, data } = await magazineProjectController.getById(id_project);
+        const callerUser = await getRequestUser(req);
+        const { error, data } = await magazineProjectController.getById(id_project, roleSnapshot(callerUser));
 
         if (error) {
             return res.status(404).json({ error });
@@ -146,7 +149,8 @@ async function create(req, res) {
             featured_project: featured_project || false
         };
 
-        const { error, data, success } = await magazineProjectController.create(projectData);
+        const callerUser = await getRequestUser(req);
+        const { error, data, success } = await magazineProjectController.create(projectData, roleSnapshot(callerUser));
 
         if (error) {
             return res.status(400).json({ error, details: data });
@@ -203,7 +207,8 @@ async function update(req, res) {
         if (status_project !== undefined) projectData.status_project = status_project;
         if (featured_project !== undefined) projectData.featured_project = featured_project;
 
-        const { error, data, success } = await magazineProjectController.update(id_project, projectData);
+        const callerUser = await getRequestUser(req);
+        const { error, data, success } = await magazineProjectController.update(id_project, projectData, roleSnapshot(callerUser));
 
         if (error) {
             return res.status(400).json({ error });
@@ -331,6 +336,69 @@ async function deactivate(req, res) {
     }
 }
 
+// ============================================================
+// Editorial approval workflow
+// ============================================================
+
+async function submitForApproval(req, res) {
+    try {
+        const { id_project } = req.params;
+        if (!id_project) return res.status(400).json({ error: 'El ID del proyecto es obligatorio' });
+
+        const callerUser = await getRequestUser(req);
+        if (!callerUser) return res.status(401).json({ error: 'Autenticación requerida' });
+
+        const result = await magazineProjectController.submitForApproval(id_project, roleSnapshot(callerUser));
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error('-> submitForApproval API - Error =', err);
+        res.status(500).json({ error: 'Error al enviar el proyecto para aprobación', details: err.message });
+    }
+}
+
+async function approveProject(req, res) {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return; // requireSuperAdmin already wrote 403
+        const { id_project } = req.params;
+        if (!id_project) return res.status(400).json({ error: 'El ID del proyecto es obligatorio' });
+        const result = await magazineProjectController.approveProject(id_project);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error('-> approveProject API - Error =', err);
+        res.status(500).json({ error: 'Error al aprobar el proyecto', details: err.message });
+    }
+}
+
+async function rejectProject(req, res) {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return;
+        const { id_project } = req.params;
+        if (!id_project) return res.status(400).json({ error: 'El ID del proyecto es obligatorio' });
+        const result = await magazineProjectController.rejectProject(id_project, req.body?.reason);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error('-> rejectProject API - Error =', err);
+        res.status(500).json({ error: 'Error al rechazar el proyecto', details: err.message });
+    }
+}
+
+async function getPending(req, res) {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return;
+        const result = await magazineProjectController.getPending();
+        res.json({ error: null, ...result });
+    } catch (err) {
+        console.error('-> getPending API - Error =', err);
+        res.status(500).json({ error: 'Error al obtener proyectos pendientes', details: err.message });
+    }
+}
+
 export default {
     getAll,
     getById,
@@ -342,5 +410,9 @@ export default {
     remove,
     uploadCoverImage,
     removeCoverImage,
-    deactivate
+    deactivate,
+    submitForApproval,
+    approveProject,
+    rejectProject,
+    getPending
 };

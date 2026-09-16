@@ -38,7 +38,8 @@ export function roleSnapshot(user) {
             isPremiumReader: false,
             // Convenience: can create content (editor, admin, or super admin).
             canCreateContent: false,
-            // Convenience: can publish without approval. Super admin or admin.
+            // Convenience: can publish without approval. Super admin only —
+            // everyone below must submit for super-admin review.
             canPublishDirectly: false,
             userId: null
         };
@@ -53,7 +54,9 @@ export function roleSnapshot(user) {
         isSuperAdmin,
         isPremiumReader: truthy(user.is_premium_reader),
         canCreateContent: isEditor || isAdmin || isSuperAdmin,
-        canPublishDirectly: isAdmin || isSuperAdmin,
+        // Only super admins publish without review. Editors AND admins must
+        // submit content for super-admin validation before it goes public.
+        canPublishDirectly: isSuperAdmin,
         userId: user.id_user
     };
 }

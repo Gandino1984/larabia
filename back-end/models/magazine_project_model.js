@@ -78,9 +78,14 @@ const magazine_project_model = sequelize.define(
             comment: 'Publication date - null for drafts'
         },
         status_project: {
-            type: DataTypes.ENUM('draft', 'published'),
+            type: DataTypes.ENUM('draft', 'pending_approval', 'published'),
             allowNull: false,
             defaultValue: 'draft'
+        },
+        rejection_reason: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            comment: 'Super-admin feedback when a submission is rejected back to draft'
         },
         featured_project: {
             type: DataTypes.BOOLEAN,
