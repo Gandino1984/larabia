@@ -1322,3 +1322,56 @@
 .project-status-line .status-draft { background: #eee; color: #555; }
 .project-status-line .status-pending_approval { background: #fff3cd; color: #8a6d1b; }
 .project-status-line .status-published { background: #e6f4ea; color: #1e7e34; }
+
+/* ---- "In review" banner in the article editor ---- */
+.editor-review-banner {
+  margin: 10px 0 4px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #fff8e1;
+  border: 1px solid #f0d98a;
+  color: #7a5c00;
+}
+.editor-review-banner strong { display: block; margin-bottom: 4px; font-size: 0.9rem; }
+.editor-review-banner p { margin: 0; font-size: 0.9rem; }
+
+/* ---- Status filter chips in the editor article list ---- */
+.articles-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 18px;
+}
+.articles-filter__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  background: #fff;
+  color: #444;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.articles-filter__btn:hover { background: #f2f2f2; }
+.articles-filter__btn.is-active {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #fff;
+}
+.articles-filter__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: rgba(0,0,0,0.12);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.articles-filter__btn.is-active .articles-filter__count { background: rgba(255,255,255,0.25); }

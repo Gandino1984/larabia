@@ -8,8 +8,8 @@ import './AdminPendingTab.css';
 
 function AdminPendingTab() {
   const { currentUser } = useAuth();
-  const { showSuccess, showError } = useUI();
-  const { fetchArticleById, navigateToArticle } = useMagazine?.() || {};
+  const { showSuccess, showError, navigateToProjectDetail } = useUI();
+  const { fetchArticleById, navigateToArticle, setSelectedProject } = useMagazine?.() || {};
   const { pendingArticles, pendingProjects, loading, refresh } = usePendingReview();
   const [actingId, setActingId] = useState(null);
   // Reject-with-reason modal: { kind: 'article'|'project', id, title } | null
@@ -77,6 +77,12 @@ function AdminPendingTab() {
     if (!fetchArticleById || !navigateToArticle) return;
     const result = await fetchArticleById(article.id_article);
     if (result?.success) navigateToArticle();
+  };
+
+  const handlePreviewProject = (project) => {
+    if (!setSelectedProject || !navigateToProjectDetail) return;
+    setSelectedProject(project);
+    navigateToProjectDetail();
   };
 
   const authorLabelOf = (item) =>
@@ -172,6 +178,12 @@ function AdminPendingTab() {
                       </p>
                     </div>
                     <div className="admin-pending-card__actions">
+                      <button
+                        className="admin-pending-card__btn admin-pending-card__btn--preview"
+                        onClick={() => handlePreviewProject(project)}
+                      >
+                        Vista previa
+                      </button>
                       <button
                         className="admin-pending-card__btn admin-pending-card__btn--reject"
                         disabled={isActing}

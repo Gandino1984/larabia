@@ -62,6 +62,8 @@ function ArticleEditorBlocks() {
   const [showProjectModal, setShowProjectModal] = useState(false);
   // null = creating a new project; an id = editing/continuing an existing draft.
   const [editingProjectId, setEditingProjectId] = useState(null);
+  // Editor article-list filter: 'all' | 'draft' | 'pending_approval' | 'published'.
+  const [articleListFilter, setArticleListFilter] = useState('all');
   const [newProjectData, setNewProjectData] = useState({
     title_project: '',
     description_project: '',
@@ -908,6 +910,12 @@ function ArticleEditorBlocks() {
                 )}
               </select>
             </div>
+            {editingArticle?.status_article === 'pending_approval' && (
+              <div className="editor-review-banner" role="status">
+                <strong>{t('editor.review.pendingTitle')}</strong>
+                <p>{t('editor.review.pendingBody')}</p>
+              </div>
+            )}
             {editingArticle?.rejection_reason && editingArticle?.status_article === 'draft' && (
               <div className="editor-rejection-banner" role="alert">
                 <strong>{t('editor.rejection.title')}</strong>
@@ -1133,15 +1141,46 @@ function ArticleEditorBlocks() {
           <h2>{t('editor.articlesList.title')}</h2>
           <p className="list-subtitle">{t('editor.articlesList.subtitle')}</p>
 
-          {editorArticles.filter(a => isSuperAdmin || isArticleAuthor(a)).length === 0 ? (
-            <div className="empty-state">
-              <p>{t('editor.articlesList.empty')}</p>
-              <p>{t('editor.articlesList.emptyHint')}</p>
-            </div>
-          ) : (
-            <div className="articles-grid">
-              {editorArticles.filter(a => isSuperAdmin || isArticleAuthor(a)).map((article) => (
-                <div key={article.id_article} className="article-item">
+          {(() => {
+            const mine = editorArticles.filter(a => isSuperAdmin || isArticleAuthor(a));
+            const counts = {
+              all: mine.length,
+              draft: mine.filter(a => a.status_article === 'draft').length,
+              pending_approval: mine.filter(a => a.status_article === 'pending_approval').length,
+              published: mine.filter(a => a.status_article === 'published').length
+            };
+            const visible = articleListFilter === 'all'
+              ? mine
+              : mine.filter(a => a.status_article === articleListFilter);
+            const FILTERS = [
+              { key: 'all', label: t('editor.articlesList.filterAll') },
+              { key: 'draft', label: t('editor.status.draft') },
+              { key: 'pending_approval', label: t('editor.review.statusShort') },
+              { key: 'published', label: t('editor.status.published') }
+            ];
+            return (
+              <>
+                <div className="articles-filter">
+                  {FILTERS.map(f => (
+                    <button
+                      key={f.key}
+                      type="button"
+                      className={`articles-filter__btn ${articleListFilter === f.key ? 'is-active' : ''}`}
+                      onClick={() => setArticleListFilter(f.key)}
+                    >
+                      {f.label} <span className="articles-filter__count">{counts[f.key]}</span>
+                    </button>
+                  ))}
+                </div>
+                {visible.length === 0 ? (
+                  <div className="empty-state">
+                    <p>{t('editor.articlesList.empty')}</p>
+                    <p>{t('editor.articlesList.emptyHint')}</p>
+                  </div>
+                ) : (
+                  <div className="articles-grid">
+                    {visible.map((article) => (
+                      <div key={article.id_article} className="article-item">
                   <div className="article-item-info">
                     <h4>{article.title_article}</h4>
                     <p className="article-meta">
@@ -1177,9 +1216,12 @@ function ArticleEditorBlocks() {
                   </div>
                   )}
                 </div>
-              ))}
-            </div>
-          )}
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>}
       </div>
 
