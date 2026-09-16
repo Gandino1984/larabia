@@ -84,7 +84,13 @@ export const MagazineProvider = ({ children }) => {
   // Fetch all articles including drafts (for editor use)
   const fetchEditorArticles = useCallback(async () => {
     try {
-      const response = await axiosInstance.get('/magazine-article', { params: { status: 'all' } });
+      // Send identity so the back-end applies role visibility: authors get their
+      // OWN drafts/pending back (not just published). Without the header the
+      // caller is treated as an anonymous visitor and drafts are hidden.
+      const response = await axiosInstance.get('/magazine-article', {
+        params: { status: 'all' },
+        headers: { 'x-user-id': currentUser?.id_user }
+      });
 
       if (!response.data.error) {
         setEditorArticles(response.data.data || []);
@@ -95,7 +101,7 @@ export const MagazineProvider = ({ children }) => {
       console.error('Error fetching editor articles:', err);
       setEditorArticles([]);
     }
-  }, []);
+  }, [currentUser]);
 
   // Fetch all published projects
   const fetchProjects = useCallback(async () => {

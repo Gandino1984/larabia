@@ -73,14 +73,17 @@ function ArticleEditorBlocks() {
   const [selectedProjectAuthorToAdd, setSelectedProjectAuthorToAdd] = useState('');
 
   // Fetch available projects on mount
+  // Re-run once the logged-in user is known so the auth header is sent and the
+  // author's own drafts/pending come back (not just published content).
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    if (currentUser?.id_user) fetchProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.id_user]);
 
-  // Fetch all articles (including drafts) for editor list
+  // Fetch articles (including the author's own drafts) for the editor list
   useEffect(() => {
     fetchEditorArticles();
-  }, []);
+  }, [fetchEditorArticles]);
 
   // Load blocks when editing an article
   useEffect(() => {
@@ -192,32 +195,36 @@ function ArticleEditorBlocks() {
     setNewProjectAuthors(newProjectAuthors.filter(a => a.id_user !== userId));
   };
 
-  // Build the request payload from the current modal state.
-  const buildProjectPayload = (status) => {
+  // Build the content payload from the current modal state (no status — status
+  // is managed separately so editing an existing project never changes it by
+  // surprise).
+  const buildProjectPayload = () => {
     const primaryAuthor = newProjectAuthors[0] || { id_user: currentUser.id_user, name_user: currentUser.name_user };
     return {
       title_project: newProjectData.title_project,
       description_project: newProjectData.description_project,
       type_project: newProjectData.type_project,
       format_project: newProjectData.format_project,
-      status_project: status,
       author_id: primaryAuthor.id_user,
       author_name: primaryAuthor.name_user,
       authors: newProjectAuthors.map((a, index) => ({ user_id: a.id_user, author_order: index }))
     };
   };
 
-  // Create the project on first save, then update it on subsequent saves.
-  // Returns the persisted project id. (Back-end drops status on update for
-  // non-super callers, so a draft stays a draft until sent for review.)
-  const persistProject = async (status) => {
+  // Create the project on first save, then update it on subsequent saves —
+  // returns the persisted project id. `statusOverride` sets the status on a NEW
+  // project (defaults to draft) and only changes an EXISTING project's status
+  // when explicitly given (so editing a published project keeps it published).
+  const persistProject = async (statusOverride) => {
     const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
     const authHeader = { headers: { 'x-user-id': currentUser?.id_user } };
-    const payload = buildProjectPayload(status);
+    const payload = buildProjectPayload();
     if (editingProjectId) {
+      if (statusOverride) payload.status_project = statusOverride;
       await axios.patch(`${apiUrl}/magazine-project/update/${editingProjectId}`, payload, authHeader);
       return editingProjectId;
     }
+    payload.status_project = statusOverride || 'draft';
     const response = await axios.post(`${apiUrl}/magazine-project/create`, payload, authHeader);
     const id = response.data?.data?.id_project;
     if (id) setEditingProjectId(id);
@@ -269,7 +276,9 @@ function ArticleEditorBlocks() {
       return;
     }
     try {
-      const id = await persistProject('draft');
+      // No status override: a new project is created as a draft; an existing one
+      // keeps whatever status it already had (draft/pending/published).
+      const id = await persistProject();
       await fetchProjects();
       if (id) setFormData(prev => ({ ...prev, project_id: id }));
       showSuccess(t('editor.project.draftSaved'));
@@ -289,7 +298,8 @@ function ArticleEditorBlocks() {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
       const authHeader = { headers: { 'x-user-id': currentUser?.id_user } };
-      const id = await persistProject(canPublishDirectly ? 'published' : 'draft');
+      // Super admins publish now; everyone else persists (new = draft) then submits.
+      const id = await persistProject(canPublishDirectly ? 'published' : undefined);
       if (!id) throw new Error('No project id returned');
 
       if (!canPublishDirectly) {
@@ -1189,6 +1199,18 @@ function ArticleEditorBlocks() {
             </div>
 
             <div className="modal-body">
+              {editingProjectId && (
+                <div className="project-status-line">
+                  <span>{t('editor.status.label')}:</span>
+                  <span className={`status status-${newProjectData.status_project}`}>
+                    {newProjectData.status_project === 'published'
+                      ? t('editor.status.published')
+                      : newProjectData.status_project === 'pending_approval'
+                      ? 'En revisión'
+                      : t('editor.status.draft')}
+                  </span>
+                </div>
+              )}
               <div className="form-group">
                 <label htmlFor="project_title">{t('editor.project.titleLabel')}</label>
                 <input

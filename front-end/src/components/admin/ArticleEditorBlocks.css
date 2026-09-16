@@ -1302,3 +1302,23 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 .btn-edit-project:hover { background: rgba(0, 0, 0, 0.07); color: #1a1a1a; }
+
+/* ---- Current status indicator inside the project modal ---- */
+.project-status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+  color: #555;
+}
+.project-status-line .status {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+.project-status-line .status-draft { background: #eee; color: #555; }
+.project-status-line .status-pending_approval { background: #fff3cd; color: #8a6d1b; }
+.project-status-line .status-published { background: #e6f4ea; color: #1e7e34; }
