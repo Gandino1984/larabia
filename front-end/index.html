@@ -15,6 +15,34 @@
 
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- TEMP diagnostic: surface fatal JS errors on screen (esp. mobile where
+         the console isn't reachable). Remove once the blank-screen is fixed. -->
+    <script>
+      (function () {
+        function show(msg) {
+          try {
+            var el = document.getElementById('boot-error');
+            if (!el) {
+              el = document.createElement('pre');
+              el.id = 'boot-error';
+              el.style.cssText = 'position:fixed;inset:0;z-index:99999;margin:0;padding:16px;background:#111;color:#7CFC00;font:12px/1.5 monospace;white-space:pre-wrap;overflow:auto;';
+              (document.body || document.documentElement).appendChild(el);
+            }
+            el.textContent += msg + '\n\n';
+          } catch (_) {}
+        }
+        window.addEventListener('error', function (e) {
+          show('JS error: ' + (e.message || (e.error && e.error.message) || '?') +
+               '\n' + (e.filename || '') + ':' + (e.lineno || '') + ':' + (e.colno || '') +
+               '\n' + ((e.error && e.error.stack) || ''));
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+          var r = e.reason;
+          show('Promise rejection: ' + ((r && (r.stack || r.message)) || r || '?'));
+        });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
