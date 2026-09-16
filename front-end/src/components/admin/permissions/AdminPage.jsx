@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../../app_context/AuthContext';
 import { useUI } from '../../../app_context/UIContext';
+import { usePendingReview } from '../../../app_context/PendingReviewContext';
 import AdminUsersTab from './AdminUsersTab';
 import AdminPendingTab from './AdminPendingTab';
 import AdminMetadataTab from './AdminMetadataTab';
@@ -19,6 +20,7 @@ const TABS = [
 function AdminPage() {
   const { isSuperAdmin } = useAuth();
   const { navigateToHome } = useUI();
+  const { totalPending } = usePendingReview();
   const [activeTab, setActiveTab] = useState('users');
 
   if (!isSuperAdmin) {
@@ -50,6 +52,9 @@ function AdminPage() {
             onClick={() => setActiveTab(tab.key)}
           >
             {tab.label}
+            {tab.key === 'pending' && totalPending > 0 && (
+              <span className="admin-page__tab-badge">{totalPending}</span>
+            )}
           </button>
         ))}
       </nav>

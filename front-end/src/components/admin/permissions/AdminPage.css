@@ -76,3 +76,21 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ---- Pending-count badge on the "Pendientes" tab ---- */
+.admin-page__tab { position: relative; }
+.admin-page__tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 6px;
+  border-radius: 9px;
+  background: #e53935;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}

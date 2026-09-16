@@ -11,6 +11,7 @@ import { AuthorProvider } from './app_context/AuthorContext.jsx';
 import { MetadataProvider } from './app_context/MetadataContext.jsx';
 import { ThemeProvider } from './app_context/ThemeContext.jsx';
 import { NavProvider } from './app_context/NavContext.jsx';
+import { PendingReviewProvider } from './app_context/PendingReviewContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -21,7 +22,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <MetadataProvider>
               <MagazineProvider>
                 <AuthorProvider>
-                  <App />
+                  <PendingReviewProvider>
+                    <App />
+                  </PendingReviewProvider>
                 </AuthorProvider>
               </MagazineProvider>
             </MetadataProvider>

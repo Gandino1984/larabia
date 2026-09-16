@@ -145,8 +145,10 @@ function ArticleEditorBlocks() {
   const fetchProjects = async () => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+      // Send identity so the back-end applies role visibility: authors also get
+      // their own draft/pending projects (not just published ones) to attach to.
       const response = await axios.get(`${apiUrl}/magazine-project`, {
-        params: { status: 'published' }
+        headers: { 'x-user-id': currentUser?.id_user }
       });
 
       if (response.data && response.data.data) {
@@ -196,19 +198,35 @@ function ArticleEditorBlocks() {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+      const authHeader = { headers: { 'x-user-id': currentUser?.id_user } };
       const primaryAuthor = newProjectAuthors[0] || { id_user: currentUser.id_user, name_user: currentUser.name_user };
       const projectDataToSend = {
         ...newProjectData,
+        // Super admins publish directly; everyone else creates a draft that is
+        // immediately submitted for super-admin review below.
+        status_project: canPublishDirectly ? 'published' : 'draft',
         author_id: primaryAuthor.id_user,
         author_name: primaryAuthor.name_user,
         authors: newProjectAuthors.map((a, index) => ({ user_id: a.id_user, author_order: index }))
       };
 
-      const response = await axios.post(`${apiUrl}/magazine-project/create`, projectDataToSend);
+      const response = await axios.post(`${apiUrl}/magazine-project/create`, projectDataToSend, authHeader);
 
       if (response.data && response.data.data) {
         const newProject = response.data.data;
-        showSuccess(t('messages.success.projectCreated'));
+
+        // Non-super creators: send the fresh project into the approval queue.
+        if (!canPublishDirectly) {
+          try {
+            await axios.post(`${apiUrl}/magazine-project/submit-for-approval/${newProject.id_project}`, {}, authHeader);
+            showSuccess(t('editor.project.submittedForReview'));
+          } catch (submitErr) {
+            console.error('Error submitting project for approval:', submitErr);
+            showSuccess(t('messages.success.projectCreated'));
+          }
+        } else {
+          showSuccess(t('messages.success.projectCreated'));
+        }
 
         // Refresh projects list
         await fetchProjects();
@@ -811,6 +829,12 @@ function ArticleEditorBlocks() {
                 )}
               </select>
             </div>
+            {editingArticle?.rejection_reason && editingArticle?.status_article === 'draft' && (
+              <div className="editor-rejection-banner" role="alert">
+                <strong>{t('editor.rejection.title')}</strong>
+                <p>{editingArticle.rejection_reason}</p>
+              </div>
+            )}
           </div>
         </div>
 

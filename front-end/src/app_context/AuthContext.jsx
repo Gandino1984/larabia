@@ -107,8 +107,9 @@ export const AuthProvider = ({ children }) => {
     isSuperAdmin,
     isPremiumReader,
     // True if this user can publish without going through the approval flow.
-    // Admins and super admins publish directly; editors must submit for approval.
-    canPublishDirectly: isAdmin || isSuperAdmin,
+    // Only super admins publish directly; editors AND admins must submit for
+    // super-admin review before content goes public.
+    canPublishDirectly: isSuperAdmin,
     // True if this user can create articles at all (admin, editor, or super admin).
     canCreateContent: isEditor || isAdmin || isSuperAdmin,
     isArticleAuthor

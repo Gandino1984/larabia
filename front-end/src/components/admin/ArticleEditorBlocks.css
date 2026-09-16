@@ -1260,3 +1260,15 @@
   background: #e0e0e0;
 }
 
+
+/* ---- Rejection feedback shown to the author when content was returned ---- */
+.editor-rejection-banner {
+  margin: 10px 0 4px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #fdecea;
+  border: 1px solid #f5c6c2;
+  color: #8a1f16;
+}
+.editor-rejection-banner strong { display: block; margin-bottom: 4px; font-size: 0.9rem; }
+.editor-rejection-banner p { margin: 0; font-size: 0.9rem; white-space: pre-wrap; }

@@ -7,6 +7,7 @@ import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuthor } from '../../app_context/AuthorContext';
 import { useMetadata } from '../../app_context/MetadataContext';
 import { useNav } from '../../app_context/NavContext';
+import { usePendingReview } from '../../app_context/PendingReviewContext';
 import { useNavActions } from '../../app_context/navActions';
 import { navLabel, canSeeNavItem } from '../../app_context/navConfig';
 import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, Globe, Shield } from 'lucide-react';
@@ -47,6 +48,7 @@ function AuthorResultAvatar({ profile }) {
 function Header() {
   const { t } = useTranslation();
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
+  const { totalPending } = usePendingReview();
   const { showArticleDetail, showAuthors, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToHumor, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
@@ -509,9 +511,14 @@ function Header() {
           <LanguageSelector />
 
           {isSuperAdmin && (
-            <button className="nav-link" onClick={handleAdminClick} title="Administración">
+            <button className="nav-link nav-link--admin" onClick={handleAdminClick} title="Administración">
               <Shield size={16} />
               <span>Admin</span>
+              {totalPending > 0 && (
+                <span className="admin-pending-badge" title={`${totalPending} pendiente(s) de revisión`}>
+                  {totalPending}
+                </span>
+              )}
             </button>
           )}
 
@@ -703,6 +710,9 @@ function Header() {
                   <button className="mobile-nav-link" onClick={handleAdminClick}>
                     <Shield size={18} />
                     <span>Admin</span>
+                    {totalPending > 0 && (
+                      <span className="admin-pending-badge">{totalPending}</span>
+                    )}
                   </button>
                 )}
                 <button className="mobile-nav-link logout" onClick={handleLogout}>

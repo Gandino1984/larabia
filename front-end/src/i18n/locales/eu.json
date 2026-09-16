@@ -155,6 +155,8 @@
   "editor.project.noProject": "Proiekturik gabe",
   "editor.project.createNew": "Sortu proiektu berria",
   "editor.project.titleRequired": "Proiektuaren izenburua beharrezkoa da",
+  "editor.project.submittedForReview": "Proiektua berrikuspenera bidali da. Super-administratzaile batek onartu behar du argitaratu aurretik.",
+  "editor.rejection.title": "Eduki hau super-administratzaile batek itzuli du. Arrazoia:",
   "editor.project.titleLabel": "Proiektuaren Izenburua *",
   "editor.project.titlePlaceholder": "Proiektuaren izena...",
   "editor.project.descriptionLabel": "Deskribapena",

@@ -118,3 +118,64 @@
   background: #111;
   color: #fff;
 }
+
+/* ---- Section headers + counts (articles / projects) ---- */
+.admin-pending__section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 10px;
+  font-size: 1.05rem;
+}
+.admin-pending__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #e53935;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* ---- Reject-with-reason modal ---- */
+.admin-pending__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.admin-pending__modal {
+  background: #fff;
+  color: #1a1a1a;
+  border-radius: 12px;
+  padding: 20px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+.admin-pending__modal-title { margin: 0 0 4px; font-size: 1.1rem; }
+.admin-pending__modal-subtitle { margin: 0 0 14px; color: #666; font-style: italic; }
+.admin-pending__modal-label { display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: 600; }
+.admin-pending__modal-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+}
+.admin-pending__modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}

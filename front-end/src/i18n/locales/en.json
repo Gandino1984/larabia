@@ -155,6 +155,8 @@
   "editor.project.noProject": "No project",
   "editor.project.createNew": "Create new project",
   "editor.project.titleRequired": "Project title is required",
+  "editor.project.submittedForReview": "Project submitted for review. A super admin must approve it before it goes public.",
+  "editor.rejection.title": "This content was returned by a super admin. Reason:",
   "editor.project.titleLabel": "Project Title *",
   "editor.project.titlePlaceholder": "Project name...",
   "editor.project.descriptionLabel": "Description",

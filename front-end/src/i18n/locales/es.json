@@ -155,6 +155,8 @@
   "editor.project.noProject": "Sin proyecto",
   "editor.project.createNew": "Crear nuevo proyecto",
   "editor.project.titleRequired": "El título del proyecto es obligatorio",
+  "editor.project.submittedForReview": "Proyecto enviado a revisión. Un super-administrador debe aprobarlo antes de publicarse.",
+  "editor.rejection.title": "Este contenido fue devuelto por un super-administrador. Motivo:",
   "editor.project.titleLabel": "Título del Proyecto *",
   "editor.project.titlePlaceholder": "Nombre del proyecto...",
   "editor.project.descriptionLabel": "Descripción",
