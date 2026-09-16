@@ -188,7 +188,7 @@ function ArticlesList() {
                     }}
                   />
                   <div className="list-badges">
-                    {article.category_article && (
+                    {article.category_article && normalize(article.category_article) !== 'general' && (
                       <span className="list-type-badge">
                         {getCategoryDisplay(article.category_article)}
                       </span>

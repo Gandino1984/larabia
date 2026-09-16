@@ -141,7 +141,7 @@ function HomePage() {
                       }
                     </span>
                   )}
-                  {currentArticle.category_article && (
+                  {currentArticle.category_article && currentArticle.category_article.toLowerCase() !== 'general' && (
                     <span className="hero-category">{currentArticle.category_article}</span>
                   )}
                 </div>

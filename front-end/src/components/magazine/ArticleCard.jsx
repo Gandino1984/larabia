@@ -89,7 +89,7 @@ function ArticleCard({ article }) {
             e.target.src = '/logoFondoNegro.jpg';
           }}
         />
-        {article.category_article && (
+        {article.category_article && normalize(article.category_article) !== 'general' && (
           <span className="article-category">{getCategoryDisplay(article.category_article)}</span>
         )}
       </div>

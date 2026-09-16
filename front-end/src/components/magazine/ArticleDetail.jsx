@@ -273,7 +273,7 @@ function ArticleDetail() {
         )}
 
         <div className="article-detail-header">
-          {selectedArticle.category_article && (
+          {selectedArticle.category_article && normalize(selectedArticle.category_article) !== 'general' && (
             <span className="article-detail-category">
               {getCategoryDisplay(selectedArticle.category_article)}
             </span>
