@@ -558,6 +558,12 @@ function ArticleEditorBlocks() {
         content_article: 'Block-based content' // Placeholder for backward compatibility
       };
 
+      // If the author removed the cover (no new file and no preview left), clear
+      // it on save. Otherwise leave it untouched (a new file is uploaded below).
+      if (!coverImageFile && !coverImagePreview) {
+        articleData.cover_image_article = null;
+      }
+
       // Create or update article
       if (editingArticle) {
         articleResult = await updateArticle(editingArticle.id_article, articleData);
@@ -706,6 +712,16 @@ function ArticleEditorBlocks() {
       status_article: article.status_article,
       featured_article: article.featured_article
     });
+    // Load the existing cover into the preview so it shows AND isn't wiped on
+    // save (save clears the cover when there's no preview and no new file).
+    setCoverImageFile(null);
+    if (article.cover_image_article) {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+      const c = article.cover_image_article;
+      setCoverImagePreview(c.startsWith('http') ? c : c.startsWith('/') ? `${apiUrl}${c}` : `${apiUrl}/${c}`);
+    } else {
+      setCoverImagePreview(null);
+    }
     // Scroll to the form (it sits below the stories list) so the edit is visible.
     setTimeout(() => {
       editorFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1016,7 +1032,10 @@ function ArticleEditorBlocks() {
                     onClick={() => {
                       setCoverImageFile(null);
                       setCoverImagePreview(null);
-                      document.getElementById('cover').value = '';
+                      // The file <input> is only mounted when there's no preview,
+                      // so it may not exist here — guard against a null crash.
+                      const coverInput = document.getElementById('cover');
+                      if (coverInput) coverInput.value = '';
                     }}
                   >
                     <X size={16} />
