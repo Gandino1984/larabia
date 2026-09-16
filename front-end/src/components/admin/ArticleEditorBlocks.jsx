@@ -60,6 +60,8 @@ function ArticleEditorBlocks() {
   const [selectedProjectFormat, setSelectedProjectFormat] = useState(null);
   const [articleContentType, setArticleContentType] = useState('regular');
   const [showProjectModal, setShowProjectModal] = useState(false);
+  // null = creating a new project; an id = editing/continuing an existing draft.
+  const [editingProjectId, setEditingProjectId] = useState(null);
   const [newProjectData, setNewProjectData] = useState({
     title_project: '',
     description_project: '',
@@ -190,67 +192,118 @@ function ArticleEditorBlocks() {
     setNewProjectAuthors(newProjectAuthors.filter(a => a.id_user !== userId));
   };
 
-  const handleCreateProject = async () => {
+  // Build the request payload from the current modal state.
+  const buildProjectPayload = (status) => {
+    const primaryAuthor = newProjectAuthors[0] || { id_user: currentUser.id_user, name_user: currentUser.name_user };
+    return {
+      title_project: newProjectData.title_project,
+      description_project: newProjectData.description_project,
+      type_project: newProjectData.type_project,
+      format_project: newProjectData.format_project,
+      status_project: status,
+      author_id: primaryAuthor.id_user,
+      author_name: primaryAuthor.name_user,
+      authors: newProjectAuthors.map((a, index) => ({ user_id: a.id_user, author_order: index }))
+    };
+  };
+
+  // Create the project on first save, then update it on subsequent saves.
+  // Returns the persisted project id. (Back-end drops status on update for
+  // non-super callers, so a draft stays a draft until sent for review.)
+  const persistProject = async (status) => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+    const authHeader = { headers: { 'x-user-id': currentUser?.id_user } };
+    const payload = buildProjectPayload(status);
+    if (editingProjectId) {
+      await axios.patch(`${apiUrl}/magazine-project/update/${editingProjectId}`, payload, authHeader);
+      return editingProjectId;
+    }
+    const response = await axios.post(`${apiUrl}/magazine-project/create`, payload, authHeader);
+    const id = response.data?.data?.id_project;
+    if (id) setEditingProjectId(id);
+    return id;
+  };
+
+  const resetProjectModal = () => {
+    setShowProjectModal(false);
+    setEditingProjectId(null);
+    setNewProjectAuthors(currentUser ? [{ id_user: currentUser.id_user, name_user: currentUser.name_user, image_user: currentUser.image_user }] : []);
+    setSelectedProjectAuthorToAdd('');
+    setNewProjectData({
+      title_project: '',
+      description_project: '',
+      type_project: '',
+      format_project: '',
+      status_project: 'draft'
+    });
+  };
+
+  const openCreateProjectModal = () => {
+    resetProjectModal();
+    setShowProjectModal(true);
+  };
+
+  const openEditProjectModal = (project) => {
+    if (!project) return;
+    setEditingProjectId(project.id_project);
+    setNewProjectData({
+      title_project: project.title_project || '',
+      description_project: project.description_project || '',
+      type_project: project.type_project || '',
+      format_project: project.format_project || '',
+      status_project: project.status_project || 'draft'
+    });
+    const authors = (project.authors && project.authors.length > 0)
+      ? project.authors.map(a => ({ id_user: a.id_user, name_user: a.name_user, image_user: a.image_user }))
+      : (currentUser ? [{ id_user: currentUser.id_user, name_user: currentUser.name_user, image_user: currentUser.image_user }] : []);
+    setNewProjectAuthors(authors);
+    setSelectedProjectAuthorToAdd('');
+    setShowProjectModal(true);
+  };
+
+  // Save progress without submitting: persists (or updates) the project as a
+  // draft and keeps the modal open so the author can keep working.
+  const handleSaveProjectDraft = async () => {
     if (!newProjectData.title_project.trim()) {
       showError(t('editor.project.titleRequired'));
       return;
     }
+    try {
+      const id = await persistProject('draft');
+      await fetchProjects();
+      if (id) setFormData(prev => ({ ...prev, project_id: id }));
+      showSuccess(t('editor.project.draftSaved'));
+    } catch (error) {
+      console.error('Error saving project draft:', error);
+      showError(error.response?.data?.error || t('messages.error.createProject'));
+    }
+  };
 
+  // Final action: super admins publish directly; everyone else submits the
+  // saved draft for super-admin review.
+  const handleSubmitProject = async () => {
+    if (!newProjectData.title_project.trim()) {
+      showError(t('editor.project.titleRequired'));
+      return;
+    }
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
       const authHeader = { headers: { 'x-user-id': currentUser?.id_user } };
-      const primaryAuthor = newProjectAuthors[0] || { id_user: currentUser.id_user, name_user: currentUser.name_user };
-      const projectDataToSend = {
-        ...newProjectData,
-        // Super admins publish directly; everyone else creates a draft that is
-        // immediately submitted for super-admin review below.
-        status_project: canPublishDirectly ? 'published' : 'draft',
-        author_id: primaryAuthor.id_user,
-        author_name: primaryAuthor.name_user,
-        authors: newProjectAuthors.map((a, index) => ({ user_id: a.id_user, author_order: index }))
-      };
+      const id = await persistProject(canPublishDirectly ? 'published' : 'draft');
+      if (!id) throw new Error('No project id returned');
 
-      const response = await axios.post(`${apiUrl}/magazine-project/create`, projectDataToSend, authHeader);
-
-      if (response.data && response.data.data) {
-        const newProject = response.data.data;
-
-        // Non-super creators: send the fresh project into the approval queue.
-        if (!canPublishDirectly) {
-          try {
-            await axios.post(`${apiUrl}/magazine-project/submit-for-approval/${newProject.id_project}`, {}, authHeader);
-            showSuccess(t('editor.project.submittedForReview'));
-          } catch (submitErr) {
-            console.error('Error submitting project for approval:', submitErr);
-            showSuccess(t('messages.success.projectCreated'));
-          }
-        } else {
-          showSuccess(t('messages.success.projectCreated'));
-        }
-
-        // Refresh projects list
-        await fetchProjects();
-
-        // Auto-select the new project
-        setFormData({
-          ...formData,
-          project_id: newProject.id_project
-        });
-
-        // Close modal and reset form
-        setShowProjectModal(false);
-        setNewProjectAuthors(currentUser ? [{ id_user: currentUser.id_user, name_user: currentUser.name_user, image_user: currentUser.image_user }] : []);
-        setSelectedProjectAuthorToAdd('');
-        setNewProjectData({
-          title_project: '',
-          description_project: '',
-          type_project: '',
-          format_project: '',
-          status_project: 'published'
-        });
+      if (!canPublishDirectly) {
+        await axios.post(`${apiUrl}/magazine-project/submit-for-approval/${id}`, {}, authHeader);
+        showSuccess(t('editor.project.submittedForReview'));
+      } else {
+        showSuccess(t('messages.success.projectCreated'));
       }
+
+      await fetchProjects();
+      setFormData(prev => ({ ...prev, project_id: id }));
+      resetProjectModal();
     } catch (error) {
-      console.error('Error creating project:', error);
+      console.error('Error submitting project:', error);
       showError(error.response?.data?.error || t('messages.error.createProject'));
     }
   };
@@ -686,26 +739,42 @@ function ArticleEditorBlocks() {
                     </option>
                   ))}
                 </select>
-                {formData.project_id && (
-                  <button
-                    type="button"
-                    className="btn-delete-project"
-                    onClick={handleDeleteProject}
-                    title={t('editor.project.deleteTitle')}
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                )}
+                {formData.project_id && (() => {
+                  const selectedProject = projects.find(p => p.id_project === parseInt(formData.project_id));
+                  const canEditProject = selectedProject && (
+                    isSuperAdmin
+                    || selectedProject.author_id === currentUser?.id_user
+                    || selectedProject.authors?.some(a => a.id_user === currentUser?.id_user)
+                  );
+                  return (
+                    <>
+                      {canEditProject && (
+                        <button
+                          type="button"
+                          className="btn-edit-project"
+                          onClick={() => openEditProjectModal(selectedProject)}
+                          title={t('editor.project.editTitle')}
+                        >
+                          <Edit size={15} />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="btn-delete-project"
+                        onClick={handleDeleteProject}
+                        title={t('editor.project.deleteTitle')}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             </div>
             <button
               type="button"
               className="btn-create-project-header"
-              onClick={() => {
-                setNewProjectAuthors(currentUser ? [{ id_user: currentUser.id_user, name_user: currentUser.name_user, image_user: currentUser.image_user }] : []);
-                setSelectedProjectAuthorToAdd('');
-                setShowProjectModal(true);
-              }}
+              onClick={openCreateProjectModal}
               title={t('editor.project.createNew')}
             >
               <FolderPlus size={18} />
@@ -1106,13 +1175,13 @@ function ArticleEditorBlocks() {
 
       {/* Create Project Modal — rendered via portal to escape overflow/transform ancestors */}
       {showProjectModal && createPortal(
-        <div className="modal-overlay" onClick={() => setShowProjectModal(false)}>
+        <div className="modal-overlay" onClick={resetProjectModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{t('editor.project.createNew')}</h2>
+              <h2>{editingProjectId ? t('editor.project.editTitle') : t('editor.project.createNew')}</h2>
               <button
                 className="modal-close"
-                onClick={() => setShowProjectModal(false)}
+                onClick={resetProjectModal}
                 aria-label={t('common.buttons.close')}
               >
                 ×
@@ -1246,16 +1315,27 @@ function ArticleEditorBlocks() {
               <button
                 type="button"
                 className="btn-cancel"
-                onClick={() => setShowProjectModal(false)}
+                onClick={resetProjectModal}
               >
                 {t('common.buttons.cancel')}
               </button>
               <button
                 type="button"
-                className="btn-save"
-                onClick={handleCreateProject}
+                className="btn-save-draft"
+                onClick={handleSaveProjectDraft}
+                title={t('editor.project.saveDraftTitle')}
               >
-                {t('editor.project.createButton')}
+                <Save size={15} />
+                <span>{t('editor.project.saveDraftButton')}</span>
+              </button>
+              <button
+                type="button"
+                className="btn-save"
+                onClick={handleSubmitProject}
+              >
+                {canPublishDirectly
+                  ? t('editor.project.publishButton')
+                  : t('editor.project.submitReviewButton')}
               </button>
             </div>
           </div>
