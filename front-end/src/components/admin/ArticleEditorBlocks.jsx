@@ -1,5 +1,5 @@
 // magazine-front/src/components/admin/ArticleEditorBlocks.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../app_context/AuthContext';
@@ -64,6 +64,9 @@ function ArticleEditorBlocks() {
   const [editingProjectId, setEditingProjectId] = useState(null);
   // Editor article-list filter: 'all' | 'draft' | 'pending_approval' | 'published'.
   const [articleListFilter, setArticleListFilter] = useState('all');
+  // Ref to the create/edit form so "Edit" from the list scrolls straight to it
+  // (the list now sits above the form).
+  const editorFormRef = useRef(null);
   const [newProjectData, setNewProjectData] = useState({
     title_project: '',
     description_project: '',
@@ -330,7 +333,9 @@ function ArticleEditorBlocks() {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
-      await axios.delete(`${apiUrl}/magazine-project/remove-by-id/${project.id_project}`);
+      await axios.delete(`${apiUrl}/magazine-project/remove-by-id/${project.id_project}`, {
+        headers: { 'x-user-id': currentUser?.id_user }
+      });
       showSuccess(t('editor.project.deleteSuccess'));
 
       // Deselect the project and refresh the list
@@ -663,7 +668,10 @@ function ArticleEditorBlocks() {
       status_article: article.status_article,
       featured_article: article.featured_article
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll to the form (it sits below the stories list) so the edit is visible.
+    setTimeout(() => {
+      editorFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const resetForm = () => {
@@ -753,14 +761,16 @@ function ArticleEditorBlocks() {
                 </select>
                 {formData.project_id && (() => {
                   const selectedProject = projects.find(p => p.id_project === parseInt(formData.project_id));
-                  const canEditProject = selectedProject && (
+                  // A project can be managed (edited/deleted) by a super admin or
+                  // by one of its authors. Super admins can manage every project.
+                  const canManageProject = selectedProject && (
                     isSuperAdmin
                     || selectedProject.author_id === currentUser?.id_user
                     || selectedProject.authors?.some(a => a.id_user === currentUser?.id_user)
                   );
                   return (
                     <>
-                      {canEditProject && (
+                      {canManageProject && (
                         <button
                           type="button"
                           className="btn-edit-project"
@@ -770,14 +780,16 @@ function ArticleEditorBlocks() {
                           <Edit size={15} />
                         </button>
                       )}
-                      <button
-                        type="button"
-                        className="btn-delete-project"
-                        onClick={handleDeleteProject}
-                        title={t('editor.project.deleteTitle')}
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                      {canManageProject && (
+                        <button
+                          type="button"
+                          className="btn-delete-project"
+                          onClick={handleDeleteProject}
+                          title={t('editor.project.deleteTitle')}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
                     </>
                   );
                 })()}
@@ -946,7 +958,7 @@ function ArticleEditorBlocks() {
 
         {activeTab === 'newsletter' && <NewsletterTab />}
 
-        {activeTab === 'articles' && <form className="editor-form" onSubmit={handleSubmit}>
+        {activeTab === 'articles' && <form className="editor-form" ref={editorFormRef} onSubmit={handleSubmit}>
           {/* Cover Image */}
           <div className="form-group full-width cover-image-group">
             <div className="cover-image-upload">

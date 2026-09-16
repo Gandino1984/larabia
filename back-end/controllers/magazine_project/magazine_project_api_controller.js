@@ -241,6 +241,16 @@ async function remove(req, res) {
             });
         }
 
+        // Only a super admin or one of the project's authors may delete it.
+        const callerUser = await getRequestUser(req);
+        const ctx = roleSnapshot(callerUser);
+        if (!ctx.isAuthenticated) {
+            return res.status(401).json({ error: 'Autenticación requerida' });
+        }
+        if (!ctx.isSuperAdmin && !(await magazineProjectController.isProjectAuthor(id_project, ctx.userId))) {
+            return res.status(403).json({ error: 'No tienes permiso para eliminar este proyecto' });
+        }
+
         const { error, data, message } = await magazineProjectController.removeById(id_project);
 
         if (error) {

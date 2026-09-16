@@ -1375,3 +1375,16 @@
   font-weight: 700;
 }
 .articles-filter__btn.is-active .articles-filter__count { background: rgba(255,255,255,0.25); }
+
+/* ---- Put the author's existing stories/drafts above the long create form ---- */
+.article-editor-blocks .editor-container {
+  display: flex;
+  flex-direction: column;
+}
+.article-editor-blocks .editor-form { order: 2; }
+.article-editor-blocks .articles-list {
+  order: 1;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+}

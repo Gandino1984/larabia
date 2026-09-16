@@ -131,6 +131,16 @@ async function buildProjectVisibilityWhere(roleCtx, requestedStatus) {
     return where;
 }
 
+// Whether the given user authors this project (junction table or legacy author_id).
+async function isProjectAuthor(id_project, userId) {
+    if (!userId) return false;
+    const project = await magazine_project_model.findByPk(id_project, { attributes: ['id_project', 'author_id'] });
+    if (!project) return false;
+    if (project.author_id && project.author_id === userId) return true;
+    const row = await project_author_model.findOne({ where: { project_id: id_project, user_id: userId } });
+    return !!row;
+}
+
 // Whether the caller may see a single project (used by getById).
 async function canReadProject(project, roleCtx) {
     const ctx = roleCtx || EMPTY_ROLE_CTX;
@@ -1005,5 +1015,6 @@ export default {
     submitForApproval,
     approveProject,
     rejectProject,
-    getPending
+    getPending,
+    isProjectAuthor
 };
