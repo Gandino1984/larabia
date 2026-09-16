@@ -118,7 +118,8 @@ async function create(req, res) {
             format_project,
             date_published,
             status_project,
-            featured_project
+            featured_project,
+            authors
         } = req.body;
 
         if (!title_project) {
@@ -146,7 +147,10 @@ async function create(req, res) {
             format_project: normalizeString(format_project),
             date_published: date_published || null,
             status_project: status_project || 'draft',
-            featured_project: featured_project || false
+            featured_project: featured_project || false,
+            // Multi-author support: forward the collaborators array so co-authors
+            // are persisted in project_authors (not just the primary author_id).
+            authors: Array.isArray(authors) ? authors : undefined
         };
 
         const callerUser = await getRequestUser(req);
@@ -186,7 +190,8 @@ async function update(req, res) {
             format_project,
             date_published,
             status_project,
-            featured_project
+            featured_project,
+            authors
         } = req.body;
 
         // Convert empty strings to null for ENUM fields
@@ -206,6 +211,8 @@ async function update(req, res) {
         if (date_published !== undefined) projectData.date_published = date_published;
         if (status_project !== undefined) projectData.status_project = status_project;
         if (featured_project !== undefined) projectData.featured_project = featured_project;
+        // Sync collaborators when provided (controller replaces project_authors).
+        if (authors !== undefined) projectData.authors = authors;
 
         const callerUser = await getRequestUser(req);
         const { error, data, success } = await magazineProjectController.update(id_project, projectData, roleSnapshot(callerUser));
