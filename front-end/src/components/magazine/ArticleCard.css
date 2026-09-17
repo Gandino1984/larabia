@@ -291,3 +291,33 @@
     padding-top: 0.6rem;
   }
 }
+
+/* ---- All authors (with avatars) on the card ---- */
+.article-card-meta .meta-item--authors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.card-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.card-author-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.card-author-avatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ccc;
+  color: #333;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+.card-author-name { white-space: nowrap; }

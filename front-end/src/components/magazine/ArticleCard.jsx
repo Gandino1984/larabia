@@ -1,10 +1,28 @@
 // magazine-front/src/components/magazine/ArticleCard.jsx
+import { useState } from 'react';
 import { Calendar, User, Eye, Trash2, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import './ArticleCard.css';
+
+// Resolve a user's avatar: Google users store a full URL, local uploads a filename.
+const resolveAuthorImage = (img) => {
+  if (!img) return null;
+  if (img.startsWith('http://') || img.startsWith('https://')) return img;
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+  return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
+};
+
+function CardAuthorAvatar({ author }) {
+  const [err, setErr] = useState(false);
+  const url = resolveAuthorImage(author?.image_user);
+  if (!url || err) {
+    return <span className="card-author-avatar card-author-avatar--fallback">{author?.name_user?.charAt(0)?.toUpperCase() || '?'}</span>;
+  }
+  return <img src={url} alt={author.name_user} className="card-author-avatar" onError={() => setErr(true)} />;
+}
 
 const CATEGORY_DISPLAY = {
   'terrenito en pluton': 'Terrenito en Plut\u00F3n',
@@ -112,10 +130,21 @@ function ArticleCard({ article }) {
             </span>
           )}
 
-          {article.author_name && (
-            <span className="meta-item">
-              <User size={16} />
-              {article.author_name}
+          {(article.authors?.length > 0 || article.author_name) && (
+            <span className="meta-item meta-item--authors">
+              {article.authors?.length > 0 ? (
+                article.authors.map(author => (
+                  <span key={author.id_user || author.name_user} className="card-author">
+                    <CardAuthorAvatar author={author} />
+                    <span className="card-author-name">{author.name_user}</span>
+                  </span>
+                ))
+              ) : (
+                <span className="card-author">
+                  <User size={16} />
+                  <span className="card-author-name">{article.author_name}</span>
+                </span>
+              )}
             </span>
           )}
 
