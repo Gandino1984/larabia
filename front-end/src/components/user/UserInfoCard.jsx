@@ -1,11 +1,13 @@
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useSpring, animated } from '@react-spring/web';
-import { X, User, Camera, Eye, Upload, Loader } from 'lucide-react';
+import { X, User, Camera, Eye, Upload, Loader, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { UserInfoCardUtils } from './UserInfoCardUtils.jsx';
 import './UserInfoCard.css';
 
-const UserInfoCard = ({ user, onClose, isOwner }) => {
+const UserInfoCard = ({ user, onClose, isOwner, onLogout }) => {
+  const { t } = useTranslation();
   const [showActionsPopup, setShowActionsPopup] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const fileInputRef = useRef(null);
@@ -162,6 +164,17 @@ const UserInfoCard = ({ user, onClose, isOwner }) => {
               </p>
             )}
           </div>
+
+          {isOwner && onLogout && (
+            <button
+              className="user-card-logout"
+              type="button"
+              onClick={() => { onClose?.(); onLogout(); }}
+            >
+              <LogOut size={18} />
+              <span>{t('common.buttons.logout')}</span>
+            </button>
+          )}
         </div>
 
         {/* Image Modal */}

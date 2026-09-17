@@ -544,3 +544,23 @@
     max-width: 460px;
   }
 }
+
+/* Logout button inside the profile card */
+.user-card-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid #d9534f;
+  border-radius: 8px;
+  background: #fff;
+  color: #c62828;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.user-card-logout:hover { background: #c62828; color: #fff; }

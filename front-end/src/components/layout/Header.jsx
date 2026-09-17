@@ -567,14 +567,6 @@ function Header() {
             </button>
           )}
 
-          <div className="header-user">
-            {currentUser && (
-              <button className="logout-btn" onClick={handleLogout}>
-                <LogOut size={18} />
-                <span>{t('common.buttons.logout')}</span>
-              </button>
-            )}
-          </div>
         </nav>
 
         {/* Mobile Navigation */}
@@ -785,6 +777,7 @@ function Header() {
           user={currentUser}
           onClose={() => setShowUserCard(false)}
           isOwner={true}
+          onLogout={handleLogout}
         />
       )}
 
