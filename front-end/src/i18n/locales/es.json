@@ -314,7 +314,7 @@
   "hscroll.restoringToPanel": "Regresando al panel {{panel}}",
   "hscroll.panelNotFound": "No se pudo encontrar el panel guardado",
   "hscroll.noProgressSaved": "No hay progreso guardado para este cómic",
-  "hscroll.audio.errorPlaying": "Error al reproducir el audio",
+  "hscroll.audio.errorPlaying": "No se pudo reproducir el audio. Es posible que tu navegador no admita este formato (p. ej. OGG en iPhone/Safari).",
   "hscroll.audio.pause": "Pausar",
   "hscroll.audio.play": "Reproducir",
   "hscroll.audio.closePlayer": "Cerrar reproductor",

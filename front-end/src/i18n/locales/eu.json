@@ -314,7 +314,7 @@
   "hscroll.restoringToPanel": "{{panel}} panelera itzultzen",
   "hscroll.panelNotFound": "Ezin izan da gordetako panela aurkitu",
   "hscroll.noProgressSaved": "Ez dago gordetako aurrerapenik komiki honentzat",
-  "hscroll.audio.errorPlaying": "Errorea audioa erreproduzitzean",
+  "hscroll.audio.errorPlaying": "Ezin izan da audioa erreproduzitu. Baliteke zure nabigatzaileak formatu hau ez onartzea (adib. OGG iPhone/Safarin).",
   "hscroll.audio.pause": "Pausatu",
   "hscroll.audio.play": "Erreproduzitu",
   "hscroll.audio.closePlayer": "Itxi erreproduzigailua",

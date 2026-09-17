@@ -788,6 +788,16 @@ function HScrollViewer({ panels, articleId }) {
             }
           });
 
+          // Fires when the file can't be decoded/loaded (e.g. an unsupported
+          // codec like OGG on iOS Safari) — play() itself may not reject there.
+          audio.addEventListener('error', () => {
+            console.error('Audio error (unsupported format or load failure):', audioUrl);
+            alert(t('hscroll.audio.errorPlaying'));
+            setIsPlaying(false);
+            setCurrentAudio(null);
+            if (audioRef.current === audio) audioRef.current = null;
+          });
+
           audio.play().catch(err => {
             console.error('Error playing audio:', err);
             alert(t('hscroll.audio.errorPlaying'));
