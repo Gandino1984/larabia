@@ -958,8 +958,12 @@ function ArticleEditorBlocks() {
                 <option value="crítica">{t('editor.category.critica')}</option>
                 <option value="ensayo">{t('editor.category.ensayo')}</option>
                 <option value="terrenito en pluton">{t('editor.category.microAbierto')}</option>
-                <option value="humor">{t('editor.category.humor')}</option>
                 <option value="internacional">{t('editor.category.internacional')}</option>
+                <option value="no-ficcion">{t('editor.category.noficcion')}</option>
+                <option value="ficcion">{t('editor.category.ficcion')}</option>
+                <option value="micro-perfiles">{t('editor.category.microperfiles')}</option>
+                <option value="talleres">{t('editor.category.talleres')}</option>
+                <option value="infantil">{t('editor.category.infantil')}</option>
               </select>
             </div>
 

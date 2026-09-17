@@ -16,7 +16,6 @@ import AuthorProfileReader from './components/authors/AuthorProfileReader';
 import AuthorPublications from './components/authors/AuthorPublications';
 import ProjectDetail from './components/magazine/ProjectDetail';
 import OpenMicPublications from './components/openmic/OpenMicPublications';
-import HumorPublications from './components/humor/HumorPublications';
 import AdminPage from './components/admin/permissions/AdminPage';
 import LoginPage from './components/layout/LoginPage';
 import ForgotPasswordPage from './components/layout/ForgotPasswordPage';
@@ -25,7 +24,7 @@ import LoadingScreen from './components/layout/LoadingScreen';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showHumor, showAdmin, isFullscreen, navigateToArticle } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showAdmin, isFullscreen, navigateToArticle } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { isLoading, progress } = usePreloader();
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
@@ -73,7 +72,6 @@ function App() {
     if (showAdmin) return <AdminPage />;
     if (showProjectDetail) return <ProjectDetail />;
     if (showOpenMic) return <OpenMicPublications />;
-    if (showHumor) return <HumorPublications />;
     if (showArticleDetail) return <ArticleDetail />;
     if (showArticlesList) return <ArticlesList />;
     if (showHome) return <HomePage />;

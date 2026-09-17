@@ -21,20 +21,26 @@ export const DEFAULT_NAV = [
   { id: 'more', kind: 'group', visible: true, min_role: 'all',
     label: { es: 'Más', en: 'More' },
     children: [
+      { id: 'no-ficcion', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'No-ficción', en: 'Non-fiction' }, action: { type: 'category', value: 'no-ficcion' } },
+      { id: 'ficcion', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Ficción', en: 'Fiction' }, action: { type: 'category', value: 'ficcion' } },
+      { id: 'internacional', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Internacional', en: 'International' }, action: { type: 'category', value: 'internacional' } },
+      { id: 'microabierto', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Micro abierto', en: 'Open mic' }, action: { type: 'section', value: 'openmic' } },
+      { id: 'microperfiles', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Micro-perfiles', en: 'Micro-profiles' }, action: { type: 'category', value: 'micro-perfiles' } },
+      { id: 'talleres', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Talleres', en: 'Workshops' }, action: { type: 'category', value: 'talleres' } },
+      { id: 'infantil', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Infantil', en: 'Kids' }, action: { type: 'category', value: 'infantil' } },
+      { id: 'galeria', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Galería', en: 'Gallery' }, action: { type: 'category', value: 'galeria' } },
       { id: 'contact', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Contacto', en: 'Contact' }, action: { type: 'modal', value: 'contact' } },
       { id: 'newsletter', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Newsletter', en: 'Newsletter' }, action: { type: 'modal', value: 'newsletter' } },
-      { id: 'editorial', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Editorial', en: 'Editorial' }, action: { type: 'category', value: 'editorial' } },
-      { id: 'internacional', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Internacional', en: 'International' }, action: { type: 'category', value: 'internacional' } },
-      { id: 'humor', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Humor', en: 'Humor' }, action: { type: 'section', value: 'humor' } },
-      { id: 'microabierto', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Micro abierto', en: 'Open mic' }, action: { type: 'section', value: 'openmic' } },
-      { id: 'galeria', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Galería', en: 'Gallery' }, action: { type: 'category', value: 'galeria' } }
+        label: { es: 'Newsletter', en: 'Newsletter' }, action: { type: 'modal', value: 'newsletter' } }
     ] }
 ];
 
@@ -53,7 +59,6 @@ export const SECTION_OPTIONS = [
   { value: 'home', label: 'Inicio' },
   { value: 'articles', label: 'Artículos' },
   { value: 'authors', label: 'Autoras' },
-  { value: 'humor', label: 'Humor' },
   { value: 'openmic', label: 'Micro abierto' }
 ];
 

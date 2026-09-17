@@ -124,6 +124,11 @@
   "editor.category.microAbierto": "Terrenito en Plut\u00F3n",
   "editor.category.humor": "Umorea",
   "editor.category.internacional": "Nazioartekoa",
+  "editor.category.noficcion": "No-fikzioa",
+  "editor.category.ficcion": "Fikzioa",
+  "editor.category.microperfiles": "Mikro-profilak",
+  "editor.category.talleres": "Tailerrak",
+  "editor.category.infantil": "Haurrentzako",
   "editor.category.label": "Kategoria",
 
   "editor.status.label": "Egoera",

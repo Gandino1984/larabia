@@ -124,6 +124,11 @@
   "editor.category.microAbierto": "Terrenito en Plut\u00F3n",
   "editor.category.humor": "Humor",
   "editor.category.internacional": "Internacional",
+  "editor.category.noficcion": "No-ficción",
+  "editor.category.ficcion": "Ficción",
+  "editor.category.microperfiles": "Micro-perfiles",
+  "editor.category.talleres": "Talleres",
+  "editor.category.infantil": "Infantil",
   "editor.category.label": "Categoría",
 
   "editor.status.label": "Estado",

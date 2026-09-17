@@ -18,7 +18,6 @@ export const UIProvider = ({ children }) => {
   const [showAuthorPublications, setShowAuthorPublications] = useState(false);
   const [showProjectDetail, setShowProjectDetail] = useState(false);
   const [showOpenMic, setShowOpenMic] = useState(false);
-  const [showHumor, setShowHumor] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [openEditorToEdit, setOpenEditorToEdit] = useState(false);
 
@@ -96,7 +95,6 @@ export const UIProvider = ({ children }) => {
     setShowAuthorPublications(false);
     setShowProjectDetail(false);
     setShowOpenMic(false);
-    setShowHumor(false);
     setShowAdmin(false);
   };
 
@@ -238,12 +236,6 @@ export const UIProvider = ({ children }) => {
     setShowOpenMic(true);
   };
 
-  const navigateToHumor = () => {
-    setPreviousView('home');
-    resetAllViews();
-    setShowHumor(true);
-  };
-
   const navigateToAdmin = () => {
     setPreviousView('home');
     resetAllViews();
@@ -333,8 +325,6 @@ export const UIProvider = ({ children }) => {
     navigateToProjectDetail,
     showOpenMic,
     navigateToOpenMic,
-    showHumor,
-    navigateToHumor,
     showAdmin,
     navigateToAdmin,
     navigateBack,

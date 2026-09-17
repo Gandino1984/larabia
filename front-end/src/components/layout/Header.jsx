@@ -49,7 +49,7 @@ function Header() {
   const { t } = useTranslation();
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { totalPending } = usePendingReview();
-  const { showArticleDetail, showAuthors, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToHumor, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
+  const { showArticleDetail, showAuthors, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
   const { metadata, resolveLogoUrl } = useMetadata();
@@ -172,11 +172,6 @@ function Header() {
 
   const handleMicroAbiertoClick = () => {
     navigateToOpenMic();
-    setIsMobileMenuOpen(false);
-  };
-
-  const handleHumorClick = () => {
-    navigateToHumor();
     setIsMobileMenuOpen(false);
   };
 
