@@ -71,7 +71,7 @@
   "editor.contentType.regular": "Artículo regular",
   "editor.contentType.comic": "Cómic",
   "editor.category": "Categoría *",
-  "editor.author": "Autores *",
+  "editor.author": "Autoras/es *",
   "editor.project": "Proyecto",
   "editor.featured": "Destacar artículo",
   "editor.coverImage": "Imagen de portada",
@@ -135,7 +135,7 @@
   "editor.coverImage.preview": "Vista previa de portada",
   "editor.coverImage.select": "Selecciona una imagen de portada para el artículo",
   "editor.coverImage.mustBeImage": "La portada debe ser una imagen (JPG, PNG, WebP o AVIF), no un vídeo u otro tipo de archivo.",
-  "editor.authors.label": "Autores",
+  "editor.authors.label": "Autoras/es",
   "editor.author.add": "+ Añadir autor/a",
   "editor.author.remove": "Eliminar autor",
   "editor.author.unknown": "Usuario #{{id}}",
@@ -282,7 +282,7 @@
   "authors.createProfile": "Crear mi perfil de autor/a",
   "authors.editProfile": "Editar mi perfil",
   "authors.loadingProfiles": "Cargando perfiles...",
-  "authors.emptyState": "No hay perfiles de autores publicados todavía.",
+  "authors.emptyState": "No hay perfiles de autoras/es publicados todavía.",
   "authors.emptyHint": "¡Sé el primero en crear tu perfil!",
   "authors.searchNoResults": "No se encontraron autoras/es para \"{{query}}\"",
   "authors.empty": "No hay autoras/es registrados",
@@ -353,5 +353,5 @@
   "notifications.title": "Notificaciones",
   "notifications.empty": "No tienes notificaciones.",
   "notifications.completeProfile.title": "Completa tu perfil de autora",
-  "notifications.completeProfile.message": "Aún no has creado tu perfil. Pulsa para crearlo y aparecer en la sección de Autoras."
+  "notifications.completeProfile.message": "Aún no has creado tu perfil. Pulsa para crearlo y aparecer en la sección de Autoras/es."
 }

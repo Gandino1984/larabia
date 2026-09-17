@@ -16,7 +16,7 @@ export const DEFAULT_NAV = [
   { id: 'projects', kind: 'projects', visible: true, min_role: 'all',
     label: { es: 'Proyectos', en: 'Projects' } },
   { id: 'authors', kind: 'link', visible: true, min_role: 'all',
-    label: { es: 'Autoras', en: 'Authors' },
+    label: { es: 'Autoras/es', en: 'Authors' },
     action: { type: 'section', value: 'authors' } },
   { id: 'more', kind: 'group', visible: true, min_role: 'all',
     label: { es: 'Más', en: 'More' },
@@ -58,7 +58,7 @@ export const ACTION_TYPE_OPTIONS = [
 export const SECTION_OPTIONS = [
   { value: 'home', label: 'Inicio' },
   { value: 'articles', label: 'Artículos' },
-  { value: 'authors', label: 'Autoras' },
+  { value: 'authors', label: 'Autoras/es' },
   { value: 'openmic', label: 'Micro abierto' },
   { value: 'microperfiles', label: 'Micro-perfiles' },
   { value: 'talleres', label: 'Talleres' }

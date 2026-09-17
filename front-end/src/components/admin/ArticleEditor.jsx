@@ -558,7 +558,7 @@ function ArticleEditor() {
             </div>
 
             <div className="form-group">
-              <label>Autores *</label>
+              <label>Autoras/es *</label>
 
               {/* Current authors list */}
               <div className="authors-list">
