@@ -28,7 +28,7 @@ function AuthorAvatar({ author, getUrl }) {
 }
 
 function HomePage() {
-  const { featuredArticles, setSelectedArticle } = useMagazine();
+  const { featuredArticles, setSelectedArticle, fetchArticleById } = useMagazine();
   const { navigateToArticle } = useUI();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [brokenImages, setBrokenImages] = useState({});
@@ -60,8 +60,14 @@ function HomePage() {
     setCurrentSlide(index);
   };
 
-  const handleArticleClick = (article) => {
-    setSelectedArticle(article);
+  const handleArticleClick = async (article) => {
+    // Load the full, canonical article by id (same path as an article card /
+    // deep link) so the detail always has the complete data — the featured
+    // object alone was leaving the description empty in the detail view.
+    setSelectedArticle(article); // instant paint with what we have
+    if (article?.id_article && fetchArticleById) {
+      await fetchArticleById(article.id_article);
+    }
     navigateToArticle();
   };
 
