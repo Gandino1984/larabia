@@ -111,7 +111,8 @@
   opacity: 0.95;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -499,6 +500,8 @@
   .hero-excerpt {
     font-size: 0.85rem;
     margin-bottom: 0.75rem;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 
   .hero-meta {
