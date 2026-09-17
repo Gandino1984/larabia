@@ -1407,3 +1407,19 @@
 }
 .btn-edit-project-article:hover { background: #f0f0f0; }
 .project-articles-hint { margin: 8px 0 0; font-size: 0.8rem; color: #777; font-style: italic; }
+
+/* ---- Preview draft button ---- */
+.btn-preview-draft {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+  background: #fff;
+  color: #1a1a1a;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.btn-preview-draft:hover { background: #1a1a1a; color: #fff; }

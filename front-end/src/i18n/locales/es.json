@@ -369,5 +369,7 @@
   "workshops.reservedNote": "Ya tienes una plaza reservada en este taller.",
   "workshops.fullNote": "El taller está completo.",
   "workshops.participantsTitle": "Inscritas/os",
-  "workshops.notFound": "Taller no encontrado."
+  "workshops.notFound": "Taller no encontrado.",
+  "editor.previewDraft": "Vista previa",
+  "editor.previewDraftHint": "Abre el borrador en una pestaña nueva (guarda primero para ver los últimos cambios)"
 }

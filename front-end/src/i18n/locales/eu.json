@@ -369,5 +369,7 @@
   "workshops.reservedNote": "Dagoeneko leku bat erreserbatuta duzu tailer honetan.",
   "workshops.fullNote": "Tailerra beteta dago.",
   "workshops.participantsTitle": "Izena emanda",
-  "workshops.notFound": "Tailerra ez da aurkitu."
+  "workshops.notFound": "Tailerra ez da aurkitu.",
+  "editor.previewDraft": "Aurrebista",
+  "editor.previewDraftHint": "Ireki zirriborroa fitxa berrian (gorde lehenik azken aldaketak ikusteko)"
 }

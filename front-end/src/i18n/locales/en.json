@@ -369,5 +369,7 @@
   "workshops.reservedNote": "You already have a spot reserved in this workshop.",
   "workshops.fullNote": "This workshop is full.",
   "workshops.participantsTitle": "Registered",
-  "workshops.notFound": "Workshop not found."
+  "workshops.notFound": "Workshop not found.",
+  "editor.previewDraft": "Preview",
+  "editor.previewDraftHint": "Open the draft in a new tab (save first to see the latest changes)"
 }

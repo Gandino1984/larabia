@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../app_context/AuthContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
-import { Plus, Save, ArrowLeft, Edit, Trash2, FileText, Image as ImageIcon, Video, FolderPlus, X, User } from 'lucide-react';
+import { Plus, Save, ArrowLeft, Edit, Trash2, FileText, Image as ImageIcon, Video, FolderPlus, X, User, Eye } from 'lucide-react';
 import TextBlock from './blocks/TextBlock';
 import ImageBlock from './blocks/ImageBlock';
 import IframeBlock from './blocks/IframeBlock';
@@ -734,6 +734,13 @@ function ArticleEditorBlocks() {
     }, 100);
   };
 
+  // Open the saved draft in a new tab (renders images + comic panels/audio like
+  // the public view). Save first to see the latest changes.
+  const handlePreviewDraft = () => {
+    if (!editingArticle?.id_article) return;
+    window.open(`${window.location.origin}/?article=${editingArticle.id_article}`, '_blank', 'noopener,noreferrer');
+  };
+
   const resetForm = () => {
     setEditingArticle(null);
     setFormData({
@@ -1221,6 +1228,17 @@ function ArticleEditorBlocks() {
                 ? (editingArticle ? t('editor.updateArticle') : t('editor.publishArticle'))
                 : t('editor.project.saveDraftButton') /* status = draft */}
             </button>
+            {editingArticle?.id_article && (
+              <button
+                type="button"
+                className="btn-preview-draft"
+                onClick={handlePreviewDraft}
+                title={t('editor.previewDraftHint')}
+              >
+                <Eye size={20} />
+                {t('editor.previewDraft')}
+              </button>
+            )}
             {editingArticle && (
               <button type="button" className="btn-cancel" onClick={resetForm}>
                 {t('editor.cancelEdit')}
