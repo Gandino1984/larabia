@@ -174,7 +174,11 @@ export const MagazineProvider = ({ children }) => {
   const fetchArticleById = useCallback(async (id_article) => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(`/magazine-article/by-id/${id_article}`);
+      // Send identity so authors/super admins can open their own drafts and
+      // pending articles (e.g. preview from the approval panel).
+      const response = await axiosInstance.get(`/magazine-article/by-id/${id_article}`, {
+        headers: { 'x-user-id': currentUser?.id_user }
+      });
 
       if (!response.data.error) {
         setSelectedArticle(response.data.data);
@@ -190,7 +194,7 @@ export const MagazineProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [showError]);
+  }, [currentUser, showError]);
 
   // Track article view (called once per navigation to the article)
   const trackArticleView = useCallback(async (id_article) => {

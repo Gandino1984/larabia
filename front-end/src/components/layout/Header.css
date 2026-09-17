@@ -28,6 +28,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
   pointer-events: auto;
@@ -1008,6 +1010,10 @@
   .desktop-nav {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    min-width: 0;
   }
 
   /* Show Search Bar on Desktop */

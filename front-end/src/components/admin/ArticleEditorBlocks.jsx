@@ -1008,16 +1008,18 @@ function ArticleEditorBlocks() {
           </div>
         </div>
 
-        <div className="editor-tabs-switch">
-          <div className="content-type-switch">
-            <button
-              type="button"
-              className={`switch-option ${activeTab === 'articles' ? 'switch-active' : ''}`}
-              onClick={() => setActiveTab('articles')}
-            >
-              {t('editor.title.create').split(' ')[0]}
-            </button>
-            {isSuperAdmin && (
+        {/* The tab switcher only makes sense for super admins, who have the
+            extra "Recomendaciones" tab. Everyone else just edits articles. */}
+        {isSuperAdmin && (
+          <div className="editor-tabs-switch">
+            <div className="content-type-switch">
+              <button
+                type="button"
+                className={`switch-option ${activeTab === 'articles' ? 'switch-active' : ''}`}
+                onClick={() => setActiveTab('articles')}
+              >
+                {t('editor.title.create').split(' ')[0]}
+              </button>
               <button
                 type="button"
                 className={`switch-option ${activeTab === 'newsletter' ? 'switch-active' : ''}`}
@@ -1025,9 +1027,9 @@ function ArticleEditorBlocks() {
               >
                 Recomendaciones
               </button>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
         {isSuperAdmin && activeTab === 'newsletter' && <NewsletterTab />}
 

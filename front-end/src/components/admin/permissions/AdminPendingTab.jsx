@@ -8,8 +8,8 @@ import './AdminPendingTab.css';
 
 function AdminPendingTab() {
   const { currentUser } = useAuth();
-  const { showSuccess, showError, navigateToProjectDetail } = useUI();
-  const { fetchArticleById, navigateToArticle, setSelectedProject } = useMagazine?.() || {};
+  const { showSuccess, showError, navigateToProjectDetail, navigateToArticle } = useUI();
+  const { fetchArticleById, setSelectedProject } = useMagazine?.() || {};
   const { pendingArticles, pendingProjects, loading, refresh } = usePendingReview();
   const [actingId, setActingId] = useState(null);
   // Reject-with-reason modal: { kind: 'article'|'project', id, title } | null
