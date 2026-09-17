@@ -738,7 +738,7 @@ function ArticleEditorBlocks() {
   // the public view). Save first to see the latest changes.
   const handlePreviewDraft = () => {
     if (!editingArticle?.id_article) return;
-    window.open(`${window.location.origin}/?article=${editingArticle.id_article}`, '_blank', 'noopener,noreferrer');
+    window.open(`${window.location.origin}/?article=${editingArticle.id_article}&preview=1`, '_blank', 'noopener,noreferrer');
   };
 
   const resetForm = () => {

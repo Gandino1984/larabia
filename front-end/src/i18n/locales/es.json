@@ -371,5 +371,7 @@
   "workshops.participantsTitle": "Inscritas/os",
   "workshops.notFound": "Taller no encontrado.",
   "editor.previewDraft": "Vista previa",
-  "editor.previewDraftHint": "Abre el borrador en una pestaña nueva (guarda primero para ver los últimos cambios)"
+  "editor.previewDraftHint": "Abre el borrador en una pestaña nueva (guarda primero para ver los últimos cambios)",
+  "preview.banner.label": "Vista previa del borrador — no publicado",
+  "preview.banner.back": "Volver al editor"
 }

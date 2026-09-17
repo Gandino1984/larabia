@@ -22,7 +22,7 @@ const getCategoryDisplay = (cat) => {
   return cat;
 };
 
-function ArticleDetail() {
+function ArticleDetail({ previewMode = false }) {
   const { t } = useTranslation();
   const { selectedArticle, setSelectedArticle, deleteArticle, fetchBlocksByArticleId, trackArticleView } = useMagazine();
   const { navigateBack, showSuccess, showError, navigateToHome, navigateToEditorForEdit, isFullscreen, setIsFullscreen, getCurrentLocale, navigateToAuthorProfile } = useUI();
@@ -175,14 +175,16 @@ function ArticleDetail() {
           >
             <Minimize size={24} />
           </button>
-          <button
-            className="fullscreen-close-btn"
-            onClick={navigateBack}
-            title={t('article.detail.closeArticle')}
-            aria-label={t('article.detail.closeArticle')}
-          >
-            <X size={24} />
-          </button>
+          {!previewMode && (
+            <button
+              className="fullscreen-close-btn"
+              onClick={navigateBack}
+              title={t('article.detail.closeArticle')}
+              aria-label={t('article.detail.closeArticle')}
+            >
+              <X size={24} />
+            </button>
+          )}
         </div>
         <div className="fullscreen-viewer">
           <HScrollViewer panels={comicPanels} articleId={selectedArticle.id_article} />
@@ -217,8 +219,8 @@ function ArticleDetail() {
             </button>
           )}
 
-          {/* Editor buttons (Edit and Delete) */}
-          {canCreateContent && (isSuperAdmin || isArticleAuthor(selectedArticle)) && (
+          {/* Editor buttons (Edit and Delete) — hidden in preview */}
+          {!previewMode && canCreateContent && (isSuperAdmin || isArticleAuthor(selectedArticle)) && (
             <>
               <button
                 className="article-detail-edit-btn"
@@ -239,25 +241,29 @@ function ArticleDetail() {
             </>
           )}
 
-          {/* Share button */}
-          <button
-            className="article-detail-share-btn"
-            onClick={handleShareClick}
-            title="Compartir artículo"
-            aria-label="Compartir artículo"
-          >
-            <Share2 size={24} />
-          </button>
+          {/* Share button — hidden in preview (draft isn't public) */}
+          {!previewMode && (
+            <button
+              className="article-detail-share-btn"
+              onClick={handleShareClick}
+              title="Compartir artículo"
+              aria-label="Compartir artículo"
+            >
+              <Share2 size={24} />
+            </button>
+          )}
 
-          {/* Close button */}
-          <button
-            className="article-detail-close-btn"
-            onClick={navigateBack}
-            title={t('article.detail.closeArticle')}
-            aria-label={t('article.detail.closeArticle')}
-          >
-            <X size={24} />
-          </button>
+          {/* Close button — hidden in preview (use the preview banner instead) */}
+          {!previewMode && (
+            <button
+              className="article-detail-close-btn"
+              onClick={navigateBack}
+              title={t('article.detail.closeArticle')}
+              aria-label={t('article.detail.closeArticle')}
+            >
+              <X size={24} />
+            </button>
+          )}
         </div>
 
         {getCoverImageUrl() && (
@@ -301,7 +307,7 @@ function ArticleDetail() {
                 {selectedArticle.authors && selectedArticle.authors.length > 0 ? (
                   <>
                     {selectedArticle.authors.map((author, index) => {
-                      const hasProfile = authorHasProfile(author);
+                      const hasProfile = !previewMode && authorHasProfile(author);
                       return (
                         <span
                           key={author.id_user}

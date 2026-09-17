@@ -1,5 +1,7 @@
 // magazine-front/src/App.jsx
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Eye, X } from 'lucide-react';
 import { useUI } from './app_context/UIContext';
 import { useMagazine } from './app_context/MagazineContext';
 import { useAuth } from './app_context/AuthContext';
@@ -32,6 +34,7 @@ function App() {
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { loading: authLoading } = useAuth();
   const { isLoading, progress } = usePreloader();
+  const { t } = useTranslation();
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [showContent, setShowContent] = useState(false);
   // Capture the deep-linked article id once, before we clean up the URL.
@@ -39,6 +42,10 @@ function App() {
     const id = new URLSearchParams(window.location.search).get('article');
     return id ? parseInt(id) : null;
   });
+  // Whether this tab was opened as a draft preview from the editor.
+  const [isPreview] = useState(
+    () => new URLSearchParams(window.location.search).get('preview') === '1'
+  );
 
   // Open a deep-linked article only after auth has finished restoring the
   // session from localStorage. Otherwise fetchArticleById fires with no
@@ -87,7 +94,7 @@ function App() {
     if (showMicroPerfiles) return <CategorySectionPage category="micro-perfiles" titleKey="microperfiles.title" subtitleKey="microperfiles.subtitle" />;
     if (showWorkshopDetail) return <WorkshopDetail />;
     if (showTalleres) return <WorkshopsList />;
-    if (showArticleDetail) return <ArticleDetail />;
+    if (showArticleDetail) return <ArticleDetail previewMode={isPreview} />;
     if (showArticlesList) return <ArticlesList />;
     if (showHome) return <HomePage />;
 
@@ -95,11 +102,32 @@ function App() {
     return <HomePage />;
   };
 
-  const appClassName = `app ${showContent ? 'content-visible' : ''} ${showEditor || showAuthorEditor ? 'editor-active' : ''}`;
+  const appClassName = `app ${showContent ? 'content-visible' : ''} ${showEditor || showAuthorEditor ? 'editor-active' : ''} ${isPreview && showArticleDetail ? 'preview-active' : ''}`;
   console.log('App render - showContent:', showContent, 'className:', appClassName);
+
+  const handleClosePreview = useCallback(() => {
+    // The editor is still open in the tab that spawned this preview, so the
+    // cleanest "back to editor" is to close this preview tab. If the browser
+    // refuses (e.g. tab wasn't script-opened), fall back to going home.
+    window.close();
+    window.location.href = '/';
+  }, []);
 
   return (
     <>
+      {isPreview && showArticleDetail && (
+        <div className="preview-banner" role="status">
+          <span className="preview-banner__label">
+            <Eye size={18} />
+            {t('preview.banner.label')}
+          </span>
+          <button type="button" className="preview-banner__back" onClick={handleClosePreview}>
+            <X size={16} />
+            {t('preview.banner.back')}
+          </button>
+        </div>
+      )}
+
       {showLoadingScreen && (
         <LoadingScreen
           isLoading={isLoading}
@@ -109,13 +137,13 @@ function App() {
       )}
 
       <div className={appClassName}>
-        {!showEditor && !showAuthorEditor && !isFullscreen && <Header />}
-        <FloatingEditorButton />
-        <CardDisplay />
+        {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Header />}
+        {!isPreview && <FloatingEditorButton />}
+        {!isPreview && <CardDisplay />}
         <main className="main-content">
           {renderMainContent()}
         </main>
-        {!showEditor && !showAuthorEditor && !isFullscreen && <Footer />}
+        {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Footer />}
       </div>
     </>
   );
