@@ -56,6 +56,7 @@
 .header-user-section {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .header-logo-user-container {
@@ -1295,20 +1296,26 @@
 }
 
 /* ---- Notification bell + dropdown ---- */
-.notif-wrapper { position: relative; display: inline-flex; }
+.notif-wrapper { position: relative; display: inline-flex; align-items: center; }
+/* Mirror .user-info-btn so the bell adapts to the header's active (white) state. */
 .notif-bell-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: none;
   border: none;
-  color: inherit;
+  color: var(--color-header-text, #ffffff);
   cursor: pointer;
-  padding: 6px;
-  border-radius: 8px;
+  padding: 0.4rem;
+  border-radius: 50%;
+  min-height: 44px;
+  min-width: 44px;
+  transition: all 0.3s ease;
 }
-.notif-bell-btn:hover { background: rgba(127,127,127,0.15); }
+.notif-bell-btn:hover { background: rgba(255, 255, 255, 0.1); }
+.header-bar.active .notif-bell-btn { color: var(--color-header-text-active, #000000); }
+.header-bar.active .notif-bell-btn:hover { background: rgba(0, 0, 0, 0.05); }
 .notif-badge {
   position: absolute;
   top: -2px;
