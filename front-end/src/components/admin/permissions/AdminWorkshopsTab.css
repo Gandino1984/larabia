@@ -5,7 +5,17 @@
 .admin-workshops-form input,
 .admin-workshops-form textarea,
 .admin-workshops-form select {
-  font: inherit; padding: 0.55rem 0.7rem; border: 1px solid #ccc; border-radius: 8px; font-weight: 400;
+  font: inherit; padding: 0.55rem 0.7rem; border: 1px solid #bbb; border-radius: 8px; font-weight: 400;
+  background: #ffffff; color: #1a1a1a;
+}
+.admin-workshops-form input::placeholder,
+.admin-workshops-form textarea::placeholder {
+  color: #6b6b6b; opacity: 1; /* readable on the white field */
+}
+.admin-workshops-form input:focus,
+.admin-workshops-form textarea:focus,
+.admin-workshops-form select:focus {
+  outline: none; border-color: #1a1a1a;
 }
 .admin-workshops-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
 .admin-workshops-authors { display: flex; flex-direction: column; gap: 0.5rem; }
