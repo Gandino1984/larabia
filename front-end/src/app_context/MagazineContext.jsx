@@ -442,8 +442,8 @@ export const MagazineProvider = ({ children }) => {
     }
   }, [showError, showSuccess]);
 
-  // Upload panel audio
-  const uploadPanelAudio = useCallback(async (audioFile) => {
+  // Upload panel audio. `onProgress` (optional) receives 0-100 upload percent.
+  const uploadPanelAudio = useCallback(async (audioFile, onProgress) => {
     try {
       const formData = new FormData();
       formData.append('audio', audioFile);
@@ -451,6 +451,9 @@ export const MagazineProvider = ({ children }) => {
       const response = await axiosInstance.post('/article-blocks/upload-audio', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (e) => {
+          if (onProgress && e.total) onProgress(Math.round((e.loaded / e.total) * 100));
         }
       });
 

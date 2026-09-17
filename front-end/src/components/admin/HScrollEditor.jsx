@@ -10,6 +10,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
   const [showInteractiveModal, setShowInteractiveModal] = useState(false);
   const [pendingPanelIndex, setPendingPanelIndex] = useState(null);
   const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
   const [audioStopPanel, setAudioStopPanel] = useState(null);
   const [audioMode, setAudioMode] = useState('once');
   const [showIframeModal, setShowIframeModal] = useState(false);
@@ -244,8 +245,9 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
 
     try {
       setUploadingAudio(true);
+      setAudioProgress(0);
       console.log('📤 Uploading audio file:', file.name);
-      const audioUrl = await onUploadAudio(file);
+      const audioUrl = await onUploadAudio(file, (pct) => setAudioProgress(pct));
       console.log('✅ Audio uploaded successfully:', audioUrl);
       configureInteraction('audio', audioUrl, {
         stopPanel: audioStopPanel,
@@ -256,6 +258,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
       alert('Error al subir el audio');
     } finally {
       setUploadingAudio(false);
+      setAudioProgress(0);
     }
   };
 
@@ -553,8 +556,16 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                       disabled={uploadingAudio}
                     />
                     <Upload size={20} />
-                    {uploadingAudio ? 'Subiendo...' : 'Subir archivo de audio'}
+                    {uploadingAudio ? `Subiendo… ${audioProgress}%` : 'Subir archivo de audio'}
                   </label>
+                  {uploadingAudio && (
+                    <div className="audio-upload-progress" role="progressbar" aria-valuenow={audioProgress} aria-valuemin={0} aria-valuemax={100}>
+                      <div className="audio-upload-progress__bar" style={{ width: `${audioProgress}%` }} />
+                      <span className="audio-upload-progress__pct">
+                        {audioProgress < 100 ? `${audioProgress}%` : 'Procesando…'}
+                      </span>
+                    </div>
+                  )}
                   <p className="audio-hint">MP3, AAC, OGG (máx. 20MB)</p>
 
                   {/* Audio Configuration Options */}
