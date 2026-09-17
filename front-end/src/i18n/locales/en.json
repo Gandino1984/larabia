@@ -349,5 +349,9 @@
   "microperfiles.subtitle": "Short portraits of people from the neighbourhood.",
   "talleres.title": "Workshops",
   "talleres.subtitle": "Workshops and activities from La Rabia.",
-  "categorySection.empty": "There are no publications in this section yet."
+  "categorySection.empty": "There are no publications in this section yet.",
+  "notifications.title": "Notifications",
+  "notifications.empty": "You have no notifications.",
+  "notifications.completeProfile.title": "Complete your author profile",
+  "notifications.completeProfile.message": "You haven't created your profile yet. Tap to create it and appear in the Authors section."
 }

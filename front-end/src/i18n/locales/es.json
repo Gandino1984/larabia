@@ -349,5 +349,9 @@
   "microperfiles.subtitle": "Retratos breves de personas del barrio.",
   "talleres.title": "Talleres",
   "talleres.subtitle": "Talleres y actividades de La Rabia.",
-  "categorySection.empty": "Todavía no hay publicaciones en esta sección."
+  "categorySection.empty": "Todavía no hay publicaciones en esta sección.",
+  "notifications.title": "Notificaciones",
+  "notifications.empty": "No tienes notificaciones.",
+  "notifications.completeProfile.title": "Completa tu perfil de autora",
+  "notifications.completeProfile.message": "Aún no has creado tu perfil. Pulsa para crearlo y aparecer en la sección de Autoras."
 }
