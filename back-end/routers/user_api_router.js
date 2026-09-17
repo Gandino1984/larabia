@@ -237,6 +237,8 @@ router.post('/toggle-newsletter', async (req, res) => {
 
 // Subscriber count (editor-only — no PII returned)
 router.get('/newsletter-subscribers', async (req, res) => {
+    const admin = await requireSuperAdmin(req, res);
+    if (!admin) return; // 403 already sent
     try {
         const count = await user_model.count({ where: { receives_newsletter: true } });
         res.json({ error: null, data: { count } });
@@ -248,6 +250,8 @@ router.get('/newsletter-subscribers', async (req, res) => {
 
 // Send newsletter to all subscribers
 router.post('/send-newsletter', async (req, res) => {
+    const admin = await requireSuperAdmin(req, res);
+    if (!admin) return; // 403 already sent
     try {
         const { articleIds, introText } = req.body;
         if (!articleIds || !Array.isArray(articleIds) || articleIds.length === 0) {

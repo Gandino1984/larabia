@@ -1017,17 +1017,19 @@ function ArticleEditorBlocks() {
             >
               {t('editor.title.create').split(' ')[0]}
             </button>
-            <button
-              type="button"
-              className={`switch-option ${activeTab === 'newsletter' ? 'switch-active' : ''}`}
-              onClick={() => setActiveTab('newsletter')}
-            >
-              Recomendaciones
-            </button>
+            {isSuperAdmin && (
+              <button
+                type="button"
+                className={`switch-option ${activeTab === 'newsletter' ? 'switch-active' : ''}`}
+                onClick={() => setActiveTab('newsletter')}
+              >
+                Recomendaciones
+              </button>
+            )}
           </div>
         </div>
 
-        {activeTab === 'newsletter' && <NewsletterTab />}
+        {isSuperAdmin && activeTab === 'newsletter' && <NewsletterTab />}
 
         {activeTab === 'articles' && <form className="editor-form" ref={editorFormRef} onSubmit={handleSubmit}>
           {/* Cover Image */}

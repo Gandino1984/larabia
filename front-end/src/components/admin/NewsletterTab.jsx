@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
+import { useAuth } from '../../app_context/AuthContext';
 import axiosInstance from '../../utils/axiosConfig';
 import { Users, Send, CheckSquare, Square, Search } from 'lucide-react';
 import './NewsletterTab.css';
@@ -9,6 +10,8 @@ import './NewsletterTab.css';
 function NewsletterTab() {
   const { articles } = useMagazine();
   const { showSuccess, showError } = useUI();
+  const { currentUser } = useAuth();
+  const authHeader = { headers: { 'x-user-id': currentUser?.id_user } };
 
   const [subscriberCount, setSubscriberCount] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -23,10 +26,11 @@ function NewsletterTab() {
   );
 
   useEffect(() => {
-    axiosInstance.get('/user/newsletter-subscribers')
+    axiosInstance.get('/user/newsletter-subscribers', authHeader)
       .then(res => setSubscriberCount(res.data.data.count))
       .catch(() => setSubscriberCount('?'));
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.id_user]);
 
   const toggleArticle = (id) => {
     setSelectedIds(prev =>
@@ -51,7 +55,7 @@ function NewsletterTab() {
       const res = await axiosInstance.post('/user/send-newsletter', {
         articleIds: selectedIds,
         introText: introText.trim()
-      });
+      }, authHeader);
       const { sent, failed } = res.data.data;
       setSendResult({ sent, failed });
       showSuccess(`Enviado a ${sent} suscriptor${sent !== 1 ? 'es' : ''}`);
