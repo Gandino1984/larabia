@@ -353,5 +353,7 @@
   "notifications.title": "Jakinarazpenak",
   "notifications.empty": "Ez duzu jakinarazpenik.",
   "notifications.completeProfile.title": "Osatu zure egile-profila",
-  "notifications.completeProfile.message": "Oraindik ez duzu profila sortu. Sakatu sortzeko eta Egileak atalean agertzeko."
+  "notifications.completeProfile.message": "Oraindik ez duzu profila sortu. Sakatu sortzeko eta Egileak atalean agertzeko.",
+  "notifications.newArticle.title": "Artikulu berria argitaratu da",
+  "notifications.newProject.title": "Proiektu berria argitaratu da"
 }

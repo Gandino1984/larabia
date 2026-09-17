@@ -50,7 +50,7 @@ function Header() {
   const { t } = useTranslation();
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { totalPending } = usePendingReview();
-  const { notifications, count: notifCount } = useNotifications();
+  const { notifications, count: notifCount, markAllSeen } = useNotifications();
   const { showArticleDetail, showAuthors, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
@@ -349,15 +349,18 @@ function Header() {
               <div className="notif-wrapper">
                 <button
                   className="notif-bell-btn"
-                  onClick={() => setShowNotifications(v => !v)}
+                  onClick={() => { if (showNotifications) markAllSeen(); setShowNotifications(v => !v); }}
                   title={t('notifications.title')}
                   aria-label={t('notifications.title')}
                 >
                   <Bell size={20} />
-                  {notifCount > 0 && <span className="notif-badge">{notifCount}</span>}
+                  {notifCount > 0 && <span className="notif-badge">{notifCount > 9 ? '9+' : notifCount}</span>}
                 </button>
                 {showNotifications && (
-                  <div className="notif-dropdown" onMouseLeave={() => setShowNotifications(false)}>
+                  <div
+                    className="notif-dropdown"
+                    onMouseLeave={() => { markAllSeen(); setShowNotifications(false); }}
+                  >
                     <div className="notif-dropdown-header">{t('notifications.title')}</div>
                     {notifications.length === 0 ? (
                       <div className="notif-empty">{t('notifications.empty')}</div>
@@ -367,7 +370,7 @@ function Header() {
                           <li key={n.id}>
                             <button
                               className="notif-item"
-                              onClick={() => { setShowNotifications(false); n.onClick?.(); }}
+                              onClick={() => { markAllSeen(); setShowNotifications(false); n.onClick?.(); }}
                             >
                               <span className="notif-item-title">{n.title}</span>
                               <span className="notif-item-message">{n.message}</span>

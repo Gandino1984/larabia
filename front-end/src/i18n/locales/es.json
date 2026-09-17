@@ -353,5 +353,7 @@
   "notifications.title": "Notificaciones",
   "notifications.empty": "No tienes notificaciones.",
   "notifications.completeProfile.title": "Completa tu perfil de autora",
-  "notifications.completeProfile.message": "Aún no has creado tu perfil. Pulsa para crearlo y aparecer en la sección de Autoras/es."
+  "notifications.completeProfile.message": "Aún no has creado tu perfil. Pulsa para crearlo y aparecer en la sección de Autoras/es.",
+  "notifications.newArticle.title": "Nuevo artículo publicado",
+  "notifications.newProject.title": "Nuevo proyecto publicado"
 }

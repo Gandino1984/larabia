@@ -353,5 +353,7 @@
   "notifications.title": "Notifications",
   "notifications.empty": "You have no notifications.",
   "notifications.completeProfile.title": "Complete your author profile",
-  "notifications.completeProfile.message": "You haven't created your profile yet. Tap to create it and appear in the Authors section."
+  "notifications.completeProfile.message": "You haven't created your profile yet. Tap to create it and appear in the Authors section.",
+  "notifications.newArticle.title": "New article published",
+  "notifications.newProject.title": "New project published"
 }
