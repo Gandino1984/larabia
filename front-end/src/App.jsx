@@ -2,6 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useUI } from './app_context/UIContext';
 import { useMagazine } from './app_context/MagazineContext';
+import { useAuth } from './app_context/AuthContext';
 import { usePreloader } from './hooks/usePreloader';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -29,20 +30,28 @@ import './App.css';
 function App() {
   const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showAdmin, isFullscreen, navigateToArticle } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
+  const { loading: authLoading } = useAuth();
   const { isLoading, progress } = usePreloader();
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [showContent, setShowContent] = useState(false);
+  // Capture the deep-linked article id once, before we clean up the URL.
+  const [pendingArticleId, setPendingArticleId] = useState(() => {
+    const id = new URLSearchParams(window.location.search).get('article');
+    return id ? parseInt(id) : null;
+  });
 
+  // Open a deep-linked article only after auth has finished restoring the
+  // session from localStorage. Otherwise fetchArticleById fires with no
+  // x-user-id and the backend hides drafts/pending content (only published
+  // articles would load). Waiting lets authors/super admins preview drafts.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const articleId = params.get('article');
-    if (articleId) {
-      window.history.replaceState({}, '', '/');
-      fetchArticleById(parseInt(articleId)).then(result => {
-        if (result?.success) navigateToArticle();
-      });
-    }
-  }, []);
+    if (pendingArticleId == null || authLoading) return;
+    window.history.replaceState({}, '', '/');
+    fetchArticleById(pendingArticleId).then(result => {
+      if (result?.success) navigateToArticle();
+    });
+    setPendingArticleId(null);
+  }, [pendingArticleId, authLoading, fetchArticleById, navigateToArticle]);
 
   // Start showing content as soon as preloader finishes (while LoadingScreen is still fading out)
   useEffect(() => {
