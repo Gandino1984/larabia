@@ -319,10 +319,11 @@ async function uploadPanelAudio(file) {
             return { error: "No se proporcionó ningún archivo de audio" };
         }
 
-        const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 'audio/wave', 'audio/vnd.wave', 'audio/ogg', 'audio/webm', 'audio/aac'];
+        // Accepted: MP3, AAC (incl. .m4a container), OGG, WEBM. WAV removed.
+        const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/webm', 'audio/aac', 'audio/x-aac', 'audio/mp4', 'audio/x-m4a'];
         if (!allowedTypes.includes(file.mimetype)) {
             console.log('Rejected file mimetype:', file.mimetype);
-            return { error: "Tipo de archivo no permitido. Solo se aceptan archivos de audio (MP3, WAV, OGG, WEBM, AAC)" };
+            return { error: "Tipo de archivo no permitido. Solo se aceptan archivos de audio (MP3, AAC, OGG)" };
         }
 
         const uploadDir = path.join(__dirname, '../../uploads/article_blocks/audio');
