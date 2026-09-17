@@ -227,8 +227,8 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
       fileSize: file.size
     });
 
-    // Accepted: MP3, AAC (incl. .m4a container), OGG, WEBM. WAV removed.
-    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/webm', 'audio/aac', 'audio/x-aac', 'audio/mp4', 'audio/x-m4a'];
+    // Accepted: MP3, AAC (incl. .aac ADTS and .m4a container), OGG, WEBM. WAV removed.
+    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/webm', 'audio/aac', 'audio/x-aac', 'audio/aacp', 'audio/vnd.dlna.adts', 'audio/mp4', 'audio/x-m4a'];
     if (!validTypes.includes(file.type)) {
       console.error('❌ Invalid audio file type:', file.type);
       alert(`Por favor selecciona un archivo de audio válido (MP3, AAC, OGG). Tipo detectado: ${file.type}`);
@@ -547,7 +547,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                   <label className="audio-upload-btn">
                     <input
                       type="file"
-                      accept=".mp3,.aac,.m4a,.ogg,audio/mpeg,audio/aac,audio/mp4,audio/x-m4a,audio/ogg"
+                      accept=".mp3,.aac,.m4a,.ogg,audio/mpeg,audio/aac,audio/aacp,audio/vnd.dlna.adts,audio/mp4,audio/x-m4a,audio/ogg"
                       onChange={(e) => handleAudioUpload(e.target.files[0])}
                       style={{ display: 'none' }}
                       disabled={uploadingAudio}
