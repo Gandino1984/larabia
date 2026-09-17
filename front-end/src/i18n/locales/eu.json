@@ -14,7 +14,6 @@
   "common.buttons.search": "Bilatu",
   "common.buttons.closeSearch": "Itxi bilaketa",
   "common.buttons.share": "Partekatu",
-
   "common.labels.title": "Izenburua",
   "common.labels.content": "Edukia",
   "common.labels.excerpt": "Laburpena",
@@ -25,11 +24,9 @@
   "common.labels.email": "Emaila",
   "common.labels.password": "Pasahitza",
   "common.labels.name": "Izena",
-
   "common.states.loading": "Kargatzen",
   "common.states.saving": "Gordetzen",
   "common.states.uploading": "Igotzen",
-
   "header.nav.articles": "Artikuluak",
   "header.nav.projects": "Proiektuak",
   "header.nav.noProjects": "Proiektu argitaraturik ez",
@@ -37,7 +34,7 @@
   "project.collaborators": "Kolaboratzaileak",
   "header.nav.authors": "Egileak",
   "header.nav.gallery": "Galeria",
-  "header.nav.microAbierto": "Terrenito en Plut\u00F3n",
+  "header.nav.microAbierto": "Terrenito en Plutón",
   "header.nav.humor": "Umorea",
   "header.nav.more": "Gehiago",
   "header.nav.internacional": "Nazioartekoa",
@@ -49,7 +46,6 @@
   "header.search.resultCount": "emaitza {{count}}",
   "header.search.resultCount_plural": "{{count}} emaitza",
   "header.user.createArticle": "Artikulua sortu",
-
   "article.detail.notFound": "Ez da artikulua aurkitu",
   "article.detail.confirmDelete": "Ziur zaude \"{{title}}\" artikulua ezabatu nahi duzula? Ekintza hau ezin da desegin.",
   "article.detail.by": "Egilea:",
@@ -62,13 +58,11 @@
   "article.detail.deleteArticle": "Ezabatu artikulua",
   "article.detail.audioAvailable": "Artikulu honek audioa du",
   "article.detail.featured": "Nabarmendua",
-
   "article.list.title": "Artikulu Guztiak",
   "article.list.loading": "Artikuluak kargatzen...",
   "article.list.empty": "Ez dago oraindik artikulurik argitaratuta",
   "article.list.count": "artikulu {{count}} argitaratuta",
   "article.list.count_plural": "{{count}} artikulu argitaratuta",
-
   "editor.title": "Artikuluaren Izenburua *",
   "editor.titleCreate": "Artikulu Berria Sortu",
   "editor.titleEdit": "Artikulua Editatu",
@@ -104,7 +98,6 @@
   "editor.accessDenied.title": "Sarbidea Ukatua",
   "editor.accessDenied.message": "Ez duzu artikuluen editorera sartzeko baimenik.",
   "editor.accessDenied.contact": "Jarri harremanetan administratzailearekin uste baduzu sarbidea izan behar duzula.",
-
   "editor.category.general": "Orokorra",
   "editor.category.report": "Erreportajea",
   "editor.category.reportage": "Erreportajea",
@@ -121,7 +114,7 @@
   "editor.category.comic": "Komiki multimedia",
   "editor.category.critica": "Kritika",
   "editor.category.ensayo": "Saiakera",
-  "editor.category.microAbierto": "Terrenito en Plut\u00F3n",
+  "editor.category.microAbierto": "Terrenito en Plutón",
   "editor.category.humor": "Umorea",
   "editor.category.internacional": "Nazioartekoa",
   "editor.category.noficcion": "No-fikzioa",
@@ -130,24 +123,18 @@
   "editor.category.talleres": "Tailerrak",
   "editor.category.infantil": "Haurrentzako",
   "editor.category.label": "Kategoria",
-
   "editor.status.label": "Egoera",
   "editor.status.draft": "Zirriborroa",
   "editor.status.published": "Argitaratua",
-
   "editor.title.create": "Artikulu Berria Sortu",
   "editor.title.edit": "Artikulua Editatu",
   "editor.title.placeholder": "Idatzi izenburua artikulurako",
   "editor.titleRequired": "Izenburua beharrezkoa da",
-
   "editor.excerpt.placeholder": "Artikuluaren deskribapen laburra aurrebistetan agertuko dena...",
-
   "editor.content.label": "Artikuluaren Edukia *",
-
   "editor.coverImage.preview": "Azalaren aurrebista",
   "editor.coverImage.select": "Hautatu azaleko irudia artikulurako",
   "editor.coverImage.mustBeImage": "Azalak irudia izan behar du (JPG, PNG, WebP edo AVIF), ez bideo edo bestelako fitxategi bat.",
-
   "editor.authors.label": "Egileak",
   "editor.author.add": "+ Gehitu egilea",
   "editor.author.remove": "Kendu egilea",
@@ -156,7 +143,6 @@
   "editor.author.firstBadge": "1.",
   "editor.author.alreadyAdded": "Egile hau dagoeneko gehitu da",
   "editor.author.atLeastOne": "Gutxienez egile bat egon behar da",
-
   "editor.project.label": "Hautatu proiektu bat",
   "editor.project.noProject": "Proiekturik gabe",
   "editor.project.createNew": "Sortu proiektu berria",
@@ -191,33 +177,25 @@
   "editor.project.deleteConfirm": "Ziur zaude \"{{title}}\" proiektua ezabatu nahi duzula? Artikulu eta eduki guztiak ere ezabatuko dira. Ekintza hau ezin da desegin.",
   "editor.project.deleteSuccess": "Proiektua arrakastaz ezabatu da",
   "editor.project.deleteError": "Errorea proiektua ezabatzean",
-
   "editor.blocks.addText": "Gehitu Testua",
   "editor.blocks.addImage": "Gehitu Irudia",
   "editor.blocks.addIframe": "Gehitu Iframe",
-
   "editor.featured.label": "Markatu nabarmen gisa (orri nagusian agertuko da)",
-
   "editor.saving": "Gordetzen...",
   "editor.publishArticle": "Argitaratu Artikulua",
   "editor.updateArticle": "Eguneratu Artikulua",
   "editor.cancelEdit": "Ezeztatu Edizioa",
-
   "editor.confirmDeleteBlock": "Ziur zaude bloke hau ezabatu nahi duzula?",
   "editor.confirmDeleteArticle": "Ziur zaude artikulu hau ezabatu nahi duzula? Ekintza hau ezin da desegin.",
-
   "editor.validation.addComicPanel": "Gutxienez komiki panel bat gehitu behar duzu irudiarekin",
   "editor.validation.addContentBlock": "Gutxienez eduki bloke bat gehitu eta osatu behar duzu (testua, irudia edo iframe datuekin)",
-
   "editor.articlesList.title": "Dauden Artikuluak",
   "editor.articlesList.subtitle": "Kudeatu zure artikulu eta zirriborro guztiak",
   "editor.articlesList.empty": "Ez dago oraindik artikulurik",
   "editor.articlesList.emptyHint": "Sortu zure lehen artikulua goiko formularioa erabiliz",
-
   "editor.unauthorized.title": "Sarbidea Ukatua",
   "editor.unauthorized.message": "Ez duzu artikuluen editorera sartzeko baimenik.",
   "editor.unauthorized.contact": "Jarri harremanetan administratzailearekin uste baduzu sarbidea izan behar duzula.",
-
   "messages.success.articleCreated": "Artikulua behar bezala sortu da",
   "messages.success.projectCreated": "Proiektua behar bezala sortu da",
   "messages.success.articleUpdated": "Artikulua behar bezala eguneratu da",
@@ -226,7 +204,6 @@
   "messages.success.accountLinked": "Kontua behar bezala lotu da. Orain Google-rekin edo zure pasahitzarekin hasi dezakezu saioa.",
   "messages.success.accountCreated": "Ongi etorri La Rabia-ra, {{name}}! Zure kontua behar bezala sortu da.",
   "messages.success.accountWelcomeBack": "Berriz ongi etorri, {{name}}!",
-
   "messages.error.saveArticle": "Errorea artikulua gordetzean",
   "messages.error.deleteArticle": "Errorea artikulua ezabatzean",
   "messages.error.loadArticles": "Errorea artikuluak kargatzean",
@@ -239,7 +216,6 @@
   "messages.error.authorDuplicate": "Egile hau dagoeneko gehitu da",
   "messages.error.minOneAuthor": "Gutxienez egile bat egon behar da",
   "messages.error.projectComingSoon": "Proiektuak sortzeko funtzioa laster",
-
   "contact.title": "Jar zaitez harremanetan La Rabiarekin",
   "contact.form.name": "Izena",
   "contact.form.namePlaceholder": "Zure izena",
@@ -254,7 +230,6 @@
   "contact.errors.allFields": "Mesedez, bete eremu guztiak",
   "contact.errors.invalidEmail": "Mesedez, sartu baliozko email bat",
   "contact.errors.sendError": "Errorea mezua bidaltzean. Mesedez, saiatu berriro.",
-
   "auth.login.title": "Hasi saioa",
   "auth.login.accessTitle": "Sartu La Rabiara",
   "auth.login.subtitle": "Hasi saioa irakurtzen jarraitzeko",
@@ -273,29 +248,24 @@
   "auth.login.register": "Erregistratu",
   "auth.login.orContinueWith": "Edo jarraitu honekin",
   "auth.login.withGoogle": "Jarraitu Google-rekin",
-
   "auth.forgotPassword.title": "Pasahitza ahaztu duzu?",
   "auth.forgotPassword.subtitle": "Sartu zure emaila eta berreskuratzeko argibideak bidaliko dizkizugu",
   "auth.forgotPassword.send": "Bidali argibideak",
   "auth.forgotPassword.backToLogin": "Itzuli saio-hasierara",
-
   "footer.description": "Kazetaritza narratibo, multimedia esperimentazio, arte eta fikzioaren aldizkari komunitarioa.",
   "footer.contact": "Kontaktua",
   "footer.location": "Uribarri auzoa, Bilbo. Euskal Herria.",
   "footer.links": "Estekak",
   "footer.copyright": "© 2025 La Rabia - Eskubide guztiak erreserbatuak.",
   "footer.newsletter": "Gomendioak",
-
   "humor.title": "Umorea",
   "humor.subtitle": "La Rabiaren umore piezarik onenak.",
   "humor.empty": "Oraindik ez dago umore piezarik argitaratua.",
   "humor.count": "{{count}} pieza",
-
-  "openmic.title": "Terrenito en Plut\u00F3n",
+  "openmic.title": "Terrenito en Plutón",
   "openmic.subtitle": "Hemen dituzu Uribarriko pertsonen proposamen literarioen hautaketa bat.",
   "openmic.empty": "Oraindik ez dago proposamenik argitaratua.",
   "openmic.count": "{{count}} proposamen",
-
   "newsletter.title": "Gomendioak",
   "newsletter.description": "Jaso La Rabiaren istorio berrien hautaketa zure posta elektronikoan.",
   "newsletter.subscribedStatus": "Gomendioak jasotzen ari zara.",
@@ -307,7 +277,6 @@
   "newsletter.successSubscribe": "Harpidetuta! Gure gomendioak jasoko dituzu.",
   "newsletter.successUnsubscribe": "Harpidetza bertan behera utzi da.",
   "newsletter.error": "Zerbait gaizki joan da. Saiatu berriro.",
-
   "authors.title": "Egileak",
   "authors.subtitle": "Ezagutu La Rabiaren atzean dauden ahotsak",
   "authors.createProfile": "Sortu nire egile profila",
@@ -334,14 +303,12 @@
   "authors.noPublicationsGeneric": "Egile honek ez du argitalpenik oraindik.",
   "authors.profileNotFound": "Egilearen profila ez da aurkitu.",
   "authors.authorNotFound": "Egilea ez da aurkitu.",
-
   "userProfile.editProfile": "Editatu Profila",
   "userProfile.myArticles": "Nire Artikuluak",
   "userProfile.bio": "Biografia",
   "userProfile.email": "Emaila",
   "userProfile.role": "Rola",
   "userProfile.joined": "Batu zen:",
-
   "hscroll.tutorial.interactivePanels": "Interaktibotasun ikono duten panelak klikatu daitezke eta audioa edo beste multimedia baliabide batzuk izan ditzakete.",
   "hscroll.progressSaved": "Aurrerapena gordeta {{panel}} panelean",
   "hscroll.restoringToPanel": "{{panel}} panelera itzultzen",
@@ -375,8 +342,12 @@
   "hscroll.progress.restoreAria": "Berreskuratu aurrerapena",
   "hscroll.progress.restore": "Berreskuratu",
   "hscroll.rotateBanner": "Biratu pantaila istorioa hobeto ikusteko",
-
   "notifications.error": "Errorea",
   "notifications.success": "Arrakasta",
-  "notifications.info": "Informazioa"
+  "notifications.info": "Informazioa",
+  "microperfiles.title": "Mikro-profilak",
+  "microperfiles.subtitle": "Auzoko pertsonen erretratu laburrak.",
+  "talleres.title": "Tailerrak",
+  "talleres.subtitle": "La Rabiaren tailerrak eta jarduerak.",
+  "categorySection.empty": "Oraindik ez dago argitalpenik atal honetan."
 }

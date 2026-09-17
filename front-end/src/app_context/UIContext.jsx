@@ -18,6 +18,8 @@ export const UIProvider = ({ children }) => {
   const [showAuthorPublications, setShowAuthorPublications] = useState(false);
   const [showProjectDetail, setShowProjectDetail] = useState(false);
   const [showOpenMic, setShowOpenMic] = useState(false);
+  const [showMicroPerfiles, setShowMicroPerfiles] = useState(false);
+  const [showTalleres, setShowTalleres] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [openEditorToEdit, setOpenEditorToEdit] = useState(false);
 
@@ -95,6 +97,8 @@ export const UIProvider = ({ children }) => {
     setShowAuthorPublications(false);
     setShowProjectDetail(false);
     setShowOpenMic(false);
+    setShowMicroPerfiles(false);
+    setShowTalleres(false);
     setShowAdmin(false);
   };
 
@@ -236,6 +240,18 @@ export const UIProvider = ({ children }) => {
     setShowOpenMic(true);
   };
 
+  const navigateToMicroPerfiles = () => {
+    setPreviousView('home');
+    resetAllViews();
+    setShowMicroPerfiles(true);
+  };
+
+  const navigateToTalleres = () => {
+    setPreviousView('home');
+    resetAllViews();
+    setShowTalleres(true);
+  };
+
   const navigateToAdmin = () => {
     setPreviousView('home');
     resetAllViews();
@@ -325,6 +341,10 @@ export const UIProvider = ({ children }) => {
     navigateToProjectDetail,
     showOpenMic,
     navigateToOpenMic,
+    showMicroPerfiles,
+    navigateToMicroPerfiles,
+    showTalleres,
+    navigateToTalleres,
     showAdmin,
     navigateToAdmin,
     navigateBack,

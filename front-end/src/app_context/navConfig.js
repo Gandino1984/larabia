@@ -30,9 +30,9 @@ export const DEFAULT_NAV = [
       { id: 'microabierto', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Micro abierto', en: 'Open mic' }, action: { type: 'section', value: 'openmic' } },
       { id: 'microperfiles', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Micro-perfiles', en: 'Micro-profiles' }, action: { type: 'category', value: 'micro-perfiles' } },
+        label: { es: 'Micro-perfiles', en: 'Micro-profiles' }, action: { type: 'section', value: 'microperfiles' } },
       { id: 'talleres', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Talleres', en: 'Workshops' }, action: { type: 'category', value: 'talleres' } },
+        label: { es: 'Talleres', en: 'Workshops' }, action: { type: 'section', value: 'talleres' } },
       { id: 'infantil', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Infantil', en: 'Kids' }, action: { type: 'category', value: 'infantil' } },
       { id: 'galeria', kind: 'link', visible: true, min_role: 'all',
@@ -59,7 +59,9 @@ export const SECTION_OPTIONS = [
   { value: 'home', label: 'Inicio' },
   { value: 'articles', label: 'Artículos' },
   { value: 'authors', label: 'Autoras' },
-  { value: 'openmic', label: 'Micro abierto' }
+  { value: 'openmic', label: 'Micro abierto' },
+  { value: 'microperfiles', label: 'Micro-perfiles' },
+  { value: 'talleres', label: 'Talleres' }
 ];
 
 export const MODAL_OPTIONS = [

@@ -14,7 +14,6 @@
   "common.buttons.search": "Buscar",
   "common.buttons.closeSearch": "Cerrar búsqueda",
   "common.buttons.share": "Comparte",
-
   "common.labels.title": "Título",
   "common.labels.content": "Contenido",
   "common.labels.excerpt": "Extracto",
@@ -25,11 +24,9 @@
   "common.labels.email": "Email",
   "common.labels.password": "Contraseña",
   "common.labels.name": "Nombre",
-
   "common.states.loading": "Cargando",
   "common.states.saving": "Guardando",
   "common.states.uploading": "Subiendo",
-
   "header.nav.articles": "Artículos",
   "header.nav.projects": "Proyectos",
   "header.nav.noProjects": "Sin proyectos publicados",
@@ -37,7 +34,7 @@
   "project.collaborators": "Colaboradores",
   "header.nav.authors": "Autoras/es",
   "header.nav.gallery": "Galería",
-  "header.nav.microAbierto": "Terrenito en Plut\u00F3n",
+  "header.nav.microAbierto": "Terrenito en Plutón",
   "header.nav.humor": "Humor",
   "header.nav.more": "Más",
   "header.nav.internacional": "Internacional",
@@ -49,7 +46,6 @@
   "header.search.resultCount": "{{count}} resultado",
   "header.search.resultCount_plural": "{{count}} resultados",
   "header.user.createArticle": "Crear artículo",
-
   "article.detail.notFound": "No se encontró el artículo",
   "article.detail.confirmDelete": "¿Estás seguro de que quieres eliminar el artículo \"{{title}}\"? Esta acción no se puede deshacer.",
   "article.detail.by": "Por",
@@ -62,13 +58,11 @@
   "article.detail.deleteArticle": "Eliminar artículo",
   "article.detail.audioAvailable": "Este artículo contiene audio",
   "article.detail.featured": "Destacado",
-
   "article.list.title": "Todos los Artículos",
   "article.list.loading": "Cargando artículos...",
   "article.list.empty": "No hay artículos publicados todavía",
   "article.list.count": "{{count}} artículo publicado",
   "article.list.count_plural": "{{count}} artículos publicados",
-
   "editor.title": "Título del Artículo *",
   "editor.titleCreate": "Crear Nuevo Artículo",
   "editor.titleEdit": "Editar Artículo",
@@ -104,7 +98,6 @@
   "editor.accessDenied.title": "Acceso Denegado",
   "editor.accessDenied.message": "No tienes permisos para acceder al editor de artículos.",
   "editor.accessDenied.contact": "Contacta al administrador si crees que deberías tener acceso.",
-
   "editor.category.general": "General",
   "editor.category.report": "Reportaje",
   "editor.category.reportage": "Reportaje",
@@ -121,7 +114,7 @@
   "editor.category.comic": "Cómic multimedia",
   "editor.category.critica": "Crítica",
   "editor.category.ensayo": "Ensayo",
-  "editor.category.microAbierto": "Terrenito en Plut\u00F3n",
+  "editor.category.microAbierto": "Terrenito en Plutón",
   "editor.category.humor": "Humor",
   "editor.category.internacional": "Internacional",
   "editor.category.noficcion": "No-ficción",
@@ -130,24 +123,18 @@
   "editor.category.talleres": "Talleres",
   "editor.category.infantil": "Infantil",
   "editor.category.label": "Categoría",
-
   "editor.status.label": "Estado",
   "editor.status.draft": "Borrador",
   "editor.status.published": "Publicado",
-
   "editor.title.create": "Crear Nuevo Artículo",
   "editor.title.edit": "Editar Artículo",
   "editor.title.placeholder": "Escribe un título para el artículo",
   "editor.titleRequired": "El título es obligatorio",
-
   "editor.excerpt.placeholder": "Breve descripción del artículo que aparecerá en las vistas previas...",
-
   "editor.content.label": "Contenido del Artículo *",
-
   "editor.coverImage.preview": "Vista previa de portada",
   "editor.coverImage.select": "Selecciona una imagen de portada para el artículo",
   "editor.coverImage.mustBeImage": "La portada debe ser una imagen (JPG, PNG, WebP o AVIF), no un vídeo u otro tipo de archivo.",
-
   "editor.authors.label": "Autores",
   "editor.author.add": "+ Añadir autor/a",
   "editor.author.remove": "Eliminar autor",
@@ -156,7 +143,6 @@
   "editor.author.firstBadge": "1º",
   "editor.author.alreadyAdded": "Este autor ya está añadido",
   "editor.author.atLeastOne": "Debe haber al menos un autor",
-
   "editor.project.label": "Selecciona un proyecto",
   "editor.project.noProject": "Sin proyecto",
   "editor.project.createNew": "Crear nuevo proyecto",
@@ -191,33 +177,25 @@
   "editor.project.deleteConfirm": "¿Estás seguro de que quieres eliminar el proyecto \"{{title}}\"? Se eliminarán también todos sus artículos y contenidos. Esta acción no se puede deshacer.",
   "editor.project.deleteSuccess": "Proyecto eliminado exitosamente",
   "editor.project.deleteError": "Error al eliminar el proyecto",
-
   "editor.blocks.addText": "Agregar Texto",
   "editor.blocks.addImage": "Agregar Imagen",
   "editor.blocks.addIframe": "Agregar Iframe",
-
   "editor.featured.label": "Marcar como artículo destacado (aparecerá en la página principal)",
-
   "editor.saving": "Guardando...",
   "editor.publishArticle": "Publicar Artículo",
   "editor.updateArticle": "Actualizar Artículo",
   "editor.cancelEdit": "Cancelar Edición",
-
   "editor.confirmDeleteBlock": "¿Estás seguro de que quieres eliminar este bloque?",
   "editor.confirmDeleteArticle": "¿Estás seguro de que quieres eliminar este artículo? Esta acción no se puede deshacer.",
-
   "editor.validation.addComicPanel": "Debes agregar al menos un panel de cómic con imagen",
   "editor.validation.addContentBlock": "Debes agregar y completar al menos un bloque de contenido (texto, imagen o iframe con datos)",
-
   "editor.articlesList.title": "Artículos Existentes",
   "editor.articlesList.subtitle": "Gestiona todos tus artículos publicados y borradores",
   "editor.articlesList.empty": "No hay artículos todavía",
   "editor.articlesList.emptyHint": "Crea tu primer artículo usando el formulario de arriba",
-
   "editor.unauthorized.title": "Acceso Denegado",
   "editor.unauthorized.message": "No tienes permisos para acceder al editor de artículos.",
   "editor.unauthorized.contact": "Contacta al administrador si crees que deberías tener acceso.",
-
   "messages.success.articleCreated": "Artículo creado exitosamente",
   "messages.success.projectCreated": "Proyecto creado exitosamente",
   "messages.success.articleUpdated": "Artículo actualizado exitosamente",
@@ -226,7 +204,6 @@
   "messages.success.accountLinked": "Cuenta vinculada exitosamente. Ahora puedes iniciar sesión con Google o con tu contraseña.",
   "messages.success.accountCreated": "¡Bienvenido a La Rabia, {{name}}! Tu cuenta se ha creado correctamente.",
   "messages.success.accountWelcomeBack": "¡Bienvenido de nuevo, {{name}}!",
-
   "messages.error.saveArticle": "Error al guardar el artículo",
   "messages.error.deleteArticle": "Error al eliminar el artículo",
   "messages.error.loadArticles": "Error al cargar los artículos",
@@ -239,7 +216,6 @@
   "messages.error.authorDuplicate": "Este autor ya está añadido",
   "messages.error.minOneAuthor": "Debe haber al menos un autor",
   "messages.error.projectComingSoon": "Funcionalidad de crear proyecto próximamente",
-
   "contact.title": "Contacta con La Rabia",
   "contact.form.name": "Nombre",
   "contact.form.namePlaceholder": "Tu nombre",
@@ -254,7 +230,6 @@
   "contact.errors.allFields": "Por favor, completa todos los campos",
   "contact.errors.invalidEmail": "Por favor, introduce un email válido",
   "contact.errors.sendError": "Error al enviar el mensaje. Por favor, inténtalo de nuevo.",
-
   "auth.login.title": "Iniciar sesión",
   "auth.login.accessTitle": "Accede a La Rabia",
   "auth.login.subtitle": "Inicia sesión para continuar leyendo",
@@ -273,29 +248,24 @@
   "auth.login.register": "Registrarse",
   "auth.login.orContinueWith": "O continuar con",
   "auth.login.withGoogle": "Continuar con Google",
-
   "auth.forgotPassword.title": "¿Olvidaste tu contraseña?",
   "auth.forgotPassword.subtitle": "Ingresa tu email y te enviaremos instrucciones para recuperarla",
   "auth.forgotPassword.send": "Enviar instrucciones",
   "auth.forgotPassword.backToLogin": "Volver al inicio de sesión",
-
   "footer.description": "Una revista comunitaria de periodismo narrativo, experimentación multimedia, arte y ficción.",
   "footer.contact": "Contacto",
   "footer.location": "Distrito de Uribarri, Bilbao. País Vasco.",
   "footer.links": "Enlaces",
   "footer.copyright": "© 2025 La Rabia - Todos los derechos reservados.",
   "footer.newsletter": "¿Te recomendamos algo?",
-
   "humor.title": "Humor",
   "humor.subtitle": "Las mejores piezas de humor de La Rabia.",
   "humor.empty": "Aún no hay piezas de humor publicadas.",
   "humor.count": "{{count}} pieza(s)",
-
-  "openmic.title": "Terrenito en Plut\u00F3n",
+  "openmic.title": "Terrenito en Plutón",
   "openmic.subtitle": "Aquí tienes una selección de las propuestas literarias de las personas de Uribarri.",
   "openmic.empty": "Aún no hay propuestas publicadas.",
   "openmic.count": "{{count}} propuesta(s)",
-
   "newsletter.title": "Recomendaciones",
   "newsletter.description": "Recibe en tu correo una selección de nuevas historias de La Rabia.",
   "newsletter.subscribedStatus": "Estás suscrito/a a las recomendaciones.",
@@ -307,7 +277,6 @@
   "newsletter.successSubscribe": "¡Te has suscrito! Recibirás nuestras recomendaciones.",
   "newsletter.successUnsubscribe": "Suscripción cancelada.",
   "newsletter.error": "Algo salió mal. Inténtalo de nuevo.",
-
   "authors.title": "Autoras/es",
   "authors.subtitle": "Conoce las voces detrás de La Rabia",
   "authors.createProfile": "Crear mi perfil de autor/a",
@@ -334,14 +303,12 @@
   "authors.noPublicationsGeneric": "Aún no hay publicaciones de este autor/a.",
   "authors.profileNotFound": "Perfil de autor/a no encontrado.",
   "authors.authorNotFound": "Autor/a no encontrado.",
-
   "userProfile.editProfile": "Editar Perfil",
   "userProfile.myArticles": "Mis Artículos",
   "userProfile.bio": "Biografía",
   "userProfile.email": "Email",
   "userProfile.role": "Rol",
   "userProfile.joined": "Se unió el",
-
   "hscroll.tutorial.interactivePanels": "Los paneles marcados con iconos de interactividad son clickables y pueden contener audio u otros recursos multimedia.",
   "hscroll.progressSaved": "Progreso guardado en panel {{panel}}",
   "hscroll.restoringToPanel": "Regresando al panel {{panel}}",
@@ -375,8 +342,12 @@
   "hscroll.progress.restoreAria": "Restaurar progreso",
   "hscroll.progress.restore": "Restaurar",
   "hscroll.rotateBanner": "Rota tu pantalla para disfrutar mejor la historia",
-
   "notifications.error": "Error",
   "notifications.success": "Éxito",
-  "notifications.info": "Información"
+  "notifications.info": "Información",
+  "microperfiles.title": "Micro-perfiles",
+  "microperfiles.subtitle": "Retratos breves de personas del barrio.",
+  "talleres.title": "Talleres",
+  "talleres.subtitle": "Talleres y actividades de La Rabia.",
+  "categorySection.empty": "Todavía no hay publicaciones en esta sección."
 }

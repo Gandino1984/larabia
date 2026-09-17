@@ -13,6 +13,8 @@ const SECTION_NAV = {
   articles: 'navigateToArticlesList',
   authors: 'navigateToAuthors',
   openmic: 'navigateToOpenMic',
+  microperfiles: 'navigateToMicroPerfiles',
+  talleres: 'navigateToTalleres',
   projects: 'navigateToProjectDetail'
 };
 
