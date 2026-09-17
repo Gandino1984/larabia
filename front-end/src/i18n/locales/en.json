@@ -169,6 +169,7 @@
   "editor.review.pendingTitle": "In review",
   "editor.review.pendingBody": "This content is awaiting super-admin validation before it goes public.",
   "editor.review.statusShort": "In review",
+  "editor.blocks.saveFailed": "{{count}} block(s) of the story could not be saved. Check your connection and try again.",
   "editor.articlesList.filterAll": "All",
   "editor.project.titleLabel": "Project Title *",
   "editor.project.titlePlaceholder": "Project name...",

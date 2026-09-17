@@ -588,7 +588,11 @@ function ArticleEditorBlocks() {
       }
 
       // Save blocks
-      await saveBlocks(article_id);
+      const { failedCount = 0 } = await saveBlocks(article_id) || {};
+      if (failedCount > 0) {
+        // Some blocks didn't persist — warn instead of a misleading success.
+        showError(t('editor.blocks.saveFailed', { count: failedCount }));
+      }
 
       // If the editor chose "Submit for approval", transition the article now.
       if (wantsSubmission) {
@@ -597,7 +601,7 @@ function ArticleEditorBlocks() {
           // Article + blocks did save, but the transition failed. Tell user.
           showError(submitResult.error);
         }
-      } else {
+      } else if (failedCount === 0) {
         showSuccess(editingArticle ? t('messages.success.articleUpdated') : t('messages.success.articleCreated'));
       }
       await Promise.all([fetchArticles(), fetchEditorArticles()]);
@@ -648,6 +652,7 @@ function ArticleEditorBlocks() {
     };
 
     // Create or update blocks
+    let failedCount = 0;
     for (let i = 0; i < blocks.length; i++) {
       const block = blocks[i];
 
@@ -677,14 +682,15 @@ function ArticleEditorBlocks() {
         audio_mode: block.audio_mode || null
       };
 
-      if (block.id_block) {
-        // Update existing block
-        await updateBlock(block.id_block, blockData);
-      } else {
-        // Create new block
-        await createBlock(blockData);
-      }
+      const blockResult = block.id_block
+        ? await updateBlock(block.id_block, blockData)
+        : await createBlock(blockData);
+      if (blockResult?.error) failedCount++;
     }
+
+    // Report so a partial failure isn't hidden behind a "saved" toast — the
+    // author needs to know their content (text, panels, etc.) didn't persist.
+    return { failedCount };
   };
 
   const handleDelete = async (id_article) => {

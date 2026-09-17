@@ -169,6 +169,7 @@
   "editor.review.pendingTitle": "En revisión",
   "editor.review.pendingBody": "Este contenido está pendiente de que un super-administrador lo valide antes de publicarse.",
   "editor.review.statusShort": "En revisión",
+  "editor.blocks.saveFailed": "No se pudieron guardar {{count}} bloque(s) de la historia. Revisa la conexión e inténtalo de nuevo.",
   "editor.articlesList.filterAll": "Todos",
   "editor.project.titleLabel": "Título del Proyecto *",
   "editor.project.titlePlaceholder": "Nombre del proyecto...",

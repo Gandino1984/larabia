@@ -169,6 +169,7 @@
   "editor.review.pendingTitle": "Berrikuspenean",
   "editor.review.pendingBody": "Eduki hau super-administratzaile batek balioztatzeko zain dago argitaratu aurretik.",
   "editor.review.statusShort": "Berrikuspenean",
+  "editor.blocks.saveFailed": "Istorioaren {{count}} bloke ezin izan dira gorde. Egiaztatu konexioa eta saiatu berriro.",
   "editor.articlesList.filterAll": "Guztiak",
   "editor.project.titleLabel": "Proiektuaren Izenburua *",
   "editor.project.titlePlaceholder": "Proiektuaren izena...",
