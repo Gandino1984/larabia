@@ -20,6 +20,9 @@ import './models/project_author_model.js';
 import './models/magazine_metadata_model.js';
 import './models/magazine_theme_model.js';
 import './models/magazine_nav_model.js';
+import './models/magazine_workshop_model.js';
+import './models/workshop_author_model.js';
+import './models/workshop_reservation_model.js';
 
 dotenv.config();
 

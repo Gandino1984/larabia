@@ -754,4 +754,92 @@ const handleAuthorProfileImageUpload = async (req, res, next) => {
   });
 };
 
-export { handleMagazineImageUpload, handleMagazineProjectImageUpload, handleAuthorProfileImageUpload };
+// ============================================================
+// Workshop cover images (stored under assets/images/magazine/workshops)
+// ============================================================
+const cleanExistingWorkshopImages = async (dirPath, workshopId) => {
+  try {
+    try { await fs.access(dirPath); } catch { return; }
+    const files = await fs.readdir(dirPath);
+    const wf = (files || []).filter(f => f.includes(`workshop_${workshopId}`) || f.includes(`temp_workshop_${workshopId}`));
+    for (const file of wf) {
+      await fs.unlink(path.join(dirPath, file));
+    }
+  } catch (error) {
+    console.error('Error cleaning existing workshop images:', error);
+  }
+};
+
+const workshopImageStorage = multer.diskStorage({
+  destination: async function (req, file, cb) {
+    const workshopId = req.headers['x-workshop-id'];
+    if (!workshopId) return cb(new Error('Workshop ID is required'));
+    try {
+      const backendDir = path.resolve(__dirname, '..');
+      const workshopsDir = path.join(backendDir, 'assets', 'images', 'magazine', 'workshops');
+      await ensureDirectoryExists(path.join(backendDir, 'assets'));
+      await ensureDirectoryExists(path.join(backendDir, 'assets', 'images'));
+      await ensureDirectoryExists(path.join(backendDir, 'assets', 'images', 'magazine'));
+      await ensureDirectoryExists(workshopsDir);
+      await cleanExistingWorkshopImages(workshopsDir, workshopId);
+      cb(null, workshopsDir);
+    } catch (error) {
+      console.error('Error setting up workshop upload directory:', error);
+      cb(error);
+    }
+  },
+  filename: function (req, file, cb) {
+    const workshopId = req.headers['x-workshop-id'];
+    const tempFileName = workshopId
+      ? `temp_workshop_${workshopId}_${Date.now()}${path.extname(file.originalname)}`
+      : `temp_workshop_new_${Date.now()}${path.extname(file.originalname)}`;
+    cb(null, tempFileName);
+  }
+});
+
+const uploadWorkshopImage = multer({
+  storage: workshopImageStorage,
+  fileFilter: fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }
+}).single('image');
+
+const handleWorkshopImageUpload = async (req, res, next) => {
+  uploadWorkshopImage(req, res, async function (err) {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'El archivo es demasiado grande. Máximo 10MB permitido.', details: err.message });
+      }
+      return res.status(400).json({ error: 'Error uploading file', details: err.message });
+    } else if (err) {
+      return res.status(400).json({ error: 'Error uploading workshop cover image', details: err.message });
+    }
+    if (!req.file) return res.status(400).json({ error: 'No se ha proporcionado ningún archivo' });
+
+    try {
+      await validateImageMiddleware(req, res, async () => {
+        try {
+          const processedFile = await processUploadedImage(req.file);
+          const workshopId = req.headers['x-workshop-id'];
+          if (workshopId) {
+            const finalFilename = `workshop_${workshopId}.webp`;
+            const finalPath = path.join(path.dirname(processedFile.path), finalFilename);
+            try { await fs.unlink(finalPath); } catch { /* not there */ }
+            await fs.rename(processedFile.path, finalPath);
+            processedFile.path = finalPath;
+            processedFile.filename = finalFilename;
+          }
+          req.file = processedFile;
+          next();
+        } catch (processError) {
+          console.error('Error processing workshop image:', processError);
+          if (req.file?.path) { try { await fs.unlink(req.file.path); } catch { /* ignore */ } }
+          return res.status(500).json({ error: 'Error al procesar la imagen', details: processError.message });
+        }
+      });
+    } catch (validationError) {
+      console.error('Workshop image validation failed:', validationError);
+    }
+  });
+};
+
+export { handleMagazineImageUpload, handleMagazineProjectImageUpload, handleAuthorProfileImageUpload, handleWorkshopImageUpload };
