@@ -89,10 +89,15 @@ function Header() {
   }, [currentUser?.id_user, currentUser?.image_user]);
 
 
-  // Construct user profile image URL with cache-busting
+  // Construct user profile image URL with cache-busting.
+  // Google-auth users store a full avatar URL in image_user; local uploads store
+  // a filename served by the API. Use the URL as-is when it's already absolute,
+  // otherwise it stays broken and the button falls back to the default icon.
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
   const userImageUrl = currentUser?.image_user
-    ? `${apiUrl}/user/image/${encodeURIComponent(currentUser.image_user)}?_t=${imageTimestamp}`
+    ? (/^https?:\/\//.test(currentUser.image_user)
+        ? currentUser.image_user
+        : `${apiUrl}/user/image/${encodeURIComponent(currentUser.image_user)}?_t=${imageTimestamp}`)
     : null;
 
   const handleLogoClick = () => {
