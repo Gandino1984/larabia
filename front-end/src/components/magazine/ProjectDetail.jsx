@@ -82,8 +82,15 @@ function ProjectDetail() {
         )}
 
         <div className="project-detail-info">
-          {selectedProject.format_project && (
-            <span className="project-detail-format">{selectedProject.format_project}</span>
+          {(selectedProject.type_project || selectedProject.format_project) && (
+            <div className="project-detail-tags">
+              {selectedProject.type_project && (
+                <span className="project-detail-type">{selectedProject.type_project}</span>
+              )}
+              {selectedProject.format_project && (
+                <span className="project-detail-format">{selectedProject.format_project}</span>
+              )}
+            </div>
           )}
           <h1 className="project-detail-title">{selectedProject.title_project}</h1>
           {selectedProject.description_project && (

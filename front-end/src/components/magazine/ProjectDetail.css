@@ -151,3 +151,25 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- Project type + format tags row ---- */
+.project-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+.project-detail-tags .project-detail-format { margin-bottom: 0; }
+.project-detail-type {
+  display: inline-block;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #1a1a1a;
+  background: rgba(200, 200, 200, 0.5);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}

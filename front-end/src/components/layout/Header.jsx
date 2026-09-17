@@ -441,7 +441,7 @@ function Header() {
                           >
                             <div className="search-result-content">
                               <h4 className="search-result-title">{article.title_article}</h4>
-                              {article.category_article && (
+                              {article.category_article && article.category_article.toLowerCase() !== 'general' && (
                                 <span className="search-result-category">{article.category_article}</span>
                               )}
                               {article.excerpt_article && (
@@ -450,8 +450,12 @@ function Header() {
                                   {article.excerpt_article.length > 100 ? '...' : ''}
                                 </p>
                               )}
-                              {article.author_name && (
-                                <span className="search-result-author">Por {article.author_name}</span>
+                              {(article.authors?.length > 0 || article.author_name) && (
+                                <span className="search-result-author">
+                                  Por {article.authors?.length > 0
+                                    ? article.authors.map(a => a.name_user).join(', ')
+                                    : article.author_name}
+                                </span>
                               )}
                             </div>
                           </button>
@@ -595,11 +599,15 @@ function Header() {
                               onClick={() => handleArticleResultClick(article)}
                             >
                               <h4 className="mobile-search-result-title">{article.title_article}</h4>
-                              {article.category_article && (
+                              {article.category_article && article.category_article.toLowerCase() !== 'general' && (
                                 <span className="mobile-search-result-category">{article.category_article}</span>
                               )}
-                              {article.author_name && (
-                                <span className="mobile-search-result-author">Por {article.author_name}</span>
+                              {(article.authors?.length > 0 || article.author_name) && (
+                                <span className="mobile-search-result-author">
+                                  Por {article.authors?.length > 0
+                                    ? article.authors.map(a => a.name_user).join(', ')
+                                    : article.author_name}
+                                </span>
                               )}
                             </button>
                           ))}
