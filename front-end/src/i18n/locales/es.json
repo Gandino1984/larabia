@@ -355,5 +355,19 @@
   "notifications.completeProfile.title": "Completa tu perfil de autora",
   "notifications.completeProfile.message": "Aún no has creado tu perfil. Pulsa para crearlo y aparecer en la sección de Autoras/es.",
   "notifications.newArticle.title": "Nuevo artículo publicado",
-  "notifications.newProject.title": "Nuevo proyecto publicado"
+  "notifications.newProject.title": "Nuevo proyecto publicado",
+  "workshops.title": "Talleres",
+  "workshops.subtitle": "Talleres de La Rabia — reserva tu plaza.",
+  "workshops.empty": "Todavía no hay talleres programados.",
+  "workshops.full": "Completo",
+  "workshops.by": "Impartido por",
+  "workshops.spots": "{{left}} de {{total}} plazas libres",
+  "workshops.participants": "{{count}} inscritas/os",
+  "workshops.instructors": "Talleristas",
+  "workshops.reserve": "Reservar plaza",
+  "workshops.cancelReservation": "Cancelar mi reserva",
+  "workshops.reservedNote": "Ya tienes una plaza reservada en este taller.",
+  "workshops.fullNote": "El taller está completo.",
+  "workshops.participantsTitle": "Inscritas/os",
+  "workshops.notFound": "Taller no encontrado."
 }

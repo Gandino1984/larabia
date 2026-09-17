@@ -355,5 +355,19 @@
   "notifications.completeProfile.title": "Complete your author profile",
   "notifications.completeProfile.message": "You haven't created your profile yet. Tap to create it and appear in the Authors section.",
   "notifications.newArticle.title": "New article published",
-  "notifications.newProject.title": "New project published"
+  "notifications.newProject.title": "New project published",
+  "workshops.title": "Workshops",
+  "workshops.subtitle": "La Rabia workshops — book your spot.",
+  "workshops.empty": "No workshops scheduled yet.",
+  "workshops.full": "Full",
+  "workshops.by": "Led by",
+  "workshops.spots": "{{left}} of {{total}} spots left",
+  "workshops.participants": "{{count}} registered",
+  "workshops.instructors": "Instructors",
+  "workshops.reserve": "Book a spot",
+  "workshops.cancelReservation": "Cancel my reservation",
+  "workshops.reservedNote": "You already have a spot reserved in this workshop.",
+  "workshops.fullNote": "This workshop is full.",
+  "workshops.participantsTitle": "Registered",
+  "workshops.notFound": "Workshop not found."
 }

@@ -17,6 +17,8 @@ import AuthorPublications from './components/authors/AuthorPublications';
 import ProjectDetail from './components/magazine/ProjectDetail';
 import OpenMicPublications from './components/openmic/OpenMicPublications';
 import CategorySectionPage from './components/magazine/CategorySectionPage';
+import WorkshopsList from './components/workshops/WorkshopsList';
+import WorkshopDetail from './components/workshops/WorkshopDetail';
 import AdminPage from './components/admin/permissions/AdminPage';
 import LoginPage from './components/layout/LoginPage';
 import ForgotPasswordPage from './components/layout/ForgotPasswordPage';
@@ -25,7 +27,7 @@ import LoadingScreen from './components/layout/LoadingScreen';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showAdmin, isFullscreen, navigateToArticle } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showAdmin, isFullscreen, navigateToArticle } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { isLoading, progress } = usePreloader();
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
@@ -74,7 +76,8 @@ function App() {
     if (showProjectDetail) return <ProjectDetail />;
     if (showOpenMic) return <OpenMicPublications />;
     if (showMicroPerfiles) return <CategorySectionPage category="micro-perfiles" titleKey="microperfiles.title" subtitleKey="microperfiles.subtitle" />;
-    if (showTalleres) return <CategorySectionPage category="talleres" titleKey="talleres.title" subtitleKey="talleres.subtitle" />;
+    if (showWorkshopDetail) return <WorkshopDetail />;
+    if (showTalleres) return <WorkshopsList />;
     if (showArticleDetail) return <ArticleDetail />;
     if (showArticlesList) return <ArticlesList />;
     if (showHome) return <HomePage />;

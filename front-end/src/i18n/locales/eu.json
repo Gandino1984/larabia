@@ -355,5 +355,19 @@
   "notifications.completeProfile.title": "Osatu zure egile-profila",
   "notifications.completeProfile.message": "Oraindik ez duzu profila sortu. Sakatu sortzeko eta Egileak atalean agertzeko.",
   "notifications.newArticle.title": "Artikulu berria argitaratu da",
-  "notifications.newProject.title": "Proiektu berria argitaratu da"
+  "notifications.newProject.title": "Proiektu berria argitaratu da",
+  "workshops.title": "Tailerrak",
+  "workshops.subtitle": "La Rabiaren tailerrak — erreserbatu zure lekua.",
+  "workshops.empty": "Oraindik ez dago tailerrik antolatuta.",
+  "workshops.full": "Beteta",
+  "workshops.by": "Emailea:",
+  "workshops.spots": "{{total}}tik {{left}} leku libre",
+  "workshops.participants": "{{count}} izena emanda",
+  "workshops.instructors": "Tailer-emaileak",
+  "workshops.reserve": "Erreserbatu lekua",
+  "workshops.cancelReservation": "Ezeztatu nire erreserba",
+  "workshops.reservedNote": "Dagoeneko leku bat erreserbatuta duzu tailer honetan.",
+  "workshops.fullNote": "Tailerra beteta dago.",
+  "workshops.participantsTitle": "Izena emanda",
+  "workshops.notFound": "Tailerra ez da aurkitu."
 }

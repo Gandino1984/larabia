@@ -1,0 +1,38 @@
+.admin-workshops { max-width: 760px; }
+.admin-workshops h2 { margin: 0 0 1rem; }
+.admin-workshops-form { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+.admin-workshops-form label { display: flex; flex-direction: column; gap: 0.35rem; font-weight: 600; font-size: 0.9rem; color: #333; }
+.admin-workshops-form input,
+.admin-workshops-form textarea,
+.admin-workshops-form select {
+  font: inherit; padding: 0.55rem 0.7rem; border: 1px solid #ccc; border-radius: 8px; font-weight: 400;
+}
+.admin-workshops-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+.admin-workshops-authors { display: flex; flex-direction: column; gap: 0.5rem; }
+.admin-workshops-label { font-weight: 600; font-size: 0.9rem; color: #333; }
+.admin-workshops-author-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.admin-workshops-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #eee; border-radius: 999px; padding: 3px 8px 3px 4px; font-size: 0.82rem;
+}
+.admin-workshops-chip img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
+.admin-workshops-chip button { background: none; border: none; cursor: pointer; display: inline-flex; color: #a00; padding: 0; }
+.admin-workshops-actions { display: flex; gap: 0.75rem; }
+.admin-workshops-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0.6rem 1.1rem; border: 1px solid #bbb; border-radius: 8px; background: #f4f4f4;
+  font-weight: 600; cursor: pointer;
+}
+.admin-workshops-btn--save { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.admin-workshops-list-title { margin-top: 1rem; }
+.admin-workshops-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.admin-workshops-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 10px 12px; border: 1px solid #e2e2e2; border-radius: 8px; background: #fafafa;
+}
+.admin-workshops-item-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.admin-workshops-item-meta { font-size: 0.8rem; color: #666; }
+.admin-workshops-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.admin-workshops-item-actions button { background: none; border: 1px solid #ccc; border-radius: 6px; padding: 6px; cursor: pointer; color: #444; }
+.admin-workshops-item-actions button:hover { background: #efefef; }
+.admin-workshops-empty { color: #777; }
