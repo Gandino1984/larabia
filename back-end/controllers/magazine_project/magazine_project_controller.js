@@ -789,8 +789,11 @@ async function uploadCoverImage(id_project, imagePath) {
             return { error: "Proyecto no encontrado" };
         }
 
-        // Delete old cover image if exists
-        if (project.cover_image_project) {
+        // Delete old cover image if exists — but NOT when the new path is the
+        // same as the old one. Covers use a deterministic name (project_N.webp),
+        // so old === new on every replacement; deleting it here would remove the
+        // file we just uploaded and leave a dangling DB path (404).
+        if (project.cover_image_project && project.cover_image_project !== imagePath) {
             const backendDir = path.resolve(__dirname, '..', '..');
             const oldImagePath = path.join(backendDir, project.cover_image_project);
 
