@@ -18,21 +18,21 @@ export const DEFAULT_NAV = [
   { id: 'authors', kind: 'link', visible: true, min_role: 'all',
     label: { es: 'Autoras/es', en: 'Authors' },
     action: { type: 'section', value: 'authors' } },
-  { id: 'barrio', kind: 'group', visible: true, min_role: 'all',
-    label: { es: 'Barrio', en: 'Neighborhood' },
-    children: [
-      { id: 'microperfiles', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Micro-perfiles', en: 'Micro-profiles' }, action: { type: 'section', value: 'microperfiles' } },
-      { id: 'microabierto', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Espacio abierto', en: 'Open space' }, action: { type: 'section', value: 'openmic' } },
-      { id: 'galeria', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Galería', en: 'Gallery' }, action: { type: 'category', value: 'galeria' } },
-      { id: 'infantil', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Infantil', en: 'Kids' }, action: { type: 'category', value: 'infantil' } }
-    ] },
   { id: 'more', kind: 'group', visible: true, min_role: 'all',
     label: { es: 'Más', en: 'More' },
     children: [
+      { id: 'barrio', kind: 'group', visible: true, min_role: 'all',
+        label: { es: 'Barrio', en: 'Neighborhood' },
+        children: [
+          { id: 'microperfiles', kind: 'link', visible: true, min_role: 'all',
+            label: { es: 'Micro-perfiles', en: 'Micro-profiles' }, action: { type: 'section', value: 'microperfiles' } },
+          { id: 'microabierto', kind: 'link', visible: true, min_role: 'all',
+            label: { es: 'Espacio abierto', en: 'Open space' }, action: { type: 'section', value: 'openmic' } },
+          { id: 'galeria', kind: 'link', visible: true, min_role: 'all',
+            label: { es: 'Galería', en: 'Gallery' }, action: { type: 'category', value: 'galeria' } },
+          { id: 'infantil', kind: 'link', visible: true, min_role: 'all',
+            label: { es: 'Infantil', en: 'Kids' }, action: { type: 'category', value: 'infantil' } }
+        ] },
       { id: 'no-ficcion', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'No-ficción', en: 'Non-fiction' }, action: { type: 'category', value: 'no-ficcion' } },
       { id: 'ficcion', kind: 'link', visible: true, min_role: 'all',

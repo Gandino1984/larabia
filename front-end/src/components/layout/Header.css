@@ -1269,6 +1269,32 @@
   color: #666666;
 }
 
+/* Nested subgroup inside a mobile menu group (e.g. "Barrio" inside "Más") */
+.mobile-subgroup {
+  width: 100%;
+}
+
+.mobile-subgroup-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  font-weight: 600;
+}
+
+.mobile-subgroup-list {
+  display: flex;
+  flex-direction: column;
+  padding-left: 1rem;
+  border-left: 2px solid rgba(0, 0, 0, 0.12);
+  margin: 0.1rem 0 0.35rem 0.5rem;
+}
+
+.mobile-subgroup-item {
+  font-size: 0.85rem;
+}
+
 /* Mobile inline language buttons */
 .mobile-lang-btn {
   font-size: 0.95rem;

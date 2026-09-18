@@ -40,11 +40,56 @@ function NavGroupDropdown({ item, lang, roles, onSelect }) {
 
       {isOpen && (
         <div className="more-dropdown-menu">
+          {children.map((child) =>
+            child.kind === 'group' ? (
+              <NavSubGroup
+                key={child.id}
+                item={child}
+                lang={lang}
+                roles={roles}
+                onSelect={(c) => { onSelect(c); setIsOpen(false); }}
+              />
+            ) : (
+              <button
+                key={child.id}
+                className="more-dropdown-item"
+                onClick={() => { onSelect(child); setIsOpen(false); }}
+              >
+                {navLabel(child, lang)}
+              </button>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// A nested group rendered inline (accordion) inside a dropdown menu. Works on
+// touch and mouse without hover flyouts.
+function NavSubGroup({ item, lang, roles, onSelect }) {
+  const [open, setOpen] = useState(false);
+  const children = (item.children || []).filter(
+    (c) => c.visible !== false && canSeeNavItem(c, roles)
+  );
+  if (children.length === 0) return null;
+
+  return (
+    <div className="more-dropdown-subgroup">
+      <button
+        className="more-dropdown-item more-dropdown-subgroup-btn"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span>{navLabel(item, lang)}</span>
+        <ChevronDown size={14} className={`chevron-icon ${open ? 'rotated' : ''}`} />
+      </button>
+      {open && (
+        <div className="more-dropdown-submenu">
           {children.map((child) => (
             <button
               key={child.id}
-              className="more-dropdown-item"
-              onClick={() => { onSelect(child); setIsOpen(false); }}
+              className="more-dropdown-item more-dropdown-subitem"
+              onClick={() => onSelect(child)}
             >
               {navLabel(child, lang)}
             </button>

@@ -69,6 +69,7 @@ function Header() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMobileProjectsDropdown, setShowMobileProjectsDropdown] = useState(false);
   const [expandedMobileGroup, setExpandedMobileGroup] = useState(null);
+  const [expandedMobileSubGroup, setExpandedMobileSubGroup] = useState(null);
   const searchRef = useRef(null);
   const mobileSearchRef = useRef(null);
   const projectsDropdownRef = useRef(null);
@@ -693,15 +694,48 @@ function Header() {
                     </button>
                     {open && (
                       <div className="mobile-more-list">
-                        {groupChildren.map((child) => (
-                          <button
-                            key={child.id}
-                            className="mobile-project-item"
-                            onClick={() => handleNavItemSelect(child)}
-                          >
-                            {navLabel(child, currentLanguage)}
-                          </button>
-                        ))}
+                        {groupChildren.map((child) => {
+                          if (child.kind === 'group') {
+                            const subChildren = (child.children || []).filter(
+                              (c) => c.visible !== false && canSeeNavItem(c, roleFlags)
+                            );
+                            if (subChildren.length === 0) return null;
+                            const subOpen = expandedMobileSubGroup === child.id;
+                            return (
+                              <div className="mobile-subgroup" key={child.id}>
+                                <button
+                                  className="mobile-project-item mobile-subgroup-btn"
+                                  onClick={() => setExpandedMobileSubGroup(subOpen ? null : child.id)}
+                                >
+                                  <span>{navLabel(child, currentLanguage)}</span>
+                                  <ChevronDown size={13} className={`chevron-icon ${subOpen ? 'rotated' : ''}`} />
+                                </button>
+                                {subOpen && (
+                                  <div className="mobile-subgroup-list">
+                                    {subChildren.map((sub) => (
+                                      <button
+                                        key={sub.id}
+                                        className="mobile-project-item mobile-subgroup-item"
+                                        onClick={() => handleNavItemSelect(sub)}
+                                      >
+                                        {navLabel(sub, currentLanguage)}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }
+                          return (
+                            <button
+                              key={child.id}
+                              className="mobile-project-item"
+                              onClick={() => handleNavItemSelect(child)}
+                            >
+                              {navLabel(child, currentLanguage)}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

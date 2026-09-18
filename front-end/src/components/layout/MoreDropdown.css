@@ -67,6 +67,23 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* Nested subgroup (e.g. "Barrio" inside "Más") — inline accordion */
+.more-dropdown-subgroup-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.more-dropdown-submenu {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.more-dropdown-subitem {
+  padding-left: 32px;
+  font-size: 13px;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .more-dropdown-btn {
