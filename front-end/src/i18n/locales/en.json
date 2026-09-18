@@ -376,5 +376,6 @@
   "preview.banner.back": "Back to editor",
   "sectionPreviews.project": "Project",
   "sectionPreviews.article": "Article",
-  "sectionPreviews.readMore": "Read more"
+  "sectionPreviews.readMore": "Read more",
+  "editor.project.coverLabel": "Project cover image"
 }

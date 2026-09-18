@@ -53,6 +53,9 @@ function ArticleEditorBlocks() {
   const [selectedAuthorToAdd, setSelectedAuthorToAdd] = useState('');
   const [coverImageFile, setCoverImageFile] = useState(null);
   const [coverImagePreview, setCoverImagePreview] = useState(null);
+  // Project cover image (separate from the article cover above).
+  const [projectCoverFile, setProjectCoverFile] = useState(null);
+  const [projectCoverPreview, setProjectCoverPreview] = useState(null);
   const [blocks, setBlocks] = useState([]);
   const [saving, setSaving] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -181,6 +184,42 @@ function ArticleEditorBlocks() {
     });
   };
 
+  const handleProjectCoverChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (!file.type.startsWith('image/')) {
+        showError(t('editor.coverImage.mustBeImage'));
+        e.target.value = '';
+        return;
+      }
+      setProjectCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setProjectCoverPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveProjectCover = async () => {
+    const hadNewFile = !!projectCoverFile;
+    setProjectCoverFile(null);
+    setProjectCoverPreview(null);
+    const input = document.getElementById('project_cover');
+    if (input) input.value = '';
+    // If we're clearing an already-saved cover (not just an unsaved pick),
+    // remove it on the server too.
+    if (editingProjectId && !hadNewFile) {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+        await axios.delete(`${apiUrl}/magazine-project/remove-cover-image/${editingProjectId}`, {
+          headers: { 'x-user-id': currentUser?.id_user }
+        });
+        await fetchProjects();
+      } catch (error) {
+        console.error('Error removing project cover:', error);
+      }
+    }
+  };
+
   const handleAddProjectAuthor = (rawId) => {
     const authorId = parseInt(rawId);
     if (!authorId) return;
@@ -223,6 +262,22 @@ function ArticleEditorBlocks() {
   // returns the persisted project id. `statusOverride` sets the status on a NEW
   // project (defaults to draft) and only changes an EXISTING project's status
   // when explicitly given (so editing a published project keeps it published).
+  // Upload the selected project cover (if any) once the project has an id.
+  const uploadProjectCover = async (projectId) => {
+    if (!projectCoverFile || !projectId) return;
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+    const formData = new FormData();
+    formData.append('image', projectCoverFile);
+    await axios.post(`${apiUrl}/magazine-project/upload-cover-image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'x-user-id': currentUser?.id_user,
+        'x-project-id': projectId
+      }
+    });
+    setProjectCoverFile(null);
+  };
+
   const persistProject = async (statusOverride) => {
     const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
     const authHeader = { headers: { 'x-user-id': currentUser?.id_user } };
@@ -230,12 +285,14 @@ function ArticleEditorBlocks() {
     if (editingProjectId) {
       if (statusOverride) payload.status_project = statusOverride;
       await axios.patch(`${apiUrl}/magazine-project/update/${editingProjectId}`, payload, authHeader);
+      await uploadProjectCover(editingProjectId);
       return editingProjectId;
     }
     payload.status_project = statusOverride || 'draft';
     const response = await axios.post(`${apiUrl}/magazine-project/create`, payload, authHeader);
     const id = response.data?.data?.id_project;
     if (id) setEditingProjectId(id);
+    await uploadProjectCover(id);
     return id;
   };
 
@@ -252,6 +309,8 @@ function ArticleEditorBlocks() {
       format_project: '',
       status_project: 'draft'
     });
+    setProjectCoverFile(null);
+    setProjectCoverPreview(null);
   };
 
   const openCreateProjectModal = () => {
@@ -274,6 +333,17 @@ function ArticleEditorBlocks() {
       : (currentUser ? [{ id_user: currentUser.id_user, name_user: currentUser.name_user, image_user: currentUser.image_user }] : []);
     setNewProjectAuthors(authors);
     setSelectedProjectAuthorToAdd('');
+    setProjectCoverFile(null);
+    // Show the existing cover (if any) as the initial preview.
+    if (project.cover_image_project) {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+      const c = project.cover_image_project;
+      setProjectCoverPreview(
+        c.startsWith('http') ? c : c.startsWith('/') ? `${apiUrl}${c}` : `${apiUrl}/${c}`
+      );
+    } else {
+      setProjectCoverPreview(null);
+    }
     fetchProjectArticles(project.id_project);
     setShowProjectModal(true);
   };
@@ -1386,6 +1456,38 @@ function ArticleEditorBlocks() {
                   rows="3"
                   placeholder={t('editor.project.descriptionPlaceholder')}
                 />
+              </div>
+
+              <div className="form-group cover-image-group">
+                <label>{t('editor.project.coverLabel')}</label>
+                <div className="cover-image-upload">
+                  {projectCoverPreview ? (
+                    <div className="cover-image-preview">
+                      <img src={projectCoverPreview} alt={t('editor.coverImage.preview')} />
+                      <button
+                        type="button"
+                        className="btn-remove-preview"
+                        onClick={handleRemoveProjectCover}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="file"
+                        id="project_cover"
+                        accept="image/*"
+                        onChange={handleProjectCoverChange}
+                        className="cover-image-input"
+                      />
+                      <label htmlFor="project_cover" className="cover-image-label">
+                        <Plus size={24} />
+                        <span>{t('editor.coverImage.select')}</span>
+                      </label>
+                    </>
+                  )}
+                </div>
               </div>
 
               <div className="form-row-2">

@@ -376,5 +376,6 @@
   "preview.banner.back": "Editorera itzuli",
   "sectionPreviews.project": "Proiektua",
   "sectionPreviews.article": "Artikulua",
-  "sectionPreviews.readMore": "Irakurri gehiago"
+  "sectionPreviews.readMore": "Irakurri gehiago",
+  "editor.project.coverLabel": "Proiektuaren azaleko irudia"
 }

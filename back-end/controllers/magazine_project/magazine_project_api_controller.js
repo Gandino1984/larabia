@@ -269,7 +269,10 @@ async function remove(req, res) {
 
 async function uploadCoverImage(req, res) {
     try {
-        const { id_project } = req.params;
+        // The id arrives via the x-project-id header (same as the upload
+        // middleware reads); keep req.params as a fallback for any callers that
+        // pass it in the path.
+        const id_project = req.params.id_project || req.headers['x-project-id'];
 
         if (!id_project) {
             return res.status(400).json({
