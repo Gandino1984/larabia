@@ -21,6 +21,10 @@ export const DEFAULT_NAV = [
   { id: 'more', kind: 'group', visible: true, min_role: 'all',
     label: { es: 'Más', en: 'More' },
     children: [
+      { id: 'no-ficcion', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'No-ficción', en: 'Non-fiction' }, action: { type: 'category', value: 'no-ficcion' } },
+      { id: 'ficcion', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Ficción', en: 'Fiction' }, action: { type: 'category', value: 'ficcion' } },
       { id: 'barrio', kind: 'group', visible: true, min_role: 'all',
         label: { es: 'Barrio', en: 'Neighborhood' },
         children: [
@@ -33,10 +37,6 @@ export const DEFAULT_NAV = [
           { id: 'infantil', kind: 'link', visible: true, min_role: 'all',
             label: { es: 'Infantil', en: 'Kids' }, action: { type: 'category', value: 'infantil' } }
         ] },
-      { id: 'no-ficcion', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'No-ficción', en: 'Non-fiction' }, action: { type: 'category', value: 'no-ficcion' } },
-      { id: 'ficcion', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Ficción', en: 'Fiction' }, action: { type: 'category', value: 'ficcion' } },
       { id: 'internacional', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Internacional', en: 'International' }, action: { type: 'category', value: 'internacional' } },
       { id: 'talleres', kind: 'link', visible: true, min_role: 'all',
