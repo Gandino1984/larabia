@@ -373,5 +373,7 @@
   "editor.previewDraft": "Preview",
   "editor.previewDraftHint": "Open the draft in a new tab (save first to see the latest changes)",
   "preview.banner.label": "Draft preview — not published",
-  "preview.banner.back": "Back to editor"
+  "preview.banner.back": "Back to editor",
+  "sectionPreviews.project": "Project",
+  "sectionPreviews.article": "Article"
 }

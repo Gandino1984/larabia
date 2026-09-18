@@ -373,5 +373,7 @@
   "editor.previewDraft": "Aurrebista",
   "editor.previewDraftHint": "Ireki zirriborroa fitxa berrian (gorde lehenik azken aldaketak ikusteko)",
   "preview.banner.label": "Zirriborroaren aurrebista — argitaratu gabe",
-  "preview.banner.back": "Editorera itzuli"
+  "preview.banner.back": "Editorera itzuli",
+  "sectionPreviews.project": "Proiektua",
+  "sectionPreviews.article": "Artikulua"
 }

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import SectionPreviews from './SectionPreviews';
 import './HomePage.css';
 
 function AuthorAvatar({ author, getUrl }) {
@@ -189,6 +190,9 @@ function HomePage() {
           </div>
         )}
       </section>
+
+      {/* Section previews: full-width slideshows per header-bar button */}
+      <SectionPreviews />
     </div>
   );
 }
