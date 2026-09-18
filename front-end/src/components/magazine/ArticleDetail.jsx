@@ -385,6 +385,15 @@ function ArticleDetail({ previewMode = false }) {
                           {block.image_caption && (
                             <p className="image-caption">{block.image_caption}</p>
                           )}
+                          {block.interaction_type === 'audio' && block.interaction_data && (
+                            <audio
+                              className="image-audio"
+                              controls
+                              src={block.interaction_data.startsWith('http')
+                                ? block.interaction_data
+                                : `${apiUrl}/${block.interaction_data.startsWith('/') ? block.interaction_data.substring(1) : block.interaction_data}`}
+                            />
+                          )}
                         </div>
                       )}
                       {block.block_type === 'iframe' && (

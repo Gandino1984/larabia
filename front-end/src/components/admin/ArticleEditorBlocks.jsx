@@ -10,9 +10,18 @@ import TextBlock from './blocks/TextBlock';
 import ImageBlock from './blocks/ImageBlock';
 import IframeBlock from './blocks/IframeBlock';
 import HScrollEditor from './HScrollEditor';
+import MicroPerfilEditor from './MicroPerfilEditor';
 import NewsletterTab from './NewsletterTab';
 import axios from 'axios';
 import './ArticleEditorBlocks.css';
+
+// Decide which editor UI to show for an article: comic panels win, then the
+// category-driven micro-perfil format, otherwise the regular block editor.
+const detectContentType = (blocks, category) => {
+  if (blocks?.some(b => b.block_type === 'comic_panel')) return 'cómic';
+  if ((category || '').toLowerCase() === 'micro-perfiles') return 'microperfil';
+  return 'regular';
+};
 
 function ArticleEditorBlocks() {
   const { currentUser, isArticleAuthor, isSuperAdmin, canPublishDirectly, canCreateContent } = useAuth();
@@ -135,9 +144,8 @@ function ArticleEditorBlocks() {
         featured_article: selectedArticle.featured_article
       });
 
-      // Detect content type from existing blocks
-      const hasComicBlocks = selectedArticle.blocks?.some(b => b.block_type === 'comic_panel');
-      setArticleContentType(hasComicBlocks ? 'cómic' : 'regular');
+      // Detect content type from blocks + category (micro-perfil is category-driven).
+      setArticleContentType(detectContentType(selectedArticle.blocks, selectedArticle.category_article));
 
       // Set cover image preview if exists
       if (selectedArticle.cover_image_article) {
@@ -451,10 +459,9 @@ function ArticleEditorBlocks() {
     if (result.success) {
       const fetchedBlocks = result.data || [];
       setBlocks(fetchedBlocks);
-      // Detect content type from the actual blocks, not from article metadata
-      // This also fixes the case where the user switches from editing a comic to a regular article
-      const hasComicBlocks = fetchedBlocks.some(b => b.block_type === 'comic_panel');
-      setArticleContentType(hasComicBlocks ? 'cómic' : 'regular');
+      // Detect content type from the actual blocks + category. Micro-perfil is
+      // driven by the category since it stores a plain image block.
+      setArticleContentType(detectContentType(fetchedBlocks, editingArticle?.category_article || formData.category_article));
     }
   };
 
@@ -467,6 +474,32 @@ function ArticleEditorBlocks() {
     if (fieldErrors[name]) {
       setFieldErrors(prev => { const next = { ...prev }; delete next[name]; return next; });
     }
+  };
+
+  // Switch to the micro-perfil format: force the category (so it publishes to
+  // the micro-perfiles section) and keep a single image block to edit.
+  const selectMicroPerfil = () => {
+    setArticleContentType('microperfil');
+    setFormData(prev => ({ ...prev, category_article: 'micro-perfiles' }));
+    setBlocks(prev => {
+      const existingImage = prev.find(b => b.block_type === 'image');
+      if (existingImage) return [existingImage];
+      return [{
+        tempId: `mp_${Date.now()}`,
+        block_type: 'image',
+        block_order: 0,
+        image_url: '',
+        image_caption: '',
+        is_interactive: false,
+        interaction_type: null,
+        interaction_data: null,
+      }];
+    });
+  };
+
+  // When leaving the micro-perfil format, drop the forced category.
+  const clearMicroPerfilCategory = () => {
+    setFormData(prev => prev.category_article === 'micro-perfiles' ? { ...prev, category_article: 'general' } : prev);
   };
 
   const handleCoverImageChange = (e) => {
@@ -603,9 +636,24 @@ function ArticleEditorBlocks() {
     if (!hasCompleteBlock) {
       const errorMessage = articleContentType === 'cómic'
         ? t('editor.validation.addComicPanel')
+        : articleContentType === 'microperfil'
+        ? t('editor.microperfil.needImage')
         : t('editor.validation.addContentBlock');
       showError(errorMessage);
       return;
+    }
+
+    // Micro-perfil: caption is required and capped at 700 characters.
+    if (articleContentType === 'microperfil') {
+      const caption = (blocks[0]?.image_caption || '').trim();
+      if (!caption) {
+        showError(t('editor.microperfil.needCaption'));
+        return;
+      }
+      if (caption.length > 700) {
+        showError(t('editor.microperfil.captionTooLong', { count: caption.length }));
+        return;
+      }
     }
 
     setSaving(true);
@@ -1017,6 +1065,8 @@ function ArticleEditorBlocks() {
                 name="category_article"
                 value={formData.category_article}
                 onChange={handleInputChange}
+                disabled={articleContentType === 'microperfil'}
+                title={articleContentType === 'microperfil' ? t('editor.microperfil.categoryLocked') : undefined}
                 className={`project-selector-header ${formData.category_article === 'general' ? 'select-placeholder' : ''}`}
               >
                 <option value="general">{t('editor.category.general')}</option>
@@ -1189,16 +1239,23 @@ function ArticleEditorBlocks() {
               <button
                 type="button"
                 className={`switch-option ${articleContentType === 'regular' ? 'switch-active' : ''}`}
-                onClick={() => { setArticleContentType('regular'); setBlocks([]); }}
+                onClick={() => { setArticleContentType('regular'); setBlocks([]); clearMicroPerfilCategory(); }}
               >
                 {t('editor.contentType.regular')}
               </button>
               <button
                 type="button"
                 className={`switch-option ${articleContentType === 'cómic' ? 'switch-active' : ''}`}
-                onClick={() => { setArticleContentType('cómic'); setBlocks([]); }}
+                onClick={() => { setArticleContentType('cómic'); setBlocks([]); clearMicroPerfilCategory(); }}
               >
                 {t('editor.contentType.comic')}
+              </button>
+              <button
+                type="button"
+                className={`switch-option ${articleContentType === 'microperfil' ? 'switch-active' : ''}`}
+                onClick={selectMicroPerfil}
+              >
+                {t('editor.contentType.microperfil')}
               </button>
             </div>
           </div>
@@ -1216,6 +1273,14 @@ function ArticleEditorBlocks() {
                   const imageUrl = await uploadBlockImage(file);
                   return { image_url: imageUrl };
                 }}
+                onUploadAudio={uploadPanelAudio}
+              />
+            ) : articleContentType === 'microperfil' ? (
+              // Dedicated micro-perfil UI (single image + caption + optional audio)
+              <MicroPerfilEditor
+                block={blocks[0]}
+                onChange={(newBlock) => setBlocks([newBlock])}
+                onUploadImage={uploadBlockImage}
                 onUploadAudio={uploadPanelAudio}
               />
             ) : (

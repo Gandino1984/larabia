@@ -1127,3 +1127,11 @@
     padding: 1.25rem;
   }
 }
+
+/* Audio player under a micro-perfil / image block */
+.image-content .image-audio {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin: 0.75rem auto 0;
+}

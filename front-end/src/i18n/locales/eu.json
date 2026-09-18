@@ -379,5 +379,20 @@
   "sectionPreviews.readMore": "Irakurri gehiago",
   "editor.project.coverLabel": "Proiektuaren azaleko irudia",
   "sectionPreviews.barrio": "Auzoa",
-  "sectionPreviews.workshop": "Tailerra"
+  "sectionPreviews.workshop": "Tailerra",
+  "editor.contentType.microperfil": "Mikro-profila",
+  "editor.microperfil.heading": "Mikro-profila",
+  "editor.microperfil.hint": "Irudi bat, oin-testu bat (geh. 700 karaktere) eta, aukeran, audio bat.",
+  "editor.microperfil.imageLabel": "Irudia",
+  "editor.microperfil.selectImage": "Hautatu irudia",
+  "editor.microperfil.captionLabel": "Oin-testua",
+  "editor.microperfil.captionPlaceholder": "Idatzi oin-testua (geh. 700 karaktere)…",
+  "editor.microperfil.audioLabel": "Audioa (aukerakoa)",
+  "editor.microperfil.addAudio": "Gehitu audioa",
+  "editor.microperfil.audioInvalid": "Audio-formatu baliogabea (MP3, AAC, OGG)",
+  "editor.microperfil.audioTooLarge": "Audioa handiegia da. Gehienez 20MB.",
+  "editor.microperfil.needImage": "Gehitu irudi bat mikro-profilari.",
+  "editor.microperfil.needCaption": "Oin-testua beharrezkoa da.",
+  "editor.microperfil.captionTooLong": "Oin-testua luzeegia da ({{count}}/700).",
+  "editor.microperfil.categoryLocked": "Mikro-profilak beti Mikro-profilak atalean argitaratzen dira."
 }

@@ -379,5 +379,20 @@
   "sectionPreviews.readMore": "Read more",
   "editor.project.coverLabel": "Project cover image",
   "sectionPreviews.barrio": "Neighborhood",
-  "sectionPreviews.workshop": "Workshop"
+  "sectionPreviews.workshop": "Workshop",
+  "editor.contentType.microperfil": "Micro-profile",
+  "editor.microperfil.heading": "Micro-profile",
+  "editor.microperfil.hint": "One image, a caption (max 700 characters) and, optionally, an audio clip.",
+  "editor.microperfil.imageLabel": "Image",
+  "editor.microperfil.selectImage": "Select image",
+  "editor.microperfil.captionLabel": "Caption",
+  "editor.microperfil.captionPlaceholder": "Write the caption (max 700 characters)…",
+  "editor.microperfil.audioLabel": "Audio (optional)",
+  "editor.microperfil.addAudio": "Add audio",
+  "editor.microperfil.audioInvalid": "Invalid audio format (MP3, AAC, OGG)",
+  "editor.microperfil.audioTooLarge": "The audio is too large. 20MB max.",
+  "editor.microperfil.needImage": "Add an image to the micro-profile.",
+  "editor.microperfil.needCaption": "The caption is required.",
+  "editor.microperfil.captionTooLong": "The caption is too long ({{count}}/700).",
+  "editor.microperfil.categoryLocked": "Micro-profiles are always published in the Micro-profiles section."
 }

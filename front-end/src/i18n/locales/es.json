@@ -379,5 +379,20 @@
   "sectionPreviews.readMore": "Leer más",
   "editor.project.coverLabel": "Imagen de portada del proyecto",
   "sectionPreviews.barrio": "Barrio",
-  "sectionPreviews.workshop": "Taller"
+  "sectionPreviews.workshop": "Taller",
+  "editor.contentType.microperfil": "Micro-perfil",
+  "editor.microperfil.heading": "Micro-perfil",
+  "editor.microperfil.hint": "Una imagen, un pie de foto (máx. 700 caracteres) y, opcionalmente, un audio.",
+  "editor.microperfil.imageLabel": "Imagen",
+  "editor.microperfil.selectImage": "Seleccionar imagen",
+  "editor.microperfil.captionLabel": "Pie de foto",
+  "editor.microperfil.captionPlaceholder": "Escribe el pie de foto (máx. 700 caracteres)…",
+  "editor.microperfil.audioLabel": "Audio (opcional)",
+  "editor.microperfil.addAudio": "Añadir audio",
+  "editor.microperfil.audioInvalid": "Formato de audio no válido (MP3, AAC, OGG)",
+  "editor.microperfil.audioTooLarge": "El audio es demasiado grande. Máximo 20MB.",
+  "editor.microperfil.needImage": "Añade una imagen al micro-perfil.",
+  "editor.microperfil.needCaption": "El pie de foto es obligatorio.",
+  "editor.microperfil.captionTooLong": "El pie de foto es demasiado largo ({{count}}/700).",
+  "editor.microperfil.categoryLocked": "Los micro-perfiles se publican siempre en la sección Micro-perfiles."
 }
