@@ -46,6 +46,10 @@ export const UIProvider = ({ children }) => {
 
   // Navigation history (to track where user came from)
   const [previousView, setPreviousView] = useState('home');
+  // Dedicated origin for the project detail view. The single `previousView`
+  // above gets overwritten when you open an article from inside a project, so
+  // the project's own "Volver" needs its own remembered origin.
+  const [projectBackView, setProjectBackView] = useState('home');
 
   // Card notification states
   const [error, setError] = useState({ databaseResponseError: '', imageError: '', articleError: '', userError: '' });
@@ -231,9 +235,43 @@ export const UIProvider = ({ children }) => {
   };
 
   const navigateToProjectDetail = () => {
+    // Remember the actual page we came from so the project's back button
+    // returns there (home, article list, an article, authors, admin, etc.).
+    const origin =
+      showArticleDetail ? 'articleDetail' :
+      showArticlesList ? 'articlesList' :
+      showAuthors ? 'authors' :
+      showAuthorProfile ? 'authorProfile' :
+      showAuthorPublications ? 'authorPublications' :
+      showAdmin ? 'admin' :
+      showTalleres ? 'talleres' :
+      showWorkshopDetail ? 'workshopDetail' :
+      showOpenMic ? 'openmic' :
+      showMicroPerfiles ? 'microperfiles' :
+      'home';
+    setProjectBackView(origin);
     setPreviousView('home');
     resetAllViews();
     setShowProjectDetail(true);
+  };
+
+  // Back from the project detail view — uses the project's own remembered origin.
+  const navigateBackFromProject = () => {
+    resetAllViews();
+    switch (projectBackView) {
+      case 'articlesList': setShowArticlesList(true); break;
+      case 'articleDetail': setShowArticleDetail(true); break;
+      case 'authors': setShowAuthors(true); break;
+      case 'authorProfile': setShowAuthorProfile(true); break;
+      case 'authorPublications': setShowAuthorPublications(true); break;
+      case 'admin': setShowAdmin(true); break;
+      case 'talleres': setShowTalleres(true); break;
+      case 'workshopDetail': setShowWorkshopDetail(true); break;
+      case 'openmic': setShowOpenMic(true); break;
+      case 'microperfiles': setShowMicroPerfiles(true); break;
+      case 'home':
+      default: setShowHome(true); break;
+    }
   };
 
   const navigateToOpenMic = () => {
@@ -347,6 +385,7 @@ export const UIProvider = ({ children }) => {
     navigateToAuthorProfile,
     navigateToAuthorPublications,
     navigateToProjectDetail,
+    navigateBackFromProject,
     showOpenMic,
     navigateToOpenMic,
     showMicroPerfiles,

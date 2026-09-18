@@ -10,7 +10,7 @@ import './ProjectDetail.css';
 
 function ProjectDetail() {
   const { t } = useTranslation();
-  const { navigateBack } = useUI();
+  const { navigateBackFromProject } = useUI();
   const { selectedProject } = useMagazine();
   const [projectArticles, setProjectArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +65,7 @@ function ProjectDetail() {
 
   return (
     <div className="project-detail-page">
-      <button className="btn-back-nav" onClick={navigateBack}>
+      <button className="btn-back-nav" onClick={navigateBackFromProject}>
         <ArrowLeft size={20} />
         <span>{t('common.buttons.back')}</span>
       </button>
