@@ -34,6 +34,12 @@ const PREVIEW_SECTIONS = [
     matchProject: (p) => ['no-ficcion', 'periodistico'].includes(norm(p.type_project)),
     matchArticle: (a) => norm(a.category_article) === 'no-ficcion',
   },
+  {
+    id: 'ficcion',
+    titleKey: 'editor.category.ficcion',
+    matchProject: (p) => norm(p.type_project) === 'ficcion',
+    matchArticle: (a) => norm(a.category_article) === 'ficcion',
+  },
 ];
 
 function SectionPreviews() {
