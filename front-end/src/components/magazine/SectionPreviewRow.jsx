@@ -1,11 +1,12 @@
 // magazine-front/src/components/magazine/SectionPreviewRow.jsx
 //
 // One section-preview block: a title + a horizontal, snap-scrolling slideshow of
-// cards (image + description). Desktop shows prev/next arrows; on mobile the
-// track is swipeable and cards take a more vertical shape.
+// cards. On desktop each card is a wide horizontal banner (image left, text
+// right, "Leer más" far right); on mobile it's vertical (image on top, text and
+// button below). Every card has a "Leer más" button that opens the item.
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 
 function PreviewCard({ item, onClick }) {
   const { t } = useTranslation();
@@ -13,7 +14,7 @@ function PreviewCard({ item, onClick }) {
   const bg = broken ? '/logoFondoNegro.jpg' : item.image;
 
   return (
-    <button type="button" className="section-preview__card" onClick={() => onClick(item)}>
+    <article className="section-preview__card" onClick={() => onClick(item)}>
       <div className="section-preview__img" style={{ backgroundImage: `url(${bg})` }}>
         {/* Hidden img to detect broken covers and fall back to the logo. */}
         <img src={item.image} alt="" style={{ display: 'none' }} onError={() => setBroken(true)} />
@@ -21,11 +22,24 @@ function PreviewCard({ item, onClick }) {
           {item.kind === 'project' ? t('sectionPreviews.project') : t('sectionPreviews.article')}
         </span>
       </div>
+
       <div className="section-preview__body">
-        <h3 className="section-preview__card-title">{item.title}</h3>
-        {item.description && <p className="section-preview__desc">{item.description}</p>}
+        <div className="section-preview__text">
+          <h3 className="section-preview__card-title">{item.title}</h3>
+          {item.description && <p className="section-preview__desc">{item.description}</p>}
+        </div>
+        <div className="section-preview__cta">
+          <button
+            type="button"
+            className="section-preview__readmore"
+            onClick={(e) => { e.stopPropagation(); onClick(item); }}
+          >
+            {t('sectionPreviews.readMore')}
+            <ArrowRight size={16} />
+          </button>
+        </div>
       </div>
-    </button>
+    </article>
   );
 }
 

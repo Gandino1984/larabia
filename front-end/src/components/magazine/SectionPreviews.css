@@ -1,5 +1,6 @@
 /* Section previews — full-width home area between hero and footer.
-   Mobile-first: cards are portrait-ish and the track is swipeable. */
+   Mobile-first: cards are vertical (image on top) and the track is swipeable.
+   Desktop/widescreen: cards become wide horizontal banners. */
 
 .section-previews {
   width: 100%;
@@ -76,10 +77,11 @@
   border-radius: 3px;
 }
 
+/* ---- Card (mobile base: vertical) ---- */
 .section-preview__card {
   flex: 0 0 auto;
   width: 80vw;
-  max-width: 320px;
+  max-width: 340px;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
@@ -105,6 +107,7 @@
   background-size: cover;
   background-position: center;
   background-color: #333;
+  flex-shrink: 0;
 }
 
 .section-preview__kind {
@@ -122,7 +125,14 @@
 }
 
 .section-preview__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   padding: 14px 16px 18px;
+  flex: 1;
+}
+
+.section-preview__text {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -147,7 +157,32 @@
   overflow: hidden;
 }
 
-/* Desktop / tablet: wider layout, visible arrows, landscape-ish cards */
+.section-preview__cta {
+  display: flex;
+}
+
+.section-preview__readmore {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.section-preview__readmore:hover {
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+/* ---- Desktop / widescreen: horizontal banner cards ---- */
 @media (min-width: 768px) {
   .section-previews {
     padding: 2.5rem 0 3.5rem;
@@ -168,15 +203,53 @@
 
   .section-preview__track {
     padding: 6px 40px 16px;
-    gap: 20px;
+    gap: 24px;
   }
 
   .section-preview__card {
-    width: 340px;
+    flex-direction: row;
+    width: min(1040px, 92vw);
     max-width: none;
+    align-items: stretch;
   }
 
   .section-preview__img {
-    height: 210px;
+    width: 340px;
+    flex: 0 0 340px;
+    height: auto;
+    min-height: 240px;
+  }
+
+  .section-preview__body {
+    flex-direction: row;
+    align-items: center;
+    gap: 28px;
+    padding: 28px 32px;
+  }
+
+  .section-preview__text {
+    flex: 1;
+    gap: 12px;
+  }
+
+  .section-preview__card-title {
+    font-size: 1.4rem;
+  }
+
+  .section-preview__desc {
+    font-size: 1rem;
+    -webkit-line-clamp: 5;
+  }
+
+  /* "Leer más" pushed as far right as possible */
+  .section-preview__cta {
+    flex: 0 0 auto;
+    margin-left: auto;
+    align-items: center;
+  }
+
+  .section-preview__readmore {
+    padding: 10px 20px;
+    font-size: 0.95rem;
   }
 }

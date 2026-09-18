@@ -375,5 +375,6 @@
   "preview.banner.label": "Draft preview — not published",
   "preview.banner.back": "Back to editor",
   "sectionPreviews.project": "Project",
-  "sectionPreviews.article": "Article"
+  "sectionPreviews.article": "Article",
+  "sectionPreviews.readMore": "Read more"
 }

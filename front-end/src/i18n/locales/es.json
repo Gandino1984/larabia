@@ -375,5 +375,6 @@
   "preview.banner.label": "Vista previa del borrador — no publicado",
   "preview.banner.back": "Volver al editor",
   "sectionPreviews.project": "Proyecto",
-  "sectionPreviews.article": "Artículo"
+  "sectionPreviews.article": "Artículo",
+  "sectionPreviews.readMore": "Leer más"
 }
