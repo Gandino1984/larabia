@@ -19,7 +19,11 @@ function PreviewCard({ item, onClick }) {
         {/* Hidden img to detect broken covers and fall back to the logo. */}
         <img src={item.image} alt="" style={{ display: 'none' }} onError={() => setBroken(true)} />
         <span className="section-preview__kind">
-          {item.kind === 'project' ? t('sectionPreviews.project') : t('sectionPreviews.article')}
+          {item.kind === 'project'
+            ? t('sectionPreviews.project')
+            : item.kind === 'workshop'
+              ? t('sectionPreviews.workshop')
+              : t('sectionPreviews.article')}
         </span>
       </div>
 

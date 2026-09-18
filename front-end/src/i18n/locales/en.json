@@ -377,5 +377,7 @@
   "sectionPreviews.project": "Project",
   "sectionPreviews.article": "Article",
   "sectionPreviews.readMore": "Read more",
-  "editor.project.coverLabel": "Project cover image"
+  "editor.project.coverLabel": "Project cover image",
+  "sectionPreviews.barrio": "Neighborhood",
+  "sectionPreviews.workshop": "Workshop"
 }

@@ -377,5 +377,7 @@
   "sectionPreviews.project": "Proyecto",
   "sectionPreviews.article": "Artículo",
   "sectionPreviews.readMore": "Leer más",
-  "editor.project.coverLabel": "Imagen de portada del proyecto"
+  "editor.project.coverLabel": "Imagen de portada del proyecto",
+  "sectionPreviews.barrio": "Barrio",
+  "sectionPreviews.workshop": "Taller"
 }

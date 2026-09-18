@@ -2,13 +2,16 @@
 //
 // "Section previews": a full-width area shown on the home page between the hero
 // and the footer. Each entry mirrors one header-bar button and shows a
-// horizontal slideshow of the works that belong to it (projects + articles).
+// horizontal slideshow of the works that belong to it.
 //
-// Extensible: add more entries to PREVIEW_SECTIONS as we build out the other
-// buttons. For now only "No-ficción" is defined.
+// Items can come from projects, articles and workshops. A section either matches
+// a single tag/type or combines several (e.g. "Barrio").
+//
+// Extensible: add more entries to PREVIEW_SECTIONS as we build out the buttons.
 import { useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
+import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useUI } from '../../app_context/UIContext';
 import SectionPreviewRow from './SectionPreviewRow';
 import './SectionPreviews.css';
@@ -26,8 +29,20 @@ const resolveImage = (path) => {
   return `${apiUrl}${path.startsWith('/') ? path : '/' + path}`;
 };
 
-// Each section declares which projects and which articles belong to it.
+// Article categories that make up the "Barrio" section (neighbourhood content:
+// micro-perfiles, espacio abierto, talleres, infantil).
+const BARRIO_CATEGORIES = ['micro-perfiles', 'terrenito en pluton', 'micro abierto', 'talleres', 'infantil'];
+
+// Each section declares which projects/articles belong to it, and whether it
+// also pulls in workshops.
 const PREVIEW_SECTIONS = [
+  {
+    id: 'barrio',
+    titleKey: 'sectionPreviews.barrio',
+    matchProject: () => false,
+    matchArticle: (a) => BARRIO_CATEGORIES.includes(norm(a.category_article)),
+    includeWorkshops: true,
+  },
   {
     id: 'no-ficcion',
     titleKey: 'editor.category.noficcion',
@@ -45,17 +60,24 @@ const PREVIEW_SECTIONS = [
 function SectionPreviews() {
   const { t } = useTranslation();
   const { projects, allArticles, fetchProjects, setSelectedArticle, fetchArticleById, setSelectedProject } = useMagazine();
-  const { navigateToArticle, navigateToProjectDetail } = useUI();
+  const { workshops, fetchWorkshops, setSelectedWorkshop } = useWorkshop();
+  const { navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail } = useUI();
 
-  // Projects aren't loaded by default on the home page; fetch them once.
+  // Projects and workshops aren't loaded by default on the home page; fetch once.
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+    fetchWorkshops();
+  }, [fetchProjects, fetchWorkshops]);
 
   const handleItemClick = useCallback(async (item) => {
     if (item.kind === 'project') {
       setSelectedProject(item.raw);
       navigateToProjectDetail();
+      return;
+    }
+    if (item.kind === 'workshop') {
+      setSelectedWorkshop(item.raw);
+      navigateToWorkshopDetail();
       return;
     }
     // Article: mirror the hero/card open path so the detail has full data.
@@ -64,7 +86,7 @@ function SectionPreviews() {
       await fetchArticleById(item.raw.id_article);
     }
     navigateToArticle();
-  }, [setSelectedProject, navigateToProjectDetail, setSelectedArticle, fetchArticleById, navigateToArticle]);
+  }, [setSelectedProject, navigateToProjectDetail, setSelectedWorkshop, navigateToWorkshopDetail, setSelectedArticle, fetchArticleById, navigateToArticle]);
 
   const sections = useMemo(() => {
     return PREVIEW_SECTIONS.map((sec) => {
@@ -90,9 +112,20 @@ function SectionPreviews() {
           raw: a,
         }));
 
-      return { id: sec.id, title: t(sec.titleKey), items: [...projectItems, ...articleItems] };
+      const workshopItems = sec.includeWorkshops
+        ? (workshops || []).map((w) => ({
+            key: `workshop-${w.id_workshop}`,
+            kind: 'workshop',
+            title: w.title_workshop,
+            description: w.description_workshop,
+            image: resolveImage(w.cover_image_workshop),
+            raw: w,
+          }))
+        : [];
+
+      return { id: sec.id, title: t(sec.titleKey), items: [...projectItems, ...articleItems, ...workshopItems] };
     });
-  }, [projects, allArticles, t]);
+  }, [projects, allArticles, workshops, t]);
 
   const visibleSections = sections.filter((s) => s.items.length > 0);
   if (visibleSections.length === 0) return null;

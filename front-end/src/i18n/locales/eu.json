@@ -377,5 +377,7 @@
   "sectionPreviews.project": "Proiektua",
   "sectionPreviews.article": "Artikulua",
   "sectionPreviews.readMore": "Irakurri gehiago",
-  "editor.project.coverLabel": "Proiektuaren azaleko irudia"
+  "editor.project.coverLabel": "Proiektuaren azaleko irudia",
+  "sectionPreviews.barrio": "Auzoa",
+  "sectionPreviews.workshop": "Tailerra"
 }
