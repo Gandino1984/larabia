@@ -5,16 +5,18 @@
 .section-previews {
   width: 100%;
   background: var(--landing-bg, #252525);
-  padding: 1.5rem 0 2.5rem;
 }
 
+/* Each section is a full-width band. Alternating background tones make it easy
+   to tell one section from the next. Cards (#1c1c1c) stay visible on both. */
 .section-preview {
   width: 100%;
-  margin-bottom: 2rem;
+  padding: 1.75rem 0;
+  background: #252525;
 }
 
-.section-preview:last-child {
-  margin-bottom: 0;
+.section-preview:nth-child(even) {
+  background: #191919;
 }
 
 .section-preview__head {
@@ -190,8 +192,8 @@
 
 /* ---- Desktop / widescreen: horizontal banner cards ---- */
 @media (min-width: 768px) {
-  .section-previews {
-    padding: 2.5rem 0 3.5rem;
+  .section-preview {
+    padding: 2.75rem 0;
   }
 
   .section-preview__head {
