@@ -67,15 +67,20 @@
   scroll-padding-left: 16px;
   -webkit-overflow-scrolling: touch;
   padding: 4px 16px 12px;
-  scrollbar-width: thin;
+  scrollbar-width: auto;
+  scrollbar-color: #ffffff #000000; /* thumb (white) / track (black) — Firefox */
 }
 
 .section-preview__track::-webkit-scrollbar {
-  height: 6px;
+  height: 10px;
+}
+.section-preview__track::-webkit-scrollbar-track {
+  background: #000000;
+  border-radius: 5px;
 }
 .section-preview__track::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 3px;
+  background: #ffffff;
+  border-radius: 5px;
 }
 
 /* ---- Card (mobile base: vertical) ---- */
