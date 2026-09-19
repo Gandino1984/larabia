@@ -389,7 +389,7 @@
   "editor.microperfil.captionPlaceholder": "Idatzi oin-testua (geh. 700 karaktere)…",
   "editor.microperfil.audioLabel": "Audioa (aukerakoa)",
   "editor.microperfil.addAudio": "Gehitu audioa",
-  "editor.microperfil.audioInvalid": "Audio-formatu baliogabea (MP3, AAC, OGG)",
+  "editor.microperfil.audioInvalid": "Audio-formatu baliogabea (MP3, AAC, OGG, MP4)",
   "editor.microperfil.audioTooLarge": "Audioa handiegia da. Gehienez 20MB.",
   "editor.microperfil.needImage": "Gehitu irudi bat mikro-profilari.",
   "editor.microperfil.needCaption": "Oin-testua beharrezkoa da.",

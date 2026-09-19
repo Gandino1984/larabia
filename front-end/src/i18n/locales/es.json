@@ -389,7 +389,7 @@
   "editor.microperfil.captionPlaceholder": "Escribe el pie de foto (máx. 700 caracteres)…",
   "editor.microperfil.audioLabel": "Audio (opcional)",
   "editor.microperfil.addAudio": "Añadir audio",
-  "editor.microperfil.audioInvalid": "Formato de audio no válido (MP3, AAC, OGG)",
+  "editor.microperfil.audioInvalid": "Formato de audio no válido (MP3, AAC, OGG, MP4)",
   "editor.microperfil.audioTooLarge": "El audio es demasiado grande. Máximo 20MB.",
   "editor.microperfil.needImage": "Añade una imagen al micro-perfil.",
   "editor.microperfil.needCaption": "El pie de foto es obligatorio.",

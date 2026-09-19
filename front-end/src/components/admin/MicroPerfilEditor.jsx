@@ -11,7 +11,7 @@ import './MicroPerfilEditor.css';
 
 const CAPTION_MAX = 700;
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
-const AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/webm', 'audio/aac', 'audio/x-aac', 'audio/aacp', 'audio/vnd.dlna.adts', 'audio/mp4', 'audio/x-m4a'];
+const AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/webm', 'audio/aac', 'audio/x-aac', 'audio/aacp', 'audio/vnd.dlna.adts', 'audio/mp4', 'audio/x-m4a', 'video/mp4'];
 
 const resolveUrl = (u) => {
   if (!u) return '';
@@ -140,7 +140,7 @@ function MicroPerfilEditor({ block, onChange, onUploadImage, onUploadAudio }) {
             <input
               type="file"
               id="mp-audio"
-              accept=".mp3,.aac,.m4a,.ogg,audio/mpeg,audio/aac,audio/aacp,audio/vnd.dlna.adts,audio/mp4,audio/x-m4a,audio/ogg"
+              accept=".mp3,.aac,.m4a,.ogg,.mp4,audio/mpeg,audio/aac,audio/aacp,audio/vnd.dlna.adts,audio/mp4,audio/x-m4a,audio/ogg,video/mp4"
               onChange={handleAudio}
               className="cover-image-input"
             />

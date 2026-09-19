@@ -389,7 +389,7 @@
   "editor.microperfil.captionPlaceholder": "Write the caption (max 700 characters)…",
   "editor.microperfil.audioLabel": "Audio (optional)",
   "editor.microperfil.addAudio": "Add audio",
-  "editor.microperfil.audioInvalid": "Invalid audio format (MP3, AAC, OGG)",
+  "editor.microperfil.audioInvalid": "Invalid audio format (MP3, AAC, OGG, MP4)",
   "editor.microperfil.audioTooLarge": "The audio is too large. 20MB max.",
   "editor.microperfil.needImage": "Add an image to the micro-profile.",
   "editor.microperfil.needCaption": "The caption is required.",
