@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { UserInfoCardUtils } from './UserInfoCardUtils.jsx';
 import './UserInfoCard.css';
 
-const UserInfoCard = ({ user, onClose, isOwner, onLogout }) => {
+const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
   const { t } = useTranslation();
   const [showActionsPopup, setShowActionsPopup] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -162,6 +162,10 @@ const UserInfoCard = ({ user, onClose, isOwner, onLogout }) => {
               <p className="user-location">
                 Ubicación: {user.location_user}
               </p>
+            )}
+
+            {bioText && bioText.trim() && (
+              <p className="user-bio">{bioText}</p>
             )}
           </div>
 

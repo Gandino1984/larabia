@@ -122,6 +122,8 @@ function Header() {
   const handleUserClick = () => {
     setShowUserCard(true);
     setIsMobileMenuOpen(false);
+    // Ensure author profiles are loaded so the card can show the user's bio.
+    if (authorProfiles.length === 0) fetchAllProfiles();
   };
 
   const handleLogout = () => {
@@ -809,6 +811,7 @@ function Header() {
       {showUserCard && currentUser && (
         <UserInfoCard
           user={currentUser}
+          bioText={authorProfiles.find(p => p.user_id === currentUser.id_user)?.bio_text}
           onClose={() => setShowUserCard(false)}
           isOwner={true}
           onLogout={handleLogout}
