@@ -990,8 +990,11 @@ function HScrollViewer({ panels, articleId }) {
                         <p className="viewer-panel-caption">{panel.image_caption}</p>
                       )}
 
-                      {/* Audio badge for audio panels */}
-                      {panel.interaction_type === 'audio' && (
+                      {/* Audio badge only for NON-interactive audio panels.
+                          Interactive audio panels already show the (animated)
+                          interactive indicator below, so showing both duplicated
+                          the icon on the left and right corners. */}
+                      {panel.interaction_type === 'audio' && !panel.is_interactive && (
                         <div className="panel-audio-badge" title={t('hscroll.panelWithAudio')}>
                           <Volume2 size={20} />
                         </div>
