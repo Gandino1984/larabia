@@ -1,5 +1,6 @@
 // magazine-front/src/components/admin/HScrollEditor.jsx
 import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Plus, Trash2, ArrowLeft, ArrowRight, Upload, MousePointer, Link as LinkIcon, Volume2, X, Code2 } from 'lucide-react';
 import './HScrollEditor.css';
 
@@ -411,7 +412,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
       )}
 
       {/* Panel Type Selection Modal */}
-      {showPanelTypeModal && (
+      {showPanelTypeModal && createPortal(
         <div className="modal-overlay" onClick={() => setShowPanelTypeModal(false)}>
           <div className="modal-content panel-type-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
@@ -452,11 +453,12 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Iframe Panel Configuration Modal */}
-      {showIframeModal && (
+      {showIframeModal && createPortal(
         <div className="modal-overlay" onClick={() => setShowIframeModal(false)}>
           <div className="modal-content iframe-config-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
@@ -504,11 +506,12 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Interactive Panel Configuration Modal */}
-      {showInteractiveModal && (
+      {showInteractiveModal && createPortal(
         <div className="modal-overlay" onClick={() => setShowInteractiveModal(false)}>
           <div className="modal-content interactive-config-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-body">
@@ -608,7 +611,8 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
