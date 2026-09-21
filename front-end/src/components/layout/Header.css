@@ -1388,11 +1388,14 @@
 /* Mobile: move the bell to the right side, just left of the burger button. */
 @media (max-width: 767px) {
   .header-bar { position: relative; }
+  /* Center vertically with margin (not transform) — a transformed ancestor
+     would make the fixed dropdown position relative to the bell instead of the
+     viewport, causing it to overflow off-screen. */
   .header-user-section .notif-wrapper {
     position: absolute;
     top: 50%;
+    margin-top: -22px;
     right: calc(44px + 0.85rem);
-    transform: translateY(-50%);
     z-index: 6;
   }
 }
