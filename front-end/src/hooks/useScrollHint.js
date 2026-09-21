@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 export function useScrollHint(
   ref,
   enabled = true,
-  { delay = 500, autoHide = 6000, requireOverflowX = true } = {}
+  { delay = 300, autoHide = 7000, requireOverflowX = true, threshold = 0.4 } = {}
 ) {
   const [show, setShow] = useState(false);
 
@@ -50,7 +50,7 @@ export function useScrollHint(
           clearTimeout(hideTimer);
         }
       },
-      { threshold: 0.15 }
+      { threshold }
     );
     io.observe(el);
 
@@ -72,7 +72,7 @@ export function useScrollHint(
       clearTimeout(showTimer);
       clearTimeout(hideTimer);
     };
-  }, [ref, enabled, delay, autoHide, requireOverflowX]);
+  }, [ref, enabled, delay, autoHide, requireOverflowX, threshold]);
 
   return show;
 }
