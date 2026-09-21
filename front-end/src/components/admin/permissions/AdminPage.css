@@ -1,7 +1,7 @@
 .admin-page {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 32px 20px 80px;
+  padding: 7rem 20px 80px;
   font-family: inherit;
 }
 
@@ -28,11 +28,17 @@
   gap: 4px;
   margin-bottom: 24px;
   border-bottom: 2px solid #ececec;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 
 .admin-page__tab {
   background: none;
   border: none;
+  white-space: nowrap;
+  flex-shrink: 0;
   padding: 12px 18px;
   font-size: 14px;
   font-weight: 600;
@@ -42,6 +48,12 @@
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
   transition: color 120ms ease, border-color 120ms ease;
+}
+
+@media (max-width: 768px) {
+  .admin-page { padding: 6rem 1rem 4rem; }
+  .admin-page__header h1 { font-size: 22px; }
+  .admin-page__tab { padding: 10px 12px; font-size: 13px; }
 }
 
 .admin-page__tab:hover {

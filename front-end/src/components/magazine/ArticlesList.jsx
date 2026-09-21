@@ -285,7 +285,7 @@ function ArticlesList() {
                 onClick={() => scrollCarousel(-1)}
                 aria-label="Anterior"
               >
-                <ChevronLeft size={38} />
+                <ChevronLeft size={44} />
               </button>
               <div className="articles-carousel" ref={carouselRef}>
                 {orderedArticles.map(renderCard)}
@@ -296,7 +296,7 @@ function ArticlesList() {
                 onClick={() => scrollCarousel(1)}
                 aria-label="Siguiente"
               >
-                <ChevronRight size={38} />
+                <ChevronRight size={44} />
               </button>
             </div>
           ) : (
