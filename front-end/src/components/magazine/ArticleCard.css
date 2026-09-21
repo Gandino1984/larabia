@@ -15,7 +15,7 @@
 
 .article-action-buttons {
   position: absolute;
-  top: 8px;
+  bottom: 8px;
   right: 10px;
   z-index: 10;
   display: flex;
@@ -330,9 +330,16 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 10px 12px;
-  margin-bottom: 0;
+  padding: 8px 10px;
+  margin-top: auto;
   background: #1e1e1e;
+}
+
+/* When an admin delete button sits at the bottom-right, reserve room so the
+   engagement items don't slide under it. */
+.article-card:has(.article-action-buttons) .article-engagement-bar,
+.article-card:has(.list-delete-btn) .article-engagement-bar {
+  padding-right: 2.9rem;
 }
 
 .engagement-btn {

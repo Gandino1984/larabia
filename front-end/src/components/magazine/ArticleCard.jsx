@@ -85,9 +85,6 @@ function ArticleCard({ article }) {
 
   return (
     <article className="article-card" onClick={handleClick}>
-      {/* Engagement bar: like / favorite / comments + views */}
-      <ArticleEngagementBar article={article} />
-
       {canCreateContent && (isSuperAdmin || isArticleAuthor(article)) && (
         <div className="article-action-buttons">
           <button className="article-delete-btn" onClick={handleDelete} title="Eliminar artículo">
@@ -146,6 +143,9 @@ function ArticleCard({ article }) {
           )}
         </div>
       </div>
+
+      {/* Engagement bar at the bottom: like / favorite / comments + views */}
+      <ArticleEngagementBar article={article} />
     </article>
   );
 }

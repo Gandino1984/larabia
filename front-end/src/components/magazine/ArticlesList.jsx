@@ -182,7 +182,6 @@ function ArticlesList() {
                     <Trash2 size={18} />
                   </button>
                 )}
-                <ArticleEngagementBar article={article} />
                 <div className="article-card-image">
                   <img
                     src={getCoverImageUrl(article)}
@@ -241,6 +240,7 @@ function ArticlesList() {
 
                   </div>
                 </div>
+                <ArticleEngagementBar article={article} />
               </article>
             ))}
           </div>
