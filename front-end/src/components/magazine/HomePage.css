@@ -21,17 +21,26 @@
   background: var(--landing-bg, #252525);
 }
 
-/* Scroll-down hint on the upper-right side of the hero (not at the bottom). */
+/* Scroll-down hint pinned just below the create-publication button (top-right).
+   Mobile: the create button sits below the header at 44px tall. */
 .hero-scroll-hint {
-  position: absolute;
-  top: 32%;
-  right: 1.75rem;
+  position: fixed;
+  top: calc(0.5rem + var(--header-h) + 0.5rem + 44px + 0.85rem);
+  right: 0.75rem;
   z-index: 11;
 }
-@media (max-width: 767px) {
+/* Right-align the icon/label with the button above it. */
+.hero-scroll-hint .scroll-hint {
+  align-items: flex-end;
+}
+.hero-scroll-hint .scroll-hint__label {
+  text-align: right;
+}
+/* Desktop: the create button flanks the header bar, vertically centred on it. */
+@media (min-width: 769px) {
   .hero-scroll-hint {
-    top: 26%;
-    right: 1rem;
+    top: calc(0.5rem + var(--header-h) + 9px + 1rem);
+    right: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 1.5rem));
   }
 }
 
