@@ -1,5 +1,5 @@
 // magazine-front/src/components/magazine/ArticlesList.jsx
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -84,6 +84,15 @@ function ArticlesList() {
     try { localStorage.setItem('larabia_articles_view', mode); } catch { /* ignore */ }
   }, []);
 
+  const carouselRef = useRef(null);
+  const scrollCarousel = useCallback((dir) => {
+    const track = carouselRef.current;
+    if (!track) return;
+    const card = track.querySelector('.article-card');
+    const amount = card ? card.offsetWidth + 32 : track.clientWidth * 0.8;
+    track.scrollBy({ left: dir * amount, behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchArticles();
@@ -149,6 +158,77 @@ function ArticlesList() {
     return `${apiUrl}${cover.startsWith('/') ? cover : '/' + cover}`;
   };
 
+  const renderCard = (article) => (
+    <article
+      key={article.id_article}
+      className="article-card"
+      onClick={() => handleArticleClick(article)}
+    >
+      {canCreateContent && (isSuperAdmin || isArticleAuthor(article)) && (
+        <button
+          className="list-delete-btn"
+          onClick={(e) => handleDelete(e, article)}
+          title={t('article.detail.deleteArticle')}
+        >
+          <Trash2 size={18} />
+        </button>
+      )}
+      <div className="article-card-image">
+        <img
+          src={getCoverImageUrl(article)}
+          alt={article.title_article}
+          onError={(e) => { e.target.src = '/logoFondoNegro.jpg'; }}
+        />
+        <div className="list-badges">
+          {article.category_article && normalize(article.category_article) !== 'general' && (
+            <span className="list-type-badge">{getCategoryDisplay(article.category_article)}</span>
+          )}
+          {article.featured_article && (
+            <span className="list-featured-badge">{t('article.detail.featured')}</span>
+          )}
+        </div>
+      </div>
+
+      <div className="article-card-content">
+        {article.date_published && (
+          <span className="article-card-date">
+            <Calendar size={16} />
+            {formatDate(article.date_published)}
+          </span>
+        )}
+        {article.project_title && (
+          <span className="article-project-label">Proyecto: {article.project_title}</span>
+        )}
+        <h2 className="article-title">{article.title_article}</h2>
+
+        {article.excerpt_article && (
+          <p className="article-excerpt">{article.excerpt_article}</p>
+        )}
+
+        <div className="article-meta">
+          {(article.authors?.length > 0 || article.author_name) && (
+            <span className="meta-item meta-item--authors">
+              {article.authors?.length > 0 ? (
+                article.authors.map(author => (
+                  <span key={author.id_user || author.name_user} className="list-author">
+                    <AuthorAvatar author={author} />
+                    <span className="list-author-name">{author.name_user}</span>
+                  </span>
+                ))
+              ) : (
+                <span className="list-author">
+                  <User size={16} />
+                  <span className="list-author-name">{article.author_name}</span>
+                </span>
+              )}
+            </span>
+          )}
+        </div>
+      </div>
+      <ArticleEngagementBar article={article} />
+    </article>
+  );
+
   if (loading) {
     return (
       <div className="articles-list-page">
@@ -197,119 +277,71 @@ function ArticlesList() {
         </div>
       ) : (
         <>
-          <div className={viewMode === 'carousel' ? 'articles-carousel' : 'articles-grid'}>
-            {paginatedArticles.map((article) => (
-              <article
-                key={article.id_article}
-                className="article-card"
-                onClick={() => handleArticleClick(article)}
-              >
-                {canCreateContent && (isSuperAdmin || isArticleAuthor(article)) && (
-                  <button
-                    className="list-delete-btn"
-                    onClick={(e) => handleDelete(e, article)}
-                    title={t('article.detail.deleteArticle')}
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                )}
-                <div className="article-card-image">
-                  <img
-                    src={getCoverImageUrl(article)}
-                    alt={article.title_article}
-                    onError={(e) => {
-                      e.target.src = '/logoFondoNegro.jpg';
-                    }}
-                  />
-                  <div className="list-badges">
-                    {article.category_article && normalize(article.category_article) !== 'general' && (
-                      <span className="list-type-badge">
-                        {getCategoryDisplay(article.category_article)}
-                      </span>
-                    )}
-                    {article.featured_article && (
-                      <span className="list-featured-badge">{t('article.detail.featured')}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="article-card-content">
-                  {article.date_published && (
-                    <span className="article-card-date">
-                      <Calendar size={16} />
-                      {formatDate(article.date_published)}
-                    </span>
-                  )}
-                  {article.project_title && (
-                    <span className="article-project-label">Proyecto: {article.project_title}</span>
-                  )}
-                  <h2 className="article-title">{article.title_article}</h2>
-
-                  {article.excerpt_article && (
-                    <p className="article-excerpt">{article.excerpt_article}</p>
-                  )}
-
-                  <div className="article-meta">
-                    {(article.authors?.length > 0 || article.author_name) && (
-                      <span className="meta-item meta-item--authors">
-                        {article.authors?.length > 0 ? (
-                          article.authors.map(author => (
-                            <span key={author.id_user || author.name_user} className="list-author">
-                              <AuthorAvatar author={author} />
-                              <span className="list-author-name">{author.name_user}</span>
-                            </span>
-                          ))
-                        ) : (
-                          <span className="list-author">
-                            <User size={16} />
-                            <span className="list-author-name">{article.author_name}</span>
-                          </span>
-                        )}
-                      </span>
-                    )}
-
-                  </div>
-                </div>
-                <ArticleEngagementBar article={article} />
-              </article>
-            ))}
-          </div>
-
-          {totalPages > 1 && (
-            <nav className="pagination">
+          {viewMode === 'carousel' ? (
+            <div className="articles-carousel-wrap">
               <button
-                className="pagination-btn pagination-prev"
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                aria-label="Página anterior"
+                type="button"
+                className="carousel-arrow carousel-arrow--prev"
+                onClick={() => scrollCarousel(-1)}
+                aria-label="Anterior"
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={24} />
               </button>
+              <div className="articles-carousel" ref={carouselRef}>
+                {orderedArticles.map(renderCard)}
+              </div>
+              <button
+                type="button"
+                className="carousel-arrow carousel-arrow--next"
+                onClick={() => scrollCarousel(1)}
+                aria-label="Siguiente"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="articles-grid">
+                {paginatedArticles.map(renderCard)}
+              </div>
 
-              {getPageNumbers(currentPage, totalPages).map((page, i) =>
-                page === '...' ? (
-                  <span key={`ellipsis-${i}`} className="pagination-ellipsis">…</span>
-                ) : (
+              {totalPages > 1 && (
+                <nav className="pagination">
                   <button
-                    key={page}
-                    className={`pagination-btn pagination-page${currentPage === page ? ' active' : ''}`}
-                    onClick={() => goToPage(page)}
-                    aria-current={currentPage === page ? 'page' : undefined}
+                    className="pagination-btn pagination-prev"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    aria-label="Página anterior"
                   >
-                    {page}
+                    <ChevronLeft size={18} />
                   </button>
-                )
+
+                  {getPageNumbers(currentPage, totalPages).map((page, i) =>
+                    page === '...' ? (
+                      <span key={`ellipsis-${i}`} className="pagination-ellipsis">…</span>
+                    ) : (
+                      <button
+                        key={page}
+                        className={`pagination-btn pagination-page${currentPage === page ? ' active' : ''}`}
+                        onClick={() => goToPage(page)}
+                        aria-current={currentPage === page ? 'page' : undefined}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    className="pagination-btn pagination-next"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    aria-label="Página siguiente"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </nav>
               )}
-
-              <button
-                className="pagination-btn pagination-next"
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                aria-label="Página siguiente"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </nav>
+            </>
           )}
         </>
       )}

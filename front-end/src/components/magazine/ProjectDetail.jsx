@@ -1,7 +1,7 @@
 // magazine-front/src/components/magazine/ProjectDetail.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, User, Bell } from 'lucide-react';
+import { ArrowLeft, User, Bell, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -18,6 +18,21 @@ function ProjectDetail() {
   const { isSubscribed, toggleSubscribe } = useEngagement();
   const [projectArticles, setProjectArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState(() => {
+    try { return localStorage.getItem('larabia_project_view') || 'grid'; } catch { return 'grid'; }
+  });
+  const changeViewMode = useCallback((mode) => {
+    setViewMode(mode);
+    try { localStorage.setItem('larabia_project_view', mode); } catch { /* ignore */ }
+  }, []);
+  const carouselRef = useRef(null);
+  const scrollCarousel = useCallback((dir) => {
+    const track = carouselRef.current;
+    if (!track) return;
+    const card = track.querySelector('.article-card');
+    const amount = card ? card.offsetWidth + 24 : track.clientWidth * 0.8;
+    track.scrollBy({ left: dir * amount, behavior: 'smooth' });
+  }, []);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
@@ -155,13 +170,57 @@ function ProjectDetail() {
         {loading ? (
           <p className="project-detail-loading">{t('common.loading')}</p>
         ) : projectArticles.length > 0 ? (
-          <div className="project-articles-grid">
-            {[...projectArticles]
-              .sort((a, b) => (a.id_article || 0) - (b.id_article || 0))
-              .map(article => (
-                <ArticleCard key={article.id_article} article={article} />
-              ))}
-          </div>
+          (() => {
+            const ordered = [...projectArticles].sort((a, b) => (a.id_article || 0) - (b.id_article || 0));
+            return (
+              <>
+                <div className="project-articles-toolbar">
+                  <div className="articles-view-toggle" role="group" aria-label={t('article.list.viewMode')}>
+                    <button
+                      type="button"
+                      className={`view-toggle-btn ${viewMode === 'grid' ? 'view-toggle-btn--active' : ''}`}
+                      onClick={() => changeViewMode('grid')}
+                      title={t('article.list.viewGrid')}
+                      aria-pressed={viewMode === 'grid'}
+                    >
+                      <LayoutGrid size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`view-toggle-btn ${viewMode === 'carousel' ? 'view-toggle-btn--active' : ''}`}
+                      onClick={() => changeViewMode('carousel')}
+                      title={t('article.list.viewCarousel')}
+                      aria-pressed={viewMode === 'carousel'}
+                    >
+                      <GalleryHorizontal size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                {viewMode === 'carousel' ? (
+                  <div className="articles-carousel-wrap">
+                    <button type="button" className="carousel-arrow carousel-arrow--prev" onClick={() => scrollCarousel(-1)} aria-label="Anterior">
+                      <ChevronLeft size={24} />
+                    </button>
+                    <div className="articles-carousel" ref={carouselRef}>
+                      {ordered.map(article => (
+                        <ArticleCard key={article.id_article} article={article} />
+                      ))}
+                    </div>
+                    <button type="button" className="carousel-arrow carousel-arrow--next" onClick={() => scrollCarousel(1)} aria-label="Siguiente">
+                      <ChevronRight size={24} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="project-articles-grid">
+                    {ordered.map(article => (
+                      <ArticleCard key={article.id_article} article={article} />
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()
         ) : (
           <p className="project-detail-empty">{t('project.noArticles')}</p>
         )}
