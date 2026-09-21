@@ -1384,6 +1384,18 @@
 .notif-bell-btn:hover { background: rgba(255, 255, 255, 0.1); }
 .header-bar.active .notif-bell-btn { color: var(--color-header-text-active, #000000); }
 .header-bar.active .notif-bell-btn:hover { background: rgba(0, 0, 0, 0.05); }
+
+/* Mobile: move the bell to the right side, just left of the burger button. */
+@media (max-width: 767px) {
+  .header-bar { position: relative; }
+  .header-user-section .notif-wrapper {
+    position: absolute;
+    top: 50%;
+    right: calc(44px + 1.1rem);
+    transform: translateY(-50%);
+    z-index: 6;
+  }
+}
 .notif-badge {
   position: absolute;
   top: -2px;

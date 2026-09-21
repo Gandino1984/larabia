@@ -9,10 +9,15 @@
 import { Pointer, Mouse } from 'lucide-react';
 import './ScrollHint.css';
 
-function ScrollHint({ direction = 'down', label }) {
+function ScrollHint({ direction = 'down', label, labelDesktop }) {
   return (
     <div className={`scroll-hint scroll-hint--${direction}`} aria-hidden="true">
-      {label && <span className="scroll-hint__label">{label}</span>}
+      {label && (
+        <span className={`scroll-hint__label${labelDesktop ? ' scroll-hint__label--mobile' : ''}`}>{label}</span>
+      )}
+      {labelDesktop && (
+        <span className="scroll-hint__label scroll-hint__label--desktop">{labelDesktop}</span>
+      )}
       <span className="scroll-hint__hand">
         <Pointer className="scroll-hint__icon scroll-hint__icon--hand" strokeWidth={2} />
         <Mouse className="scroll-hint__icon scroll-hint__icon--mouse" strokeWidth={2} />

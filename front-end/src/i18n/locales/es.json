@@ -413,5 +413,6 @@
   "article.list.viewGrid": "Cuadrícula",
   "article.list.viewCarousel": "Carrusel horizontal",
   "hero.scrollHint": "Desliza hacia arriba",
-  "carousel.swipeHint": "Desliza hacia los lados"
+  "carousel.swipeHint": "Desliza hacia los lados",
+  "hero.scrollHintDesktop": "Puedes desplazarte hacia abajo"
 }

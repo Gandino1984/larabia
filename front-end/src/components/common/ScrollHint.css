@@ -58,13 +58,24 @@
   animation: scroll-hint-bob-x 1.5s ease-in-out infinite;
 }
 
-/* Large screens: show the mouse instead of the hand. */
+/* Desktop label variant is hidden until large screens. */
+.scroll-hint__label--desktop {
+  display: none;
+}
+
+/* Large screens: show the mouse instead of the hand, and the desktop label. */
 @media (min-width: 1024px) {
   .scroll-hint__icon--hand {
     display: none;
   }
   .scroll-hint__icon--mouse {
     display: inline-block;
+  }
+  .scroll-hint__label--mobile {
+    display: none;
+  }
+  .scroll-hint__label--desktop {
+    display: inline;
   }
 }
 

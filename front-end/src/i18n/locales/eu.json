@@ -413,5 +413,6 @@
   "article.list.viewGrid": "Sareta",
   "article.list.viewCarousel": "Karrusel horizontala",
   "hero.scrollHint": "Lerratu gora",
-  "carousel.swipeHint": "Lerratu alboetara"
+  "carousel.swipeHint": "Lerratu alboetara",
+  "hero.scrollHintDesktop": "Behera egin dezakezu"
 }

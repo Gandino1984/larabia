@@ -266,7 +266,7 @@ function HomePage() {
         {/* Scroll-down affordance (appears a few seconds after load). */}
         {showScrollHint && (
           <div className="hero-scroll-hint">
-            <ScrollHint direction="down" label={t('hero.scrollHint')} />
+            <ScrollHint direction="down" label={t('hero.scrollHint')} labelDesktop={t('hero.scrollHintDesktop')} />
           </div>
         )}
       </section>
