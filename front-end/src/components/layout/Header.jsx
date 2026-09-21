@@ -664,14 +664,8 @@ function Header({ ready = true }) {
       {isMobileMenuOpen && (
         <div className={`mobile-menu-overlay ${isHeaderActive ? 'active' : ''}`}>
           <nav className="mobile-menu-content">
-            {/* Mobile Search */}
-            <button className="mobile-nav-link" onClick={handleMobileSearchToggle}>
-              <Search size={18} />
-              <span>{showMobileSearch ? t('common.buttons.closeSearch') : t('common.buttons.search')}</span>
-            </button>
-
-            {showMobileSearch && (
-              <div className="mobile-search-container" ref={mobileSearchRef}>
+            {/* Mobile Search — always visible, no toggle needed */}
+            <div className="mobile-search-container" ref={mobileSearchRef}>
                 <div className="mobile-search-input-wrapper">
                   <Search size={16} className="mobile-search-icon" />
                   <input
@@ -680,7 +674,6 @@ function Header({ ready = true }) {
                     placeholder={t('header.search.placeholder')}
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    autoFocus
                   />
                   {searchQuery && (
                     <button className="mobile-search-clear-btn" onClick={handleSearchClear}>
@@ -726,7 +719,6 @@ function Header({ ready = true }) {
                   </div>
                 )}
               </div>
-            )}
 
             <div className="mobile-menu-divider"></div>
 

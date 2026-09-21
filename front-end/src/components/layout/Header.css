@@ -322,22 +322,22 @@
 /* Animated hamburger → X. The three lines morph into a cross when open. */
 .burger-box {
   position: relative;
-  width: 24px;
-  height: 16px;
-  display: inline-block;
+  display: block;
+  width: 22px;
+  height: 14px;
 }
 .burger-line {
   position: absolute;
   left: 0;
-  width: 100%;
-  height: 2.5px;
+  right: 0;
+  height: 2px;
   border-radius: 2px;
   background: currentColor;
-  transition: transform 0.3s ease, opacity 0.2s ease, top 0.3s ease;
+  transition: top 0.3s ease, bottom 0.3s ease, transform 0.3s ease, opacity 0.2s ease;
 }
 .burger-line:nth-child(1) { top: 0; }
 .burger-line:nth-child(2) { top: 50%; transform: translateY(-50%); }
-.burger-line:nth-child(3) { top: 100%; transform: translateY(-100%); }
+.burger-line:nth-child(3) { bottom: 0; }
 
 .burger-menu-btn.is-open .burger-line:nth-child(1) {
   top: 50%;
@@ -347,6 +347,7 @@
   opacity: 0;
 }
 .burger-menu-btn.is-open .burger-line:nth-child(3) {
+  bottom: auto;
   top: 50%;
   transform: translateY(-50%) rotate(-45deg);
 }
