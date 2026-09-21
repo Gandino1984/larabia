@@ -1,128 +1,59 @@
-/* Floating Editor Button Styles — mobile-first.
-   Phones: a bottom-right FAB. Larger screens progressively move it to the
-   top-right and grow it. (Previously authored desktop-first with max-width
-   overrides; inverted so the mobile layout is the base.) */
+/* Create-article button — flanks the header bar on the right, mirroring the
+   back button on the left. Mobile-first: a row just below the header; desktop:
+   beside the header bar, vertically centered on its axis. Square with rounded
+   corners, matching the header bar height (--header-h from index.css). */
 
 .floating-editor-btn {
   position: fixed;
+  top: calc(0.5rem + var(--header-h) + 0.5rem);
   right: 0.75rem;
-  bottom: 1.5rem;
+  z-index: 1001;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
-  width: 56px;
-  height: 56px;
-  padding: 0.875rem 1rem;
+  width: var(--header-h);
+  height: var(--header-h);
+  padding: 0;
   background: white;
   color: black;
   border: 2px solid black;
-  border-radius: 50%;
+  border-radius: 12px;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-  z-index: 999;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
   font-family: 'Source Code Pro', monospace;
   font-weight: 600;
-  font-size: 0.6rem;
-  letter-spacing: 0.05em;
-  animation: float 3s ease-in-out infinite;
 }
 
-/* Hidden state for smooth animations */
+/* Hidden state (in editor / article view) */
 .floating-editor-btn.hidden {
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-20px) scale(0.8);
 }
 
 .floating-editor-btn:hover {
-  transform: scale(1.05);
   background: black;
   color: white;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .floating-editor-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 
+/* Icon-only for a compact square button */
 .floating-btn-text {
   display: none;
-  white-space: nowrap;
-  text-transform: uppercase;
 }
 
-/* Floating animation */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-/* Large phones / small tablets: slightly larger, more inset. */
-@media (min-width: 481px) {
-  .floating-editor-btn {
-    right: 1rem;
-    bottom: 2rem;
-    width: 60px;
-    height: 60px;
-  }
-}
-
-/* Tablet / desktop: anchor to the top-right instead of the bottom. */
+/* Desktop: flank the header bar on the right, centered on its axis. */
 @media (min-width: 769px) {
   .floating-editor-btn {
-    top: 6rem;
-    bottom: auto;
-    right: 1rem;
-    width: 65px;
-    height: 65px;
-    padding: 0;
-  }
-}
-
-@media (min-width: 901px) {
-  .floating-editor-btn {
-    top: 6.5rem;
-    right: 1.25rem;
-  }
-}
-
-/* Large desktop: full size. */
-@media (min-width: 1025px) {
-  .floating-editor-btn {
-    top: 7rem;
-    right: 1.5rem;
-    width: 70px;
-    height: 70px;
-    font-size: 0.65rem;
-  }
-}
-
-@media (min-width: 1201px) {
-  .floating-editor-btn {
-    top: 7.5rem;
-  }
-}
-
-/* Desktop: align vertically with the header bar, sitting in the right gutter
-   just to the right of it (header is centered, width 98% / max 1200px). */
-@media (min-width: 769px) {
-  .floating-editor-btn {
-    top: 2.4rem;
-    bottom: auto;
-    right: max(0.75rem, calc((100% - 1200px) / 2 - 5rem));
-    z-index: 1001;
+    top: calc(0.5rem + var(--header-h) / 2);
+    right: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 0.5rem));
     transform: translateY(-50%);
-    animation: none;
   }
   .floating-editor-btn:hover {
-    transform: translateY(-50%) scale(1.05);
+    transform: translateY(-50%) scale(1.03);
   }
   .floating-editor-btn.hidden {
     transform: translateY(-50%) scale(0.8);

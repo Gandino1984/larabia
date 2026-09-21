@@ -241,40 +241,62 @@ button {
 /* ============================================
    Universal back navigation button
    ============================================ */
+/* Header bar height per breakpoint (logo + padding), used to size/align the
+   flanking back + create buttons. */
+:root { --header-h: 56px; }
+@media (min-width: 769px)  { :root { --header-h: 64px; } }
+@media (min-width: 996px)  { :root { --header-h: 74px; } }
+@media (min-width: 1053px) { :root { --header-h: 84px; } }
+@media (min-width: 1093px) { :root { --header-h: 92px; } }
+
+/* Mobile-first: a row just below the header, back button on the left. */
 .btn-back-nav {
   position: fixed;
-  top: 2.4rem;
-  left: max(0.75rem, calc((100% - 1200px) / 2 - 2.9rem));
-  transform: translateY(-50%);
+  top: calc(0.5rem + var(--header-h) + 0.5rem);
+  left: 0.75rem;
   z-index: 1001;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: var(--header-h);
+  height: var(--header-h);
   padding: 0;
-  align-self: flex-start;
   background: lightgray;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   color: #1a1a1a;
   cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
   flex-shrink: 0;
 }
 
 .btn-back-nav:hover {
   background: #000000;
   color: #ffffff;
-  transform: translateY(-50%) translateX(-3px);
 }
 
-/* Inline back buttons (toolbars) keep their in-flow position (no fixed/transform) */
+/* Desktop: flank the header bar on the left, vertically centered on its axis. */
+@media (min-width: 769px) {
+  .btn-back-nav {
+    top: calc(0.5rem + var(--header-h) / 2);
+    left: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 0.5rem));
+    transform: translateY(-50%);
+  }
+  .btn-back-nav:hover {
+    transform: translateY(-50%) translateX(-3px);
+  }
+}
+
+/* Inline back buttons (toolbars) keep their in-flow position (no fixed) */
 .article-editor-blocks .btn-back-nav,
 .author-profile-editor .btn-back-nav,
 .editor-title-section .btn-back-nav {
   position: static;
   transform: none;
+  width: 42px;
+  height: 42px;
+  top: auto;
+  left: auto;
 }
 .article-editor-blocks .btn-back-nav:hover,
 .author-profile-editor .btn-back-nav:hover,
