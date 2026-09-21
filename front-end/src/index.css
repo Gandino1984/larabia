@@ -279,7 +279,7 @@ button {
 @media (min-width: 769px) {
   .btn-back-nav {
     top: calc(0.5rem + var(--header-h) / 2 + 4px);
-    left: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 0.5rem));
+    left: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 1.25rem));
     transform: translateY(-50%);
   }
   .btn-back-nav:hover {
