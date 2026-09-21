@@ -203,7 +203,8 @@
   font-size: 1rem;
   font-family: 'Source Code Pro', sans-serif;
   color: white;
-  margin: 2.25rem 0 1.5rem;
+  /* Centered on mobile (narrow); left-aligned again on desktop (≥768). */
+  margin: 2.25rem auto 1.5rem;
   line-height: 1.6;
   opacity: 0.95;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
@@ -212,11 +213,10 @@
   line-clamp: 6;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  /* Its own (narrower) measure, hugging the left edge, leaving room at the sides
-     so the carousel arrows don't sit on top of the text. */
+  /* Narrower measure on mobile so the carousel arrows don't sit on the text;
+     centered here, left-aligned on desktop (see the 768px block). */
   text-align: left;
-  max-width: 290px;
-  margin-right: auto;
+  max-width: 330px;
 }
 
 .hero-meta {
@@ -483,6 +483,9 @@
     font-size: 1.2rem;
     margin-bottom: 1.75rem;
     max-width: 720px;
+    /* Left-aligned on desktop (mobile centers it). */
+    margin-left: 0;
+    margin-right: auto;
   }
 
   .hero-meta {
