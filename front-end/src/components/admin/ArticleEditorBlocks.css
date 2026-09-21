@@ -1423,3 +1423,14 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 .btn-preview-draft:hover { background: #1a1a1a; color: #fff; }
+
+/* Editor back button pinned to the left of the title container */
+.editor-header .editor-title-section .btn-back-nav {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.editor-header .editor-title-section .btn-back-nav:hover {
+  transform: translateY(-50%) translateX(-3px);
+}
