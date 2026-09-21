@@ -109,3 +109,13 @@
     top: 7.5rem;
   }
 }
+
+/* Desktop: sit just below the header bar, right edge aligned with the header
+   (header is centered, width 98% / max 1200px). */
+@media (min-width: 769px) {
+  .floating-editor-btn {
+    top: 5rem;
+    bottom: auto;
+    right: max(1%, calc((100% - 1200px) / 2));
+  }
+}

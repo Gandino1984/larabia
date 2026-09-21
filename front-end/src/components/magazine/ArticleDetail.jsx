@@ -105,7 +105,7 @@ function ArticleDetail({ previewMode = false }) {
     return (
       <div className="article-detail-error">
         <p>{t('article.detail.notFound')}</p>
-        <button onClick={navigateBack} className="btn-back-nav"><ArrowLeft size={24} />{t('common.buttons.back')}</button>
+        <button onClick={navigateBack} className="btn-back-nav" title={t('common.buttons.back')}><ArrowLeft size={24} /></button>
       </div>
     );
   }

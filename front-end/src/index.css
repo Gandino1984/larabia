@@ -242,21 +242,31 @@ button {
    Universal back navigation button
    ============================================ */
 .btn-back-nav {
+  position: fixed;
+  top: 5rem;
+  left: max(1%, calc((100% - 1200px) / 2));
+  z-index: 900;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.9rem;
-  min-height: 40px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
   align-self: flex-start;
   background: lightgray;
   border: none;
   border-radius: 8px;
   color: #1a1a1a;
-  font-weight: 600;
   cursor: pointer;
   transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
   flex-shrink: 0;
+}
+
+/* Inline back buttons (toolbars) keep their in-flow position */
+.article-editor-blocks .btn-back-nav,
+.author-profile-editor .btn-back-nav,
+.editor-title-section .btn-back-nav {
+  position: static;
 }
 
 .btn-back-nav:hover {

@@ -63,8 +63,8 @@ function AuthorPublications() {
       <div className="author-publications-page">
         <div className="publications-error">
           <p>{t('authors.authorNotFound')}</p>
-          <button onClick={navigateBack} className="btn-back-nav">
-            <ArrowLeft size={20} />{t('common.buttons.back')}
+          <button onClick={navigateBack} className="btn-back-nav" title={t('common.buttons.back')}>
+            <ArrowLeft size={22} />
           </button>
         </div>
       </div>

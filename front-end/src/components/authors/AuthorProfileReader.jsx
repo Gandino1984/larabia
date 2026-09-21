@@ -17,8 +17,8 @@ function AuthorProfileReader() {
       <div className="author-profile-reader">
         <div className="profile-error">
           <p>{t('authors.profileNotFound')}</p>
-          <button onClick={navigateBack} className="btn-back-nav">
-            <ArrowLeft size={20} />{t('common.buttons.back')}
+          <button onClick={navigateBack} className="btn-back-nav" title={t('common.buttons.back')}>
+            <ArrowLeft size={22} />
           </button>
         </div>
       </div>
