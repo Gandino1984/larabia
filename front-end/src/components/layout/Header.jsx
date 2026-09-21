@@ -71,7 +71,7 @@ function Header({ ready = true }) {
   useEffect(() => {
     if (!ready || hasAnimatedRef.current) return;
     hasAnimatedRef.current = true;
-    fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 1900 } });
+    fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 1150 } });
     // Randomised, decaying shake — each jolt goes in a random direction so it
     // feels chaotic ("rabid"), like the logo, rather than a fixed back-and-forth.
     // Slow decay keeps it violent for longer before it settles.
