@@ -112,6 +112,7 @@ a:hover {
 button {
   font-family: 'Source Code Pro', monospace;
   font-weight: 500;
+  text-transform: uppercase;
 }
 
 /* Utility Classes */
