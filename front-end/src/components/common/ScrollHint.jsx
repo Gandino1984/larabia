@@ -9,7 +9,34 @@
 import { Pointer, Mouse } from 'lucide-react';
 import './ScrollHint.css';
 
-function ScrollHint({ direction = 'down', label, labelDesktop, visible = true }) {
+const Icons = () => (
+  <>
+    <Pointer className="scroll-hint__icon scroll-hint__icon--hand" strokeWidth={2} />
+    <Mouse className="scroll-hint__icon scroll-hint__icon--mouse" strokeWidth={2} />
+  </>
+);
+
+function ScrollHint({ direction = 'down', label, labelDesktop, visible = true, dual = false }) {
+  // "dual": two icons side by side — one bobbing vertically, one horizontally —
+  // to convey both scroll-down and swipe-sideways at once (hand on mobile,
+  // mouse on desktop, via CSS).
+  if (dual) {
+    return (
+      <div className={`scroll-hint scroll-hint--dual${visible ? ' is-visible' : ''}`} aria-hidden="true">
+        <span className="scroll-hint__dual-row">
+          <span className="scroll-hint__hand scroll-hint__hand--bob-y"><Icons /></span>
+          <span className="scroll-hint__hand scroll-hint__hand--bob-x"><Icons /></span>
+        </span>
+        {label && (
+          <span className={`scroll-hint__label${labelDesktop ? ' scroll-hint__label--mobile' : ''}`}>{label}</span>
+        )}
+        {labelDesktop && (
+          <span className="scroll-hint__label scroll-hint__label--desktop">{labelDesktop}</span>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={`scroll-hint scroll-hint--${direction}${visible ? ' is-visible' : ''}`} aria-hidden="true">
       {label && (
@@ -19,8 +46,7 @@ function ScrollHint({ direction = 'down', label, labelDesktop, visible = true })
         <span className="scroll-hint__label scroll-hint__label--desktop">{labelDesktop}</span>
       )}
       <span className="scroll-hint__hand">
-        <Pointer className="scroll-hint__icon scroll-hint__icon--hand" strokeWidth={2} />
-        <Mouse className="scroll-hint__icon scroll-hint__icon--mouse" strokeWidth={2} />
+        <Icons />
       </span>
     </div>
   );

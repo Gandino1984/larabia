@@ -63,7 +63,7 @@ function HomePage({ ready = true }) {
     const showT = setTimeout(() => {
       scrollOverlayShown = true;
       setScrollOverlay(true);
-      hideT = setTimeout(() => setScrollOverlay(false), 4500);
+      hideT = setTimeout(() => setScrollOverlay(false), 5500);
     }, 1500);
     const dismiss = () => setScrollOverlay(false);
     window.addEventListener('wheel', dismiss, { passive: true });
@@ -294,7 +294,7 @@ function HomePage({ ready = true }) {
           shown once after the entrance sequence. */}
       {scrollOverlay && createPortal(
         <div className="scroll-hint-overlay" onClick={() => setScrollOverlay(false)}>
-          <ScrollHint direction="down" visible label={t('hero.scrollHint')} labelDesktop={t('hero.scrollHintDesktop')} />
+          <ScrollHint dual visible label={t('hero.scrollHintMobile')} labelDesktop={t('hero.scrollHintDesktop')} />
         </div>,
         document.body
       )}

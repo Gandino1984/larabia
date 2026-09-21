@@ -66,6 +66,20 @@
   animation: scroll-hint-bob-x 1.5s ease-in-out infinite;
 }
 
+/* Dual: two icons side by side (one vertical bob, one horizontal bob). */
+.scroll-hint__dual-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+}
+.scroll-hint__hand--bob-y {
+  animation: scroll-hint-bob-y 1.5s ease-in-out infinite;
+}
+.scroll-hint__hand--bob-x {
+  animation: scroll-hint-bob-x 1.5s ease-in-out infinite;
+}
+
 /* Desktop label variant is hidden until large screens. */
 .scroll-hint__label--desktop {
   display: none;

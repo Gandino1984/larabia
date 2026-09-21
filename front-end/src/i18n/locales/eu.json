@@ -412,7 +412,9 @@
   "article.list.viewMode": "Ikuspegi modua",
   "article.list.viewGrid": "Sareta",
   "article.list.viewCarousel": "Karrusel horizontala",
-  "hero.scrollHint": "Lerratu gora",
+  "hero.scrollHint": "Gora lerra dezakezu",
   "carousel.swipeHint": "Lerratu alboetara",
-  "hero.scrollHintDesktop": "Behera egin dezakezu"
+  "hero.scrollHintDesktop": "Behera egin dezakezu",
+  "hero.scrollHintSides": "Edukia alboetara ere lerra dezakezu",
+  "hero.scrollHintMobile": "Gora edo alboetara lerra dezakezu"
 }

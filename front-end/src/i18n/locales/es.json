@@ -412,7 +412,9 @@
   "article.list.viewMode": "Modo de vista",
   "article.list.viewGrid": "Cuadrícula",
   "article.list.viewCarousel": "Carrusel horizontal",
-  "hero.scrollHint": "Desliza hacia arriba",
+  "hero.scrollHint": "Puedes deslizar hacia arriba",
   "carousel.swipeHint": "Desliza hacia los lados",
-  "hero.scrollHintDesktop": "Puedes desplazarte hacia abajo o navegar horizontalmente con el ratón"
+  "hero.scrollHintDesktop": "Puedes desplazarte hacia abajo o navegar horizontalmente con el ratón",
+  "hero.scrollHintSides": "Puedes también deslizar contenido hacia los lados",
+  "hero.scrollHintMobile": "Puedes deslizar hacia arriba o hacia los lados"
 }
