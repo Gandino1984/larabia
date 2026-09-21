@@ -421,7 +421,7 @@
   height: 64px;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.35);
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
