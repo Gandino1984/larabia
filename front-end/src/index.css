@@ -243,8 +243,9 @@ button {
    ============================================ */
 .btn-back-nav {
   position: fixed;
-  top: 0.9rem;
+  top: 2.4rem;
   left: max(0.75rem, calc((100% - 1200px) / 2 - 2.9rem));
+  transform: translateY(-50%);
   z-index: 1001;
   display: inline-flex;
   align-items: center;
@@ -262,33 +263,23 @@ button {
   flex-shrink: 0;
 }
 
-/* Inline back buttons (toolbars) keep their in-flow position */
+.btn-back-nav:hover {
+  background: #000000;
+  color: #ffffff;
+  transform: translateY(-50%) translateX(-3px);
+}
+
+/* Inline back buttons (toolbars) keep their in-flow position (no fixed/transform) */
 .article-editor-blocks .btn-back-nav,
 .author-profile-editor .btn-back-nav,
 .editor-title-section .btn-back-nav {
   position: static;
+  transform: none;
 }
-
-.btn-back-nav:hover {
-  background: #000000;
-  color: #ffffff;
-  transform: translateX(-3px);
-}
-
-/* Light-background contexts — invert hover to dark */
-.article-editor-blocks .btn-back-nav,
-.author-profile-editor .btn-back-nav,
-.author-profile-reader .btn-back-nav,
-.author-publications-page .btn-back-nav {
-  color: #555;
-}
-
 .article-editor-blocks .btn-back-nav:hover,
 .author-profile-editor .btn-back-nav:hover,
-.author-profile-reader .btn-back-nav:hover,
-.author-publications-page .btn-back-nav:hover {
-  background: rgba(0, 0, 0, 0.08);
-  color: #111;
+.editor-title-section .btn-back-nav:hover {
+  transform: translateX(-3px);
 }
 
 /* ============================================

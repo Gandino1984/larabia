@@ -114,9 +114,17 @@
    just to the right of it (header is centered, width 98% / max 1200px). */
 @media (min-width: 769px) {
   .floating-editor-btn {
-    top: 0.4rem;
+    top: 2.4rem;
     bottom: auto;
     right: max(0.75rem, calc((100% - 1200px) / 2 - 5rem));
     z-index: 1001;
+    transform: translateY(-50%);
+    animation: none;
+  }
+  .floating-editor-btn:hover {
+    transform: translateY(-50%) scale(1.05);
+  }
+  .floating-editor-btn.hidden {
+    transform: translateY(-50%) scale(0.8);
   }
 }
