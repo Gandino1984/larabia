@@ -30,13 +30,6 @@
   z-index: 11;
   pointer-events: none;
 }
-/* Right-align the icon/label with the button above it. */
-.hero-scroll-hint .scroll-hint {
-  align-items: flex-end;
-}
-.hero-scroll-hint .scroll-hint__label {
-  text-align: right;
-}
 /* Desktop: the create button flanks the header bar, vertically centred on it. */
 @media (min-width: 769px) {
   .hero-scroll-hint {
@@ -68,7 +61,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7));
+  background: rgba(0, 0, 0, 0.55);
   pointer-events: none;
   z-index: 0;
 }
