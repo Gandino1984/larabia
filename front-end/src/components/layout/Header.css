@@ -58,14 +58,16 @@
   transition: all 0.25s ease;
 }
 .header-back-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: #000000;
+  color: #ffffff;
 }
 .header-bar.active .header-back-btn {
   color: var(--color-header-text-active, #000000);
   background: rgba(0, 0, 0, 0.06);
 }
 .header-bar.active .header-back-btn:hover {
-  background: rgba(0, 0, 0, 0.14);
+  background: #000000;
+  color: #ffffff;
 }
 
 /* Logo */
@@ -1301,6 +1303,17 @@
 /* Mobile more section */
 .mobile-more-section {
   width: 100%;
+}
+
+/* Submenus slide + fade in when their group is expanded. */
+@keyframes mobile-submenu-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mobile-more-list,
+.mobile-projects-list,
+.mobile-subgroup-list {
+  animation: mobile-submenu-in 0.28s ease both;
 }
 
 .mobile-more-list {
