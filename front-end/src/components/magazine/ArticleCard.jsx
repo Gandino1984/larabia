@@ -1,5 +1,5 @@
 // magazine-front/src/components/magazine/ArticleCard.jsx
-import { Calendar, User, Trash2, Share2 } from 'lucide-react';
+import { Calendar, User, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -66,13 +66,6 @@ function ArticleCard({ article }) {
     return `${apiUrl}${cover.startsWith('/') ? cover : '/' + cover}`;
   };
 
-  const handleShare = (e) => {
-    e.stopPropagation();
-    const url = `${window.location.origin}?article=${article.id_article}`;
-    navigator.clipboard.writeText(url).then(() => {
-      showSuccess('¡Enlace copiado!');
-    });
-  };
 
   const handleDelete = async (e) => {
     e.stopPropagation();
@@ -151,10 +144,6 @@ function ArticleCard({ article }) {
             </span>
           )}
         </div>
-        <button className="article-share-btn" onClick={handleShare} title={t('common.buttons.share')}>
-          <Share2 size={18} />
-          <span>{t('common.buttons.share')}</span>
-        </button>
       </div>
     </article>
   );

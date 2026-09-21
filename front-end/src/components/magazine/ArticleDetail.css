@@ -1151,24 +1151,23 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  background: #f2f2f2;
-  color: #333333;
+  border: none;
+  background: lightgray;
+  color: #1a1a1a;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 .article-detail-engagement .engagement-btn:hover {
-  background: #1a1a1a;
+  background: var(--color-accent, #667eea);
   color: #ffffff;
-  border-color: #1a1a1a;
+  transform: scale(1.05);
 }
 .article-detail-engagement .engagement-btn:active {
   transform: scale(0.9);
 }
 .article-detail-engagement .engagement-btn--active {
-  background: var(--color-accent, #e63946);
+  background: var(--color-accent, #667eea);
   color: #ffffff;
-  border-color: var(--color-accent, #e63946);
 }
 
 /* View counter inside the reader engagement section */

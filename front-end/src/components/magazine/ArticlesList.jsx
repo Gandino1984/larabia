@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
-import { Calendar, User, ArrowLeft, Trash2, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, User, ArrowLeft, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import ArticleEngagementBar from './ArticleEngagementBar';
 import './ArticlesList.css';
 
@@ -110,13 +110,6 @@ function ArticlesList() {
     navigateToArticle();
   };
 
-  const handleShare = (e, article) => {
-    e.stopPropagation();
-    const url = `${window.location.origin}?article=${article.id_article}`;
-    navigator.clipboard.writeText(url).then(() => {
-      showSuccess('¡Enlace copiado!');
-    });
-  };
 
   const handleDelete = async (e, article) => {
     e.stopPropagation();
@@ -247,14 +240,6 @@ function ArticlesList() {
                     )}
 
                   </div>
-                  <button
-                    className="article-share-btn"
-                    onClick={(e) => handleShare(e, article)}
-                    title={t('common.buttons.share')}
-                  >
-                    <Share2 size={18} />
-                    <span>{t('common.buttons.share')}</span>
-                  </button>
                 </div>
               </article>
             ))}

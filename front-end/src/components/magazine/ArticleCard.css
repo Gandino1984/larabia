@@ -349,15 +349,16 @@
   height: 34px;
   border-radius: 50%;
   border: none;
-  background: transparent;
-  color: #cfcfcf;
+  background: lightgray;
+  color: #1a1a1a;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
 .engagement-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-accent, #667eea);
   color: #ffffff;
+  transform: scale(1.05);
 }
 
 .engagement-btn:active {
@@ -365,7 +366,8 @@
 }
 
 .engagement-btn--active {
-  color: var(--color-accent, #e63946);
+  background: var(--color-accent, #667eea);
+  color: #ffffff;
 }
 
 /* View counter inside the engagement bar */
