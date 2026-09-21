@@ -212,7 +212,7 @@ function ArticlesList() {
 
                 <div className="article-card-content">
                   {article.project_title && (
-                    <span className="article-project-label">{article.project_title}</span>
+                    <span className="article-project-label">Proyecto: {article.project_title}</span>
                   )}
                   <h2 className="article-title">{article.title_article}</h2>
 

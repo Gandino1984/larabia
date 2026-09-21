@@ -117,7 +117,7 @@ function ArticleCard({ article }) {
 
       <div className="article-card-content">
         {article.project_title && (
-          <span className="article-project-label">{article.project_title}</span>
+          <span className="article-project-label">Proyecto: {article.project_title}</span>
         )}
         <h3 className="article-card-title">{article.title_article}</h3>
 
