@@ -334,6 +334,13 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* When an admin delete button overlaps the top-right corner, reserve room so the
+   view counter doesn't end up hidden behind it. */
+.article-card:has(.article-action-buttons) .article-engagement-bar,
+.article-card:has(.list-delete-btn) .article-engagement-bar {
+  padding-right: 2.9rem;
+}
+
 .engagement-btn {
   display: inline-flex;
   align-items: center;
