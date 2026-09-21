@@ -50,7 +50,7 @@ export function useScrollHint(
           clearTimeout(hideTimer);
         }
       },
-      { threshold: 0.25 }
+      { threshold: 0.15 }
     );
     io.observe(el);
 

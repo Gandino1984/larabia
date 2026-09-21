@@ -130,6 +130,10 @@ function SectionPreviews() {
   const visibleSections = sections.filter((s) => s.items.length > 0);
   if (visibleSections.length === 0) return null;
 
+  // Put the single sideways-swipe hint on the first carousel that actually has
+  // something to swipe (more than one item).
+  const swipeHintIndex = visibleSections.findIndex((s) => s.items.length > 1);
+
   return (
     <div className="section-previews">
       {visibleSections.map((sec, index) => (
@@ -138,9 +142,8 @@ function SectionPreviews() {
           title={sec.title}
           items={sec.items}
           onItemClick={handleItemClick}
-          /* A single sideways-swipe hint for the whole page, on the first visible
-             carousel (Barrio when it has content). */
-          enableSwipeHint={index === 0}
+          /* A single sideways-swipe hint, on the first carousel that overflows. */
+          enableSwipeHint={index === swipeHintIndex}
         />
       ))}
     </div>
