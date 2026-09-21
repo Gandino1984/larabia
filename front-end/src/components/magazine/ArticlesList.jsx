@@ -84,8 +84,17 @@ function ArticlesList() {
     setCurrentPage(1);
   }, [articles.length]);
 
-  const totalPages = Math.ceil(articles.length / ARTICLES_PER_PAGE);
-  const paginatedArticles = articles.slice(
+  // Show articles in publication order: the first published article first.
+  // (The API returns them newest-first, so sort ascending here.)
+  const orderedArticles = [...articles].sort((a, b) => {
+    const ta = a.date_published ? new Date(a.date_published).getTime() : 0;
+    const tb = b.date_published ? new Date(b.date_published).getTime() : 0;
+    if (ta !== tb) return ta - tb;
+    return (a.id_article || 0) - (b.id_article || 0);
+  });
+
+  const totalPages = Math.ceil(orderedArticles.length / ARTICLES_PER_PAGE);
+  const paginatedArticles = orderedArticles.slice(
     (currentPage - 1) * ARTICLES_PER_PAGE,
     currentPage * ARTICLES_PER_PAGE
   );
