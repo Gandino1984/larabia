@@ -122,8 +122,8 @@
 
 .list-delete-btn {
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
+  top: 8px;
+  right: 10px;
   z-index: 10;
   background: #dc2626;
   color: white;
