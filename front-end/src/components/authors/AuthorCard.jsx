@@ -108,20 +108,27 @@ function AuthorCard({ profile, editorUser }) {
             {profile.display_name?.charAt(0)?.toUpperCase() || '?'}
           </div>
         )}
+        {isSuperAdmin && (
+          <button
+            className="btn-edit-card-admin"
+            onClick={(e) => { e.stopPropagation(); navigateToAuthorEditorForProfile(profile); }}
+            title="Editar perfil"
+          >
+            <Edit size={16} />
+          </button>
+        )}
+        {profile.specialty_tags && profile.specialty_tags.length > 0 && (
+          <div className="author-card-tags-overlay">
+            {profile.specialty_tags.map((tag, idx) => (
+              <span key={idx} className="tag">{tag}</span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="author-card-content">
         <div className="author-name-row">
           <h3 className="author-name">{profile.display_name}</h3>
-          {isSuperAdmin && (
-            <button
-              className="btn-edit-card-admin"
-              onClick={(e) => { e.stopPropagation(); navigateToAuthorEditorForProfile(profile); }}
-              title="Editar perfil"
-            >
-              <Edit size={15} />
-            </button>
-          )}
         </div>
 
         <p className="bio-preview">
@@ -146,14 +153,6 @@ function AuthorCard({ profile, editorUser }) {
               </>
             )}
           </button>
-        )}
-
-        {profile.specialty_tags && profile.specialty_tags.length > 0 && (
-          <div className="tags">
-            {profile.specialty_tags.map((tag, idx) => (
-              <span key={idx} className="tag">{tag}</span>
-            ))}
-          </div>
         )}
 
         {(profile.website_url || profile.twitter_handle || profile.instagram_handle) && (

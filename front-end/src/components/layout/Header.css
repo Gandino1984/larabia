@@ -335,23 +335,24 @@
   height: 2px;
   border-radius: 2px;
   background: currentColor;
-  transition: top 0.3s ease, bottom 0.3s ease, transform 0.3s ease, opacity 0.2s ease;
+  /* Integer top positions (no translateY) so the lines stay pixel-aligned. */
+  transform-origin: center;
+  transition: top 0.3s ease, transform 0.3s ease, opacity 0.2s ease;
 }
 .burger-line:nth-child(1) { top: 0; }
-.burger-line:nth-child(2) { top: 50%; transform: translateY(-50%); }
-.burger-line:nth-child(3) { bottom: 0; }
+.burger-line:nth-child(2) { top: 6px; }
+.burger-line:nth-child(3) { top: 12px; }
 
 .burger-menu-btn.is-open .burger-line:nth-child(1) {
-  top: 50%;
-  transform: translateY(-50%) rotate(45deg);
+  top: 6px;
+  transform: rotate(45deg);
 }
 .burger-menu-btn.is-open .burger-line:nth-child(2) {
   opacity: 0;
 }
 .burger-menu-btn.is-open .burger-line:nth-child(3) {
-  bottom: auto;
-  top: 50%;
-  transform: translateY(-50%) rotate(-45deg);
+  top: 6px;
+  transform: rotate(-45deg);
 }
 
 /* Mobile Menu Overlay */
