@@ -248,7 +248,7 @@ function ArticlesList() {
         </div>
         <div className="articles-list-subheader">
           <p className="articles-count">{articles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: articles.length })}</p>
-          <div className="articles-view-toggle" role="group" aria-label={t('article.list.viewMode')}>
+          <div className="articles-view-toggle" data-mode={viewMode} role="group" aria-label={t('article.list.viewMode')}>
             <button
               type="button"
               className={`view-toggle-btn ${viewMode === 'grid' ? 'view-toggle-btn--active' : ''}`}

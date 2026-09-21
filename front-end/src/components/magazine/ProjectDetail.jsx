@@ -174,7 +174,7 @@ function ProjectDetail() {
             return (
               <>
                 <div className="project-articles-toolbar">
-                  <div className="articles-view-toggle" role="group" aria-label={t('article.list.viewMode')}>
+                  <div className="articles-view-toggle" data-mode={viewMode} role="group" aria-label={t('article.list.viewMode')}>
                     <button
                       type="button"
                       className={`view-toggle-btn ${viewMode === 'grid' ? 'view-toggle-btn--active' : ''}`}
