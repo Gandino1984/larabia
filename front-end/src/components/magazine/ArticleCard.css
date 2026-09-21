@@ -58,7 +58,7 @@
   gap: 0.4rem;
   transition: all 0.3s;
   min-height: 36px;
-  align-self: flex-start;
+  align-self: flex-end;
   margin-top: 0.75rem;
   font-size: 0.82rem;
   font-weight: 600;
