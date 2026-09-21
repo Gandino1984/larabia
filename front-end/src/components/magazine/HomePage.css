@@ -215,7 +215,7 @@
   /* Its own (narrower) measure, hugging the left edge, leaving room at the sides
      so the carousel arrows don't sit on top of the text. */
   text-align: left;
-  max-width: 430px;
+  max-width: 290px;
   margin-right: auto;
 }
 
@@ -482,7 +482,7 @@
   .hero-excerpt {
     font-size: 1.2rem;
     margin-bottom: 1.75rem;
-    max-width: 470px;
+    max-width: 720px;
   }
 
   .hero-meta {
@@ -556,7 +556,7 @@
   .hero-excerpt {
     font-size: 1.25rem;
     margin-bottom: 2rem;
-    max-width: 520px;
+    max-width: 820px;
   }
 
   .hero-meta {
@@ -620,7 +620,7 @@
 
   .hero-excerpt {
     font-size: 1.3rem;
-    max-width: 580px;
+    max-width: 920px;
   }
 
   .hero-logo {
