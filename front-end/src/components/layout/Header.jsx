@@ -72,26 +72,25 @@ function Header({ ready = true }) {
     if (!ready || hasAnimatedRef.current) return;
     hasAnimatedRef.current = true;
     fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 1100 } });
-    shakeApi.start({
-      from: { x: 0, y: 0, r: 0 },
-      to: [
-        { x: -26, y: -12, r: -9, config: { duration: 55 } },
-        { x: 26, y: 12, r: 9, config: { duration: 55 } },
-        { x: -24, y: 11, r: -9, config: { duration: 55 } },
-        { x: 24, y: -11, r: 9, config: { duration: 55 } },
-        { x: -22, y: -10, r: -8, config: { duration: 55 } },
-        { x: 22, y: 10, r: 8, config: { duration: 55 } },
-        { x: -18, y: 9, r: -7, config: { duration: 55 } },
-        { x: 18, y: -9, r: 7, config: { duration: 55 } },
-        { x: -14, y: -7, r: -6, config: { duration: 55 } },
-        { x: 14, y: 7, r: 6, config: { duration: 55 } },
-        { x: -10, y: 5, r: -4, config: { duration: 55 } },
-        { x: 10, y: -5, r: 4, config: { duration: 55 } },
-        { x: -6, y: -3, r: -2, config: { duration: 55 } },
-        { x: 6, y: 3, r: 2, config: { duration: 55 } },
-        { x: 0, y: 0, r: 0, config: { tension: 220, friction: 11 } },
-      ],
-    });
+    // Randomised, decaying shake — each jolt goes in a random direction so it
+    // feels chaotic ("rabid"), like the logo, rather than a fixed back-and-forth.
+    const N = 16;
+    const rand = (m) => (Math.random() * 2 - 1) * m;
+    let prevSign = 1;
+    const steps = [];
+    for (let i = 0; i < N; i++) {
+      const decay = 1 - i / N;
+      const sign = -prevSign; // alternate side but with random magnitude
+      prevSign = sign;
+      steps.push({
+        x: sign * (6 + Math.random() * 22) * decay,
+        y: rand(14) * decay,
+        r: sign * (2 + Math.random() * 8) * decay,
+        config: { duration: 45 + Math.random() * 25 },
+      });
+    }
+    steps.push({ x: 0, y: 0, r: 0, config: { tension: 220, friction: 11 } });
+    shakeApi.start({ from: { x: 0, y: 0, r: 0 }, to: steps });
   }, [ready, fadeApi, shakeApi]);
   const [showUserCard, setShowUserCard] = useState(false);
   const [isHeaderActive, setIsHeaderActive] = useState(false);
