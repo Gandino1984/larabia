@@ -317,3 +317,11 @@
   .articles-carousel .article-card { flex: none; width: 100%; max-width: none; }
   .carousel-arrow { display: none; }
 }
+
+/* Article count in the project detail */
+.project-articles-count {
+  margin: 0 0 1rem;
+  text-align: center;
+  color: #999;
+  font-size: 1rem;
+}

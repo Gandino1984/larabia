@@ -173,6 +173,11 @@ function ProjectDetail() {
             const ordered = [...projectArticles].sort((a, b) => (a.id_article || 0) - (b.id_article || 0));
             return (
               <>
+                <p className="project-articles-count">
+                  {ordered.length === 1
+                    ? t('article.list.count', { count: 1 })
+                    : t('article.list.count_plural', { count: ordered.length })}
+                </p>
                 <div className="project-articles-toolbar">
                   <div className="articles-view-toggle" data-mode={viewMode} role="group" aria-label={t('article.list.viewMode')}>
                     <button
