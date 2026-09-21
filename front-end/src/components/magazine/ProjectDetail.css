@@ -283,8 +283,8 @@
   transition: background 0.15s ease;
 }
 .carousel-arrow:hover { background: #000; }
-.carousel-arrow--prev { left: -6px; }
-.carousel-arrow--next { right: -6px; }
+.carousel-arrow--prev { left: 4px; }
+.carousel-arrow--next { right: 4px; }
 
 @media (max-width: 768px) {
   .project-articles-toolbar { display: none; }
