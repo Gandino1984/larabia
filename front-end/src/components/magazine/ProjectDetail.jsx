@@ -98,6 +98,10 @@ function ProjectDetail() {
           )}
           <h1 className="project-detail-title">{selectedProject.title_project}</h1>
 
+          {selectedProject.description_project && (
+            <p className="project-detail-description">{selectedProject.description_project}</p>
+          )}
+
           {currentUser && (() => {
             const subscribed = isSubscribed(selectedProject.id_project);
             return (
@@ -112,10 +116,6 @@ function ProjectDetail() {
               </button>
             );
           })()}
-
-          {selectedProject.description_project && (
-            <p className="project-detail-description">{selectedProject.description_project}</p>
-          )}
           {(selectedProject.authors?.length > 0 || selectedProject.author_name) && (
             <div className="project-detail-collaborators">
               <span className="project-detail-collaborators-label">{t('project.collaborators')}</span>
