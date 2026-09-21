@@ -138,6 +138,8 @@ function SectionPreviews() {
           title={sec.title}
           items={sec.items}
           onItemClick={handleItemClick}
+          /* A single sideways-swipe hint for the whole page, at the Barrio row. */
+          enableSwipeHint={sec.id === 'barrio'}
         />
       ))}
     </div>
