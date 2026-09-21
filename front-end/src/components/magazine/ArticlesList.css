@@ -231,6 +231,7 @@
 .articles-list-page .article-meta {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #3a3a3a;
