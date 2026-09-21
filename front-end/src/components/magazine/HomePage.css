@@ -370,7 +370,7 @@
 /* Slide Indicators - Mobile */
 .hero-indicators {
   position: absolute;
-  bottom: 16%;
+  bottom: 8%;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -455,7 +455,7 @@
   }
 
   .hero-indicators {
-    bottom: 16%;
+    bottom: 8%;
     gap: 0.6rem;
   }
 
@@ -529,7 +529,7 @@
   }
 
   .hero-indicators {
-    bottom: 18%;
+    bottom: 9%;
     gap: 0.7rem;
   }
 
@@ -602,7 +602,7 @@
   }
 
   .hero-indicators {
-    bottom: 20%;
+    bottom: 10%;
     gap: 0.75rem;
   }
 
@@ -696,7 +696,7 @@
   }
 
   .hero-indicators {
-    bottom: 12%;
+    bottom: 7%;
   }
 
   .hero-logo {
