@@ -58,7 +58,7 @@ function HomePage() {
         setShowScrollHint(true);
         hideTimer = setTimeout(() => setShowScrollHint(false), 5000);
       }
-    }, 4000);
+    }, 3000);
     const onScroll = () => {
       if (window.scrollY > 40) setShowScrollHint(false);
     };
