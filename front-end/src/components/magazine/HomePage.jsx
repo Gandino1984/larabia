@@ -193,7 +193,7 @@ function HomePage({ ready = true }) {
       <section className="hero-section">
         {currentArticle ? (
           <div
-            className="hero-slider"
+            className={`hero-slider hero-anim ${heroIn ? 'hero-in' : ''}`}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
