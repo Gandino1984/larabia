@@ -396,6 +396,7 @@
 /* Mobile: everything vertical; hide the toggle, carousel collapses to a column */
 @media (max-width: 768px) {
   .articles-view-toggle { display: none; }
+  .articles-carousel-wrap { padding: 0; }
   .articles-carousel {
     flex-direction: column;
     overflow-x: visible;

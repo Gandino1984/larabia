@@ -140,8 +140,11 @@
   }
 
   .project-detail-cover {
-    width: 100%;
-    max-width: 300px;
+    width: 100vw;
+    max-width: none;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
   }
   .project-detail-cover img {
     height: auto;
@@ -313,6 +316,7 @@
 
 @media (max-width: 768px) {
   .project-articles-toolbar { display: none; }
+  .articles-carousel-wrap { padding: 0; }
   .articles-carousel { flex-direction: column; overflow-x: visible; }
   .articles-carousel .article-card { flex: none; width: 100%; max-width: none; }
   .carousel-arrow { display: none; }
