@@ -1391,7 +1391,7 @@
   .header-user-section .notif-wrapper {
     position: absolute;
     top: 50%;
-    right: calc(44px + 1.1rem);
+    right: calc(44px + 0.85rem);
     transform: translateY(-50%);
     z-index: 6;
   }
@@ -1428,8 +1428,9 @@
   overflow: hidden;
 }
 
-/* On phones, pin the dropdown to the viewport so it never overflows the edges */
-@media (max-width: 600px) {
+/* On mobile the bell sits on the right, so pin the dropdown to the viewport
+   across the whole mobile range so it never overflows the edges. */
+@media (max-width: 767px) {
   .notif-dropdown {
     position: fixed;
     top: calc(0.5rem + var(--header-h) + 0.75rem);
