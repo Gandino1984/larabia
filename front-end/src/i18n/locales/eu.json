@@ -412,5 +412,6 @@
   "article.list.viewMode": "Ikuspegi modua",
   "article.list.viewGrid": "Sareta",
   "article.list.viewCarousel": "Karrusel horizontala",
-  "hero.scrollHint": "Lerratu gora"
+  "hero.scrollHint": "Lerratu gora",
+  "carousel.swipeHint": "Lerratu alboetara"
 }

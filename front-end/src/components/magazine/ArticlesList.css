@@ -431,11 +431,12 @@
   padding: 0 96px;
 }
 
-/* Swipe affordance overlaid at the bottom-right of a horizontal carousel. */
+/* Swipe affordance centred over the start of a horizontal carousel. */
 .carousel-swipe-hint {
   position: absolute;
-  right: 108px;
-  bottom: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 6;
   pointer-events: none;
 }

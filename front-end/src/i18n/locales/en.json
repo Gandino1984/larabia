@@ -412,5 +412,6 @@
   "article.list.viewMode": "View mode",
   "article.list.viewGrid": "Grid",
   "article.list.viewCarousel": "Horizontal carousel",
-  "hero.scrollHint": "Swipe up"
+  "hero.scrollHint": "Swipe up",
+  "carousel.swipeHint": "Swipe sideways"
 }

@@ -96,7 +96,7 @@ function SectionPreviewRow({ title, items, onItemClick }) {
         </div>
         {showSwipeHint && (
           <div className="section-preview__swipe-hint">
-            <ScrollHint direction="horizontal" />
+            <ScrollHint direction="horizontal" label={t('carousel.swipeHint')} />
           </div>
         )}
       </div>

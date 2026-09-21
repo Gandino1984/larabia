@@ -217,7 +217,7 @@ function ProjectDetail() {
                     </button>
                     {showSwipeHint && (
                       <div className="carousel-swipe-hint">
-                        <ScrollHint direction="horizontal" />
+                        <ScrollHint direction="horizontal" label={t('carousel.swipeHint')} />
                       </div>
                     )}
                   </div>

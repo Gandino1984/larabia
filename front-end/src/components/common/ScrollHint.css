@@ -52,18 +52,10 @@
 }
 
 /* Horizontal (swipe sideways): the icon slides left and right. */
-.scroll-hint--horizontal {
-  flex-direction: row;
-  gap: 8px;
-}
+/* Horizontal: label above a sideways-bobbing icon (same column layout as the
+   vertical hint, just a different motion). */
 .scroll-hint--horizontal .scroll-hint__hand {
-  width: 46px;
-  height: 46px;
   animation: scroll-hint-bob-x 1.5s ease-in-out infinite;
-}
-.scroll-hint--horizontal .scroll-hint__icon {
-  width: 26px;
-  height: 26px;
 }
 
 /* Large screens: show the mouse instead of the hand. */

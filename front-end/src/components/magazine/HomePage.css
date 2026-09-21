@@ -25,7 +25,7 @@
    Mobile: the create button sits below the header at 44px tall. */
 .hero-scroll-hint {
   position: fixed;
-  top: calc(0.5rem + var(--header-h) + 0.5rem + 44px + 0.85rem);
+  top: calc(0.5rem + var(--header-h) + 0.5rem + 44px + 4rem);
   right: 0.75rem;
   z-index: 11;
 }
@@ -39,7 +39,7 @@
 /* Desktop: the create button flanks the header bar, vertically centred on it. */
 @media (min-width: 769px) {
   .hero-scroll-hint {
-    top: calc(0.5rem + var(--header-h) + 9px + 1rem);
+    top: calc(0.5rem + var(--header-h) + 9px + 4.5rem);
     right: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 1.5rem));
   }
 }
@@ -135,11 +135,11 @@
   line-clamp: 6;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  /* The description gets its own (wider) measure and hugs the right edge of the
+  /* The description gets its own (wider) measure and hugs the left edge of the
      content box so more text fits per line. */
-  text-align: right;
+  text-align: left;
   max-width: 620px;
-  margin-left: auto;
+  margin-right: auto;
 }
 
 .hero-meta {
