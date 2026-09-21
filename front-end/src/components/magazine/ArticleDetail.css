@@ -1170,3 +1170,13 @@
   color: #ffffff;
   border-color: var(--color-accent, #e63946);
 }
+
+/* View counter inside the reader engagement section */
+.article-detail-views {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #555;
+  font-size: 0.9rem;
+  font-weight: 600;
+}

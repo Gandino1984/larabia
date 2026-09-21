@@ -360,3 +360,15 @@
 .engagement-btn--active {
   color: var(--color-accent, #e63946);
 }
+
+/* View counter inside the engagement bar */
+.engagement-views {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding-right: 4px;
+  color: #cfcfcf;
+  font-size: 0.82rem;
+  font-weight: 600;
+}

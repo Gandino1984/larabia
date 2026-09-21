@@ -352,7 +352,9 @@ function ArticleDetail({ previewMode = false }) {
               </span>
             )}
 
-            {selectedArticle.view_count_article > 0 && (
+            {/* In draft preview the engagement bar is hidden, so show views on
+                their own; otherwise views live inside the engagement section. */}
+            {previewMode && selectedArticle.view_count_article > 0 && (
               <span className="meta-item">
                 <Eye size={24} />
                 {selectedArticle.view_count_article} {t('article.detail.views')}
@@ -387,6 +389,12 @@ function ArticleDetail({ previewMode = false }) {
                 >
                   <MessageCircle size={20} fill={showComments ? 'currentColor' : 'none'} />
                 </button>
+                {selectedArticle.view_count_article > 0 && (
+                  <span className="article-detail-views">
+                    <Eye size={20} />
+                    {selectedArticle.view_count_article}
+                  </span>
+                )}
               </span>
             )}
           </div>

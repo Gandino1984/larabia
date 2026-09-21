@@ -1,12 +1,10 @@
 // magazine-front/src/components/magazine/ArticleCard.jsx
-import { useState } from 'react';
-import { Calendar, User, Eye, Trash2, Share2, ThumbsUp, Bookmark, MessageCircle } from 'lucide-react';
+import { Calendar, User, Trash2, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
-import { useEngagement } from '../../app_context/EngagementContext';
-import CommentsModal from './CommentsModal';
+import ArticleEngagementBar from './ArticleEngagementBar';
 import './ArticleCard.css';
 
 // Resolve a user's avatar: Google users store a full URL, local uploads a filename.
@@ -44,20 +42,11 @@ function ArticleCard({ article }) {
   const { setSelectedArticle, deleteArticle } = useMagazine();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { navigateToArticle, showSuccess, showError } = useUI();
-  const { isLiked, isFavorited, toggleLike, toggleFavorite } = useEngagement();
-  const [showComments, setShowComments] = useState(false);
-
-  const liked = isLiked(article.id_article);
-  const favorited = isFavorited(article.id_article);
 
   const handleClick = () => {
     setSelectedArticle(article);
     navigateToArticle();
   };
-
-  const handleLike = (e) => { e.stopPropagation(); toggleLike(article.id_article); };
-  const handleFavorite = (e) => { e.stopPropagation(); toggleFavorite(article.id_article); };
-  const handleComments = (e) => { e.stopPropagation(); setShowComments(true); };
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -102,35 +91,8 @@ function ArticleCard({ article }) {
 
   return (
     <article className="article-card" onClick={handleClick}>
-      {/* Engagement bar: like / favorite / comments (icon-only, fill on click) */}
-      <div className="article-engagement-bar" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          className={`engagement-btn ${liked ? 'engagement-btn--active' : ''}`}
-          onClick={handleLike}
-          title={t('engagement.like')}
-          aria-pressed={liked}
-        >
-          <ThumbsUp size={18} fill={liked ? 'currentColor' : 'none'} />
-        </button>
-        <button
-          type="button"
-          className={`engagement-btn ${favorited ? 'engagement-btn--active' : ''}`}
-          onClick={handleFavorite}
-          title={t('engagement.favorite')}
-          aria-pressed={favorited}
-        >
-          <Bookmark size={18} fill={favorited ? 'currentColor' : 'none'} />
-        </button>
-        <button
-          type="button"
-          className={`engagement-btn ${showComments ? 'engagement-btn--active' : ''}`}
-          onClick={handleComments}
-          title={t('engagement.comments')}
-        >
-          <MessageCircle size={18} fill={showComments ? 'currentColor' : 'none'} />
-        </button>
-      </div>
+      {/* Engagement bar: like / favorite / comments + views */}
+      <ArticleEngagementBar article={article} />
 
       {canCreateContent && (isSuperAdmin || isArticleAuthor(article)) && (
         <div className="article-action-buttons">
@@ -188,27 +150,12 @@ function ArticleCard({ article }) {
               )}
             </span>
           )}
-
-          {article.view_count_article > 0 && (
-            <span className="meta-item">
-              <Eye size={16} />
-              {article.view_count_article}
-            </span>
-          )}
         </div>
         <button className="article-share-btn" onClick={handleShare} title={t('common.buttons.share')}>
           <Share2 size={18} />
           <span>{t('common.buttons.share')}</span>
         </button>
       </div>
-
-      {showComments && (
-        <CommentsModal
-          articleId={article.id_article}
-          articleTitle={article.title_article}
-          onClose={() => setShowComments(false)}
-        />
-      )}
     </article>
   );
 }

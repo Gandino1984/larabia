@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
-import { Calendar, User, Eye, ArrowLeft, Trash2, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, User, ArrowLeft, Trash2, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
+import ArticleEngagementBar from './ArticleEngagementBar';
 import './ArticlesList.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -188,6 +189,7 @@ function ArticlesList() {
                     <Trash2 size={18} />
                   </button>
                 )}
+                <ArticleEngagementBar article={article} />
                 <div className="article-card-image">
                   <img
                     src={getCoverImageUrl(article)}
@@ -244,12 +246,6 @@ function ArticlesList() {
                       </span>
                     )}
 
-                    {article.view_count_article > 0 && (
-                      <span className="meta-item">
-                        <Eye size={16} />
-                        {article.view_count_article}
-                      </span>
-                    )}
                   </div>
                   <button
                     className="article-share-btn"
