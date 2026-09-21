@@ -241,6 +241,9 @@ function HomePage({ ready = true }) {
                       {formatDate(currentArticle.date_published)}
                     </span>
                   )}
+                  {currentArticle.date_published && (currentArticle.authors?.length > 0 || currentArticle.author_name) && (
+                    <span className="hero-meta-divider" aria-hidden="true"></span>
+                  )}
                   {(currentArticle.authors?.length > 0 || currentArticle.author_name) && (
                     <span className="meta-item hero-authors">
                       {currentArticle.authors?.length > 0

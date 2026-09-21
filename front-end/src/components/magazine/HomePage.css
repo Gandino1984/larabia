@@ -82,7 +82,7 @@
   background-repeat: no-repeat;
   z-index: 0;
   opacity: 0;
-  transition: opacity 1.25s ease;
+  transition: opacity 2.2s ease;
 }
 .hero-slide.bg-in .hero-slide__bg {
   opacity: 1;
@@ -240,11 +240,19 @@
   align-self: center;
 }
 
+/* Vertical divider between the publication date and the authors. */
+.hero-meta-divider {
+  width: 1px;
+  align-self: stretch;
+  min-height: 1.4em;
+  background: rgba(255, 255, 255, 0.5);
+}
+
 /* Author avatars in hero meta */
 .hero-authors {
   display: flex;
   align-items: center;
-  gap: 0.6rem 1.4rem;
+  gap: 0.7rem 2rem;
   flex-wrap: wrap;
 }
 
@@ -255,8 +263,8 @@
 }
 
 .hero-author-avatar {
-  width: 28px;
-  height: 28px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   object-fit: cover;
   border: 1.5px solid rgba(255, 255, 255, 0.5);
@@ -264,8 +272,8 @@
 }
 
 .hero-author-avatar--fallback {
-  width: 28px;
-  height: 28px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
   border: 1.5px solid rgba(255, 255, 255, 0.5);
@@ -279,7 +287,8 @@
 }
 
 .hero-author-name {
-  font-size: 0.85rem;
+  /* Same size as the publication date (inherits from .meta-item). */
+  font-size: inherit;
   color: white;
   opacity: 0.9;
 }
