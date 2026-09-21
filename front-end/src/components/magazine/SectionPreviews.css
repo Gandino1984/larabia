@@ -231,7 +231,7 @@
   }
 
   .section-preview__title {
-    font-size: 2rem;
+    font-size: 2.25rem;
   }
 
   .section-preview__arrows {
@@ -292,5 +292,12 @@
   .section-preview__readmore {
     padding: 10px 20px;
     font-size: 0.95rem;
+  }
+}
+
+/* Large / widescreen: bigger section titles. */
+@media (min-width: 1200px) {
+  .section-preview__title {
+    font-size: 2.75rem;
   }
 }

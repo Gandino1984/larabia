@@ -336,6 +336,48 @@ function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // The notifications bell + dropdown. Rendered in two spots (only one visible
+  // per breakpoint via CSS): next to the burger on mobile, and inside the
+  // desktop nav (between "Más" and the language selector) on desktop.
+  const renderNotifBell = (variant) => currentUser && (
+    <div className={`notif-wrapper notif-wrapper--${variant}`}>
+      <button
+        className="notif-bell-btn"
+        onClick={() => { if (showNotifications) markAllSeen(); setShowNotifications(v => !v); }}
+        title={t('notifications.title')}
+        aria-label={t('notifications.title')}
+      >
+        <Bell size={20} />
+        {notifCount > 0 && <span className="notif-badge">{notifCount > 9 ? '9+' : notifCount}</span>}
+      </button>
+      {showNotifications && (
+        <div
+          className="notif-dropdown"
+          onMouseLeave={() => { markAllSeen(); setShowNotifications(false); }}
+        >
+          <div className="notif-dropdown-header">{t('notifications.title')}</div>
+          {notifications.length === 0 ? (
+            <div className="notif-empty">{t('notifications.empty')}</div>
+          ) : (
+            <ul className="notif-list">
+              {notifications.map((n) => (
+                <li key={n.id}>
+                  <button
+                    className="notif-item"
+                    onClick={() => { markAllSeen(); setShowNotifications(false); n.onClick?.(); }}
+                  >
+                    <span className="notif-item-title">{n.title}</span>
+                    <span className="notif-item-message">{n.message}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <header className={`header ${showArticleDetail ? 'header-hidden' : ''}`}>
       <div
@@ -371,44 +413,7 @@ function Header() {
           </div>
 
           <div className="header-user-section">
-            {currentUser && (
-              <div className="notif-wrapper">
-                <button
-                  className="notif-bell-btn"
-                  onClick={() => { if (showNotifications) markAllSeen(); setShowNotifications(v => !v); }}
-                  title={t('notifications.title')}
-                  aria-label={t('notifications.title')}
-                >
-                  <Bell size={20} />
-                  {notifCount > 0 && <span className="notif-badge">{notifCount > 9 ? '9+' : notifCount}</span>}
-                </button>
-                {showNotifications && (
-                  <div
-                    className="notif-dropdown"
-                    onMouseLeave={() => { markAllSeen(); setShowNotifications(false); }}
-                  >
-                    <div className="notif-dropdown-header">{t('notifications.title')}</div>
-                    {notifications.length === 0 ? (
-                      <div className="notif-empty">{t('notifications.empty')}</div>
-                    ) : (
-                      <ul className="notif-list">
-                        {notifications.map((n) => (
-                          <li key={n.id}>
-                            <button
-                              className="notif-item"
-                              onClick={() => { markAllSeen(); setShowNotifications(false); n.onClick?.(); }}
-                            >
-                              <span className="notif-item-title">{n.title}</span>
-                              <span className="notif-item-message">{n.message}</span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+            {renderNotifBell('mobile')}
             {currentUser ? (
               <button className="user-info-btn" onClick={handleUserClick} title={currentUser.name_user}>
                 {userImageUrl && !imageLoadError ? (
@@ -578,6 +583,8 @@ function Header() {
               </button>
             );
           })}
+
+          {renderNotifBell('desktop')}
 
           <LanguageSelector />
 

@@ -194,10 +194,12 @@ function HomePage() {
                 onError={() => setBrokenImages(prev => ({ ...prev, [currentArticle.id_article]: true }))}
               />
               <div className="hero-content">
-                {currentArticle.project_title && (
-                  <span className="hero-project-label">Proyecto: {currentArticle.project_title}</span>
-                )}
-                <h1 className="hero-title">{currentArticle.title_article}</h1>
+                <div className="hero-headline">
+                  {currentArticle.project_title && (
+                    <span className="hero-project-label">Proyecto: {currentArticle.project_title}</span>
+                  )}
+                  <h1 className="hero-title">{currentArticle.title_article}</h1>
+                </div>
                 {currentArticle.excerpt_article && (
                   <p className="hero-excerpt">{currentArticle.excerpt_article}</p>
                 )}
@@ -263,12 +265,10 @@ function HomePage() {
           </div>
         )}
 
-        {/* Scroll-down affordance (appears a few seconds after load). */}
-        {showScrollHint && (
-          <div className="hero-scroll-hint">
-            <ScrollHint direction="down" label={t('hero.scrollHint')} labelDesktop={t('hero.scrollHintDesktop')} />
-          </div>
-        )}
+        {/* Scroll-down affordance (fades in a few seconds after load, then out). */}
+        <div className="hero-scroll-hint">
+          <ScrollHint direction="down" visible={showScrollHint} label={t('hero.scrollHint')} labelDesktop={t('hero.scrollHintDesktop')} />
+        </div>
       </section>
 
       {/* Section previews: full-width slideshows per header-bar button */}

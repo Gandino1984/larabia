@@ -1365,6 +1365,13 @@
 
 /* ---- Notification bell + dropdown ---- */
 .notif-wrapper { position: relative; display: inline-flex; align-items: center; }
+/* The desktop bell (in the nav) is hidden on mobile; the mobile bell (next to
+   the burger) is hidden on desktop. */
+.notif-wrapper--desktop { display: none; }
+@media (min-width: 768px) {
+  .notif-wrapper--mobile { display: none; }
+  .notif-wrapper--desktop { display: inline-flex; }
+}
 /* Mirror .user-info-btn so the bell adapts to the header's active (white) state. */
 .notif-bell-btn {
   position: relative;

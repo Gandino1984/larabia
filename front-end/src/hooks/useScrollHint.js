@@ -42,21 +42,24 @@ export function useScrollHint(ref, enabled = true, { delay = 500, autoHide = 600
     );
     io.observe(el);
 
-    // Only a real horizontal scroll of the carousel dismisses it (vertical page
-    // scrolling doesn't fire the track's own scroll event).
-    const dismiss = () => {
-      dismissed = true;
-      setShow(false);
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
+    // Only a real horizontal scroll of the carousel dismisses it. We check the
+    // actual offset because scroll-snap can fire a spurious scroll event at ~0
+    // on load, which would otherwise dismiss the hint before it ever appears.
+    const onScroll = () => {
+      if (el.scrollLeft > 12) {
+        dismissed = true;
+        setShow(false);
+        clearTimeout(showTimer);
+        clearTimeout(hideTimer);
+      }
     };
-    el.addEventListener('scroll', dismiss, { passive: true });
+    el.addEventListener('scroll', onScroll, { passive: true });
 
     return () => {
       io.disconnect();
       clearTimeout(showTimer);
       clearTimeout(hideTimer);
-      el.removeEventListener('scroll', dismiss);
+      el.removeEventListener('scroll', onScroll);
     };
   }, [ref, enabled, delay, autoHide]);
 

@@ -28,6 +28,7 @@
   top: calc(0.5rem + var(--header-h) + 0.5rem + 44px + 4rem);
   right: 0.75rem;
   z-index: 11;
+  pointer-events: none;
 }
 /* Right-align the icon/label with the button above it. */
 .hero-scroll-hint .scroll-hint {
@@ -76,7 +77,26 @@
   z-index: 1;
   position: relative;
   max-height: calc(100vh - 120px);
-  overflow: hidden;
+  /* visible on mobile so the full-bleed headline band can reach the screen
+     edges; clipped again on desktop (see the 768px block). */
+  overflow: visible;
+}
+
+/* Mobile: a very translucent black band behind the project + article titles,
+   edge-to-edge, to keep them readable over the cover image. */
+.hero-headline {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding: 0.7rem 1rem;
+  background: rgba(0, 0, 0, 0.35);
+  margin-bottom: 1rem;
+}
+.hero-headline .hero-project-label,
+.hero-headline .hero-title {
+  margin-bottom: 0;
+}
+.hero-headline .hero-project-label {
+  margin-bottom: 0.4rem;
 }
 
 .hero-logo {
@@ -352,6 +372,19 @@
   .hero-content {
     padding: 2rem;
     max-width: 880px;
+    overflow: hidden;
+  }
+
+  /* No band on desktop — plain titles. */
+  .hero-headline {
+    width: auto;
+    margin-left: 0;
+    padding: 0;
+    background: transparent;
+    margin-bottom: 0;
+  }
+  .hero-headline .hero-title {
+    margin-bottom: 1.25rem;
   }
 
   .hero-category {

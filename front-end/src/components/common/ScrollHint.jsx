@@ -9,9 +9,9 @@
 import { Pointer, Mouse } from 'lucide-react';
 import './ScrollHint.css';
 
-function ScrollHint({ direction = 'down', label, labelDesktop }) {
+function ScrollHint({ direction = 'down', label, labelDesktop, visible = true }) {
   return (
-    <div className={`scroll-hint scroll-hint--${direction}`} aria-hidden="true">
+    <div className={`scroll-hint scroll-hint--${direction}${visible ? ' is-visible' : ''}`} aria-hidden="true">
       {label && (
         <span className={`scroll-hint__label${labelDesktop ? ' scroll-hint__label--mobile' : ''}`}>{label}</span>
       )}
