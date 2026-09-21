@@ -377,19 +377,12 @@
   .hero-content {
     padding: 2rem;
     max-width: 880px;
-    overflow: hidden;
   }
 
-  /* No band on desktop — plain titles. */
+  /* Keep the translucent title band on desktop too (edge-to-edge). */
   .hero-headline {
-    width: auto;
-    margin-left: 0;
-    padding: 0;
-    background: transparent;
-    margin-bottom: 0;
-  }
-  .hero-headline .hero-title {
-    margin-bottom: 1.25rem;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .hero-category {

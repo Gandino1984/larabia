@@ -1,11 +1,12 @@
 // magazine-front/src/hooks/useScrollHint.js
 //
-// Returns whether to show a scroll/swipe help hint over a target element. The
-// hint appears when the element is in the viewport (so it shows on first load
-// and on every normal reload — regardless of restored scroll position — for
-// whatever element the user is actually looking at). It auto-hides after a few
-// seconds, hides if the element leaves the viewport, and (for horizontal
-// carousels) is dismissed by a real sideways scroll.
+// Returns whether to show a scroll/swipe help hint over a target element. Uses
+// an IntersectionObserver so it works regardless of which element is the scroll
+// container (the page scrolls on <body> here, so window-scroll listeners are
+// unreliable). The hint appears when the element enters the viewport — on first
+// load and on every normal reload, for whatever the user is looking at — then
+// auto-hides, hides when the element leaves the viewport, and (for horizontal
+// carousels) is dismissed for good by a real sideways scroll.
 import { useEffect, useState } from 'react';
 
 export function useScrollHint(
@@ -28,37 +29,33 @@ export function useScrollHint(
     let hideTimer;
 
     const overflowsX = () => el.scrollWidth - el.clientWidth > 12;
-    const inView = () => {
-      const r = el.getBoundingClientRect();
-      const vh = window.innerHeight || document.documentElement.clientHeight;
-      return r.top < vh * 0.8 && r.bottom > vh * 0.2;
-    };
-    const canReveal = () =>
-      inView() && (!requireOverflowX || (overflowsX() && el.scrollLeft < 8));
 
-    const onView = () => {
-      if (dismissed) return;
-      if (!shown) {
-        if (canReveal()) {
-          shown = true;
-          showTimer = setTimeout(() => {
-            if (dismissed) return;
-            // Re-check in view at fire time (scroll may have been restored).
-            if (inView()) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        const e = entries[entries.length - 1];
+        if (dismissed) return;
+        if (e.isIntersecting) {
+          if (!shown && (!requireOverflowX || (overflowsX() && el.scrollLeft < 8))) {
+            shown = true;
+            showTimer = setTimeout(() => {
+              if (dismissed) return;
               setShow(true);
               hideTimer = setTimeout(() => setShow(false), autoHide);
-            } else {
-              shown = false; // let it reveal later when scrolled into view
-            }
-          }, delay);
+            }, delay);
+          }
+        } else {
+          // Left the viewport — hide (and cancel a pending show).
+          setShow(false);
+          clearTimeout(showTimer);
+          clearTimeout(hideTimer);
         }
-      } else if (!inView()) {
-        // Once shown, hide as soon as the element leaves the viewport.
-        setShow(false);
-      }
-    };
+      },
+      { threshold: 0.25 }
+    );
+    io.observe(el);
 
-    // A real horizontal scroll of the carousel dismisses it for good.
+    // A real horizontal scroll of the carousel dismisses it for good (checking
+    // the offset avoids a spurious scroll-snap event at ~0 on load).
     const onTrackScroll = () => {
       if (requireOverflowX && el.scrollLeft > 12) {
         dismissed = true;
@@ -67,20 +64,11 @@ export function useScrollHint(
         clearTimeout(hideTimer);
       }
     };
-
-    window.addEventListener('scroll', onView, { passive: true });
-    window.addEventListener('resize', onView);
     el.addEventListener('scroll', onTrackScroll, { passive: true });
-    // Check on mount, and again on the next frame in case reload restored the
-    // scroll position after the first paint.
-    onView();
-    const raf = requestAnimationFrame(onView);
 
     return () => {
-      window.removeEventListener('scroll', onView);
-      window.removeEventListener('resize', onView);
+      io.disconnect();
       el.removeEventListener('scroll', onTrackScroll);
-      cancelAnimationFrame(raf);
       clearTimeout(showTimer);
       clearTimeout(hideTimer);
     };
