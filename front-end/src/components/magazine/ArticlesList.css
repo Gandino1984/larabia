@@ -442,3 +442,12 @@
 .articles-list-page > .btn-back-nav {
   margin: 0 0 1rem;
 }
+
+/* Mouse drag-to-scroll affordance for the carousel */
+.articles-carousel { cursor: grab; }
+.articles-carousel.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+.articles-carousel.is-dragging .article-card { pointer-events: none; }

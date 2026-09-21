@@ -8,6 +8,7 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useEngagement } from '../../app_context/EngagementContext';
 import axiosInstance from '../../utils/axiosConfig';
 import ArticleCard from './ArticleCard';
+import { useDragScroll } from '../../hooks/useDragScroll';
 import './ProjectDetail.css';
 
 function ProjectDetail() {
@@ -33,6 +34,7 @@ function ProjectDetail() {
     const amount = card ? card.offsetWidth + 24 : track.clientWidth * 0.8;
     track.scrollBy({ left: dir * amount, behavior: 'smooth' });
   }, []);
+  useDragScroll(carouselRef, viewMode === 'carousel');
 
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 

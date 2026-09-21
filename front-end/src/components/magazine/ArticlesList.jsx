@@ -6,6 +6,7 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import { Calendar, User, ArrowLeft, Trash2, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal } from 'lucide-react';
 import ArticleEngagementBar from './ArticleEngagementBar';
+import { useDragScroll } from '../../hooks/useDragScroll';
 import './ArticlesList.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -92,6 +93,7 @@ function ArticlesList() {
     const amount = card ? card.offsetWidth + 32 : track.clientWidth * 0.8;
     track.scrollBy({ left: dir * amount, behavior: 'smooth' });
   }, []);
+  useDragScroll(carouselRef, viewMode === 'carousel');
 
   useEffect(() => {
     window.scrollTo(0, 0);
