@@ -317,6 +317,38 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
+/* Animated hamburger → X. The three lines morph into a cross when open. */
+.burger-box {
+  position: relative;
+  width: 24px;
+  height: 16px;
+  display: inline-block;
+}
+.burger-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2.5px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.3s ease, opacity 0.2s ease, top 0.3s ease;
+}
+.burger-line:nth-child(1) { top: 0; }
+.burger-line:nth-child(2) { top: 50%; transform: translateY(-50%); }
+.burger-line:nth-child(3) { top: 100%; transform: translateY(-100%); }
+
+.burger-menu-btn.is-open .burger-line:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+.burger-menu-btn.is-open .burger-line:nth-child(2) {
+  opacity: 0;
+}
+.burger-menu-btn.is-open .burger-line:nth-child(3) {
+  top: 50%;
+  transform: translateY(-50%) rotate(-45deg);
+}
+
 /* Mobile Menu Overlay */
 .mobile-menu-overlay {
   position: absolute;
@@ -867,11 +899,13 @@
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #000000;
+  color: #ffffff;
 }
 
 .header-bar.active .nav-link:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: #000000;
+  color: #ffffff;
 }
 
 /* User Section */

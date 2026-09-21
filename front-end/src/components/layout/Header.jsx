@@ -646,11 +646,16 @@ function Header({ ready = true }) {
         {/* Mobile Navigation */}
         <div className="mobile-nav">
           <button
-            className="burger-menu-btn"
+            className={`burger-menu-btn ${isMobileMenuOpen ? 'is-open' : ''}`}
             onClick={toggleMobileMenu}
             aria-label="Menu"
+            aria-expanded={isMobileMenuOpen}
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <span className="burger-box">
+              <span className="burger-line"></span>
+              <span className="burger-line"></span>
+              <span className="burger-line"></span>
+            </span>
           </button>
         </div>
       </animated.div>
