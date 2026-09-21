@@ -737,8 +737,6 @@ function Header({ ready = true }) {
                 )}
               </div>
 
-            <div className="mobile-menu-divider"></div>
-
             {visibleNavItems.map((item) => {
               if (item.kind === 'projects') {
                 return (
@@ -835,9 +833,7 @@ function Header({ ready = true }) {
               );
             })}
 
-            <div className="mobile-menu-divider"></div>
-
-            {/* Language: single 3-option toggle on one line */}
+            {/* Language: single 3-option toggle on one line — at the bottom */}
             <div className="mobile-lang-toggle" role="group" aria-label="Idioma">
               {[
                 { code: 'es', label: 'Español' },
@@ -856,7 +852,6 @@ function Header({ ready = true }) {
 
             {currentUser && (
               <>
-                <div className="mobile-menu-divider"></div>
                 {isSuperAdmin && (
                   <button className="mobile-nav-link" onClick={handleAdminClick}>
                     <Shield size={18} />

@@ -203,7 +203,7 @@
   font-size: 1rem;
   font-family: 'Source Code Pro', sans-serif;
   color: white;
-  margin: 1.25rem 0 1.5rem;
+  margin: 2.25rem 0 1.5rem;
   line-height: 1.6;
   opacity: 0.95;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
@@ -215,7 +215,7 @@
   /* Its own (narrower) measure, hugging the left edge, leaving room at the sides
      so the carousel arrows don't sit on top of the text. */
   text-align: left;
-  max-width: 470px;
+  max-width: 430px;
   margin-right: auto;
 }
 
@@ -482,7 +482,7 @@
   .hero-excerpt {
     font-size: 1.2rem;
     margin-bottom: 1.75rem;
-    max-width: 520px;
+    max-width: 470px;
   }
 
   .hero-meta {
@@ -556,7 +556,7 @@
   .hero-excerpt {
     font-size: 1.25rem;
     margin-bottom: 2rem;
-    max-width: 580px;
+    max-width: 520px;
   }
 
   .hero-meta {
@@ -620,7 +620,7 @@
 
   .hero-excerpt {
     font-size: 1.3rem;
-    max-width: 640px;
+    max-width: 580px;
   }
 
   .hero-logo {

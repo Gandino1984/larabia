@@ -508,9 +508,10 @@
   position: relative;
   display: flex;
   align-items: center;
+  min-height: 48px;
   background: rgba(0, 0, 0, 0.05);
   border-radius: 6px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.85rem;
   transition: all 0.3s ease;
   margin: 0 0.5rem;
 }
@@ -529,7 +530,7 @@
   background: none;
   border: none;
   color: var(--color-header-text-active, #000000);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-family: 'Source Code Pro', monospace;
   outline: none;
   width: 100%;
