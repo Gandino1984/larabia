@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useUI } from '../../app_context/UIContext';
 import { Globe } from 'lucide-react';
+import SpringDropdown from './SpringDropdown';
 import './LanguageSelector.css';
 
 function LanguageSelector() {
@@ -44,19 +45,17 @@ function LanguageSelector() {
         <span className="current-lang-label">{currentLang?.code.toUpperCase()}</span>
       </button>
 
-      {isOpen && (
-        <div className="language-dropdown">
-          {languages.map((lang) => (
-            <button
-              key={lang.code}
-              className={`language-option ${currentLanguage === lang.code ? 'active' : ''}`}
-              onClick={() => handleLanguageChange(lang.code)}
-            >
-              <span className="lang-label">{lang.label}</span>
-            </button>
-          ))}
-        </div>
-      )}
+      <SpringDropdown open={isOpen} className="language-dropdown">
+        {languages.map((lang) => (
+          <button
+            key={lang.code}
+            className={`language-option ${currentLanguage === lang.code ? 'active' : ''}`}
+            onClick={() => handleLanguageChange(lang.code)}
+          >
+            <span className="lang-label">{lang.label}</span>
+          </button>
+        ))}
+      </SpringDropdown>
     </div>
   );
 }

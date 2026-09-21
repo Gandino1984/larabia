@@ -30,7 +30,6 @@
   justify-content: space-between;
   flex-wrap: wrap;
   row-gap: 0.25rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
   pointer-events: auto;
 }
@@ -38,7 +37,6 @@
 /* Active state (on hover/click) */
 .header-bar.active {
   background: var(--color-header-bg-active, #ffffff);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* Back button inside the header bar (inner pages). Sized to sit compactly next

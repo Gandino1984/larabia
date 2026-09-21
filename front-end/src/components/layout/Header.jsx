@@ -15,6 +15,7 @@ import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, G
 import UserInfoCard from '../user/UserInfoCard';
 import LanguageSelector from './LanguageSelector';
 import NavGroupDropdown from './NavGroupDropdown';
+import SpringDropdown from './SpringDropdown';
 import AnimatedLogo from './AnimatedLogo';
 import ContactModal from '../contact/ContactModal';
 import NewsletterModal from '../newsletter/NewsletterModal';
@@ -350,31 +351,30 @@ function Header() {
         <Bell size={20} />
         {notifCount > 0 && <span className="notif-badge">{notifCount > 9 ? '9+' : notifCount}</span>}
       </button>
-      {showNotifications && (
-        <div
-          className="notif-dropdown"
-          onMouseLeave={() => { markAllSeen(); setShowNotifications(false); }}
-        >
-          <div className="notif-dropdown-header">{t('notifications.title')}</div>
-          {notifications.length === 0 ? (
-            <div className="notif-empty">{t('notifications.empty')}</div>
-          ) : (
-            <ul className="notif-list">
-              {notifications.map((n) => (
-                <li key={n.id}>
-                  <button
-                    className="notif-item"
-                    onClick={() => { markAllSeen(); setShowNotifications(false); n.onClick?.(); }}
-                  >
-                    <span className="notif-item-title">{n.title}</span>
-                    <span className="notif-item-message">{n.message}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
+      <SpringDropdown
+        open={showNotifications}
+        className="notif-dropdown"
+        onMouseLeave={() => { markAllSeen(); setShowNotifications(false); }}
+      >
+        <div className="notif-dropdown-header">{t('notifications.title')}</div>
+        {notifications.length === 0 ? (
+          <div className="notif-empty">{t('notifications.empty')}</div>
+        ) : (
+          <ul className="notif-list">
+            {notifications.map((n) => (
+              <li key={n.id}>
+                <button
+                  className="notif-item"
+                  onClick={() => { markAllSeen(); setShowNotifications(false); n.onClick?.(); }}
+                >
+                  <span className="notif-item-title">{n.title}</span>
+                  <span className="notif-item-message">{n.message}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </SpringDropdown>
     </div>
   );
 
@@ -386,20 +386,20 @@ function Header() {
         onMouseLeave={() => setIsHeaderActive(false)}
         onClick={() => setIsHeaderActive(true)}
       >
-        {/* Back button — lives inside the header bar on inner pages. */}
-        {showHeaderBack && (
-          <button
-            className="header-back-btn"
-            onClick={(e) => { e.stopPropagation(); handleHeaderBack(); }}
-            title={t('common.buttons.back')}
-            aria-label={t('common.buttons.back')}
-          >
-            <ArrowLeft size={20} />
-          </button>
-        )}
-
         {/* Logo and User Info in single container */}
         <div className="header-logo-user-container">
+          {/* Back button — grouped with the logo so it doesn't disrupt the
+              header-bar's space-between layout on inner pages. */}
+          {showHeaderBack && (
+            <button
+              className="header-back-btn"
+              onClick={(e) => { e.stopPropagation(); handleHeaderBack(); }}
+              title={t('common.buttons.back')}
+              aria-label={t('common.buttons.back')}
+            >
+              <ArrowLeft size={20} />
+            </button>
+          )}
           <div className="header-logo" onClick={handleLogoClick}>
             <AnimatedLogo
               src={
@@ -546,23 +546,21 @@ function Header() {
                     <span>{navLabel(item, currentLanguage)}</span>
                     <ChevronDown size={14} className={`chevron-icon ${showProjectsDropdown ? 'rotated' : ''}`} />
                   </button>
-                  {showProjectsDropdown && (
-                    <div className="projects-dropdown-menu">
-                      {projects.length > 0 ? (
-                        projects.map(project => (
-                          <button
-                            key={project.id_project}
-                            className="projects-dropdown-item"
-                            onClick={() => handleProjectSelect(project)}
-                          >
-                            {project.title_project}
-                          </button>
-                        ))
-                      ) : (
-                        <span className="projects-dropdown-empty">{t('header.nav.noProjects')}</span>
-                      )}
-                    </div>
-                  )}
+                  <SpringDropdown open={showProjectsDropdown} className="projects-dropdown-menu">
+                    {projects.length > 0 ? (
+                      projects.map(project => (
+                        <button
+                          key={project.id_project}
+                          className="projects-dropdown-item"
+                          onClick={() => handleProjectSelect(project)}
+                        >
+                          {project.title_project}
+                        </button>
+                      ))
+                    ) : (
+                      <span className="projects-dropdown-empty">{t('header.nav.noProjects')}</span>
+                    )}
+                  </SpringDropdown>
                 </div>
               );
             }

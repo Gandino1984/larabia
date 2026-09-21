@@ -6,6 +6,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { navLabel, canSeeNavItem } from '../../app_context/navConfig';
+import SpringDropdown from './SpringDropdown';
 import './MoreDropdown.css';
 
 function NavGroupDropdown({ item, lang, roles, onSelect }) {
@@ -38,29 +39,27 @@ function NavGroupDropdown({ item, lang, roles, onSelect }) {
         <ChevronDown size={16} className={`chevron-icon ${isOpen ? 'rotated' : ''}`} />
       </button>
 
-      {isOpen && (
-        <div className="more-dropdown-menu">
-          {children.map((child) =>
-            child.kind === 'group' ? (
-              <NavSubGroup
-                key={child.id}
-                item={child}
-                lang={lang}
-                roles={roles}
-                onSelect={(c) => { onSelect(c); setIsOpen(false); }}
-              />
-            ) : (
-              <button
-                key={child.id}
-                className="more-dropdown-item"
-                onClick={() => { onSelect(child); setIsOpen(false); }}
-              >
-                {navLabel(child, lang)}
-              </button>
-            )
-          )}
-        </div>
-      )}
+      <SpringDropdown open={isOpen} className="more-dropdown-menu">
+        {children.map((child) =>
+          child.kind === 'group' ? (
+            <NavSubGroup
+              key={child.id}
+              item={child}
+              lang={lang}
+              roles={roles}
+              onSelect={(c) => { onSelect(c); setIsOpen(false); }}
+            />
+          ) : (
+            <button
+              key={child.id}
+              className="more-dropdown-item"
+              onClick={() => { onSelect(child); setIsOpen(false); }}
+            >
+              {navLabel(child, lang)}
+            </button>
+          )
+        )}
+      </SpringDropdown>
     </div>
   );
 }
