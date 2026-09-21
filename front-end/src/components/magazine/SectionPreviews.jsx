@@ -132,14 +132,15 @@ function SectionPreviews() {
 
   return (
     <div className="section-previews">
-      {visibleSections.map((sec) => (
+      {visibleSections.map((sec, index) => (
         <SectionPreviewRow
           key={sec.id}
           title={sec.title}
           items={sec.items}
           onItemClick={handleItemClick}
-          /* A single sideways-swipe hint for the whole page, at the Barrio row. */
-          enableSwipeHint={sec.id === 'barrio'}
+          /* A single sideways-swipe hint for the whole page, on the first visible
+             carousel (Barrio when it has content). */
+          enableSwipeHint={index === 0}
         />
       ))}
     </div>

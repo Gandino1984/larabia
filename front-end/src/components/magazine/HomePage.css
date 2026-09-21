@@ -61,6 +61,18 @@
      here — it would fight the spring and make dragging feel laggy. */
 }
 
+/* Translucent black overlay over the cover image so the text reads well.
+   A dedicated layer (below the content) rather than baked into the animated
+   background, so it always renders. */
+.hero-slide:not(.hero-default)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7));
+  pointer-events: none;
+  z-index: 0;
+}
+
 .hero-default {
   background: var(--landing-bg, #252525);
   cursor: default;
@@ -233,7 +245,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.32);
+  background: rgba(0, 0, 0, 0.42);
   border: none;
   color: white;
   width: 34px;
