@@ -251,7 +251,7 @@
 
 .articles-list-page .meta-item--authors {
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.9rem;
 }
 
 .articles-list-page .list-author {
