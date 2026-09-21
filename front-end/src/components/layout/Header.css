@@ -1386,6 +1386,18 @@
   z-index: 1000;
   overflow: hidden;
 }
+
+/* On phones, pin the dropdown to the viewport so it never overflows the edges */
+@media (max-width: 600px) {
+  .notif-dropdown {
+    position: fixed;
+    top: calc(0.5rem + var(--header-h) + 0.75rem);
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: none;
+  }
+}
 .notif-dropdown-header {
   padding: 10px 14px;
   font-weight: 700;
