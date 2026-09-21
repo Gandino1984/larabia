@@ -1035,21 +1035,40 @@
     display: none;
   }
 
+  /* Keep the header on a single row; the search box flexes to absorb spare
+     space so the nav never wraps to a second line (e.g. when the back button
+     shows on inner pages). */
+  .header-bar {
+    flex-wrap: nowrap;
+  }
+
+  .header-logo-user-container {
+    flex-shrink: 0;
+  }
+
   /* Show Desktop Navigation */
   .desktop-nav {
     display: flex;
     gap: 0.5rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
     justify-content: flex-end;
     align-items: center;
     min-width: 0;
   }
 
-  /* Show Search Bar on Desktop */
+  /* Show Search Bar on Desktop — flexible so it gives up width first */
   .desktop-search {
     display: block;
+    flex: 1 1 120px;
+    min-width: 0;
     margin-left: 1rem;
     margin-right: 0.5rem;
+  }
+
+  .desktop-search .search-input-wrapper {
+    min-width: 0;
+    width: 100%;
   }
 
   .nav-link,
