@@ -289,6 +289,7 @@
 .hero-author-name {
   /* Same size as the publication date (inherits from .meta-item). */
   font-size: inherit;
+  font-weight: 700;
   color: white;
   opacity: 0.9;
 }
