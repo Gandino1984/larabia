@@ -83,9 +83,9 @@ function Header({ ready = true }) {
       const sign = -prevSign; // alternate side but with random magnitude
       prevSign = sign;
       steps.push({
-        x: sign * (6 + Math.random() * 22) * decay,
-        y: rand(14) * decay,
-        r: sign * (2 + Math.random() * 8) * decay,
+        x: sign * (14 + Math.random() * 40) * decay,
+        y: rand(26) * decay,
+        r: sign * (2 + Math.random() * 7) * decay,
         config: { duration: 45 + Math.random() * 25 },
       });
     }
