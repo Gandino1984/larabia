@@ -278,7 +278,7 @@ button {
 /* Desktop: flank the header bar on the left, vertically centered on its axis. */
 @media (min-width: 769px) {
   .btn-back-nav {
-    top: calc(0.5rem + var(--header-h) / 2);
+    top: calc(0.5rem + var(--header-h) / 2 + 4px);
     left: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 0.5rem));
     transform: translateY(-50%);
   }
