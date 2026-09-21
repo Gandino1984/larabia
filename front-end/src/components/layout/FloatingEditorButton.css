@@ -48,8 +48,8 @@
 /* Desktop: flank the header bar on the right, centered on its axis. */
 @media (min-width: 769px) {
   .floating-editor-btn {
-    top: calc(0.5rem + var(--header-h) / 2 + 4px);
-    right: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 1.25rem));
+    top: calc(0.5rem + var(--header-h) / 2 + 9px);
+    right: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 1.5rem));
     transform: translateY(-50%);
   }
   .floating-editor-btn:hover {
