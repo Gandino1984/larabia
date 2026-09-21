@@ -50,6 +50,7 @@ function PreviewCard({ item, onClick }) {
 }
 
 function SectionPreviewRow({ title, items, onItemClick }) {
+  const { t } = useTranslation();
   const trackRef = useRef(null);
   const showSwipeHint = useScrollHint(trackRef, items.length > 1);
 

@@ -19,10 +19,10 @@
   width: 62px;
   height: 62px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
 }
 
 .scroll-hint__icon {
