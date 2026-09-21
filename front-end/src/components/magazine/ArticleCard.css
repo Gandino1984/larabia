@@ -323,7 +323,7 @@
   font-size: 0.65rem;
   font-weight: 700;
 }
-.card-author-name { white-space: nowrap; }
+.card-author-name { white-space: nowrap; color: #ffffff; }
 
 /* ---- Engagement bar (like / favorite / comments) ---- */
 .article-engagement-bar {
