@@ -128,16 +128,16 @@
   background: #dc2626;
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 0.5rem;
+  border-radius: 50%;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
 }
 
 .list-delete-btn:hover {

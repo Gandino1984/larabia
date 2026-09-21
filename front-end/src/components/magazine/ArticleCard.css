@@ -35,10 +35,10 @@
   justify-content: center;
   transition: all 0.3s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  width: 36px;
-  height: 36px;
-  min-height: 36px;
-  min-width: 36px;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  min-width: 34px;
 }
 
 .article-delete-btn:hover {
