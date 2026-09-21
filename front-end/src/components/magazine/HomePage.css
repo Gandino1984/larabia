@@ -249,7 +249,9 @@
 }
 
 /* Author avatars in hero meta */
-.hero-authors {
+/* Higher specificity than `.hero-meta .meta-item { gap }` so the spacing between
+   authors actually applies. */
+.hero-meta .meta-item.hero-authors {
   display: flex;
   align-items: center;
   gap: 0.7rem 2.75rem;
