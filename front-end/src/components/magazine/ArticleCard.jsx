@@ -1,4 +1,5 @@
 // magazine-front/src/components/magazine/ArticleCard.jsx
+import { useState } from 'react';
 import { Calendar, User, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
