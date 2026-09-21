@@ -168,10 +168,19 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #1a1a1a;
-  background: rgba(200, 200, 200, 0.5);
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
+  color: #666;
+}
+
+/* Show project tags as plain text separated by a vertical bar (no button-like
+   background on the first tag). */
+.project-detail-tags {
+  gap: 0.75rem;
+}
+.project-detail-tags > * + *::before {
+  content: '|';
+  margin-right: 0.75rem;
+  color: rgba(128, 128, 128, 0.6);
+  font-weight: 400;
 }
 
 /* Follow-project (bell) button — matches the article card "Comparte" button */
