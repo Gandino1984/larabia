@@ -371,7 +371,7 @@
 /* Slide Indicators - Mobile */
 .hero-indicators {
   position: absolute;
-  bottom: 3.5%;
+  bottom: 5.5%;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -456,7 +456,7 @@
   }
 
   .hero-indicators {
-    bottom: 3.5%;
+    bottom: 5.5%;
     gap: 0.6rem;
   }
 
@@ -497,9 +497,9 @@
     font-size: 1.2rem;
     margin-bottom: 1.75rem;
     max-width: 720px;
-    /* Left-aligned on desktop (mobile centers it). */
+    /* Text left-aligned, but the block is centered between the side arrows. */
     text-align: left;
-    margin-left: 0;
+    margin-left: auto;
     margin-right: auto;
   }
 
@@ -530,7 +530,7 @@
   }
 
   .hero-indicators {
-    bottom: 4%;
+    bottom: 6%;
     gap: 0.7rem;
   }
 
@@ -603,7 +603,7 @@
   }
 
   .hero-indicators {
-    bottom: 4.5%;
+    bottom: 6.5%;
     gap: 0.75rem;
   }
 
@@ -697,7 +697,7 @@
   }
 
   .hero-indicators {
-    bottom: 3%;
+    bottom: 4.5%;
   }
 
   .hero-logo {
