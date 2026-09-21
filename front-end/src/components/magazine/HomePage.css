@@ -257,8 +257,8 @@
 .hero-meta .meta-item.hero-authors {
   display: flex;
   align-items: center;
-  gap: 0.7rem 2.75rem;
-  flex-wrap: wrap;
+  gap: 2.75rem;
+  flex-wrap: nowrap;
 }
 
 .hero-author {
