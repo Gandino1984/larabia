@@ -20,7 +20,7 @@
   background: lightgray;
   color: #1a1a1a;
   border: none;
-  border-radius: 12px;
+  border-radius: 50%;
   cursor: pointer;
   /* Start off-screen to the right; .is-in slides it into place. */
   opacity: 0;
