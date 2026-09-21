@@ -1,5 +1,6 @@
 // magazine-front/src/components/magazine/HomePage.jsx
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useSpring, animated } from '@react-spring/web';
 import { useMagazine } from '../../app_context/MagazineContext';
@@ -7,7 +8,6 @@ import { useUI } from '../../app_context/UIContext';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import SectionPreviews from './SectionPreviews';
 import ScrollHint from '../common/ScrollHint';
-import { useScrollHint } from '../../hooks/useScrollHint';
 import './HomePage.css';
 
 function AuthorAvatar({ author, getUrl }) {
@@ -32,25 +32,52 @@ function AuthorAvatar({ author, getUrl }) {
   );
 }
 
-// Play the hero staggered entrance only once per session (after the header +
-// create button); afterwards the hero content is simply there.
+// Play the hero staggered entrance + the scroll-hint overlay only once per
+// session; afterwards the hero content is simply there.
 let heroEntrancePlayed = false;
+let scrollOverlayShown = false;
 
 function HomePage({ ready = true }) {
   const { t } = useTranslation();
   const { featuredArticles, setSelectedArticle, fetchArticleById } = useMagazine();
   const { navigateToArticle } = useUI();
   // Staggered fade-up of the hero content (project label → title → description/
-  // date/authors), sequenced after the header and create-button entrances.
+  // date/authors), in sync with the create-button slide-in.
   const [heroIn, setHeroIn] = useState(heroEntrancePlayed);
   useEffect(() => {
     if (!ready || heroEntrancePlayed) return;
     const timer = setTimeout(() => {
       heroEntrancePlayed = true;
       setHeroIn(true);
-    }, 1250);
+    }, 850);
     return () => clearTimeout(timer);
   }, [ready]);
+
+  // Scroll-hint overlay: after the whole entrance sequence, show a centered
+  // scroll message over a darkened, blurred backdrop. Auto-hides and is
+  // dismissed by any scroll intent. Once per session.
+  const [scrollOverlay, setScrollOverlay] = useState(false);
+  useEffect(() => {
+    if (!heroIn || scrollOverlayShown) return;
+    let hideT;
+    const showT = setTimeout(() => {
+      scrollOverlayShown = true;
+      setScrollOverlay(true);
+      hideT = setTimeout(() => setScrollOverlay(false), 4500);
+    }, 1500);
+    const dismiss = () => setScrollOverlay(false);
+    window.addEventListener('wheel', dismiss, { passive: true });
+    window.addEventListener('touchmove', dismiss, { passive: true });
+    window.addEventListener('scroll', dismiss, { passive: true });
+    return () => {
+      clearTimeout(showT);
+      clearTimeout(hideT);
+      window.removeEventListener('wheel', dismiss);
+      window.removeEventListener('touchmove', dismiss);
+      window.removeEventListener('scroll', dismiss);
+    };
+  }, [heroIn]);
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [brokenImages, setBrokenImages] = useState({});
   // Touch swipe support for the hero (it advances by state, not native scroll,
@@ -62,14 +89,6 @@ function HomePage({ ready = true }) {
   const touchDeltaX = useRef(0);
   const didDrag = useRef(false);
   const [{ x }, springApi] = useSpring(() => ({ x: 0, config: { tension: 300, friction: 32 } }));
-  // Scroll-down affordance: shown whenever the hero is in the viewport (so it
-  // appears on first load and on any normal reload), then auto-hides.
-  const heroRef = useRef(null);
-  const showScrollHint = useScrollHint(heroRef, true, {
-    requireOverflowX: false,
-    delay: 900,
-    autoHide: 6000,
-  });
 
   // Auto-advance slides every 8 seconds
   useEffect(() => {
@@ -171,7 +190,7 @@ function HomePage({ ready = true }) {
   return (
     <div className="home-page">
       {/* Hero Section with Featured Articles Slider */}
-      <section className="hero-section" ref={heroRef}>
+      <section className="hero-section">
         {currentArticle ? (
           <div
             className="hero-slider"
@@ -266,14 +285,19 @@ function HomePage({ ready = true }) {
           </div>
         )}
 
-        {/* Scroll-down affordance (fades in a few seconds after load, then out). */}
-        <div className="hero-scroll-hint">
-          <ScrollHint direction="down" visible={showScrollHint} label={t('hero.scrollHint')} labelDesktop={t('hero.scrollHintDesktop')} />
-        </div>
       </section>
 
       {/* Section previews: full-width slideshows per header-bar button */}
       <SectionPreviews />
+
+      {/* Scroll-hint overlay: centered message over a darkened, blurred backdrop,
+          shown once after the entrance sequence. */}
+      {scrollOverlay && createPortal(
+        <div className="scroll-hint-overlay" onClick={() => setScrollOverlay(false)}>
+          <ScrollHint direction="down" visible label={t('hero.scrollHint')} labelDesktop={t('hero.scrollHintDesktop')} />
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

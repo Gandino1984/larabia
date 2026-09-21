@@ -21,21 +21,23 @@
   background: var(--landing-bg, #252525);
 }
 
-/* Scroll-down hint pinned just below the create-publication button (top-right).
-   Mobile: the create button sits below the header at 44px tall. */
-.hero-scroll-hint {
+/* Scroll-hint overlay: centered message over a darkened + blurred backdrop. */
+.scroll-hint-overlay {
   position: fixed;
-  top: calc(0.5rem + var(--header-h) + 0.5rem + 44px + 4rem);
-  right: 0.75rem;
-  z-index: 11;
-  pointer-events: none;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  cursor: pointer;
+  animation: scroll-overlay-fade 0.35s ease both;
 }
-/* Desktop: the create button flanks the header bar, vertically centred on it. */
-@media (min-width: 769px) {
-  .hero-scroll-hint {
-    top: calc(0.5rem + var(--header-h) + 9px + 4.5rem);
-    right: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 1.5rem));
-  }
+@keyframes scroll-overlay-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .hero-slide {
