@@ -312,11 +312,13 @@
 }
 
 .burger-menu-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #000000;
+  color: #ffffff;
 }
 
 .header-bar.active .burger-menu-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: #000000;
+  color: #ffffff;
 }
 
 /* Animated hamburger → X. The three lines morph into a cross when open. */
@@ -376,11 +378,11 @@
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: scaleY(0.9);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: scaleY(1);
+    transform: translateY(0);
   }
 }
 
@@ -429,6 +431,68 @@
 
 .mobile-menu-overlay.active .mobile-menu-divider {
   background: rgba(0, 0, 0, 0.1);
+}
+
+/* User header at the top of the mobile menu (image left + name) */
+.mobile-user-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem 0.75rem;
+  text-align: left;
+}
+.mobile-user-header-img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-user-header-img--fallback {
+  background: #e5e5e5;
+  color: #333;
+}
+.mobile-user-header-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111111;
+  text-transform: none;
+}
+
+/* Language: single 3-option toggle on one line */
+.mobile-lang-toggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0.25rem 0.25rem;
+}
+.mobile-lang-option {
+  flex: 1 1 0;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(0, 0, 0, 0.15);
+  color: #333333;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.6rem 0.25rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.mobile-lang-option:last-child { border-right: none; }
+.mobile-lang-option.active {
+  background: #000000;
+  color: #ffffff;
 }
 
 /* Mobile Search Styles */

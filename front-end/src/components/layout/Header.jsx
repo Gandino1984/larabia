@@ -664,6 +664,23 @@ function Header({ ready = true }) {
       {isMobileMenuOpen && (
         <div className={`mobile-menu-overlay ${isHeaderActive ? 'active' : ''}`}>
           <nav className="mobile-menu-content">
+            {/* User (image left + name) at the very top */}
+            {currentUser ? (
+              <button className="mobile-user-header" onClick={handleUserClick}>
+                {userImageUrl ? (
+                  <img src={userImageUrl} alt={currentUser.name_user} className="mobile-user-header-img" />
+                ) : (
+                  <span className="mobile-user-header-img mobile-user-header-img--fallback"><User size={20} /></span>
+                )}
+                <span className="mobile-user-header-name">{currentUser.name_user}</span>
+              </button>
+            ) : (
+              <button className="mobile-nav-link login" onClick={handleLoginClick}>
+                <User size={18} />
+                <span>{t('common.buttons.login')}</span>
+              </button>
+            )}
+
             {/* Mobile Search — always visible, no toggle needed */}
             <div className="mobile-search-container" ref={mobileSearchRef}>
                 <div className="mobile-search-input-wrapper">
@@ -820,37 +837,26 @@ function Header({ ready = true }) {
 
             <div className="mobile-menu-divider"></div>
 
-            {[
-              { code: 'es', label: 'Español' },
-              { code: 'en', label: 'English' },
-              { code: 'eu', label: 'Euskara' }
-            ].map(lang => (
-              <button
-                key={lang.code}
-                className={`mobile-nav-link mobile-lang-btn ${currentLanguage === lang.code ? 'mobile-lang-active' : ''}`}
-                onClick={() => handleLanguageChange(lang.code)}
-              >
-                <Globe size={16} />
-                <span>{lang.label}</span>
-              </button>
-            ))}
-
-            <div className="mobile-menu-divider"></div>
-
-            {currentUser ? (
-              <>
-                <button className="mobile-nav-link" onClick={handleUserClick}>
-                  <span>{currentUser.name_user}</span>
-                  {userImageUrl ? (
-                    <img
-                      src={userImageUrl}
-                      alt={currentUser.name_user}
-                      className="user-profile-image"
-                    />
-                  ) : (
-                    <User size={18} />
-                  )}
+            {/* Language: single 3-option toggle on one line */}
+            <div className="mobile-lang-toggle" role="group" aria-label="Idioma">
+              {[
+                { code: 'es', label: 'Español' },
+                { code: 'en', label: 'English' },
+                { code: 'eu', label: 'Euskara' }
+              ].map(lang => (
+                <button
+                  key={lang.code}
+                  className={`mobile-lang-option ${currentLanguage === lang.code ? 'active' : ''}`}
+                  onClick={() => handleLanguageChange(lang.code)}
+                >
+                  {lang.label}
                 </button>
+              ))}
+            </div>
+
+            {currentUser && (
+              <>
+                <div className="mobile-menu-divider"></div>
                 {isSuperAdmin && (
                   <button className="mobile-nav-link" onClick={handleAdminClick}>
                     <Shield size={18} />
@@ -865,11 +871,6 @@ function Header({ ready = true }) {
                   <span>{t('common.buttons.logout')}</span>
                 </button>
               </>
-            ) : (
-              <button className="mobile-nav-link login" onClick={handleLoginClick}>
-                <User size={18} />
-                <span>{t('common.buttons.login')}</span>
-              </button>
             )}
           </nav>
         </div>

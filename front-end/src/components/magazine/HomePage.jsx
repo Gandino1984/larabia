@@ -32,10 +32,25 @@ function AuthorAvatar({ author, getUrl }) {
   );
 }
 
-function HomePage() {
+// Play the hero staggered entrance only once per session (after the header +
+// create button); afterwards the hero content is simply there.
+let heroEntrancePlayed = false;
+
+function HomePage({ ready = true }) {
   const { t } = useTranslation();
   const { featuredArticles, setSelectedArticle, fetchArticleById } = useMagazine();
   const { navigateToArticle } = useUI();
+  // Staggered fade-up of the hero content (project label → title → description/
+  // date/authors), sequenced after the header and create-button entrances.
+  const [heroIn, setHeroIn] = useState(heroEntrancePlayed);
+  useEffect(() => {
+    if (!ready || heroEntrancePlayed) return;
+    const timer = setTimeout(() => {
+      heroEntrancePlayed = true;
+      setHeroIn(true);
+    }, 1250);
+    return () => clearTimeout(timer);
+  }, [ready]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [brokenImages, setBrokenImages] = useState({});
   // Touch swipe support for the hero (it advances by state, not native scroll,
@@ -179,7 +194,7 @@ function HomePage() {
                 style={{ display: 'none' }}
                 onError={() => setBrokenImages(prev => ({ ...prev, [currentArticle.id_article]: true }))}
               />
-              <div className="hero-content">
+              <div className={`hero-content hero-anim ${heroIn ? 'hero-in' : ''}`}>
                 <div className="hero-headline">
                   {currentArticle.project_title && (
                     <span className="hero-project-label">Proyecto: {currentArticle.project_title}</span>

@@ -1,7 +1,8 @@
 /* Create-article button — flanks the header bar on the right, mirroring the
    back button on the left. Mobile-first: a row just below the header; desktop:
    beside the header bar, vertically centered on its axis. Square with rounded
-   corners, matching the header bar height (--header-h from index.css). */
+   corners, matching the header bar height (--header-h from index.css).
+   It slides in from the right (off-screen) after the header entrance. */
 
 .floating-editor-btn {
   position: fixed;
@@ -21,15 +22,18 @@
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
+  /* Start off-screen to the right; .is-in slides it into place. */
+  opacity: 0;
+  transform: translateX(150px);
+  transition: opacity 0.45s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.25s ease, color 0.25s ease;
   font-family: 'Source Code Pro', monospace;
   font-weight: 600;
 }
 
-/* Hidden state (in editor / article view) */
-.floating-editor-btn.hidden {
-  opacity: 0;
-  pointer-events: none;
+.floating-editor-btn.is-in {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .floating-editor-btn:hover {
@@ -39,6 +43,13 @@
 
 .floating-editor-btn:active {
   transform: scale(0.96);
+}
+
+/* Hidden state (in editor / article view) — overrides the slide-in. */
+.floating-editor-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(150px);
 }
 
 /* Icon-only for a compact square button */
@@ -53,7 +64,10 @@
     height: var(--header-h);
     top: calc(0.5rem + var(--header-h) / 2 + 9px);
     right: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 1.5rem));
-    transform: translateY(-50%);
+    transform: translateY(-50%) translateX(150px);
+  }
+  .floating-editor-btn.is-in {
+    transform: translateY(-50%) translateX(0);
   }
   .floating-editor-btn:hover {
     transform: translateY(-50%) scale(1.03);

@@ -80,6 +80,10 @@ function App() {
     setShowLoadingScreen(false);
   }, []);
 
+  // True once the loading screen is gone and content is visible — used to
+  // sequence the entrance animations (header → create button → hero).
+  const appReady = showContent && !showLoadingScreen;
+
   const renderMainContent = () => {
     // Priority-based rendering
     if (showForgotPassword) return <ForgotPasswordPage />;
@@ -97,10 +101,10 @@ function App() {
     if (showTalleres) return <WorkshopsList />;
     if (showArticleDetail) return <ArticleDetail previewMode={isPreview} />;
     if (showArticlesList) return <ArticlesList />;
-    if (showHome) return <HomePage />;
+    if (showHome) return <HomePage ready={appReady} />;
 
     // Default
-    return <HomePage />;
+    return <HomePage ready={appReady} />;
   };
 
   // A key that changes whenever the active top-level view changes, so the page
@@ -160,8 +164,8 @@ function App() {
       )}
 
       <div className={appClassName}>
-        {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Header ready={showContent && !showLoadingScreen} />}
-        {!isPreview && <FloatingEditorButton />}
+        {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Header ready={appReady} />}
+        {!isPreview && <FloatingEditorButton ready={appReady} />}
         {!isPreview && <CardDisplay />}
         <main className="main-content">
           <AnimatedView key={viewKey}>
