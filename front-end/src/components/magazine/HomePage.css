@@ -116,7 +116,7 @@
   z-index: 2;
   position: relative;
   /* Push the whole slide content down so it clears the create-article button. */
-  margin-top: 5rem;
+  margin-top: 3.5rem;
   max-height: calc(100vh - 120px);
   /* visible on mobile so the full-bleed headline band can reach the screen
      edges; clipped again on desktop (see the 768px block). */
@@ -229,6 +229,7 @@
   font-size: 0.85rem;
   opacity: 0.9;
   margin-top: 0.75rem;
+  margin-bottom: 1rem;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
 }
 
