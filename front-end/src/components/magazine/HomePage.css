@@ -213,7 +213,6 @@
   top: 50%;
   transform: translateY(-50%);
   background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
   border: none;
   color: white;
   width: 34px;
