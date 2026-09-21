@@ -243,9 +243,9 @@ button {
    ============================================ */
 .btn-back-nav {
   position: fixed;
-  top: 5rem;
-  left: max(1%, calc((100% - 1200px) / 2));
-  z-index: 900;
+  top: 0.9rem;
+  left: max(0.75rem, calc((100% - 1200px) / 2 - 2.9rem));
+  z-index: 1001;
   display: inline-flex;
   align-items: center;
   justify-content: center;
