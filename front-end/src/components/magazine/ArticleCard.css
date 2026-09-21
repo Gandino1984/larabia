@@ -385,3 +385,15 @@
   font-size: 0.82rem;
   font-weight: 600;
 }
+
+/* Publication date at the top of the card content, right-aligned */
+.article-card-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: flex-end;
+  margin-bottom: 0.6rem;
+  color: var(--color-text-muted, #999);
+  font-size: 0.8rem;
+}
+.article-card-date svg { flex-shrink: 0; }

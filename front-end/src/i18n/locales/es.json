@@ -408,5 +408,8 @@
   "subscribe.follow": "Seguir proyecto",
   "subscribe.following": "Siguiendo",
   "notifications.projectNewContent.title": "Nuevo contenido en un proyecto que sigues",
-  "notifications.projectUpdated.title": "Un proyecto que sigues se ha actualizado"
+  "notifications.projectUpdated.title": "Un proyecto que sigues se ha actualizado",
+  "article.list.viewMode": "Modo de vista",
+  "article.list.viewGrid": "Cuadrícula",
+  "article.list.viewCarousel": "Carrusel horizontal"
 }

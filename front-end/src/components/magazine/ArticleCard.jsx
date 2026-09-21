@@ -107,6 +107,12 @@ function ArticleCard({ article }) {
       </div>
 
       <div className="article-card-content">
+        {article.date_published && (
+          <span className="article-card-date">
+            <Calendar size={16} />
+            {formatDate(article.date_published)}
+          </span>
+        )}
         {article.project_title && (
           <span className="article-project-label">Proyecto: {article.project_title}</span>
         )}
@@ -117,13 +123,6 @@ function ArticleCard({ article }) {
         )}
 
         <div className="article-card-meta">
-          {article.date_published && (
-            <span className="meta-item">
-              <Calendar size={16} />
-              {formatDate(article.date_published)}
-            </span>
-          )}
-
           {(article.authors?.length > 0 || article.author_name) && (
             <span className="meta-item meta-item--authors">
               {article.authors?.length > 0 ? (

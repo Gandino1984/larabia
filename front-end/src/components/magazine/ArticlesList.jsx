@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
-import { Calendar, User, ArrowLeft, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, User, ArrowLeft, Trash2, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal } from 'lucide-react';
 import ArticleEngagementBar from './ArticleEngagementBar';
 import './ArticlesList.css';
 
@@ -74,6 +74,15 @@ function ArticlesList() {
   const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError } = useUI();
 
   const [currentPage, setCurrentPage] = useState(1);
+  // Grid vs horizontal carousel (desktop only; mobile is always vertical).
+  const [viewMode, setViewMode] = useState(() => {
+    try { return localStorage.getItem('larabia_articles_view') || 'grid'; } catch { return 'grid'; }
+  });
+
+  const changeViewMode = useCallback((mode) => {
+    setViewMode(mode);
+    try { localStorage.setItem('larabia_articles_view', mode); } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -157,7 +166,29 @@ function ArticlesList() {
           </button>
           <h1>{t('article.list.title')}</h1>
         </div>
-        <p className="articles-count">{articles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: articles.length })}</p>
+        <div className="articles-list-subheader">
+          <p className="articles-count">{articles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: articles.length })}</p>
+          <div className="articles-view-toggle" role="group" aria-label={t('article.list.viewMode')}>
+            <button
+              type="button"
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'view-toggle-btn--active' : ''}`}
+              onClick={() => changeViewMode('grid')}
+              title={t('article.list.viewGrid')}
+              aria-pressed={viewMode === 'grid'}
+            >
+              <LayoutGrid size={18} />
+            </button>
+            <button
+              type="button"
+              className={`view-toggle-btn ${viewMode === 'carousel' ? 'view-toggle-btn--active' : ''}`}
+              onClick={() => changeViewMode('carousel')}
+              title={t('article.list.viewCarousel')}
+              aria-pressed={viewMode === 'carousel'}
+            >
+              <GalleryHorizontal size={18} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {articles.length === 0 ? (
@@ -166,7 +197,7 @@ function ArticlesList() {
         </div>
       ) : (
         <>
-          <div className="articles-grid">
+          <div className={viewMode === 'carousel' ? 'articles-carousel' : 'articles-grid'}>
             {paginatedArticles.map((article) => (
               <article
                 key={article.id_article}
@@ -203,6 +234,12 @@ function ArticlesList() {
                 </div>
 
                 <div className="article-card-content">
+                  {article.date_published && (
+                    <span className="article-card-date">
+                      <Calendar size={16} />
+                      {formatDate(article.date_published)}
+                    </span>
+                  )}
                   {article.project_title && (
                     <span className="article-project-label">Proyecto: {article.project_title}</span>
                   )}
@@ -213,13 +250,6 @@ function ArticlesList() {
                   )}
 
                   <div className="article-meta">
-                    {article.date_published && (
-                      <span className="meta-item">
-                        <Calendar size={16} />
-                        {formatDate(article.date_published)}
-                      </span>
-                    )}
-
                     {(article.authors?.length > 0 || article.author_name) && (
                       <span className="meta-item meta-item--authors">
                         {article.authors?.length > 0 ? (

@@ -408,5 +408,8 @@
   "subscribe.follow": "Jarraitu proiektua",
   "subscribe.following": "Jarraitzen",
   "notifications.projectNewContent.title": "Jarraitzen duzun proiektu batean eduki berria",
-  "notifications.projectUpdated.title": "Jarraitzen duzun proiektu bat eguneratu da"
+  "notifications.projectUpdated.title": "Jarraitzen duzun proiektu bat eguneratu da",
+  "article.list.viewMode": "Ikuspegi modua",
+  "article.list.viewGrid": "Sareta",
+  "article.list.viewCarousel": "Karrusel horizontala"
 }

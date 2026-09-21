@@ -408,5 +408,8 @@
   "subscribe.follow": "Follow project",
   "subscribe.following": "Following",
   "notifications.projectNewContent.title": "New content in a project you follow",
-  "notifications.projectUpdated.title": "A project you follow was updated"
+  "notifications.projectUpdated.title": "A project you follow was updated",
+  "article.list.viewMode": "View mode",
+  "article.list.viewGrid": "Grid",
+  "article.list.viewCarousel": "Horizontal carousel"
 }
