@@ -40,7 +40,7 @@ function HomePage() {
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % featuredArticles.length);
-    }, 8000);
+    }, 12000);
 
     return () => clearInterval(interval);
   }, [featuredArticles]);

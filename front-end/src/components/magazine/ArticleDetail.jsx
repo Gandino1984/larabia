@@ -1,12 +1,14 @@
 // magazine-front/src/components/magazine/ArticleDetail.jsx
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useAuthor } from '../../app_context/AuthorContext';
-import { Calendar, User, Eye, X, Trash2, Maximize, Minimize, Edit, Volume2, ArrowLeft, Share2 } from 'lucide-react';
+import { useEngagement } from '../../app_context/EngagementContext';
+import { Calendar, User, Eye, X, Trash2, Maximize, Minimize, Edit, Volume2, ArrowLeft, Share2, ThumbsUp, Bookmark, MessageCircle } from 'lucide-react';
 import HScrollViewer from './HScrollViewer';
+import CommentsModal from './CommentsModal';
 import './ArticleDetail.css';
 
 const CATEGORY_DISPLAY = {
@@ -28,6 +30,8 @@ function ArticleDetail({ previewMode = false }) {
   const { navigateBack, showSuccess, showError, navigateToHome, navigateToEditorForEdit, isFullscreen, setIsFullscreen, getCurrentLocale, navigateToAuthorProfile } = useUI();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
+  const { isLiked, isFavorited, toggleLike, toggleFavorite } = useEngagement();
+  const [showComments, setShowComments] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -354,8 +358,47 @@ function ArticleDetail({ previewMode = false }) {
                 {selectedArticle.view_count_article} {t('article.detail.views')}
               </span>
             )}
+
+            {!previewMode && (
+              <span className="article-detail-engagement">
+                <button
+                  type="button"
+                  className={`engagement-btn ${isLiked(selectedArticle.id_article) ? 'engagement-btn--active' : ''}`}
+                  onClick={() => toggleLike(selectedArticle.id_article)}
+                  title={t('engagement.like')}
+                  aria-pressed={isLiked(selectedArticle.id_article)}
+                >
+                  <ThumbsUp size={20} fill={isLiked(selectedArticle.id_article) ? 'currentColor' : 'none'} />
+                </button>
+                <button
+                  type="button"
+                  className={`engagement-btn ${isFavorited(selectedArticle.id_article) ? 'engagement-btn--active' : ''}`}
+                  onClick={() => toggleFavorite(selectedArticle.id_article)}
+                  title={t('engagement.favorite')}
+                  aria-pressed={isFavorited(selectedArticle.id_article)}
+                >
+                  <Bookmark size={20} fill={isFavorited(selectedArticle.id_article) ? 'currentColor' : 'none'} />
+                </button>
+                <button
+                  type="button"
+                  className={`engagement-btn ${showComments ? 'engagement-btn--active' : ''}`}
+                  onClick={() => setShowComments(true)}
+                  title={t('engagement.comments')}
+                >
+                  <MessageCircle size={20} fill={showComments ? 'currentColor' : 'none'} />
+                </button>
+              </span>
+            )}
           </div>
         </div>
+
+        {showComments && (
+          <CommentsModal
+            articleId={selectedArticle.id_article}
+            articleTitle={selectedArticle.title_article}
+            onClose={() => setShowComments(false)}
+          />
+        )}
 
         <div className="article-detail-content">
           {isComicArticle ? (
