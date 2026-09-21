@@ -111,7 +111,7 @@
 }
 
 .articles-list-page .article-card {
-  background: #242424;
+  background: #1f1f1f;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
@@ -324,10 +324,10 @@
 /* Subheader: count + view toggle */
 .articles-list-subheader {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
 }
 
 /* Grid/carousel view toggle styled as a sliding segmented switch */

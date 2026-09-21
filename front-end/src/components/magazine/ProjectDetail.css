@@ -2,9 +2,9 @@
 
 .project-detail-page {
   width: 100%;
-  max-width: 1200px;
+  max-width: none;
   margin: 0 auto;
-  padding: 10rem 1.5rem 4rem;
+  padding: 10rem 2.5rem 4rem;
   min-height: calc(100vh - 150px);
 }
 
@@ -231,7 +231,7 @@
 /* View toggle + carousel in the project articles section */
 .project-articles-toolbar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   margin-bottom: 1rem;
 }
 .articles-view-toggle {
