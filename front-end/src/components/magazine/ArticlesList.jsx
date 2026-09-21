@@ -239,11 +239,11 @@ function ArticlesList() {
 
   return (
     <div className="articles-list-page">
+      <button className="btn-back-nav" onClick={navigateToHome} title={t('common.buttons.backToHome')}>
+        <ArrowLeft size={24} />
+      </button>
       <div className="articles-list-header">
         <div className="header-title-row">
-          <button className="btn-back-nav" onClick={navigateToHome} title={t('common.buttons.backToHome')}>
-            <ArrowLeft size={24} />
-          </button>
           <h1>{t('article.list.title')}</h1>
         </div>
         <div className="articles-list-subheader">

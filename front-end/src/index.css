@@ -245,21 +245,22 @@ button {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  padding: 0.5rem;
-  min-width: 40px;
+  padding: 0.5rem 0.9rem;
   min-height: 40px;
-  background: none;
+  align-self: flex-start;
+  background: lightgray;
   border: none;
   border-radius: 8px;
-  color: #888;
+  color: #1a1a1a;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
   flex-shrink: 0;
 }
 
 .btn-back-nav:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #e0e0e0;
+  background: #000000;
+  color: #ffffff;
   transform: translateX(-3px);
 }
 

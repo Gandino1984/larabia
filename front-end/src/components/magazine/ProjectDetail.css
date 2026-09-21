@@ -84,7 +84,7 @@
 .project-detail-authors-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 1.1rem;
 }
 
 .project-detail-author-item {
