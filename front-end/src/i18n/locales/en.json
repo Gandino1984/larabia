@@ -413,7 +413,7 @@
   "article.list.viewGrid": "Grid",
   "article.list.viewCarousel": "Horizontal carousel",
   "hero.scrollHint": "You can swipe up",
-  "carousel.swipeHint": "Swipe sideways",
+  "carousel.swipeHint": "Navigate horizontally",
   "hero.scrollHintDesktop": "You can scroll down",
   "hero.scrollHintSides": "You can also swipe content sideways",
   "hero.scrollHintMobile": "You can swipe up or sideways"
