@@ -272,7 +272,7 @@
 .view-toggle-btn:hover { color: #ffffff; }
 .view-toggle-btn--active { color: #1a1a1a; }
 
-.articles-carousel-wrap { position: relative; }
+.articles-carousel-wrap { position: relative; padding: 0 70px; }
 .articles-carousel {
   display: flex;
   gap: 1.5rem;
@@ -295,8 +295,8 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   border: none;
   background: rgba(0, 0, 0, 0.75);
@@ -308,8 +308,8 @@
   transition: background 0.15s ease;
 }
 .carousel-arrow:hover { background: #000; }
-.carousel-arrow--prev { left: 4px; }
-.carousel-arrow--next { right: 4px; }
+.carousel-arrow--prev { left: 8px; }
+.carousel-arrow--next { right: 8px; }
 
 @media (max-width: 768px) {
   .project-articles-toolbar { display: none; }

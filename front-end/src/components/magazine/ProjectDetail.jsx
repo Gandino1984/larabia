@@ -204,7 +204,7 @@ function ProjectDetail() {
                 {viewMode === 'carousel' ? (
                   <div className="articles-carousel-wrap">
                     <button type="button" className="carousel-arrow carousel-arrow--prev" onClick={() => scrollCarousel(-1)} aria-label="Anterior">
-                      <ChevronLeft size={24} />
+                      <ChevronLeft size={30} />
                     </button>
                     <div className="articles-carousel" ref={carouselRef}>
                       {ordered.map(article => (
@@ -212,7 +212,7 @@ function ProjectDetail() {
                       ))}
                     </div>
                     <button type="button" className="carousel-arrow carousel-arrow--next" onClick={() => scrollCarousel(1)} aria-label="Siguiente">
-                      <ChevronRight size={24} />
+                      <ChevronRight size={30} />
                     </button>
                   </div>
                 ) : (
