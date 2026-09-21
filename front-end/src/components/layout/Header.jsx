@@ -71,19 +71,25 @@ function Header({ ready = true }) {
   useEffect(() => {
     if (!ready || hasAnimatedRef.current) return;
     hasAnimatedRef.current = true;
-    fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 700 } });
+    fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 1100 } });
     shakeApi.start({
       from: { x: 0, y: 0, r: 0 },
       to: [
-        { x: -12, y: -6, r: -5, config: { duration: 70 } },
-        { x: 12, y: 6, r: 5, config: { duration: 70 } },
-        { x: -12, y: 5, r: -5, config: { duration: 70 } },
-        { x: 12, y: -5, r: 5, config: { duration: 70 } },
-        { x: -9, y: -4, r: -4, config: { duration: 70 } },
-        { x: 9, y: 4, r: 4, config: { duration: 70 } },
-        { x: -5, y: -2, r: -2, config: { duration: 70 } },
-        { x: 5, y: 2, r: 2, config: { duration: 70 } },
-        { x: 0, y: 0, r: 0, config: { tension: 200, friction: 12 } },
+        { x: -26, y: -12, r: -9, config: { duration: 55 } },
+        { x: 26, y: 12, r: 9, config: { duration: 55 } },
+        { x: -24, y: 11, r: -9, config: { duration: 55 } },
+        { x: 24, y: -11, r: 9, config: { duration: 55 } },
+        { x: -22, y: -10, r: -8, config: { duration: 55 } },
+        { x: 22, y: 10, r: 8, config: { duration: 55 } },
+        { x: -18, y: 9, r: -7, config: { duration: 55 } },
+        { x: 18, y: -9, r: 7, config: { duration: 55 } },
+        { x: -14, y: -7, r: -6, config: { duration: 55 } },
+        { x: 14, y: 7, r: 6, config: { duration: 55 } },
+        { x: -10, y: 5, r: -4, config: { duration: 55 } },
+        { x: 10, y: -5, r: 4, config: { duration: 55 } },
+        { x: -6, y: -3, r: -2, config: { duration: 55 } },
+        { x: 6, y: 3, r: 2, config: { duration: 55 } },
+        { x: 0, y: 0, r: 0, config: { tension: 220, friction: 11 } },
       ],
     });
   }, [ready, fadeApi, shakeApi]);
