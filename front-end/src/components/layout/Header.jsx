@@ -71,25 +71,26 @@ function Header({ ready = true }) {
   useEffect(() => {
     if (!ready || hasAnimatedRef.current) return;
     hasAnimatedRef.current = true;
-    fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 1100 } });
+    fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 1600 } });
     // Randomised, decaying shake — each jolt goes in a random direction so it
     // feels chaotic ("rabid"), like the logo, rather than a fixed back-and-forth.
-    const N = 16;
+    // Slow decay keeps it violent for longer before it settles.
+    const N = 24;
     const rand = (m) => (Math.random() * 2 - 1) * m;
     let prevSign = 1;
     const steps = [];
     for (let i = 0; i < N; i++) {
-      const decay = 1 - i / N;
+      const decay = Math.pow(1 - i / N, 0.7);
       const sign = -prevSign; // alternate side but with random magnitude
       prevSign = sign;
       steps.push({
-        x: sign * (14 + Math.random() * 40) * decay,
-        y: rand(26) * decay,
-        r: sign * (2 + Math.random() * 7) * decay,
-        config: { duration: 45 + Math.random() * 25 },
+        x: sign * (20 + Math.random() * 52) * decay,
+        y: rand(38) * decay,
+        r: sign * (3 + Math.random() * 8) * decay,
+        config: { duration: 45 + Math.random() * 30 },
       });
     }
-    steps.push({ x: 0, y: 0, r: 0, config: { tension: 220, friction: 11 } });
+    steps.push({ x: 0, y: 0, r: 0, config: { tension: 240, friction: 10 } });
     shakeApi.start({ from: { x: 0, y: 0, r: 0 }, to: steps });
   }, [ready, fadeApi, shakeApi]);
   const [showUserCard, setShowUserCard] = useState(false);
