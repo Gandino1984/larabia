@@ -1179,3 +1179,15 @@
   font-size: 0.9rem;
   font-weight: 600;
 }
+
+/* Publication date at the top of the reader, right-aligned (like the cards) */
+.article-detail-date {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  color: var(--color-text-muted, #999);
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+.article-detail-date svg { flex-shrink: 0; }

@@ -283,6 +283,13 @@ function ArticleDetail({ previewMode = false }) {
         )}
 
         <div className="article-detail-header">
+          {selectedArticle.date_published && (
+            <span className="article-detail-date">
+              <Calendar size={18} />
+              {formatDate(selectedArticle.date_published)}
+            </span>
+          )}
+
           {selectedArticle.category_article && normalize(selectedArticle.category_article) !== 'general' && (
             <span className="article-detail-category">
               {getCategoryDisplay(selectedArticle.category_article)}
@@ -290,7 +297,7 @@ function ArticleDetail({ previewMode = false }) {
           )}
 
           {selectedArticle.project_title && (
-            <span className="article-project-label">{selectedArticle.project_title}</span>
+            <span className="article-project-label">Proyecto: {selectedArticle.project_title}</span>
           )}
           <h1 className="article-detail-title">{selectedArticle.title_article}</h1>
 
@@ -299,12 +306,6 @@ function ArticleDetail({ previewMode = false }) {
           )}
 
           <div className="article-detail-meta">
-            {selectedArticle.date_published && (
-              <span className="meta-item">
-                <Calendar size={24} />
-                {formatDate(selectedArticle.date_published)}
-              </span>
-            )}
 
             {(selectedArticle.authors?.length > 0 || selectedArticle.author_name) && (
               <span className="meta-item meta-item-author">
