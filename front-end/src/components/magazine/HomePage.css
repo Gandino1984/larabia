@@ -208,11 +208,7 @@
   line-height: 1.6;
   opacity: 0.95;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
-  display: -webkit-box;
-  -webkit-line-clamp: 6;
-  line-clamp: 6;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  /* No truncation — the full description flows downward. */
   /* Narrower measure on mobile so the carousel arrows don't sit on the text;
      centered here, left-aligned on desktop (see the 768px block). */
   text-align: center;
@@ -667,8 +663,6 @@
   .hero-excerpt {
     font-size: 0.85rem;
     margin-bottom: 0.75rem;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
   }
 
   .hero-meta {
