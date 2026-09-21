@@ -1,5 +1,6 @@
 // magazine-front/src/components/layout/Header.jsx
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSpring, animated, to } from '@react-spring/web';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
@@ -58,6 +59,26 @@ function Header() {
   const { metadata, resolveLogoUrl } = useMetadata();
   const { navConfig } = useNav();
   const runNavAction = useNavActions();
+
+  // Entrance animation for the header bar: a "rabid" shake (like the La Rabia
+  // logo) while it fades in, then it settles to normal.
+  const [entrance, entranceApi] = useSpring(() => ({ opacity: 0, x: 0, y: 0, r: 0 }));
+  useEffect(() => {
+    entranceApi.start({ opacity: 1, config: { duration: 550 } });
+    entranceApi.start({
+      from: { x: 0, y: 0, r: 0 },
+      to: [
+        { x: -10, y: -5, r: -4, config: { duration: 60 } },
+        { x: 10, y: 5, r: 4, config: { duration: 60 } },
+        { x: -10, y: 4, r: -4, config: { duration: 60 } },
+        { x: 10, y: -4, r: 4, config: { duration: 60 } },
+        { x: -7, y: -3, r: -3, config: { duration: 60 } },
+        { x: 7, y: 3, r: 3, config: { duration: 60 } },
+        { x: -3, y: -1, r: -1, config: { duration: 60 } },
+        { x: 0, y: 0, r: 0, config: { tension: 200, friction: 14 } },
+      ],
+    });
+  }, [entranceApi]);
   const [showUserCard, setShowUserCard] = useState(false);
   const [isHeaderActive, setIsHeaderActive] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -380,11 +401,19 @@ function Header() {
 
   return (
     <header className={`header ${showArticleDetail ? 'header-hidden' : ''}`}>
-      <div
+      <animated.div
         className={`header-bar ${isHeaderActive ? 'active' : ''}`}
         onMouseEnter={() => setIsHeaderActive(true)}
         onMouseLeave={() => setIsHeaderActive(false)}
         onClick={() => setIsHeaderActive(true)}
+        style={{
+          opacity: entrance.opacity,
+          transform: to([entrance.x, entrance.y, entrance.r], (x, y, r) =>
+            Math.abs(x) < 0.1 && Math.abs(y) < 0.1 && Math.abs(r) < 0.1
+              ? 'none'
+              : `translate3d(${x}px, ${y}px, 0) rotate(${r}deg)`
+          ),
+        }}
       >
         {/* Logo and User Info in single container */}
         <div className="header-logo-user-container">
@@ -610,7 +639,7 @@ function Header() {
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
-      </div>
+      </animated.div>
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (

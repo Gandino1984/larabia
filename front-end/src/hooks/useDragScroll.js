@@ -28,7 +28,7 @@ export function useDragScroll(ref, enabled = true) {
     const onPointerMove = (e) => {
       if (!isDown) return;
       const dx = e.clientX - startX;
-      if (Math.abs(dx) > 4) moved = true;
+      if (Math.abs(dx) > 10) moved = true;
       el.scrollLeft = startScroll - dx;
     };
 
