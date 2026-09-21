@@ -556,12 +556,14 @@
     height: 62px;
   }
 
+  /* Bring the arrows in next to the (max 1080px) content instead of the far
+     screen edges on wide screens. */
   .hero-nav.prev {
-    left: 2.5rem;
+    left: max(2.5rem, calc(50% - 540px - 74px));
   }
 
   .hero-nav.next {
-    right: 2.5rem;
+    right: max(2.5rem, calc(50% - 540px - 74px));
   }
 }
 

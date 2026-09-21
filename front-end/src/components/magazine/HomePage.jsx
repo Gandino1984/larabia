@@ -7,6 +7,7 @@ import { useUI } from '../../app_context/UIContext';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import SectionPreviews from './SectionPreviews';
 import ScrollHint from '../common/ScrollHint';
+import { useScrollHint } from '../../hooks/useScrollHint';
 import './HomePage.css';
 
 function AuthorAvatar({ author, getUrl }) {
@@ -46,29 +47,14 @@ function HomePage() {
   const touchDeltaX = useRef(0);
   const didDrag = useRef(false);
   const [{ x }, springApi] = useSpring(() => ({ x: 0, config: { tension: 300, friction: 32 } }));
-  // Scroll-down affordance: appears a few seconds after the first load and
-  // disappears as soon as the user scrolls.
-  const [showScrollHint, setShowScrollHint] = useState(false);
-
-  useEffect(() => {
-    let hideTimer;
-    // Appear a few seconds after load, then auto-dismiss 5s later.
-    const showTimer = setTimeout(() => {
-      if (window.scrollY < 40) {
-        setShowScrollHint(true);
-        hideTimer = setTimeout(() => setShowScrollHint(false), 5000);
-      }
-    }, 3000);
-    const onScroll = () => {
-      if (window.scrollY > 40) setShowScrollHint(false);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, []);
+  // Scroll-down affordance: shown whenever the hero is in the viewport (so it
+  // appears on first load and on any normal reload), then auto-hides.
+  const heroRef = useRef(null);
+  const showScrollHint = useScrollHint(heroRef, true, {
+    requireOverflowX: false,
+    delay: 900,
+    autoHide: 6000,
+  });
 
   // Auto-advance slides every 8 seconds
   useEffect(() => {
@@ -170,7 +156,7 @@ function HomePage() {
   return (
     <div className="home-page">
       {/* Hero Section with Featured Articles Slider */}
-      <section className="hero-section">
+      <section className="hero-section" ref={heroRef}>
         {currentArticle ? (
           <div
             className="hero-slider"

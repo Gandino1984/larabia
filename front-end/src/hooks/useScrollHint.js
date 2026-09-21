@@ -1,13 +1,18 @@
 // magazine-front/src/hooks/useScrollHint.js
 //
-// Returns whether to show a "you can swipe sideways" hint over a horizontally
-// scrollable container. The hint appears when the container is in view (so it's
-// actually seen, including on mobile where it starts off-screen), only if the
-// content overflows and hasn't been scrolled yet. It auto-hides after a few
-// seconds and is dismissed as soon as the user scrolls the carousel horizontally.
+// Returns whether to show a scroll/swipe help hint over a target element. The
+// hint appears when the element is in the viewport (so it shows on first load
+// and on every normal reload — regardless of restored scroll position — for
+// whatever element the user is actually looking at). It auto-hides after a few
+// seconds, hides if the element leaves the viewport, and (for horizontal
+// carousels) is dismissed by a real sideways scroll.
 import { useEffect, useState } from 'react';
 
-export function useScrollHint(ref, enabled = true, { delay = 500, autoHide = 6000 } = {}) {
+export function useScrollHint(
+  ref,
+  enabled = true,
+  { delay = 500, autoHide = 6000, requireOverflowX = true } = {}
+) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -26,26 +31,36 @@ export function useScrollHint(ref, enabled = true, { delay = 500, autoHide = 600
     const inView = () => {
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight;
-      return r.top < vh * 0.85 && r.bottom > vh * 0.15;
+      return r.top < vh * 0.8 && r.bottom > vh * 0.2;
     };
+    const canReveal = () =>
+      inView() && (!requireOverflowX || (overflowsX() && el.scrollLeft < 8));
 
-    const tryReveal = () => {
-      if (shown || dismissed) return;
-      if (inView() && overflowsX() && el.scrollLeft < 8) {
-        window.removeEventListener('scroll', tryReveal);
-        showTimer = setTimeout(() => {
-          if (dismissed) return;
+    const onView = () => {
+      if (dismissed) return;
+      if (!shown) {
+        if (canReveal()) {
           shown = true;
-          setShow(true);
-          hideTimer = setTimeout(() => setShow(false), autoHide);
-        }, delay);
+          showTimer = setTimeout(() => {
+            if (dismissed) return;
+            // Re-check in view at fire time (scroll may have been restored).
+            if (inView()) {
+              setShow(true);
+              hideTimer = setTimeout(() => setShow(false), autoHide);
+            } else {
+              shown = false; // let it reveal later when scrolled into view
+            }
+          }, delay);
+        }
+      } else if (!inView()) {
+        // Once shown, hide as soon as the element leaves the viewport.
+        setShow(false);
       }
     };
 
-    // A real horizontal scroll of the carousel dismisses it (checking the actual
-    // offset avoids a spurious scroll-snap event at ~0 on load).
+    // A real horizontal scroll of the carousel dismisses it for good.
     const onTrackScroll = () => {
-      if (el.scrollLeft > 12) {
+      if (requireOverflowX && el.scrollLeft > 12) {
         dismissed = true;
         setShow(false);
         clearTimeout(showTimer);
@@ -53,18 +68,23 @@ export function useScrollHint(ref, enabled = true, { delay = 500, autoHide = 600
       }
     };
 
-    window.addEventListener('scroll', tryReveal, { passive: true });
+    window.addEventListener('scroll', onView, { passive: true });
+    window.addEventListener('resize', onView);
     el.addEventListener('scroll', onTrackScroll, { passive: true });
-    // Check once in case the section is already on screen.
-    tryReveal();
+    // Check on mount, and again on the next frame in case reload restored the
+    // scroll position after the first paint.
+    onView();
+    const raf = requestAnimationFrame(onView);
 
     return () => {
-      window.removeEventListener('scroll', tryReveal);
+      window.removeEventListener('scroll', onView);
+      window.removeEventListener('resize', onView);
       el.removeEventListener('scroll', onTrackScroll);
+      cancelAnimationFrame(raf);
       clearTimeout(showTimer);
       clearTimeout(hideTimer);
     };
-  }, [ref, enabled, delay, autoHide]);
+  }, [ref, enabled, delay, autoHide, requireOverflowX]);
 
   return show;
 }
