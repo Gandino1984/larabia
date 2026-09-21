@@ -336,7 +336,7 @@
   display: inline-flex;
   padding: 3px;
   border-radius: 999px;
-  background: #2a2a2a;
+  background: #000000;
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 .articles-view-toggle::before {
@@ -347,7 +347,7 @@
   width: 40px;
   height: calc(100% - 6px);
   border-radius: 999px;
-  background: #ffffff;
+  background: lightgray;
   transition: transform 0.22s ease;
   z-index: 0;
 }
