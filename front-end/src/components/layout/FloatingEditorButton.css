@@ -110,12 +110,13 @@
   }
 }
 
-/* Desktop: sit just below the header bar, right edge aligned with the header
-   (header is centered, width 98% / max 1200px). */
+/* Desktop: align vertically with the header bar, sitting in the right gutter
+   just to the right of it (header is centered, width 98% / max 1200px). */
 @media (min-width: 769px) {
   .floating-editor-btn {
-    top: 5rem;
+    top: 0.4rem;
     bottom: auto;
-    right: max(1%, calc((100% - 1200px) / 2));
+    right: max(0.75rem, calc((100% - 1200px) / 2 - 5rem));
+    z-index: 1001;
   }
 }
