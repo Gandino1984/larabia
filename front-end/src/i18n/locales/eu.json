@@ -394,5 +394,15 @@
   "editor.microperfil.needImage": "Gehitu irudi bat mikro-profilari.",
   "editor.microperfil.needCaption": "Oin-testua beharrezkoa da.",
   "editor.microperfil.captionTooLong": "Oin-testua luzeegia da ({{count}}/700).",
-  "editor.microperfil.categoryLocked": "Mikro-profilak beti Mikro-profilak atalean argitaratzen dira."
+  "editor.microperfil.categoryLocked": "Mikro-profilak beti Mikro-profilak atalean argitaratzen dira.",
+  "engagement.like": "Atsegin dut",
+  "engagement.favorite": "Gorde gogokoetan",
+  "engagement.comments": "Iruzkinak",
+  "comments.title": "Iruzkinak",
+  "comments.placeholder": "Idatzi iruzkin bat…",
+  "comments.submit": "Iruzkina",
+  "comments.loginToComment": "Hasi saioa iruzkina uzteko.",
+  "comments.empty": "Oraindik ez dago iruzkinik. Izan zaitez lehena!",
+  "comments.delete": "Ezabatu iruzkina",
+  "comments.undoDelete": "Sakatu berriro desegiteko"
 }

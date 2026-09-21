@@ -23,6 +23,9 @@ import './models/magazine_nav_model.js';
 import './models/magazine_workshop_model.js';
 import './models/workshop_author_model.js';
 import './models/workshop_reservation_model.js';
+import articleLikeModel from './models/article_like_model.js';
+import articleFavoriteModel from './models/article_favorite_model.js';
+import articleCommentModel from './models/article_comment_model.js';
 
 dotenv.config();
 
@@ -44,6 +47,17 @@ app.use(cors(config.cors));
 app.options('*', cors(config.cors));
 
 app.use("/", router);
+
+// Create the engagement tables (likes/favorites/comments) if they don't exist
+// yet. Existing tables are managed by the SQL migrations; sync() here only issues
+// CREATE TABLE IF NOT EXISTS for these new tables and never alters others.
+Promise.all([
+    articleLikeModel.sync(),
+    articleFavoriteModel.sync(),
+    articleCommentModel.sync()
+])
+    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments)'))
+    .catch((err) => console.error('Error syncing engagement tables:', err.message));
 
 app.listen(INTERNAL_PORT, '0.0.0.0', () => {
     console.log('');

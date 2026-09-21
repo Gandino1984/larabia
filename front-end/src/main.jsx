@@ -14,6 +14,7 @@ import { NavProvider } from './app_context/NavContext.jsx';
 import { PendingReviewProvider } from './app_context/PendingReviewContext.jsx';
 import { NotificationProvider } from './app_context/NotificationContext.jsx';
 import { WorkshopProvider } from './app_context/WorkshopContext.jsx';
+import { EngagementProvider } from './app_context/EngagementContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -26,9 +27,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 <AuthorProvider>
                   <PendingReviewProvider>
                     <WorkshopProvider>
-                      <NotificationProvider>
-                        <App />
-                      </NotificationProvider>
+                      <EngagementProvider>
+                        <NotificationProvider>
+                          <App />
+                        </NotificationProvider>
+                      </EngagementProvider>
                     </WorkshopProvider>
                   </PendingReviewProvider>
                 </AuthorProvider>

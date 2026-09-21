@@ -394,5 +394,15 @@
   "editor.microperfil.needImage": "Añade una imagen al micro-perfil.",
   "editor.microperfil.needCaption": "El pie de foto es obligatorio.",
   "editor.microperfil.captionTooLong": "El pie de foto es demasiado largo ({{count}}/700).",
-  "editor.microperfil.categoryLocked": "Los micro-perfiles se publican siempre en la sección Micro-perfiles."
+  "editor.microperfil.categoryLocked": "Los micro-perfiles se publican siempre en la sección Micro-perfiles.",
+  "engagement.like": "Me gusta",
+  "engagement.favorite": "Guardar en favoritos",
+  "engagement.comments": "Comentarios",
+  "comments.title": "Comentarios",
+  "comments.placeholder": "Escribe un comentario…",
+  "comments.submit": "Comentar",
+  "comments.loginToComment": "Inicia sesión para dejar un comentario.",
+  "comments.empty": "Todavía no hay comentarios. ¡Sé la primera persona en comentar!",
+  "comments.delete": "Eliminar comentario",
+  "comments.undoDelete": "Pulsa de nuevo para deshacer"
 }

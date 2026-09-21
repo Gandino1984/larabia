@@ -321,3 +321,40 @@
   font-weight: 700;
 }
 .card-author-name { white-space: nowrap; }
+
+/* ---- Engagement bar (like / favorite / comments) ---- */
+.article-engagement-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--color-surface, #2a2a2a);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.engagement-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #cfcfcf;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.engagement-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.engagement-btn:active {
+  transform: scale(0.9);
+}
+
+.engagement-btn--active {
+  color: var(--color-accent, #e63946);
+}

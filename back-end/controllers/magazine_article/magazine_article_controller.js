@@ -5,6 +5,7 @@ import article_author_model from "../../models/article_author_model.js";
 import user_model from "../../models/user_model.js";
 import magazine_project_model from "../../models/magazine_project_model.js";
 import { Op } from "sequelize";
+import engagementController from "../engagement/engagement_controller.js";
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -391,14 +392,33 @@ async function getByCategory(category, roleCtx = EMPTY_ROLE_CTX) {
 
 async function getFeatured(roleCtx = EMPTY_ROLE_CTX) {
     try {
-        const whereClause = await buildVisibilityWhere(roleCtx);
-        whereClause.featured_article = true;
-
-        const articles = await magazine_article_model.findAll({
-            where: whereClause,
+        // 1) Author-recommended (featured) articles.
+        const featuredWhere = await buildVisibilityWhere(roleCtx);
+        featuredWhere.featured_article = true;
+        const featuredArticles = await magazine_article_model.findAll({
+            where: featuredWhere,
             order: [['date_published', 'DESC']],
-            limit: 5
+            limit: 10
         });
+
+        // 2) The 10 most-liked articles (visible to this role), appended after the
+        //    author-recommended ones. This is what turns popular stories into hero
+        //    features.
+        const topLiked = await engagementController.getTopLikedArticleIds(10);
+        const featuredIdSet = new Set(featuredArticles.map(a => a.id_article));
+        const extraIds = topLiked.map(t => t.article_id).filter(id => !featuredIdSet.has(id));
+
+        let extraArticles = [];
+        if (extraIds.length > 0) {
+            const extraWhere = await buildVisibilityWhere(roleCtx);
+            extraWhere.id_article = { [Op.in]: extraIds };
+            const found = await magazine_article_model.findAll({ where: extraWhere });
+            // Keep them ordered by like count (as returned by topLiked).
+            const byId = new Map(found.map(a => [a.id_article, a]));
+            extraArticles = extraIds.map(id => byId.get(id)).filter(Boolean);
+        }
+
+        const articles = [...featuredArticles, ...extraArticles];
 
         if (!articles || articles.length === 0) {
             return { data: [], message: "No hay artículos destacados" };

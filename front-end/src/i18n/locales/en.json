@@ -394,5 +394,15 @@
   "editor.microperfil.needImage": "Add an image to the micro-profile.",
   "editor.microperfil.needCaption": "The caption is required.",
   "editor.microperfil.captionTooLong": "The caption is too long ({{count}}/700).",
-  "editor.microperfil.categoryLocked": "Micro-profiles are always published in the Micro-profiles section."
+  "editor.microperfil.categoryLocked": "Micro-profiles are always published in the Micro-profiles section.",
+  "engagement.like": "Like",
+  "engagement.favorite": "Save to favorites",
+  "engagement.comments": "Comments",
+  "comments.title": "Comments",
+  "comments.placeholder": "Write a comment…",
+  "comments.submit": "Comment",
+  "comments.loginToComment": "Log in to leave a comment.",
+  "comments.empty": "No comments yet. Be the first to comment!",
+  "comments.delete": "Delete comment",
+  "comments.undoDelete": "Click again to undo"
 }
