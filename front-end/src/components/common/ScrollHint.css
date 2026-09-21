@@ -66,12 +66,23 @@
   animation: scroll-hint-bob-x 1.5s ease-in-out infinite;
 }
 
-/* Dual: two icons side by side (one vertical bob, one horizontal bob). */
+/* Dual: two icon groups side by side (icon + a direction arrow), one bobbing
+   vertically, one horizontally. */
 .scroll-hint__dual-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 22px;
+  gap: 24px;
+}
+.scroll-hint__dual-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.scroll-hint__dir {
+  width: 20px;
+  height: 20px;
+  opacity: 0.95;
 }
 .scroll-hint__hand--bob-y {
   animation: scroll-hint-bob-y 1.5s ease-in-out infinite;

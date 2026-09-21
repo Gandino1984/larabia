@@ -43,6 +43,13 @@ function HomePage({ ready = true }) {
   const { navigateToArticle } = useUI();
   // Staggered fade-up of the hero content (project label → title → description/
   // date/authors), in sync with the create-button slide-in.
+  // The cover image fades in slowly starting as soon as the hero is visible; the
+  // fade finishes around when the description text slides up.
+  const [heroBgIn, setHeroBgIn] = useState(false);
+  useEffect(() => {
+    if (ready) setHeroBgIn(true);
+  }, [ready]);
+
   const [heroIn, setHeroIn] = useState(heroEntrancePlayed);
   useEffect(() => {
     if (!ready || heroEntrancePlayed) return;
@@ -199,13 +206,17 @@ function HomePage({ ready = true }) {
             onTouchEnd={handleTouchEnd}
           >
             <animated.div
-              className="hero-slide"
+              className={`hero-slide ${heroBgIn ? 'bg-in' : ''}`}
               style={{
-                backgroundImage: `url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})`,
                 transform: x.to((v) => `translate3d(${v}px, 0, 0)`),
               }}
               onClick={() => { if (didDrag.current) { didDrag.current = false; return; } handleArticleClick(currentArticle); }}
             >
+              {/* Cover image on its own layer so it can fade in slowly. */}
+              <div
+                className="hero-slide__bg"
+                style={{ backgroundImage: `url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})` }}
+              />
               {/* Hidden img to detect broken cover images and fall back to logo */}
               <img
                 src={getCoverImageUrl(currentArticle)}

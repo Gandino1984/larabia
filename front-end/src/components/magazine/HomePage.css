@@ -72,6 +72,22 @@
      here — it would fight the spring and make dragging feel laggy. */
 }
 
+/* Cover image on its own layer so it can fade in slowly (ends ~when the
+   description slides up). Sits below the dark overlay and the content. */
+.hero-slide__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 1.25s ease;
+}
+.hero-slide.bg-in .hero-slide__bg {
+  opacity: 1;
+}
+
 /* Translucent black overlay over the cover image so the text reads well.
    A dedicated layer (below the content) rather than baked into the animated
    background, so it always renders. */
@@ -81,7 +97,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
 
 .hero-default {
@@ -97,7 +113,7 @@
   text-align: center;
   padding: 1rem;
   max-width: 90%;
-  z-index: 1;
+  z-index: 2;
   position: relative;
   max-height: calc(100vh - 120px);
   /* visible on mobile so the full-bleed headline band can reach the screen

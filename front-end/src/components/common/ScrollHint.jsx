@@ -6,7 +6,7 @@
 //   - "down"       → hints at vertical scroll (used on the hero).
 //   - "horizontal" → hints at sideways swipe (used on scrollable carousels).
 // Purely decorative: it never captures pointer events.
-import { Pointer, Mouse } from 'lucide-react';
+import { Pointer, Mouse, ArrowUpDown, ArrowLeftRight } from 'lucide-react';
 import './ScrollHint.css';
 
 const Icons = () => (
@@ -23,16 +23,22 @@ function ScrollHint({ direction = 'down', label, labelDesktop, visible = true, d
   if (dual) {
     return (
       <div className={`scroll-hint scroll-hint--dual${visible ? ' is-visible' : ''}`} aria-hidden="true">
-        <span className="scroll-hint__dual-row">
-          <span className="scroll-hint__hand scroll-hint__hand--bob-y"><Icons /></span>
-          <span className="scroll-hint__hand scroll-hint__hand--bob-x"><Icons /></span>
-        </span>
         {label && (
           <span className={`scroll-hint__label${labelDesktop ? ' scroll-hint__label--mobile' : ''}`}>{label}</span>
         )}
         {labelDesktop && (
           <span className="scroll-hint__label scroll-hint__label--desktop">{labelDesktop}</span>
         )}
+        <span className="scroll-hint__dual-row">
+          <span className="scroll-hint__dual-item">
+            <span className="scroll-hint__hand scroll-hint__hand--bob-y"><Icons /></span>
+            <ArrowUpDown className="scroll-hint__dir" strokeWidth={2.5} />
+          </span>
+          <span className="scroll-hint__dual-item">
+            <span className="scroll-hint__hand scroll-hint__hand--bob-x"><Icons /></span>
+            <ArrowLeftRight className="scroll-hint__dir" strokeWidth={2.5} />
+          </span>
+        </span>
       </div>
     );
   }
