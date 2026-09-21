@@ -1,14 +1,14 @@
-/* Scroll / swipe affordance — the pointing hand that nudges to show a surface
-   can be scrolled. Decorative only. */
+/* Scroll / swipe affordance — a nudge that a surface can be scrolled.
+   Decorative only. Small screens use the pointing hand, large screens the
+   mouse. */
 .scroll-hint {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: #ffffff;
   pointer-events: none;
   user-select: none;
-  /* Fade + rise in when mounted. */
   animation: scroll-hint-appear 0.6s ease both;
 }
 
@@ -16,38 +16,63 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+}
+
+.scroll-hint__icon {
+  width: 34px;
+  height: 34px;
+}
+
+/* Hand on small screens, mouse on large — toggled below. */
+.scroll-hint__icon--mouse {
+  display: none;
 }
 
 .scroll-hint__label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-  opacity: 0.9;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  opacity: 0.95;
 }
 
-/* Vertical (scroll down): the hand bobs up and down. */
+/* Vertical (scroll down): the icon bobs up and down. */
 .scroll-hint--down .scroll-hint__hand {
   animation: scroll-hint-bob-y 1.5s ease-in-out infinite;
 }
 
-/* Horizontal (swipe sideways): the hand slides left and right. */
+/* Horizontal (swipe sideways): the icon slides left and right. */
 .scroll-hint--horizontal {
   flex-direction: row;
   gap: 8px;
 }
 .scroll-hint--horizontal .scroll-hint__hand {
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   animation: scroll-hint-bob-x 1.5s ease-in-out infinite;
+}
+.scroll-hint--horizontal .scroll-hint__icon {
+  width: 26px;
+  height: 26px;
+}
+
+/* Large screens: show the mouse instead of the hand. */
+@media (min-width: 1024px) {
+  .scroll-hint__icon--hand {
+    display: none;
+  }
+  .scroll-hint__icon--mouse {
+    display: inline-block;
+  }
 }
 
 @keyframes scroll-hint-appear {

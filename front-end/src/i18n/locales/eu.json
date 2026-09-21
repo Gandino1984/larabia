@@ -411,5 +411,6 @@
   "notifications.projectUpdated.title": "Jarraitzen duzun proiektu bat eguneratu da",
   "article.list.viewMode": "Ikuspegi modua",
   "article.list.viewGrid": "Sareta",
-  "article.list.viewCarousel": "Karrusel horizontala"
+  "article.list.viewCarousel": "Karrusel horizontala",
+  "hero.scrollHint": "Lerratu gora"
 }

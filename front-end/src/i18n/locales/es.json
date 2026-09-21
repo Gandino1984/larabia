@@ -411,5 +411,6 @@
   "notifications.projectUpdated.title": "Un proyecto que sigues se ha actualizado",
   "article.list.viewMode": "Modo de vista",
   "article.list.viewGrid": "Cuadrícula",
-  "article.list.viewCarousel": "Carrusel horizontal"
+  "article.list.viewCarousel": "Carrusel horizontal",
+  "hero.scrollHint": "Desliza hacia arriba"
 }

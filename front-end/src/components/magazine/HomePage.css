@@ -21,16 +21,18 @@
   background: var(--landing-bg, #252525);
 }
 
-/* Scroll-down hint pinned to the bottom-centre of the hero. */
+/* Scroll-down hint on the upper-right side of the hero (not at the bottom). */
 .hero-scroll-hint {
   position: absolute;
-  bottom: 3.25rem;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 32%;
+  right: 1.75rem;
   z-index: 11;
 }
 @media (max-width: 767px) {
-  .hero-scroll-hint { bottom: 2.75rem; }
+  .hero-scroll-hint {
+    top: 26%;
+    right: 1rem;
+  }
 }
 
 .hero-slide {

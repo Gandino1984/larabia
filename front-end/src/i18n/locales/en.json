@@ -411,5 +411,6 @@
   "notifications.projectUpdated.title": "A project you follow was updated",
   "article.list.viewMode": "View mode",
   "article.list.viewGrid": "Grid",
-  "article.list.viewCarousel": "Horizontal carousel"
+  "article.list.viewCarousel": "Horizontal carousel",
+  "hero.scrollHint": "Swipe up"
 }

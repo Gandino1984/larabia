@@ -1,5 +1,6 @@
 // magazine-front/src/components/magazine/HomePage.jsx
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSpring, animated } from '@react-spring/web';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
@@ -31,6 +32,7 @@ function AuthorAvatar({ author, getUrl }) {
 }
 
 function HomePage() {
+  const { t } = useTranslation();
   const { featuredArticles, setSelectedArticle, fetchArticleById } = useMagazine();
   const { navigateToArticle } = useUI();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -49,16 +51,21 @@ function HomePage() {
   const [showScrollHint, setShowScrollHint] = useState(false);
 
   useEffect(() => {
-    // Don't bother on tiny/landscape viewports where the hero isn't full-height.
-    const timer = setTimeout(() => {
-      if (window.scrollY < 40) setShowScrollHint(true);
+    let hideTimer;
+    // Appear a few seconds after load, then auto-dismiss 5s later.
+    const showTimer = setTimeout(() => {
+      if (window.scrollY < 40) {
+        setShowScrollHint(true);
+        hideTimer = setTimeout(() => setShowScrollHint(false), 5000);
+      }
     }, 4000);
     const onScroll = () => {
       if (window.scrollY > 40) setShowScrollHint(false);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
-      clearTimeout(timer);
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
       window.removeEventListener('scroll', onScroll);
     };
   }, []);
@@ -259,7 +266,7 @@ function HomePage() {
         {/* Scroll-down affordance (appears a few seconds after load). */}
         {showScrollHint && (
           <div className="hero-scroll-hint">
-            <ScrollHint direction="down" />
+            <ScrollHint direction="down" label={t('hero.scrollHint')} />
           </div>
         )}
       </section>
