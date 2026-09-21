@@ -52,10 +52,11 @@
 
 .project-detail-title {
   font-family: 'Alfa Slab One', serif;
-  font-size: 2.5rem;
+  font-size: 2.9rem;
   color: #e0e0e0;
   margin: 0 0 1rem;
   line-height: 1.15;
+  text-align: center;
 }
 
 .project-detail-description {
@@ -144,7 +145,7 @@
   }
 
   .project-detail-title {
-    font-size: 1.8rem;
+    font-size: 2.1rem;
   }
 
   .project-articles-grid {
