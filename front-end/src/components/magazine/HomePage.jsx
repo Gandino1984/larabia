@@ -1,9 +1,11 @@
 // magazine-front/src/components/magazine/HomePage.jsx
 import { useState, useEffect, useRef } from 'react';
+import { useSpring, animated } from '@react-spring/web';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import SectionPreviews from './SectionPreviews';
+import ScrollHint from '../common/ScrollHint';
 import './HomePage.css';
 
 function AuthorAvatar({ author, getUrl }) {
@@ -34,9 +36,32 @@ function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [brokenImages, setBrokenImages] = useState({});
   // Touch swipe support for the hero (it advances by state, not native scroll,
-  // so it needs explicit touch handling to pan sideways with a finger).
+  // so it needs explicit touch handling to pan sideways with a finger). The
+  // slide tracks the finger via a react-spring x offset so the content feels
+  // like it's being dragged; on release it either advances (new slide slides in
+  // from the swipe direction) or snaps back.
   const touchStartX = useRef(null);
   const touchDeltaX = useRef(0);
+  const didDrag = useRef(false);
+  const [{ x }, springApi] = useSpring(() => ({ x: 0, config: { tension: 300, friction: 32 } }));
+  // Scroll-down affordance: appears a few seconds after the first load and
+  // disappears as soon as the user scrolls.
+  const [showScrollHint, setShowScrollHint] = useState(false);
+
+  useEffect(() => {
+    // Don't bother on tiny/landscape viewports where the hero isn't full-height.
+    const timer = setTimeout(() => {
+      if (window.scrollY < 40) setShowScrollHint(true);
+    }, 4000);
+    const onScroll = () => {
+      if (window.scrollY > 40) setShowScrollHint(false);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
 
   // Auto-advance slides every 8 seconds
   useEffect(() => {
@@ -65,22 +90,35 @@ function HomePage() {
     setCurrentSlide(index);
   };
 
-  // Swipe to change slides on touch devices.
+  // Swipe to change slides on touch devices — the slide follows the finger.
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
     touchDeltaX.current = 0;
+    didDrag.current = false;
+    springApi.stop();
   };
   const handleTouchMove = (e) => {
     if (touchStartX.current == null) return;
-    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    touchDeltaX.current = dx;
+    if (Math.abs(dx) > 6) didDrag.current = true;
+    springApi.start({ x: dx, immediate: true }); // track the finger 1:1
   };
   const handleTouchEnd = () => {
     const dx = touchDeltaX.current;
     touchStartX.current = null;
     touchDeltaX.current = 0;
-    if (Math.abs(dx) < 40) return; // ignore taps / tiny drags
-    if (dx < 0) nextSlide();
-    else prevSlide();
+    const width = window.innerWidth || 400;
+    const multiple = featuredArticles && featuredArticles.length > 1;
+    if (multiple && Math.abs(dx) > 50) {
+      const dir = dx < 0 ? 1 : -1; // swipe left → next, right → prev
+      // The new slide enters from the side the finger came from.
+      if (dir === 1) nextSlide(); else prevSlide();
+      springApi.set({ x: dir * width });
+      springApi.start({ x: 0 });
+    } else {
+      springApi.start({ x: 0 }); // snap back
+    }
   };
 
   const handleArticleClick = async (article) => {
@@ -133,12 +171,13 @@ function HomePage() {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <div
+            <animated.div
               className="hero-slide"
               style={{
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.88)), url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})`
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.88)), url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})`,
+                transform: x.to((v) => `translate3d(${v}px, 0, 0)`),
               }}
-              onClick={() => handleArticleClick(currentArticle)}
+              onClick={() => { if (didDrag.current) { didDrag.current = false; return; } handleArticleClick(currentArticle); }}
             >
               {/* Hidden img to detect broken cover images and fall back to logo */}
               <img
@@ -180,7 +219,7 @@ function HomePage() {
                   )}
                 </div>
               </div>
-            </div>
+            </animated.div>
 
             {/* Navigation Arrows */}
             {featuredArticles && featuredArticles.length > 1 && (
@@ -214,6 +253,13 @@ function HomePage() {
                 className="hero-logo"
               />
             </div>
+          </div>
+        )}
+
+        {/* Scroll-down affordance (appears a few seconds after load). */}
+        {showScrollHint && (
+          <div className="hero-scroll-hint">
+            <ScrollHint direction="down" />
           </div>
         )}
       </section>

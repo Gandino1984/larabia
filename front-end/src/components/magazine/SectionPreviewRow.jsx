@@ -7,6 +7,8 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import ScrollHint from '../common/ScrollHint';
+import { useScrollHint } from '../../hooks/useScrollHint';
 
 function PreviewCard({ item, onClick }) {
   const { t } = useTranslation();
@@ -49,6 +51,7 @@ function PreviewCard({ item, onClick }) {
 
 function SectionPreviewRow({ title, items, onItemClick }) {
   const trackRef = useRef(null);
+  const showSwipeHint = useScrollHint(trackRef, items.length > 1);
 
   const scrollByCards = (dir) => {
     const track = trackRef.current;
@@ -85,10 +88,17 @@ function SectionPreviewRow({ title, items, onItemClick }) {
         )}
       </div>
 
-      <div className="section-preview__track" ref={trackRef}>
-        {items.map((item) => (
-          <PreviewCard key={item.key} item={item} onClick={onItemClick} />
-        ))}
+      <div className="section-preview__scroller">
+        <div className="section-preview__track" ref={trackRef}>
+          {items.map((item) => (
+            <PreviewCard key={item.key} item={item} onClick={onItemClick} />
+          ))}
+        </div>
+        {showSwipeHint && (
+          <div className="section-preview__swipe-hint">
+            <ScrollHint direction="horizontal" />
+          </div>
+        )}
       </div>
     </section>
   );

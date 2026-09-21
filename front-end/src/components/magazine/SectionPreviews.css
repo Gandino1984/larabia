@@ -60,6 +60,20 @@
   border-color: rgba(255, 255, 255, 0.6);
 }
 
+/* Wrapper so the swipe hint can be overlaid on the track. */
+.section-preview__scroller {
+  position: relative;
+}
+
+/* Swipe affordance, bottom-right over the track. */
+.section-preview__swipe-hint {
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  z-index: 3;
+  pointer-events: none;
+}
+
 /* Horizontal snap-scrolling track */
 .section-preview__track {
   display: flex;

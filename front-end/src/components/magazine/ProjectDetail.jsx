@@ -9,6 +9,8 @@ import { useEngagement } from '../../app_context/EngagementContext';
 import axiosInstance from '../../utils/axiosConfig';
 import ArticleCard from './ArticleCard';
 import { useDragScroll } from '../../hooks/useDragScroll';
+import { useScrollHint } from '../../hooks/useScrollHint';
+import ScrollHint from '../common/ScrollHint';
 import './ProjectDetail.css';
 
 function ProjectDetail() {
@@ -35,6 +37,7 @@ function ProjectDetail() {
     track.scrollBy({ left: dir * amount, behavior: 'smooth' });
   }, []);
   useDragScroll(carouselRef, viewMode === 'carousel');
+  const showSwipeHint = useScrollHint(carouselRef, viewMode === 'carousel');
 
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
@@ -212,6 +215,11 @@ function ProjectDetail() {
                     <button type="button" className="carousel-arrow carousel-arrow--next" onClick={() => scrollCarousel(1)} aria-label="Siguiente">
                       <ChevronRight size={44} />
                     </button>
+                    {showSwipeHint && (
+                      <div className="carousel-swipe-hint">
+                        <ScrollHint direction="horizontal" />
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="project-articles-grid">

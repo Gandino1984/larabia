@@ -7,6 +7,8 @@ import { useUI } from '../../app_context/UIContext';
 import { Calendar, User, ArrowLeft, Trash2, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal } from 'lucide-react';
 import ArticleEngagementBar from './ArticleEngagementBar';
 import { useDragScroll } from '../../hooks/useDragScroll';
+import { useScrollHint } from '../../hooks/useScrollHint';
+import ScrollHint from '../common/ScrollHint';
 import './ArticlesList.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -94,6 +96,7 @@ function ArticlesList() {
     track.scrollBy({ left: dir * amount, behavior: 'smooth' });
   }, []);
   useDragScroll(carouselRef, viewMode === 'carousel');
+  const showSwipeHint = useScrollHint(carouselRef, viewMode === 'carousel');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -339,6 +342,11 @@ function ArticlesList() {
               >
                 <ChevronRight size={44} />
               </button>
+              {showSwipeHint && (
+                <div className="carousel-swipe-hint">
+                  <ScrollHint direction="horizontal" />
+                </div>
+              )}
             </div>
           ) : (
             <>

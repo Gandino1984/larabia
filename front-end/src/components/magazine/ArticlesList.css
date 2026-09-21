@@ -430,6 +430,18 @@
   position: relative;
   padding: 0 96px;
 }
+
+/* Swipe affordance overlaid at the bottom-right of a horizontal carousel. */
+.carousel-swipe-hint {
+  position: absolute;
+  right: 108px;
+  bottom: 10px;
+  z-index: 6;
+  pointer-events: none;
+}
+@media (max-width: 768px) {
+  .carousel-swipe-hint { display: none; }
+}
 .carousel-arrow {
   position: absolute;
   top: 50%;

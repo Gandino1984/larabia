@@ -21,6 +21,18 @@
   background: var(--landing-bg, #252525);
 }
 
+/* Scroll-down hint pinned to the bottom-centre of the hero. */
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 3.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11;
+}
+@media (max-width: 767px) {
+  .hero-scroll-hint { bottom: 2.75rem; }
+}
+
 .hero-slide {
   width: 100%;
   height: 100%;
@@ -33,11 +45,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s ease;
-}
-
-.hero-slide:hover {
-  transform: scale(1.01);
+  /* transform is driven by react-spring (drag/slide), so no CSS transition
+     here — it would fight the spring and make dragging feel laggy. */
 }
 
 .hero-default {
@@ -115,6 +124,11 @@
   line-clamp: 6;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  /* The description gets its own (wider) measure and hugs the right edge of the
+     content box so more text fits per line. */
+  text-align: right;
+  max-width: 620px;
+  margin-left: auto;
 }
 
 .hero-meta {
@@ -187,12 +201,12 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(10px);
   border: none;
   color: white;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -202,8 +216,14 @@
   transition: all 0.3s ease;
 }
 
+/* Scale the chevron with the button so it stays balanced across breakpoints. */
+.hero-nav svg {
+  width: 58%;
+  height: 58%;
+}
+
 .hero-nav:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.85);
   transform: translateY(-50%) scale(1.1);
 }
 
@@ -290,8 +310,8 @@
   }
 
   .hero-nav {
-    width: 44px;
-    height: 44px;
+    width: 38px;
+    height: 38px;
   }
 
   .hero-nav.prev {
@@ -320,7 +340,7 @@
 @media (min-width: 768px) {
   .hero-content {
     padding: 2rem;
-    max-width: 800px;
+    max-width: 880px;
   }
 
   .hero-category {
@@ -337,6 +357,7 @@
   .hero-excerpt {
     font-size: 1.2rem;
     margin-bottom: 1.75rem;
+    max-width: 720px;
   }
 
   .hero-meta {
@@ -353,8 +374,8 @@
   }
 
   .hero-nav {
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
   }
 
   .hero-nav.prev {
@@ -393,7 +414,7 @@
 /* Desktop: 1024px and up */
 @media (min-width: 1024px) {
   .hero-content {
-    max-width: 850px;
+    max-width: 980px;
   }
 
   .hero-category {
@@ -410,6 +431,7 @@
   .hero-excerpt {
     font-size: 1.25rem;
     margin-bottom: 2rem;
+    max-width: 820px;
   }
 
   .hero-meta {
@@ -425,8 +447,8 @@
   }
 
   .hero-nav {
-    width: 50px;
-    height: 50px;
+    width: 52px;
+    height: 52px;
   }
 
   .hero-nav.prev {
@@ -464,7 +486,7 @@
 /* Large Desktop: 1200px and up */
 @media (min-width: 1200px) {
   .hero-content {
-    max-width: 900px;
+    max-width: 1080px;
   }
 
   .hero-title {
@@ -473,10 +495,24 @@
 
   .hero-excerpt {
     font-size: 1.3rem;
+    max-width: 920px;
   }
 
   .hero-logo {
     width: 400px;
+  }
+
+  .hero-nav {
+    width: 62px;
+    height: 62px;
+  }
+
+  .hero-nav.prev {
+    left: 2.5rem;
+  }
+
+  .hero-nav.next {
+    right: 2.5rem;
   }
 }
 
@@ -513,8 +549,8 @@
   }
 
   .hero-nav {
-    width: 36px;
-    height: 36px;
+    width: 30px;
+    height: 30px;
   }
 
   .hero-indicators {
