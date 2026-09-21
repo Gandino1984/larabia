@@ -153,9 +153,11 @@ function ProjectDetail() {
           <p className="project-detail-loading">{t('common.loading')}</p>
         ) : projectArticles.length > 0 ? (
           <div className="project-articles-grid">
-            {projectArticles.map(article => (
-              <ArticleCard key={article.id_article} article={article} />
-            ))}
+            {[...projectArticles]
+              .sort((a, b) => (a.id_article || 0) - (b.id_article || 0))
+              .map(article => (
+                <ArticleCard key={article.id_article} article={article} />
+              ))}
           </div>
         ) : (
           <p className="project-detail-empty">{t('project.noArticles')}</p>
