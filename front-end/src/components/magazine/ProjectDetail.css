@@ -174,27 +174,29 @@
   border-radius: 4px;
 }
 
-/* Follow-project (bell) button */
+/* Follow-project (bell) button — matches the article card "Comparte" button */
 .project-subscribe-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.4rem;
   margin: 0.5rem 0 0.75rem;
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  background: transparent;
-  color: inherit;
-  font-weight: 700;
-  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: none;
+  background: lightgray;
+  color: black;
+  font-weight: 600;
+  font-size: 0.82rem;
+  min-height: 36px;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: all 0.3s;
 }
 .project-subscribe-btn:hover {
-  border-color: currentColor;
+  background: var(--color-accent, #667eea);
+  color: white;
+  transform: scale(1.05);
 }
 .project-subscribe-btn--active {
-  background: var(--color-accent, #e63946);
-  border-color: var(--color-accent, #e63946);
-  color: #ffffff;
+  background: var(--color-accent, #667eea);
+  color: white;
 }
