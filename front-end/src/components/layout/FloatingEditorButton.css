@@ -11,8 +11,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--header-h);
-  height: var(--header-h);
+  width: 44px;
+  height: 44px;
   padding: 0;
   background: white;
   color: black;
@@ -48,6 +48,8 @@
 /* Desktop: flank the header bar on the right, centered on its axis. */
 @media (min-width: 769px) {
   .floating-editor-btn {
+    width: var(--header-h);
+    height: var(--header-h);
     top: calc(0.5rem + var(--header-h) / 2 + 9px);
     right: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 1.5rem));
     transform: translateY(-50%);
