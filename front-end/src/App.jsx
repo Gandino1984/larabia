@@ -160,7 +160,7 @@ function App() {
       )}
 
       <div className={appClassName}>
-        {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Header ready={showContent} />}
+        {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Header ready={showContent && !showLoadingScreen} />}
         {!isPreview && <FloatingEditorButton />}
         {!isPreview && <CardDisplay />}
         <main className="main-content">
