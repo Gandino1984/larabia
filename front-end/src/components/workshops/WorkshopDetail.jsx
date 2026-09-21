@@ -51,7 +51,6 @@ function WorkshopDetail() {
     return (
       <div className="workshops-page">
         <div className="workshops-container">
-          <button onClick={navigateToTalleres} className="btn-back-nav"><ArrowLeft size={24} /></button>
           <p className="workshops-empty">{t('workshops.notFound')}</p>
         </div>
       </div>
@@ -74,10 +73,6 @@ function WorkshopDetail() {
   return (
     <div className="workshops-page">
       <div className="workshops-container workshop-detail">
-        <button onClick={navigateToTalleres} className="btn-back-nav" title={t('common.buttons.back')}>
-          <ArrowLeft size={24} />
-        </button>
-
         {cover && (
           <div className="workshop-detail-cover">
             <img src={cover} alt={w.title_workshop} onError={(e) => { e.target.style.display = 'none'; }} />

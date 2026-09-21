@@ -63,9 +63,6 @@ function AuthorPublications() {
       <div className="author-publications-page">
         <div className="publications-error">
           <p>{t('authors.authorNotFound')}</p>
-          <button onClick={navigateBack} className="btn-back-nav" title={t('common.buttons.back')}>
-            <ArrowLeft size={22} />
-          </button>
         </div>
       </div>
     );
@@ -75,9 +72,6 @@ function AuthorPublications() {
     <div className="author-publications-page">
       <div className="publications-container">
         <header className="publications-header">
-          <button onClick={navigateBack} className="btn-back-nav" title={t('common.buttons.back')}>
-            <ArrowLeft size={24} />
-          </button>
           <div className="header-content">
             <h1>{t('authors.publicationsBy')}</h1>
 

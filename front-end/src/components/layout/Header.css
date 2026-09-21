@@ -41,6 +41,35 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
+/* Back button inside the header bar (inner pages). Sized to sit compactly next
+   to the logo; inherits the header's light/dark text like the other controls. */
+.header-back-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: var(--color-header-text, #ffffff);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 40px;
+  flex-shrink: 0;
+  margin-right: 0.4rem;
+  transition: all 0.25s ease;
+}
+.header-back-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.header-bar.active .header-back-btn {
+  color: var(--color-header-text-active, #000000);
+  background: rgba(0, 0, 0, 0.06);
+}
+.header-bar.active .header-back-btn:hover {
+  background: rgba(0, 0, 0, 0.14);
+}
+
 /* Logo */
 .header-logo {
   cursor: pointer;

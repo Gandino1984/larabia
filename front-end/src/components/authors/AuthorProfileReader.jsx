@@ -17,9 +17,6 @@ function AuthorProfileReader() {
       <div className="author-profile-reader">
         <div className="profile-error">
           <p>{t('authors.profileNotFound')}</p>
-          <button onClick={navigateBack} className="btn-back-nav" title={t('common.buttons.back')}>
-            <ArrowLeft size={22} />
-          </button>
         </div>
       </div>
     );
@@ -43,9 +40,6 @@ function AuthorProfileReader() {
     <div className="author-profile-reader">
       <div className="profile-container">
         <header className="profile-header">
-          <button onClick={navigateBack} className="btn-back-nav" title={t('common.buttons.back')}>
-            <ArrowLeft size={24} />
-          </button>
           <h1>{t('authors.authorProfile')}</h1>
           {isSuperAdmin && (
             <button

@@ -11,7 +11,7 @@ import { usePendingReview } from '../../app_context/PendingReviewContext';
 import { useNotifications } from '../../app_context/NotificationContext';
 import { useNavActions } from '../../app_context/navActions';
 import { navLabel, canSeeNavItem } from '../../app_context/navConfig';
-import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, Globe, Shield, Bell } from 'lucide-react';
+import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, Globe, Shield, Bell, ArrowLeft } from 'lucide-react';
 import UserInfoCard from '../user/UserInfoCard';
 import LanguageSelector from './LanguageSelector';
 import NavGroupDropdown from './NavGroupDropdown';
@@ -51,7 +51,7 @@ function Header() {
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { totalPending } = usePendingReview();
   const { notifications, count: notifCount, markAllSeen } = useNotifications();
-  const { showArticleDetail, showAuthors, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
+  const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
   const { metadata, resolveLogoUrl } = useMetadata();
@@ -205,6 +205,17 @@ function Header() {
     navigateBack();
   };
 
+  // Back button that lives inside the header bar (shown on every inner page
+  // where the header is visible). Each view has its own notion of "back", so we
+  // route to the right one here. Hidden on home (nothing to go back to).
+  const showHeaderBack = !showHome;
+  const handleHeaderBack = () => {
+    if (showProjectDetail) { navigateBackFromProject(); return; }
+    if (showWorkshopDetail) { navigateToTalleres(); return; }
+    if (showArticlesList || showTalleres) { navigateToHome(); return; }
+    navigateBack();
+  };
+
   const handleDeleteClick = async () => {
     if (!selectedArticle) return;
 
@@ -333,6 +344,18 @@ function Header() {
         onMouseLeave={() => setIsHeaderActive(false)}
         onClick={() => setIsHeaderActive(true)}
       >
+        {/* Back button — lives inside the header bar on inner pages. */}
+        {showHeaderBack && (
+          <button
+            className="header-back-btn"
+            onClick={(e) => { e.stopPropagation(); handleHeaderBack(); }}
+            title={t('common.buttons.back')}
+            aria-label={t('common.buttons.back')}
+          >
+            <ArrowLeft size={20} />
+          </button>
+        )}
+
         {/* Logo and User Info in single container */}
         <div className="header-logo-user-container">
           <div className="header-logo" onClick={handleLogoClick}>

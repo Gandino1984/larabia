@@ -9,7 +9,7 @@
  * var(--token, <original-literal>) so a missing token degrades to today's color.
  */
 :root {
-  --color-bg: #2e2e2e;          /* app / body background */
+  --color-bg: #363636;          /* app / body background */
   --color-surface: #2a2a2a;     /* cards, panels */
   --color-surface-alt: #1a1a1a; /* darker surfaces */
   --color-surface-3: #3a3a3a;   /* inputs, borders, wells */
@@ -19,7 +19,7 @@
   --color-accent-2: #764ba2;    /* gradient partner / secondary accent */
   --color-danger: #dc2626;      /* destructive actions */
   --color-border: rgba(255, 255, 255, 0.12);
-  --landing-bg: #2e2e2e;        /* landing / hero background */
+  --landing-bg: #363636;        /* landing / hero background */
 
   /* Light-context surfaces — used by the white "reading" pages (article detail,
      author profiles, publication lists). These pages are light by design, so

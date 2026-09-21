@@ -86,10 +86,6 @@ function ProjectDetail() {
 
   return (
     <div className="project-detail-page">
-      <button className="btn-back-nav" onClick={navigateBackFromProject} title={t('common.buttons.back')}>
-        <ArrowLeft size={22} />
-      </button>
-
       <div className="project-detail-header">
         {coverUrl && (
           <div className="project-detail-cover">

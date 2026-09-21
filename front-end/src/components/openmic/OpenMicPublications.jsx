@@ -26,9 +26,6 @@ function OpenMicPublications() {
     <div className="openmic-page">
       <div className="openmic-container">
         <header className="openmic-header">
-          <button onClick={navigateBack} className="btn-back-nav" title={t('common.buttons.back')}>
-            <ArrowLeft size={24} />
-          </button>
           <div className="openmic-header-content">
             <div className="openmic-title-row">
               <h1>{t('openmic.title')}</h1>

@@ -33,9 +33,6 @@ function CategorySectionPage({ category, titleKey, subtitleKey }) {
     <div className="category-section-page">
       <div className="category-section-container">
         <header className="category-section-header">
-          <button onClick={navigateBack} className="btn-back-nav" title={t('common.buttons.back')}>
-            <ArrowLeft size={24} />
-          </button>
           <div className="category-section-header-content">
             <h1>{title}</h1>
             {subtitle && <p className="category-section-subtitle">{subtitle}</p>}

@@ -41,9 +41,6 @@ function WorkshopsList() {
     <div className="workshops-page">
       <div className="workshops-container">
         <header className="workshops-header">
-          <button onClick={navigateToHome} className="btn-back-nav" title={t('common.buttons.back')}>
-            <ArrowLeft size={24} />
-          </button>
           <div className="workshops-header-content">
             <h1>{t('workshops.title')}</h1>
             <p className="workshops-subtitle">{t('workshops.subtitle')}</p>
