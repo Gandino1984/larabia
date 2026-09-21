@@ -666,14 +666,19 @@ function Header({ ready = true }) {
           <nav className="mobile-menu-content">
             {/* User (image left + name) at the very top */}
             {currentUser ? (
-              <button className="mobile-user-header" onClick={handleUserClick}>
-                {userImageUrl ? (
-                  <img src={userImageUrl} alt={currentUser.name_user} className="mobile-user-header-img" />
-                ) : (
-                  <span className="mobile-user-header-img mobile-user-header-img--fallback"><User size={20} /></span>
-                )}
-                <span className="mobile-user-header-name">{currentUser.name_user}</span>
-              </button>
+              <div className="mobile-user-header">
+                <button className="mobile-user-header-main" onClick={handleUserClick}>
+                  {userImageUrl ? (
+                    <img src={userImageUrl} alt={currentUser.name_user} className="mobile-user-header-img" />
+                  ) : (
+                    <span className="mobile-user-header-img mobile-user-header-img--fallback"><User size={20} /></span>
+                  )}
+                  <span className="mobile-user-header-name">{currentUser.name_user}</span>
+                </button>
+                <button className="mobile-user-logout" onClick={handleLogout} title={t('common.buttons.logout')} aria-label={t('common.buttons.logout')}>
+                  <LogOut size={20} />
+                </button>
+              </div>
             ) : (
               <button className="mobile-nav-link login" onClick={handleLoginClick}>
                 <User size={18} />
@@ -833,7 +838,17 @@ function Header({ ready = true }) {
               );
             })}
 
-            {/* Language: single 3-option toggle on one line — at the bottom */}
+            {currentUser && isSuperAdmin && (
+              <button className="mobile-nav-link" onClick={handleAdminClick}>
+                <Shield size={18} />
+                <span>Admin</span>
+                {totalPending > 0 && (
+                  <span className="admin-pending-badge">{totalPending}</span>
+                )}
+              </button>
+            )}
+
+            {/* Language: single 3-option toggle on one line — at the very bottom */}
             <div className="mobile-lang-toggle" role="group" aria-label="Idioma">
               {[
                 { code: 'es', label: 'Español' },
@@ -849,24 +864,6 @@ function Header({ ready = true }) {
                 </button>
               ))}
             </div>
-
-            {currentUser && (
-              <>
-                {isSuperAdmin && (
-                  <button className="mobile-nav-link" onClick={handleAdminClick}>
-                    <Shield size={18} />
-                    <span>Admin</span>
-                    {totalPending > 0 && (
-                      <span className="admin-pending-badge">{totalPending}</span>
-                    )}
-                  </button>
-                )}
-                <button className="mobile-nav-link logout" onClick={handleLogout}>
-                  <LogOut size={18} />
-                  <span>{t('common.buttons.logout')}</span>
-                </button>
-              </>
-            )}
           </nav>
         </div>
       )}

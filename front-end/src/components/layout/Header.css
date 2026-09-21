@@ -434,17 +434,44 @@
   background: rgba(0, 0, 0, 0.1);
 }
 
-/* User header at the top of the mobile menu (image left + name) */
+/* User header at the top of the mobile menu: image + name on the left, logout
+   on the right of the same row. */
 .mobile-user-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   width: 100%;
+  padding: 0.5rem 0.75rem 0.75rem;
+}
+.mobile-user-header-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.5rem 0.75rem 0.75rem;
+  padding: 0;
   text-align: left;
+}
+.mobile-user-logout {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: #111111;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.mobile-user-logout:hover {
+  background: #000000;
+  color: #ffffff;
 }
 .mobile-user-header-img {
   width: 42px;
@@ -464,7 +491,7 @@
   font-size: 1.05rem;
   font-weight: 700;
   color: #111111;
-  text-transform: none;
+  text-transform: capitalize;
 }
 
 /* Language: single 3-option toggle on one line */
