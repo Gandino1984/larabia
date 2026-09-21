@@ -71,23 +71,23 @@ function Header({ ready = true }) {
   useEffect(() => {
     if (!ready || hasAnimatedRef.current) return;
     hasAnimatedRef.current = true;
-    fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 1600 } });
+    fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 1900 } });
     // Randomised, decaying shake — each jolt goes in a random direction so it
     // feels chaotic ("rabid"), like the logo, rather than a fixed back-and-forth.
     // Slow decay keeps it violent for longer before it settles.
-    const N = 24;
+    const N = 30;
     const rand = (m) => (Math.random() * 2 - 1) * m;
     let prevSign = 1;
     const steps = [];
     for (let i = 0; i < N; i++) {
-      const decay = Math.pow(1 - i / N, 0.7);
+      const decay = Math.pow(1 - i / N, 0.6);
       const sign = -prevSign; // alternate side but with random magnitude
       prevSign = sign;
       steps.push({
-        x: sign * (20 + Math.random() * 52) * decay,
-        y: rand(38) * decay,
-        r: sign * (3 + Math.random() * 8) * decay,
-        config: { duration: 45 + Math.random() * 30 },
+        x: sign * (34 + Math.random() * 66) * decay,
+        y: rand(54) * decay,
+        r: sign * (4 + Math.random() * 9) * decay,
+        config: { duration: 42 + Math.random() * 30 },
       });
     }
     steps.push({ x: 0, y: 0, r: 0, config: { tension: 240, friction: 10 } });
