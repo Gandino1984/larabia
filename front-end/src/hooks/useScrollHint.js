@@ -1,12 +1,14 @@
 // magazine-front/src/hooks/useScrollHint.js
 //
 // Returns whether to show a "you can swipe sideways" hint over a horizontally
-// scrollable container. The hint appears a short moment after mount (only if the
-// content actually overflows and hasn't been scrolled yet) and is dismissed the
-// first time the user scrolls or touches the container.
+// scrollable container. The hint appears when the container scrolls into view
+// (so it's actually seen, including on mobile where it may start off-screen),
+// only if the content overflows and hasn't been scrolled yet. It auto-hides
+// after a few seconds and is dismissed the moment the user scrolls the carousel
+// horizontally.
 import { useEffect, useState } from 'react';
 
-export function useScrollHint(ref, enabled = true, delay = 1800) {
+export function useScrollHint(ref, enabled = true, { delay = 500, autoHide = 6000 } = {}) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -16,27 +18,47 @@ export function useScrollHint(ref, enabled = true, delay = 1800) {
       return;
     }
 
+    let shown = false;
     let dismissed = false;
+    let showTimer;
+    let hideTimer;
+
     const overflowsX = () => el.scrollWidth - el.clientWidth > 12;
 
-    const timer = setTimeout(() => {
-      if (!dismissed && overflowsX() && el.scrollLeft < 8) setShow(true);
-    }, delay);
+    const reveal = () => {
+      if (shown || dismissed) return;
+      showTimer = setTimeout(() => {
+        if (!dismissed && overflowsX() && el.scrollLeft < 8) {
+          shown = true;
+          setShow(true);
+          hideTimer = setTimeout(() => setShow(false), autoHide);
+        }
+      }, delay);
+    };
 
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && reveal()),
+      { threshold: 0.15 }
+    );
+    io.observe(el);
+
+    // Only a real horizontal scroll of the carousel dismisses it (vertical page
+    // scrolling doesn't fire the track's own scroll event).
     const dismiss = () => {
       dismissed = true;
       setShow(false);
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
     };
-
     el.addEventListener('scroll', dismiss, { passive: true });
-    el.addEventListener('pointerdown', dismiss);
 
     return () => {
-      clearTimeout(timer);
+      io.disconnect();
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
       el.removeEventListener('scroll', dismiss);
-      el.removeEventListener('pointerdown', dismiss);
     };
-  }, [ref, enabled, delay]);
+  }, [ref, enabled, delay, autoHide]);
 
   return show;
 }
