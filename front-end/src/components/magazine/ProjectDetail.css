@@ -272,7 +272,7 @@
 .view-toggle-btn:hover { color: #ffffff; }
 .view-toggle-btn--active { color: #1a1a1a; }
 
-.articles-carousel-wrap { position: relative; padding: 0 70px; }
+.articles-carousel-wrap { position: relative; padding: 0 84px; }
 .articles-carousel {
   display: flex;
   gap: 1.5rem;
@@ -295,8 +295,8 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
-  width: 52px;
-  height: 52px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   border: none;
   background: rgba(0, 0, 0, 0.75);
