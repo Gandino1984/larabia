@@ -35,6 +35,28 @@ async function myEngagement(req, res) {
     }
 }
 
+async function subscribe(req, res) {
+    try {
+        const user = await getRequestUser(req);
+        const { error, data } = await engagementController.toggleSubscription(req.params.id_project, user?.id_user);
+        if (error) return res.status(user ? 400 : 401).json({ error });
+        res.json({ error: null, data });
+    } catch (err) {
+        res.status(500).json({ error: "Error interno" });
+    }
+}
+
+async function mySubscriptions(req, res) {
+    try {
+        const user = await getRequestUser(req);
+        const { error, data } = await engagementController.getMySubscriptions(user?.id_user);
+        if (error) return res.status(400).json({ error });
+        res.json({ error: null, data });
+    } catch (err) {
+        res.status(500).json({ error: "Error interno" });
+    }
+}
+
 async function listComments(req, res) {
     try {
         const { error, data } = await engagementController.listComments(req.params.id_article);
@@ -70,4 +92,4 @@ async function deleteComment(req, res) {
     }
 }
 
-export default { like, favorite, myEngagement, listComments, createComment, deleteComment };
+export default { like, favorite, myEngagement, subscribe, mySubscriptions, listComments, createComment, deleteComment };

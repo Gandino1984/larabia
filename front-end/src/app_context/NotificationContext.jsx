@@ -20,6 +20,7 @@ import { useAuth } from './AuthContext';
 import { useAuthor } from './AuthorContext';
 import { useUI } from './UIContext';
 import { useMagazine } from './MagazineContext';
+import { useEngagement } from './EngagementContext';
 
 const NotificationContext = createContext(null);
 const MAX_CONTENT_NOTIFS = 30;
@@ -30,6 +31,7 @@ export const NotificationProvider = ({ children }) => {
   const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail } = useUI();
   const { setSelectedArticle, setSelectedProject } = useMagazine();
+  const { subscribedProjectIds } = useEngagement();
 
   const [publishedArticles, setPublishedArticles] = useState([]);
   const [publishedProjects, setPublishedProjects] = useState([]);
@@ -110,18 +112,23 @@ export const NotificationProvider = ({ children }) => {
     // New content published since the user last opened the bell.
     if (currentUser && lastSeen) {
       const content = [];
+      const subs = new Set(subscribedProjectIds || []);
+      const projectById = new Map(publishedProjects.map(p => [p.id_project, p]));
+
       for (const a of publishedArticles) {
         const ts = a.date_published ? new Date(a.date_published).getTime() : 0;
-        if (ts > lastSeen) {
-          content.push({
-            id: `article-${a.id_article}`,
-            type: 'article',
-            ts,
-            title: t('notifications.newArticle.title'),
-            message: a.title_article,
-            onClick: () => { setSelectedArticle(a); navigateToArticle(); }
-          });
-        }
+        if (ts <= lastSeen) continue;
+        // Articles inside a followed project get a project-context notification
+        // below instead of the generic one (avoids duplicates).
+        if (a.project_id && subs.has(a.project_id)) continue;
+        content.push({
+          id: `article-${a.id_article}`,
+          type: 'article',
+          ts,
+          title: t('notifications.newArticle.title'),
+          message: a.title_article,
+          onClick: () => { setSelectedArticle(a); navigateToArticle(); }
+        });
       }
       for (const p of publishedProjects) {
         const ts = p.date_published ? new Date(p.date_published).getTime() : 0;
@@ -136,6 +143,40 @@ export const NotificationProvider = ({ children }) => {
           });
         }
       }
+
+      // Followed-project notifications: new content inside a followed project, and
+      // updates to a followed project (edited after it was first published).
+      for (const a of publishedArticles) {
+        if (!a.project_id || !subs.has(a.project_id)) continue;
+        const ts = a.date_published ? new Date(a.date_published).getTime() : 0;
+        if (ts <= lastSeen) continue;
+        const proj = projectById.get(a.project_id);
+        content.push({
+          id: `sub-article-${a.id_article}`,
+          type: 'subscription',
+          ts,
+          title: t('notifications.projectNewContent.title'),
+          message: proj ? `${proj.title_project}: ${a.title_article}` : a.title_article,
+          onClick: () => { setSelectedArticle(a); navigateToArticle(); }
+        });
+      }
+      for (const p of publishedProjects) {
+        if (!subs.has(p.id_project)) continue;
+        const publishedTs = p.date_published ? new Date(p.date_published).getTime() : 0;
+        const updatedTs = p.updated_at ? new Date(p.updated_at).getTime() : 0;
+        // Only "updated" (not the initial publish, which is covered above).
+        if (updatedTs > lastSeen && publishedTs <= lastSeen) {
+          content.push({
+            id: `sub-project-${p.id_project}-${updatedTs}`,
+            type: 'subscription',
+            ts: updatedTs,
+            title: t('notifications.projectUpdated.title'),
+            message: p.title_project,
+            onClick: () => { setSelectedProject(p); navigateToProjectDetail(); }
+          });
+        }
+      }
+
       content.sort((x, y) => y.ts - x.ts);
       list.push(...content.slice(0, MAX_CONTENT_NOTIFS));
     }
@@ -143,7 +184,7 @@ export const NotificationProvider = ({ children }) => {
     return list;
   }, [
     profilesReady, currentUser, canCreateContent, authorProfiles, lastSeen,
-    publishedArticles, publishedProjects,
+    publishedArticles, publishedProjects, subscribedProjectIds,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

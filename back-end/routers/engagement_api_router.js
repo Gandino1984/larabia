@@ -11,6 +11,10 @@ router.post("/favorite/:id_article", engagementApiController.favorite);
 // The current user's liked + favorited article ids.
 router.get("/my", engagementApiController.myEngagement);
 
+// Project subscriptions (bell) — toggle + list the current user's followed projects.
+router.post("/subscribe/:id_project", engagementApiController.subscribe);
+router.get("/my-subscriptions", engagementApiController.mySubscriptions);
+
 // Comments
 router.get("/comments/:id_article", engagementApiController.listComments);
 router.post("/comments/:id_article", engagementApiController.createComment);

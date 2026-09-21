@@ -404,5 +404,9 @@
   "comments.loginToComment": "Hasi saioa iruzkina uzteko.",
   "comments.empty": "Oraindik ez dago iruzkinik. Izan zaitez lehena!",
   "comments.delete": "Ezabatu iruzkina",
-  "comments.undoDelete": "Sakatu berriro desegiteko"
+  "comments.undoDelete": "Sakatu berriro desegiteko",
+  "subscribe.follow": "Jarraitu proiektua",
+  "subscribe.following": "Jarraitzen",
+  "notifications.projectNewContent.title": "Jarraitzen duzun proiektu batean eduki berria",
+  "notifications.projectUpdated.title": "Jarraitzen duzun proiektu bat eguneratu da"
 }

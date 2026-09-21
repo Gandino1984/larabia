@@ -404,5 +404,9 @@
   "comments.loginToComment": "Log in to leave a comment.",
   "comments.empty": "No comments yet. Be the first to comment!",
   "comments.delete": "Delete comment",
-  "comments.undoDelete": "Click again to undo"
+  "comments.undoDelete": "Click again to undo",
+  "subscribe.follow": "Follow project",
+  "subscribe.following": "Following",
+  "notifications.projectNewContent.title": "New content in a project you follow",
+  "notifications.projectUpdated.title": "A project you follow was updated"
 }

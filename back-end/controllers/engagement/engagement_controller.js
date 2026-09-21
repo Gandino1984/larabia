@@ -5,6 +5,7 @@ import { fn, col } from "sequelize";
 import article_like_model from "../../models/article_like_model.js";
 import article_favorite_model from "../../models/article_favorite_model.js";
 import article_comment_model from "../../models/article_comment_model.js";
+import project_subscription_model from "../../models/project_subscription_model.js";
 import user_model from "../../models/user_model.js";
 
 // ---- Likes ----
@@ -86,6 +87,38 @@ async function getTopLikedArticleIds(limit = 10) {
     }
 }
 
+// ---- Project subscriptions (bell) ----
+
+async function toggleSubscription(id_project, userId) {
+    if (!userId) return { error: "Debes iniciar sesión" };
+    try {
+        const existing = await project_subscription_model.findOne({ where: { project_id: id_project, user_id: userId } });
+        let subscribed;
+        if (existing) {
+            await existing.destroy();
+            subscribed = false;
+        } else {
+            await project_subscription_model.create({ project_id: id_project, user_id: userId });
+            subscribed = true;
+        }
+        return { data: { subscribed } };
+    } catch (err) {
+        console.error("-> engagement_controller.js - toggleSubscription() - Error =", err);
+        return { error: "Error al actualizar la suscripción" };
+    }
+}
+
+async function getMySubscriptions(userId) {
+    if (!userId) return { data: { projectIds: [] } };
+    try {
+        const rows = await project_subscription_model.findAll({ where: { user_id: userId }, attributes: ['project_id'] });
+        return { data: { projectIds: rows.map(r => r.project_id) } };
+    } catch (err) {
+        console.error("-> engagement_controller.js - getMySubscriptions() - Error =", err);
+        return { error: "Error al obtener las suscripciones" };
+    }
+}
+
 // ---- Comments ----
 
 async function listComments(id_article) {
@@ -162,6 +195,8 @@ export default {
     toggleFavorite,
     getMyEngagement,
     getTopLikedArticleIds,
+    toggleSubscription,
+    getMySubscriptions,
     listComments,
     createComment,
     deleteComment

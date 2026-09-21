@@ -404,5 +404,9 @@
   "comments.loginToComment": "Inicia sesión para dejar un comentario.",
   "comments.empty": "Todavía no hay comentarios. ¡Sé la primera persona en comentar!",
   "comments.delete": "Eliminar comentario",
-  "comments.undoDelete": "Pulsa de nuevo para deshacer"
+  "comments.undoDelete": "Pulsa de nuevo para deshacer",
+  "subscribe.follow": "Seguir proyecto",
+  "subscribe.following": "Siguiendo",
+  "notifications.projectNewContent.title": "Nuevo contenido en un proyecto que sigues",
+  "notifications.projectUpdated.title": "Un proyecto que sigues se ha actualizado"
 }

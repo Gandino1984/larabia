@@ -15,6 +15,7 @@ export const EngagementProvider = ({ children }) => {
   const { showError } = useUI();
   const [likedIds, setLikedIds] = useState([]);
   const [favoritedIds, setFavoritedIds] = useState([]);
+  const [subscribedProjectIds, setSubscribedProjectIds] = useState([]);
 
   const authHeader = useCallback(
     () => ({ headers: { 'x-user-id': currentUser?.id_user } }),
@@ -26,13 +27,20 @@ export const EngagementProvider = ({ children }) => {
     if (!currentUser?.id_user) {
       setLikedIds([]);
       setFavoritedIds([]);
+      setSubscribedProjectIds([]);
       return;
     }
     try {
-      const res = await axiosInstance.get('/engagement/my', authHeader());
-      if (!res.data.error && res.data.data) {
-        setLikedIds(res.data.data.likedIds || []);
-        setFavoritedIds(res.data.data.favoritedIds || []);
+      const [my, subs] = await Promise.all([
+        axiosInstance.get('/engagement/my', authHeader()),
+        axiosInstance.get('/engagement/my-subscriptions', authHeader())
+      ]);
+      if (!my.data.error && my.data.data) {
+        setLikedIds(my.data.data.likedIds || []);
+        setFavoritedIds(my.data.data.favoritedIds || []);
+      }
+      if (!subs.data.error && subs.data.data) {
+        setSubscribedProjectIds(subs.data.data.projectIds || []);
       }
     } catch (err) {
       // Non-fatal — the icons just stay empty.
@@ -46,6 +54,28 @@ export const EngagementProvider = ({ children }) => {
 
   const isLiked = useCallback((id) => likedIds.includes(id), [likedIds]);
   const isFavorited = useCallback((id) => favoritedIds.includes(id), [favoritedIds]);
+  const isSubscribed = useCallback((id) => subscribedProjectIds.includes(id), [subscribedProjectIds]);
+
+  const toggleSubscribe = useCallback(async (id_project) => {
+    if (!currentUser?.id_user) {
+      showError('Inicia sesión para seguir este proyecto');
+      return;
+    }
+    setSubscribedProjectIds(prev => prev.includes(id_project) ? prev.filter(x => x !== id_project) : [...prev, id_project]);
+    try {
+      const res = await axiosInstance.post(`/engagement/subscribe/${id_project}`, {}, authHeader());
+      if (res.data.error) throw new Error(res.data.error);
+      setSubscribedProjectIds(prev => {
+        const has = prev.includes(id_project);
+        if (res.data.data.subscribed && !has) return [...prev, id_project];
+        if (!res.data.data.subscribed && has) return prev.filter(x => x !== id_project);
+        return prev;
+      });
+    } catch (err) {
+      setSubscribedProjectIds(prev => prev.includes(id_project) ? prev.filter(x => x !== id_project) : [...prev, id_project]);
+      showError('No se pudo actualizar la suscripción');
+    }
+  }, [currentUser, authHeader, showError]);
 
   const toggleLike = useCallback(async (id_article) => {
     if (!currentUser?.id_user) {
@@ -125,9 +155,9 @@ export const EngagementProvider = ({ children }) => {
   }, [authHeader]);
 
   const value = {
-    likedIds, favoritedIds,
-    isLiked, isFavorited,
-    toggleLike, toggleFavorite,
+    likedIds, favoritedIds, subscribedProjectIds,
+    isLiked, isFavorited, isSubscribed,
+    toggleLike, toggleFavorite, toggleSubscribe,
     fetchComments, createComment, deleteComment,
     refreshMyEngagement: fetchMyEngagement,
   };

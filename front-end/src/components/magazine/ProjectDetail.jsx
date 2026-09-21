@@ -1,9 +1,11 @@
 // magazine-front/src/components/magazine/ProjectDetail.jsx
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, User } from 'lucide-react';
+import { ArrowLeft, User, Bell } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
+import { useAuth } from '../../app_context/AuthContext';
+import { useEngagement } from '../../app_context/EngagementContext';
 import axiosInstance from '../../utils/axiosConfig';
 import ArticleCard from './ArticleCard';
 import './ProjectDetail.css';
@@ -12,6 +14,8 @@ function ProjectDetail() {
   const { t } = useTranslation();
   const { navigateBackFromProject } = useUI();
   const { selectedProject } = useMagazine();
+  const { currentUser } = useAuth();
+  const { isSubscribed, toggleSubscribe } = useEngagement();
   const [projectArticles, setProjectArticles] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -93,6 +97,22 @@ function ProjectDetail() {
             </div>
           )}
           <h1 className="project-detail-title">{selectedProject.title_project}</h1>
+
+          {currentUser && (() => {
+            const subscribed = isSubscribed(selectedProject.id_project);
+            return (
+              <button
+                type="button"
+                className={`project-subscribe-btn ${subscribed ? 'project-subscribe-btn--active' : ''}`}
+                onClick={() => toggleSubscribe(selectedProject.id_project)}
+                title={subscribed ? t('subscribe.following') : t('subscribe.follow')}
+              >
+                <Bell size={18} fill={subscribed ? 'currentColor' : 'none'} />
+                <span>{subscribed ? t('subscribe.following') : t('subscribe.follow')}</span>
+              </button>
+            );
+          })()}
+
           {selectedProject.description_project && (
             <p className="project-detail-description">{selectedProject.description_project}</p>
           )}

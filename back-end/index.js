@@ -26,6 +26,7 @@ import './models/workshop_reservation_model.js';
 import articleLikeModel from './models/article_like_model.js';
 import articleFavoriteModel from './models/article_favorite_model.js';
 import articleCommentModel from './models/article_comment_model.js';
+import projectSubscriptionModel from './models/project_subscription_model.js';
 
 dotenv.config();
 
@@ -54,9 +55,10 @@ app.use("/", router);
 Promise.all([
     articleLikeModel.sync(),
     articleFavoriteModel.sync(),
-    articleCommentModel.sync()
+    articleCommentModel.sync(),
+    projectSubscriptionModel.sync()
 ])
-    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments)'))
+    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions)'))
     .catch((err) => console.error('Error syncing engagement tables:', err.message));
 
 app.listen(INTERNAL_PORT, '0.0.0.0', () => {
