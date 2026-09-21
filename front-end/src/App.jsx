@@ -9,6 +9,7 @@ import { usePreloader } from './hooks/usePreloader';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import FloatingEditorButton from './components/layout/FloatingEditorButton';
+import AnimatedView from './components/layout/AnimatedView';
 import HomePage from './components/magazine/HomePage';
 import ArticleDetail from './components/magazine/ArticleDetail';
 import ArticlesList from './components/magazine/ArticlesList';
@@ -102,6 +103,28 @@ function App() {
     return <HomePage />;
   };
 
+  // A key that changes whenever the active top-level view changes, so the page
+  // entrance animation replays on every navigation.
+  const viewKey = (
+    (showForgotPassword && 'forgot') ||
+    (showLogin && 'login') ||
+    (showEditor && 'editor') ||
+    (showAuthorEditor && 'authorEditor') ||
+    (showAuthorPublications && 'authorPublications') ||
+    (showAuthorProfile && 'authorProfile') ||
+    (showAuthors && 'authors') ||
+    (showAdmin && 'admin') ||
+    (showProjectDetail && 'projectDetail') ||
+    (showOpenMic && 'openmic') ||
+    (showMicroPerfiles && 'microperfiles') ||
+    (showWorkshopDetail && 'workshopDetail') ||
+    (showTalleres && 'talleres') ||
+    (showArticleDetail && 'articleDetail') ||
+    (showArticlesList && 'articlesList') ||
+    (showHome && 'home') ||
+    'home'
+  );
+
   const appClassName = `app ${showContent ? 'content-visible' : ''} ${showEditor || showAuthorEditor ? 'editor-active' : ''} ${isPreview && showArticleDetail ? 'preview-active' : ''}`;
   console.log('App render - showContent:', showContent, 'className:', appClassName);
 
@@ -141,7 +164,9 @@ function App() {
         {!isPreview && <FloatingEditorButton />}
         {!isPreview && <CardDisplay />}
         <main className="main-content">
-          {renderMainContent()}
+          <AnimatedView key={viewKey}>
+            {renderMainContent()}
+          </AnimatedView>
         </main>
         {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Footer />}
       </div>
