@@ -7,7 +7,9 @@
   position: fixed;
   top: calc(0.5rem + var(--header-h) + 0.5rem);
   right: 0.75rem;
-  z-index: 1001;
+  /* Below the header (1000) so the burger menu and notifications dropdown open
+     over this button, not behind it. */
+  z-index: 999;
   display: flex;
   align-items: center;
   justify-content: center;
