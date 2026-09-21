@@ -70,7 +70,7 @@
 }
 
 .article-share-btn:hover {
-  background: var(--color-accent, #667eea);
+  background: #000000;
   color: white;
   transform: scale(1.05);
 }
@@ -362,7 +362,7 @@
 }
 
 .engagement-btn:hover {
-  background: var(--color-accent, #667eea);
+  background: #000000;
   color: #ffffff;
   transform: scale(1.05);
 }
@@ -372,7 +372,7 @@
 }
 
 .engagement-btn--active {
-  background: var(--color-accent, #667eea);
+  background: #000000;
   color: #ffffff;
 }
 
@@ -392,7 +392,8 @@
   align-items: center;
   gap: 0.4rem;
   align-self: flex-end;
-  margin-bottom: 0.6rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
   color: var(--color-text-muted, #999);
   font-size: 0.8rem;
 }

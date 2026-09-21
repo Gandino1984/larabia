@@ -202,12 +202,12 @@
   transition: all 0.3s;
 }
 .project-subscribe-btn:hover {
-  background: var(--color-accent, #667eea);
+  background: #000000;
   color: white;
   transform: scale(1.05);
 }
 .project-subscribe-btn--active {
-  background: var(--color-accent, #667eea);
+  background: #000000;
   color: white;
 }
 

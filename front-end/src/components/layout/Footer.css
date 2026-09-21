@@ -95,12 +95,13 @@
   font-size: 0.85rem;
   font-family: 'Source Code Pro', monospace;
   cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .footer-contact-btn:hover {
-  border-color: var(--color-text, #ffffff);
-  color: var(--color-text, #ffffff);
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
 }
 
 .footer-bottom {

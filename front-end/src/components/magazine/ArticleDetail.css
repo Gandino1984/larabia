@@ -1158,7 +1158,7 @@
   transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 .article-detail-engagement .engagement-btn:hover {
-  background: var(--color-accent, #667eea);
+  background: #000000;
   color: #ffffff;
   transform: scale(1.05);
 }
@@ -1166,7 +1166,7 @@
   transform: scale(0.9);
 }
 .article-detail-engagement .engagement-btn--active {
-  background: var(--color-accent, #667eea);
+  background: #000000;
   color: #ffffff;
 }
 
