@@ -63,27 +63,30 @@ function Header({ ready = true }) {
   // Entrance animation for the header bar: a "rabid" shake (like the La Rabia
   // logo) while it fades in, then it settles to normal. Triggered when the app
   // becomes visible (after the loading screen), not on mount — otherwise it
-  // would play behind the loading overlay and never be seen.
-  const [entrance, entranceApi] = useSpring(() => ({ opacity: 0, x: 0, y: 0, r: 0 }));
+  // would play behind the loading overlay and never be seen. Two independent
+  // springs so the shake and the fade don't interrupt each other.
+  const [fade, fadeApi] = useSpring(() => ({ opacity: 0 }));
+  const [shake, shakeApi] = useSpring(() => ({ x: 0, y: 0, r: 0 }));
   const hasAnimatedRef = useRef(false);
   useEffect(() => {
     if (!ready || hasAnimatedRef.current) return;
     hasAnimatedRef.current = true;
-    entranceApi.start({ opacity: 1, config: { duration: 550 } });
-    entranceApi.start({
+    fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 700 } });
+    shakeApi.start({
       from: { x: 0, y: 0, r: 0 },
       to: [
-        { x: -10, y: -5, r: -4, config: { duration: 60 } },
-        { x: 10, y: 5, r: 4, config: { duration: 60 } },
-        { x: -10, y: 4, r: -4, config: { duration: 60 } },
-        { x: 10, y: -4, r: 4, config: { duration: 60 } },
-        { x: -7, y: -3, r: -3, config: { duration: 60 } },
-        { x: 7, y: 3, r: 3, config: { duration: 60 } },
-        { x: -3, y: -1, r: -1, config: { duration: 60 } },
-        { x: 0, y: 0, r: 0, config: { tension: 200, friction: 14 } },
+        { x: -12, y: -6, r: -5, config: { duration: 70 } },
+        { x: 12, y: 6, r: 5, config: { duration: 70 } },
+        { x: -12, y: 5, r: -5, config: { duration: 70 } },
+        { x: 12, y: -5, r: 5, config: { duration: 70 } },
+        { x: -9, y: -4, r: -4, config: { duration: 70 } },
+        { x: 9, y: 4, r: 4, config: { duration: 70 } },
+        { x: -5, y: -2, r: -2, config: { duration: 70 } },
+        { x: 5, y: 2, r: 2, config: { duration: 70 } },
+        { x: 0, y: 0, r: 0, config: { tension: 200, friction: 12 } },
       ],
     });
-  }, [ready, entranceApi]);
+  }, [ready, fadeApi, shakeApi]);
   const [showUserCard, setShowUserCard] = useState(false);
   const [isHeaderActive, setIsHeaderActive] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -412,8 +415,8 @@ function Header({ ready = true }) {
         onMouseLeave={() => setIsHeaderActive(false)}
         onClick={() => setIsHeaderActive(true)}
         style={{
-          opacity: entrance.opacity,
-          transform: to([entrance.x, entrance.y, entrance.r], (x, y, r) =>
+          opacity: fade.opacity,
+          transform: to([shake.x, shake.y, shake.r], (x, y, r) =>
             Math.abs(x) < 0.1 && Math.abs(y) < 0.1 && Math.abs(r) < 0.1
               ? 'none'
               : `translate3d(${x}px, ${y}px, 0) rotate(${r}deg)`
