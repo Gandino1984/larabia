@@ -401,7 +401,10 @@
 
 /* Mobile: everything vertical; hide the toggle, carousel collapses to a column */
 @media (max-width: 768px) {
-  .articles-view-toggle { display: none; }
+  /* !important because the shared .articles-view-toggle base rule is also
+     declared (unconditionally) in ProjectDetail.css; depending on bundle order
+     that copy can win and re-show the toggle here on phones. */
+  .articles-view-toggle { display: none !important; }
   .articles-carousel-wrap { padding: 0; }
   .articles-carousel {
     flex-direction: column;
@@ -436,7 +439,7 @@
   height: 76px;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.3);
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;

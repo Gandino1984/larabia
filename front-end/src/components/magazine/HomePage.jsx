@@ -1,5 +1,5 @@
 // magazine-front/src/components/magazine/HomePage.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
@@ -33,6 +33,10 @@ function HomePage() {
   const { navigateToArticle } = useUI();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [brokenImages, setBrokenImages] = useState({});
+  // Touch swipe support for the hero (it advances by state, not native scroll,
+  // so it needs explicit touch handling to pan sideways with a finger).
+  const touchStartX = useRef(null);
+  const touchDeltaX = useRef(0);
 
   // Auto-advance slides every 8 seconds
   useEffect(() => {
@@ -59,6 +63,24 @@ function HomePage() {
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
+  };
+
+  // Swipe to change slides on touch devices.
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  };
+  const handleTouchMove = (e) => {
+    if (touchStartX.current == null) return;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+  const handleTouchEnd = () => {
+    const dx = touchDeltaX.current;
+    touchStartX.current = null;
+    touchDeltaX.current = 0;
+    if (Math.abs(dx) < 40) return; // ignore taps / tiny drags
+    if (dx < 0) nextSlide();
+    else prevSlide();
   };
 
   const handleArticleClick = async (article) => {
@@ -105,11 +127,16 @@ function HomePage() {
       {/* Hero Section with Featured Articles Slider */}
       <section className="hero-section">
         {currentArticle ? (
-          <div className="hero-slider">
+          <div
+            className="hero-slider"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <div
               className="hero-slide"
               style={{
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.82)), url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})`
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.88)), url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})`
               }}
               onClick={() => handleArticleClick(currentArticle)}
             >

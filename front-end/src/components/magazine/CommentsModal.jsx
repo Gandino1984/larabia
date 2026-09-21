@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { useSpring, animated, to } from '@react-spring/web';
 import { X, Trash2, Send, User } from 'lucide-react';
 import { useAuth } from '../../app_context/AuthContext';
 import { useEngagement } from '../../app_context/EngagementContext';
@@ -105,9 +106,30 @@ function CommentsModal({ articleId, articleTitle, onClose }) {
     } catch { return ''; }
   };
 
+  // Cinematic entrance: the backdrop fades in while the panel scales up and
+  // rises slightly into place.
+  const backdrop = useSpring({
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+    config: { tension: 210, friction: 26 },
+  });
+  const panel = useSpring({
+    from: { opacity: 0, y: 24, scale: 0.96 },
+    to: { opacity: 1, y: 0, scale: 1 },
+    config: { tension: 240, friction: 24 },
+  });
+
   return createPortal(
-    <div className="comments-modal-backdrop" onClick={onClose}>
-      <div className="comments-modal" onClick={(e) => e.stopPropagation()}>
+    <animated.div className="comments-modal-backdrop" style={backdrop} onClick={onClose}>
+      <animated.div
+        className="comments-modal"
+        style={{
+          opacity: panel.opacity,
+          transform: to([panel.y, panel.scale], (y, s) => `translate3d(0, ${y}px, 0) scale(${s})`),
+          willChange: 'opacity, transform',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="comments-modal-header">
           <h3>{t('comments.title')}</h3>
           <button className="comments-modal-close" onClick={onClose} aria-label={t('common.buttons.close')}>
@@ -168,8 +190,8 @@ function CommentsModal({ articleId, articleTitle, onClose }) {
             })
           )}
         </div>
-      </div>
-    </div>,
+      </animated.div>
+    </animated.div>,
     document.body
   );
 }
