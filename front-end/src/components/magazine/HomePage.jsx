@@ -242,9 +242,6 @@ function HomePage({ ready = true }) {
                 )}
                 <div className="hero-meta">
                   {(currentArticle.authors?.length > 0 || currentArticle.author_name) && (
-                    <span className="hero-meta-divider" aria-hidden="true"></span>
-                  )}
-                  {(currentArticle.authors?.length > 0 || currentArticle.author_name) && (
                     <span className="meta-item hero-authors">
                       {currentArticle.authors?.length > 0
                         ? currentArticle.authors.map((author) => (
