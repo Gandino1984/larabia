@@ -20,9 +20,9 @@
 }
 
 .language-selector-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: black;
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
 }
 
 /* Make text black when header is active (hovered) */
@@ -32,8 +32,9 @@
 }
 
 .header-bar.active .language-selector-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.3);
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
 }
 
 .current-lang-label {
