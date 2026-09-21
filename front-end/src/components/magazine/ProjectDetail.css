@@ -210,3 +210,16 @@
   background: var(--color-accent, #667eea);
   color: white;
 }
+
+/* Row holding the collaborators (left) and the follow button (right) */
+.project-detail-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+.project-detail-meta-row .project-subscribe-btn {
+  margin: 0 0 0 auto;
+}

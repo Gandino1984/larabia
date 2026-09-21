@@ -102,49 +102,52 @@ function ProjectDetail() {
             <p className="project-detail-description">{selectedProject.description_project}</p>
           )}
 
-          {currentUser && (() => {
-            const subscribed = isSubscribed(selectedProject.id_project);
-            return (
-              <button
-                type="button"
-                className={`project-subscribe-btn ${subscribed ? 'project-subscribe-btn--active' : ''}`}
-                onClick={() => toggleSubscribe(selectedProject.id_project)}
-                title={subscribed ? t('subscribe.following') : t('subscribe.follow')}
-              >
-                <Bell size={18} fill={subscribed ? 'currentColor' : 'none'} />
-                <span>{subscribed ? t('subscribe.following') : t('subscribe.follow')}</span>
-              </button>
-            );
-          })()}
-          {(selectedProject.authors?.length > 0 || selectedProject.author_name) && (
-            <div className="project-detail-collaborators">
-              <span className="project-detail-collaborators-label">{t('project.collaborators')}</span>
-              <div className="project-detail-authors-list">
-                {selectedProject.authors && selectedProject.authors.length > 0 ? (
-                  selectedProject.authors.map(author => (
-                    <span key={author.id_user} className="project-detail-author-item">
-                      {getAuthorImageUrl(author) ? (
-                        <img
-                          src={getAuthorImageUrl(author)}
-                          alt={author.name_user}
-                          className="project-author-avatar"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                      ) : (
-                        <User size={14} className="project-author-icon" />
-                      )}
-                      <span>{author.name_user}</span>
+          <div className="project-detail-meta-row">
+            {(selectedProject.authors?.length > 0 || selectedProject.author_name) && (
+              <div className="project-detail-collaborators">
+                <span className="project-detail-collaborators-label">{t('project.collaborators')}</span>
+                <div className="project-detail-authors-list">
+                  {selectedProject.authors && selectedProject.authors.length > 0 ? (
+                    selectedProject.authors.map(author => (
+                      <span key={author.id_user} className="project-detail-author-item">
+                        {getAuthorImageUrl(author) ? (
+                          <img
+                            src={getAuthorImageUrl(author)}
+                            alt={author.name_user}
+                            className="project-author-avatar"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        ) : (
+                          <User size={14} className="project-author-icon" />
+                        )}
+                        <span>{author.name_user}</span>
+                      </span>
+                    ))
+                  ) : (
+                    <span className="project-detail-author-item">
+                      <User size={14} className="project-author-icon" />
+                      <span>{selectedProject.author_name}</span>
                     </span>
-                  ))
-                ) : (
-                  <span className="project-detail-author-item">
-                    <User size={14} className="project-author-icon" />
-                    <span>{selectedProject.author_name}</span>
-                  </span>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {currentUser && (() => {
+              const subscribed = isSubscribed(selectedProject.id_project);
+              return (
+                <button
+                  type="button"
+                  className={`project-subscribe-btn ${subscribed ? 'project-subscribe-btn--active' : ''}`}
+                  onClick={() => toggleSubscribe(selectedProject.id_project)}
+                  title={subscribed ? t('subscribe.following') : t('subscribe.follow')}
+                >
+                  <Bell size={18} fill={subscribed ? 'currentColor' : 'none'} />
+                  <span>{subscribed ? t('subscribe.following') : t('subscribe.follow')}</span>
+                </button>
+              );
+            })()}
+          </div>
         </div>
       </div>
 
