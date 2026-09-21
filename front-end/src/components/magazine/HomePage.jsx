@@ -231,17 +231,17 @@ function HomePage({ ready = true }) {
                   )}
                   <h1 className="hero-title">{currentArticle.title_article}</h1>
                 </div>
+                {currentArticle.date_published && (
+                  <span className="hero-date">
+                    <Calendar size={18} />
+                    {formatDate(currentArticle.date_published)}
+                  </span>
+                )}
                 {currentArticle.excerpt_article && (
                   <p className="hero-excerpt">{currentArticle.excerpt_article}</p>
                 )}
                 <div className="hero-meta">
-                  {currentArticle.date_published && (
-                    <span className="meta-item">
-                      <Calendar size={18} />
-                      {formatDate(currentArticle.date_published)}
-                    </span>
-                  )}
-                  {currentArticle.date_published && (currentArticle.authors?.length > 0 || currentArticle.author_name) && (
+                  {(currentArticle.authors?.length > 0 || currentArticle.author_name) && (
                     <span className="hero-meta-divider" aria-hidden="true"></span>
                   )}
                   {(currentArticle.authors?.length > 0 || currentArticle.author_name) && (
