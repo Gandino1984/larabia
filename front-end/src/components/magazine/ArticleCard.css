@@ -332,7 +332,7 @@
   gap: 12px;
   padding: 8px 10px;
   margin-bottom: 9px;
-  background: var(--color-surface, #2a2a2a);
+  background: #000000;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
