@@ -72,6 +72,12 @@
   padding-bottom: 2rem;
 }
 
+/* The top copy of the pagination is mobile-only; on desktop only the bottom
+   one shows (the historical behaviour). */
+.pagination--top {
+  display: none;
+}
+
 .pagination-btn {
   background: #2a2a2a;
   color: #ccc;
@@ -405,6 +411,14 @@
     flex: none;
     width: 100%;
     max-width: none;
+  }
+  /* On phones the grid list scrolls vertically, so surface the pagination at
+     the top as well as the bottom. */
+  .pagination--top {
+    display: flex;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0;
   }
 }
 

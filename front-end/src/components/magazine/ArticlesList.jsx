@@ -231,6 +231,48 @@ function ArticlesList() {
     </article>
   );
 
+  // Pagination is rendered twice in grid view: once above and once below the
+  // grid. The top copy is mobile-only (see .pagination--top in the CSS) so that
+  // on phones — where the toggle is hidden and the list scrolls vertically —
+  // the page controls are reachable without scrolling to the very bottom.
+  const renderPagination = (extraClass = '') =>
+    totalPages > 1 ? (
+      <nav className={`pagination${extraClass ? ` ${extraClass}` : ''}`}>
+        <button
+          className="pagination-btn pagination-prev"
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage === 1}
+          aria-label="Página anterior"
+        >
+          <ChevronLeft size={18} />
+        </button>
+
+        {getPageNumbers(currentPage, totalPages).map((page, i) =>
+          page === '...' ? (
+            <span key={`ellipsis-${i}`} className="pagination-ellipsis">…</span>
+          ) : (
+            <button
+              key={page}
+              className={`pagination-btn pagination-page${currentPage === page ? ' active' : ''}`}
+              onClick={() => goToPage(page)}
+              aria-current={currentPage === page ? 'page' : undefined}
+            >
+              {page}
+            </button>
+          )
+        )}
+
+        <button
+          className="pagination-btn pagination-next"
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          aria-label="Página siguiente"
+        >
+          <ChevronRight size={18} />
+        </button>
+      </nav>
+    ) : null;
+
   if (loading) {
     return (
       <div className="articles-list-page">
@@ -303,46 +345,11 @@ function ArticlesList() {
             </div>
           ) : (
             <>
+              {renderPagination('pagination--top')}
               <div className="articles-grid">
                 {paginatedArticles.map(renderCard)}
               </div>
-
-              {totalPages > 1 && (
-                <nav className="pagination">
-                  <button
-                    className="pagination-btn pagination-prev"
-                    onClick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    aria-label="Página anterior"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-
-                  {getPageNumbers(currentPage, totalPages).map((page, i) =>
-                    page === '...' ? (
-                      <span key={`ellipsis-${i}`} className="pagination-ellipsis">…</span>
-                    ) : (
-                      <button
-                        key={page}
-                        className={`pagination-btn pagination-page${currentPage === page ? ' active' : ''}`}
-                        onClick={() => goToPage(page)}
-                        aria-current={currentPage === page ? 'page' : undefined}
-                      >
-                        {page}
-                      </button>
-                    )
-                  )}
-
-                  <button
-                    className="pagination-btn pagination-next"
-                    onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    aria-label="Página siguiente"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </nav>
-              )}
+              {renderPagination('pagination--bottom')}
             </>
           )}
         </>
