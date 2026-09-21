@@ -1140,7 +1140,7 @@
 .article-detail-engagement {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
   margin-left: auto;
 }
 

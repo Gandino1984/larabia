@@ -328,17 +328,10 @@
 .article-engagement-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
   padding: 8px 10px;
   background: var(--color-surface, #2a2a2a);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* When an admin delete button overlaps the top-right corner, reserve room so the
-   view counter doesn't end up hidden behind it. */
-.article-card:has(.article-action-buttons) .article-engagement-bar,
-.article-card:has(.list-delete-btn) .article-engagement-bar {
-  padding-right: 2.9rem;
 }
 
 .engagement-btn {
@@ -370,13 +363,11 @@
   color: #ffffff;
 }
 
-/* View counter inside the engagement bar */
+/* View counter inside the engagement bar, grouped right after the buttons */
 .engagement-views {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-left: auto;
-  padding-right: 4px;
   color: #cfcfcf;
   font-size: 0.82rem;
   font-weight: 600;
