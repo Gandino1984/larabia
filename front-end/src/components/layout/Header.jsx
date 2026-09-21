@@ -48,7 +48,7 @@ function AuthorResultAvatar({ profile }) {
   );
 }
 
-function Header() {
+function Header({ ready = true }) {
   const { t } = useTranslation();
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { totalPending } = usePendingReview();
@@ -61,9 +61,14 @@ function Header() {
   const runNavAction = useNavActions();
 
   // Entrance animation for the header bar: a "rabid" shake (like the La Rabia
-  // logo) while it fades in, then it settles to normal.
+  // logo) while it fades in, then it settles to normal. Triggered when the app
+  // becomes visible (after the loading screen), not on mount — otherwise it
+  // would play behind the loading overlay and never be seen.
   const [entrance, entranceApi] = useSpring(() => ({ opacity: 0, x: 0, y: 0, r: 0 }));
+  const hasAnimatedRef = useRef(false);
   useEffect(() => {
+    if (!ready || hasAnimatedRef.current) return;
+    hasAnimatedRef.current = true;
     entranceApi.start({ opacity: 1, config: { duration: 550 } });
     entranceApi.start({
       from: { x: 0, y: 0, r: 0 },
@@ -78,7 +83,7 @@ function Header() {
         { x: 0, y: 0, r: 0, config: { tension: 200, friction: 14 } },
       ],
     });
-  }, [entranceApi]);
+  }, [ready, entranceApi]);
   const [showUserCard, setShowUserCard] = useState(false);
   const [isHeaderActive, setIsHeaderActive] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
