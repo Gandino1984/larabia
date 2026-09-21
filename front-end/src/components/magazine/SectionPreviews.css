@@ -195,6 +195,7 @@
 
 .section-preview__cta {
   display: flex;
+  justify-content: flex-end;
 }
 
 .section-preview__readmore {
