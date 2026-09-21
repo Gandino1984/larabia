@@ -215,8 +215,8 @@
   overflow: hidden;
   /* Narrower measure on mobile so the carousel arrows don't sit on the text;
      centered here, left-aligned on desktop (see the 768px block). */
-  text-align: left;
-  max-width: 330px;
+  text-align: center;
+  max-width: 300px;
 }
 
 .hero-meta {
@@ -484,6 +484,7 @@
     margin-bottom: 1.75rem;
     max-width: 720px;
     /* Left-aligned on desktop (mobile centers it). */
+    text-align: left;
     margin-left: 0;
     margin-right: auto;
   }
