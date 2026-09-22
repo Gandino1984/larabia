@@ -357,10 +357,10 @@ function HomePage({ ready = true }) {
                       type="button"
                       className="hero-share-btn"
                       onClick={(e) => handleShare(e, currentArticle)}
-                      aria-label={t('hero.share', 'Compartir')}
                       title={t('hero.share', 'Compartir')}
                     >
                       <Share2 size={18} />
+                      {t('hero.share', 'Compartir')}
                     </button>
                     <button
                       type="button"

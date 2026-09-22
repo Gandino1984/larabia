@@ -342,17 +342,19 @@
   background: #000000;
   color: #ffffff;
 }
-/* Share button — icon-only, same look as Entrar, to its left. */
+/* Share button — same look as Entrar (icon + text), to its left. */
 .hero-share-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
+  gap: 4px;
+  padding: 0.5rem 1.1rem;
   border: none;
   border-radius: 8px;
   background: lightgray;
   color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 }
