@@ -292,6 +292,13 @@
   justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
+  /* Keep the authors + "Entrar" button within the same width as the project
+     excerpt so they don't overflow its margins. */
+  width: 100%;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
 }
 
 .hero-meta .meta-item {
@@ -811,5 +818,24 @@
 
   .hero-logo {
     width: 150px;
+  }
+}
+
+/* Keep the hero meta row (authors + "Entrar") within the project excerpt's
+   width at each breakpoint. */
+@media (min-width: 768px)  { .hero-meta { max-width: 720px; } }
+@media (min-width: 1024px) { .hero-meta { max-width: 820px; } }
+@media (min-width: 1200px) { .hero-meta { max-width: 920px; } }
+
+/* Mobile: stack the authors and the "Entrar" button, centered, so nothing
+   overflows the narrow excerpt width. */
+@media (max-width: 767px) {
+  .hero-meta {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .hero-enter-btn {
+    margin-left: 0;
   }
 }
