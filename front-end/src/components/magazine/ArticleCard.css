@@ -107,13 +107,14 @@
 .article-category {
   font-family: 'Source Code Pro', monospace;
   position: absolute;
-  bottom: 0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(220, 220, 220, 0.6);
+  top: 1rem;
+  left: 1rem;
+  background: rgba(220, 220, 220, 0.85);
   color: #1a1a1a;
-  padding: 0.25rem 0.65rem;
-  border-radius: 4px;
+  padding: 0.3rem 0.7rem;
+  /* Fully rounded (pill) ends so they don't read like buttons — matches the
+     type badges on the articles list. */
+  border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 600;
   white-space: nowrap;
@@ -191,7 +192,6 @@
   }
 
   .article-category {
-    bottom: 1rem;
     padding: 0.3rem 0.75rem;
     font-size: 0.72rem;
   }
