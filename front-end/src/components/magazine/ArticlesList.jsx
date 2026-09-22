@@ -325,7 +325,6 @@ function ArticlesList() {
           </div>
         </div>
         <div className="articles-list-subheader">
-          <p className="articles-count">{filteredArticles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: filteredArticles.length })}</p>
           <div className="articles-search">
             <div className="search-input-wrapper">
               <Search size={16} className="search-icon" />
@@ -343,6 +342,7 @@ function ArticlesList() {
               )}
             </div>
           </div>
+          <p className="articles-count">{filteredArticles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: filteredArticles.length })}</p>
         </div>
       </div>
 
