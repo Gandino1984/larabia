@@ -1,5 +1,5 @@
 // magazine-front/src/components/magazine/HomePage.jsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useSpring, animated } from '@react-spring/web';
@@ -64,6 +64,15 @@ function HomePage({ ready = true }) {
   // scroll message over a darkened, blurred backdrop. Auto-hides and is
   // dismissed by any scroll intent. Once per session.
   const [scrollOverlay, setScrollOverlay] = useState(false);
+  const [overlayClosing, setOverlayClosing] = useState(false);
+  // Play the reverse (fade + slide down) exit, then unmount.
+  const hideOverlay = useCallback(() => {
+    setOverlayClosing(true);
+    setTimeout(() => {
+      setScrollOverlay(false);
+      setOverlayClosing(false);
+    }, 320);
+  }, []);
   useEffect(() => {
     if (!heroIn || scrollOverlayShown) return;
     let hideT;
@@ -71,9 +80,9 @@ function HomePage({ ready = true }) {
       scrollOverlayShown = true;
       setScrollOverlay(true);
       const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-      hideT = setTimeout(() => setScrollOverlay(false), isDesktop ? 4000 : 4500);
+      hideT = setTimeout(hideOverlay, isDesktop ? 4000 : 4500);
     }, 1500);
-    const dismiss = () => setScrollOverlay(false);
+    const dismiss = () => { clearTimeout(hideT); hideOverlay(); };
     window.addEventListener('wheel', dismiss, { passive: true });
     window.addEventListener('touchmove', dismiss, { passive: true });
     window.addEventListener('scroll', dismiss, { passive: true });
@@ -305,7 +314,7 @@ function HomePage({ ready = true }) {
       {/* Scroll-hint overlay: centered message over a darkened, blurred backdrop,
           shown once after the entrance sequence. */}
       {scrollOverlay && createPortal(
-        <div className="scroll-hint-overlay" onClick={() => setScrollOverlay(false)}>
+        <div className={`scroll-hint-overlay ${overlayClosing ? 'is-closing' : ''}`} onClick={hideOverlay}>
           <ScrollHint dual visible label={t('hero.scrollHintMobile')} labelDesktop={t('hero.scrollHintDesktop')} />
         </div>,
         document.body

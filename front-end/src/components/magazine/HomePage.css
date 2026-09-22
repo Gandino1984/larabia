@@ -35,25 +35,40 @@
   cursor: pointer;
   animation: scroll-overlay-fade 0.35s ease both;
 }
+/* Exit: reverse of the entrance. */
+.scroll-hint-overlay.is-closing {
+  animation: scroll-overlay-fade-out 0.32s ease both;
+}
 @keyframes scroll-overlay-fade {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-/* Each message fades/scales in when it (re)mounts on phase change. */
+@keyframes scroll-overlay-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+/* Message fades + slides up in; on close it fades + slides back down. */
 .scroll-hint-overlay .scroll-hint {
   animation: scroll-hint-pop 0.4s ease both;
-  max-width: min(80vw, 300px);
+  max-width: min(84vw, 340px);
+}
+.scroll-hint-overlay.is-closing .scroll-hint {
+  animation: scroll-hint-pop-out 0.32s ease both;
 }
 /* Overlay messages wrap onto (about two) centered lines rather than one wide row. */
 .scroll-hint-overlay .scroll-hint__label {
   white-space: normal;
   text-align: center;
   line-height: 1.35;
-  max-width: 260px;
+  max-width: 280px;
 }
 @keyframes scroll-hint-pop {
   from { opacity: 0; transform: translateY(28px); }
   to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scroll-hint-pop-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(28px); }
 }
 
 .hero-slide {
@@ -95,7 +110,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.64);
+  background: rgba(0, 0, 0, 0.59);
   pointer-events: none;
   z-index: 1;
 }
