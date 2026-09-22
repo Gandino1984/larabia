@@ -177,6 +177,27 @@ function HomePage({ ready = true }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [featuredArticles]);
 
+  // Left/right arrow keys move the hero slider (unless the user is typing).
+  useEffect(() => {
+    const count = featuredArticles?.length || 0;
+    if (count <= 1) return;
+    const handleKey = (e) => {
+      const tag = e.target?.tagName;
+      const typing = tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable;
+      if (typing) return;
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        fadeTo((prev) => (prev + 1) % count);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        fadeTo((prev) => (prev - 1 + count) % count);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [featuredArticles]);
+
   // Swipe to change slides on touch devices — the slide follows the finger.
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
