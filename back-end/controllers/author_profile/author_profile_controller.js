@@ -19,7 +19,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user']
+                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
                 }],
                 order: [
                     ['featured_profile', 'DESC'],
@@ -50,7 +50,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user']
+                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
                 }],
                 order: [
                     ['featured_profile', 'DESC'],
@@ -86,7 +86,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user']
+                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
                 }],
                 order: [['created_at', 'DESC']]
             });
@@ -115,7 +115,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user']
+                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
                 }]
             });
 
@@ -149,7 +149,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor']
+                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
                 }]
             });
 
@@ -224,7 +224,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user']
+                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
                 }]
             });
 
@@ -273,7 +273,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user']
+                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
                 }]
             });
 
