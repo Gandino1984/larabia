@@ -1,33 +1,34 @@
 /* Mobile-First Header Styles */
 
 /* "Roll up" text hover for menu-bar buttons (added on top of the existing color
-   hover). The label slides up and an identical copy enters from below. */
+   hover). Two stacked copies; on hover the column slides up one line so the
+   first copy leaves and the identical copy enters from below. */
 .roll {
   display: inline-flex;
-  position: relative;
   overflow: hidden;
   vertical-align: top;
+  line-height: 1.2;
+  height: 1.2em;
 }
-.roll__label {
-  display: block;
-  transition: transform 0.55s cubic-bezier(0.19, 1, 0.22, 1);
+.roll__col {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   will-change: transform;
 }
-.roll__label::after {
-  content: attr(data-label);
-  position: absolute;
-  left: 0;
-  top: 100%;
+.roll__line {
+  display: block;
+  height: 1.2em;
   white-space: nowrap;
 }
-.nav-link:hover .roll__label,
-.more-dropdown-btn:hover .roll__label {
-  transform: translateY(-100%);
+.nav-link:hover .roll__col,
+.more-dropdown-btn:hover .roll__col {
+  transform: translateY(-50%);
 }
 @media (prefers-reduced-motion: reduce) {
-  .roll__label { transition: none; }
-  .nav-link:hover .roll__label,
-  .more-dropdown-btn:hover .roll__label { transform: none; }
+  .roll__col { transition: none; }
+  .nav-link:hover .roll__col,
+  .more-dropdown-btn:hover .roll__col { transform: none; }
 }
 
 /* Floating Header Container - Mobile Base */
