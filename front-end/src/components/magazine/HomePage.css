@@ -217,10 +217,24 @@
 .hero-title {
   font-family: 'Alfa Slab One', serif;
   font-size: 1.875rem;
-  color: white;
   margin: 0 0 1rem;
   line-height: 1.2;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  /* Slow shimmer between white and a slightly darker tone. */
+  background: linear-gradient(100deg, #ffffff 0%, #ffffff 35%, #b9b9b9 50%, #ffffff 65%, #ffffff 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: hero-title-shimmer 7s ease-in-out infinite;
+  filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.5));
+}
+@keyframes hero-title-shimmer {
+  0%, 100% { background-position: 100% 50%; }
+  50% { background-position: 0% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-title { animation: none; }
 }
 
 .hero-excerpt {

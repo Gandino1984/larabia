@@ -55,18 +55,25 @@ function HomePage({ ready = true }) {
   const [parallaxY, setParallaxY] = useState(0);
   useEffect(() => {
     let raf = 0;
+    const readScroll = () =>
+      (document.scrollingElement && document.scrollingElement.scrollTop) ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop ||
+      window.scrollY ||
+      0;
     const onScroll = () => {
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
-        setParallaxY(
-          window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0
-        );
+        setParallaxY(readScroll());
       });
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
+    // The page scrolls on <body> here (overflow-x:hidden makes body the
+    // scroller), and that scroll event doesn't reach window — so listen broadly.
+    const targets = [window, document, document.body, document.documentElement];
+    targets.forEach((t) => t.addEventListener('scroll', onScroll, { passive: true }));
     return () => {
-      window.removeEventListener('scroll', onScroll);
+      targets.forEach((t) => t.removeEventListener('scroll', onScroll));
       if (raf) cancelAnimationFrame(raf);
     };
   }, []);
@@ -265,7 +272,7 @@ function HomePage({ ready = true }) {
                 className="hero-slide__bg"
                 style={{
                   backgroundImage: `url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})`,
-                  transform: `translate3d(0, ${parallaxY * 0.25}px, 0)`,
+                  transform: `translate3d(0, ${parallaxY * 0.4}px, 0)`,
                 }}
               />
               {/* Hidden img to detect broken cover images and fall back to logo */}
