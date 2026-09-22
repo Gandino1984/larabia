@@ -22,8 +22,13 @@
 
 /* Floating Header Bar - Mobile Base */
 .header-bar {
-  background: var(--color-header-bg, #000000);
-  border: 1px solid #555555;
+  /* Gradient border (existing gray -> slightly darker) kept rounded via the
+     double-background trick: solid bg on the padding box, gradient on the border box. */
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--color-header-bg, #000000), var(--color-header-bg, #000000)) padding-box,
+    linear-gradient(135deg, #5a5a5a, #333333) border-box;
+  background-clip: padding-box, border-box;
   border-radius: 14px;
   padding: 0.3rem 0.5rem;
   display: flex;
@@ -37,7 +42,10 @@
 
 /* Active state (on hover/click) */
 .header-bar.active {
-  background: var(--color-header-bg-active, #ffffff);
+  background:
+    linear-gradient(var(--color-header-bg-active, #ffffff), var(--color-header-bg-active, #ffffff)) padding-box,
+    linear-gradient(135deg, #5a5a5a, #333333) border-box;
+  background-clip: padding-box, border-box;
 }
 
 /* Back button inside the header bar (inner pages). Sized to sit compactly next

@@ -9,12 +9,17 @@
   color: #ffffff;
   pointer-events: none;
   user-select: none;
-  /* Dark translucent panel so the message reads over any background. */
+  /* Dark translucent panel so the message reads over any background.
+     Gradient border (existing gray -> slightly darker) via the double-background
+     trick so the rounded corners are kept. */
   justify-content: center;
   padding: 18px 26px;
   border-radius: 16px;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid #666666;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)) padding-box,
+    linear-gradient(135deg, #6a6a6a, #454545) border-box;
+  background-clip: padding-box, border-box;
   backdrop-filter: blur(2px);
   /* Fade + rise in/out, driven by the `is-visible` class. */
   opacity: 0;
