@@ -67,10 +67,16 @@ function Header({ ready = true }) {
   // springs so the shake and the fade don't interrupt each other.
   const [fade, fadeApi] = useSpring(() => ({ opacity: 0 }));
   const [shake, shakeApi] = useSpring(() => ({ x: 0, y: 0, r: 0 }));
+  // While true, the header border repeatedly "draws" and fades out in sync with
+  // the shake (CSS animation on .header-bar--entrance).
+  const [entrancePlaying, setEntrancePlaying] = useState(false);
   const hasAnimatedRef = useRef(false);
   useEffect(() => {
     if (!ready || hasAnimatedRef.current) return;
     hasAnimatedRef.current = true;
+    setEntrancePlaying(true);
+    // Stop the border flashing once the shake has settled.
+    const flashTimer = setTimeout(() => setEntrancePlaying(false), 2000);
     fadeApi.start({ from: { opacity: 0 }, to: { opacity: 1 }, config: { duration: 800 } });
     // Randomised, decaying shake — each jolt goes in a random direction so it
     // feels chaotic ("rabid"), like the logo, rather than a fixed back-and-forth.
@@ -92,6 +98,7 @@ function Header({ ready = true }) {
     }
     steps.push({ x: 0, y: 0, r: 0, config: { tension: 240, friction: 10 } });
     shakeApi.start({ from: { x: 0, y: 0, r: 0 }, to: steps });
+    return () => clearTimeout(flashTimer);
   }, [ready, fadeApi, shakeApi]);
   const [showUserCard, setShowUserCard] = useState(false);
   const [isHeaderActive, setIsHeaderActive] = useState(false);
@@ -416,7 +423,7 @@ function Header({ ready = true }) {
   return (
     <header className={`header ${showArticleDetail ? 'header-hidden' : ''}`}>
       <animated.div
-        className={`header-bar ${isHeaderActive ? 'active' : ''}`}
+        className={`header-bar ${isHeaderActive ? 'active' : ''} ${entrancePlaying ? 'header-bar--entrance' : ''}`}
         onMouseEnter={() => setIsHeaderActive(true)}
         onMouseLeave={() => setIsHeaderActive(false)}
         onClick={() => setIsHeaderActive(true)}

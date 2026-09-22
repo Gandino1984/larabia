@@ -24,6 +24,7 @@
 .header-bar {
   /* Gradient border (existing gray -> slightly darker) kept rounded via the
      double-background trick: solid bg on the padding box, gradient on the border box. */
+  position: relative;
   border: 1px solid transparent;
   background:
     linear-gradient(var(--color-header-bg, #000000), var(--color-header-bg, #000000)) padding-box,
@@ -31,6 +32,7 @@
   background-clip: padding-box, border-box;
   border-radius: 14px;
   padding: 0.3rem 0.5rem;
+  margin-top: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -38,6 +40,36 @@
   row-gap: 0.25rem;
   transition: all 0.3s ease;
   pointer-events: auto;
+}
+
+/* Entrance: a bright border that "draws" and quickly fades, pulsing in time
+   with the header shake, then stops. */
+.header-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#0000, #0000) padding-box,
+    linear-gradient(135deg, #ffffff, #b9b9b9) border-box;
+  background-clip: padding-box, border-box;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.header-bar--entrance::after {
+  animation: header-border-flash 0.3s ease-out 6;
+}
+
+@keyframes header-border-flash {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-bar--entrance::after { animation: none; }
 }
 
 /* Active state (on hover/click) */
