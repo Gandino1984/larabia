@@ -306,6 +306,28 @@
   align-self: center;
 }
 
+/* "Entrar" button — pushed to the right edge of the meta row, opens the story. */
+.hero-enter-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: lightgray;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.hero-enter-btn:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
 /* Vertical divider between the publication date and the authors. */
 .hero-meta-divider {
   width: 1px;

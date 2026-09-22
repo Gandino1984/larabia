@@ -342,6 +342,14 @@ function HomePage({ ready = true }) {
                   {currentArticle.category_article && currentArticle.category_article.toLowerCase() !== 'general' && (
                     <span className="hero-category">{currentArticle.category_article}</span>
                   )}
+                  <button
+                    type="button"
+                    className="hero-enter-btn"
+                    onClick={(e) => { e.stopPropagation(); handleArticleClick(currentArticle); }}
+                  >
+                    {t('hero.enter', 'Entrar')}
+                    <ChevronRight size={18} />
+                  </button>
                 </div>
               </div>
             </animated.div>
