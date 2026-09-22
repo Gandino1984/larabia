@@ -80,7 +80,7 @@ function HomePage({ ready = true }) {
       scrollOverlayShown = true;
       setScrollOverlay(true);
       const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-      hideT = setTimeout(hideOverlay, isDesktop ? 4000 : 4500);
+      hideT = setTimeout(hideOverlay, isDesktop ? 3500 : 4000);
     }, 1500);
     const dismiss = () => { clearTimeout(hideT); hideOverlay(); };
     window.addEventListener('wheel', dismiss, { passive: true });
@@ -106,33 +106,48 @@ function HomePage({ ready = true }) {
   const touchDeltaX = useRef(0);
   const didDrag = useRef(false);
   const [{ x }, springApi] = useSpring(() => ({ x: 0, config: { tension: 300, friction: 32 } }));
+  // Opacity spring for cross-fading between featured stories (arrows + auto).
+  const [{ op }, opApi] = useSpring(() => ({ op: 1 }));
+  const transitioning = useRef(false);
 
-  // Auto-advance slides every 8 seconds
+  const slideCount = featuredArticles?.length || 0;
+
+  // Raw change (used by the touch swipe, which has its own slide animation).
+  const advanceRaw = (dir) => {
+    if (slideCount > 0) setCurrentSlide((prev) => (prev + dir + slideCount) % slideCount);
+  };
+
+  // Quick fade-out of the current story, swap, quick fade-in of the next.
+  const fadeTo = (getIndex) => {
+    if (slideCount <= 1 || transitioning.current) return;
+    transitioning.current = true;
+    opApi.start({
+      op: 0,
+      config: { duration: 160 },
+      onRest: () => {
+        setCurrentSlide(getIndex);
+        opApi.start({
+          op: 1,
+          config: { duration: 220 },
+          onRest: () => { transitioning.current = false; },
+        });
+      },
+    });
+  };
+
+  const nextSlide = () => fadeTo((prev) => (prev + 1) % slideCount);
+  const prevSlide = () => fadeTo((prev) => (prev - 1 + slideCount) % slideCount);
+  const goToSlide = (index) => fadeTo(() => index);
+
+  // Auto-advance slides (with the same cross-fade).
   useEffect(() => {
     if (!featuredArticles || featuredArticles.length <= 1) return;
-
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % featuredArticles.length);
+      fadeTo((prev) => (prev + 1) % featuredArticles.length);
     }, 12000);
-
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [featuredArticles]);
-
-  const nextSlide = () => {
-    if (featuredArticles && featuredArticles.length > 0) {
-      setCurrentSlide((prev) => (prev + 1) % featuredArticles.length);
-    }
-  };
-
-  const prevSlide = () => {
-    if (featuredArticles && featuredArticles.length > 0) {
-      setCurrentSlide((prev) => (prev - 1 + featuredArticles.length) % featuredArticles.length);
-    }
-  };
-
-  const goToSlide = (index) => {
-    setCurrentSlide(index);
-  };
 
   // Swipe to change slides on touch devices — the slide follows the finger.
   const handleTouchStart = (e) => {
@@ -156,8 +171,9 @@ function HomePage({ ready = true }) {
     const multiple = featuredArticles && featuredArticles.length > 1;
     if (multiple && Math.abs(dx) > 50) {
       const dir = dx < 0 ? 1 : -1; // swipe left → next, right → prev
-      // The new slide enters from the side the finger came from.
-      if (dir === 1) nextSlide(); else prevSlide();
+      // The new slide enters from the side the finger came from (raw change, the
+      // x spring provides the slide animation here — no cross-fade on swipe).
+      advanceRaw(dir);
       springApi.set({ x: dir * width });
       springApi.start({ x: 0 });
     } else {
@@ -218,6 +234,7 @@ function HomePage({ ready = true }) {
             <animated.div
               className={`hero-slide ${heroBgIn ? 'bg-in' : ''}`}
               style={{
+                opacity: op,
                 transform: x.to((v) => `translate3d(${v}px, 0, 0)`),
               }}
               onClick={() => { if (didDrag.current) { didDrag.current = false; return; } handleArticleClick(currentArticle); }}

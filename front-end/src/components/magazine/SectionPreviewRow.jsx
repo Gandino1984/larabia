@@ -52,7 +52,7 @@ function PreviewCard({ item, onClick }) {
 function SectionPreviewRow({ title, items, onItemClick, enableSwipeHint = false }) {
   const { t } = useTranslation();
   const trackRef = useRef(null);
-  const showSwipeHint = useScrollHint(trackRef, enableSwipeHint && items.length > 1, { autoHide: 5500 });
+  const showSwipeHint = useScrollHint(trackRef, enableSwipeHint && items.length > 1, { autoHide: 5000 });
 
   const scrollByCards = (dir) => {
     const track = trackRef.current;
