@@ -475,6 +475,7 @@ function Header({ ready = true }) {
                 <User size={20} />
               </button>
             )}
+            {renderNotifBell('desktop')}
           </div>
         </div>
 
@@ -624,8 +625,6 @@ function Header({ ready = true }) {
               </button>
             );
           })}
-
-          {renderNotifBell('desktop')}
 
           {isSuperAdmin && (
             <button className="nav-link nav-link--admin" onClick={handleAdminClick} title="Administración">

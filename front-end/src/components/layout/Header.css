@@ -1586,7 +1586,8 @@
 .notif-dropdown {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
+  /* Bell sits on the left of the header, so open the dropdown to the right. */
+  left: 0;
   width: 300px;
   max-width: 90vw;
   background: #fff;
