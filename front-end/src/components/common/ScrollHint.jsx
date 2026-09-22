@@ -51,8 +51,13 @@ function ScrollHint({ direction = 'down', label, labelDesktop, visible = true, d
       {labelDesktop && (
         <span className="scroll-hint__label scroll-hint__label--desktop">{labelDesktop}</span>
       )}
-      <span className="scroll-hint__hand">
-        <Icons />
+      <span className="scroll-hint__dual-item">
+        <span className="scroll-hint__hand">
+          <Icons />
+        </span>
+        {direction === 'horizontal'
+          ? <ArrowLeftRight className="scroll-hint__dir" strokeWidth={2.5} />
+          : <ArrowUpDown className="scroll-hint__dir" strokeWidth={2.5} />}
       </span>
     </div>
   );
