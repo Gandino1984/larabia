@@ -265,7 +265,7 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   filter: blur(10px);
   pointer-events: none;
@@ -442,6 +442,15 @@
 }
 .hero-slider.hero-in .hero-nav.prev { animation: hero-arrow-in-left 0.5s ease both; animation-delay: 1s; }
 .hero-slider.hero-in .hero-nav.next { animation: hero-arrow-in-right 0.5s ease both; animation-delay: 1s; }
+
+/* Indicators: hidden until the slider entrance plays, then fade/rise in with
+   the arrows (they keep their translateX(-50%) centering). */
+.hero-slider.hero-anim .hero-indicators { opacity: 0; }
+@keyframes hero-indicators-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.hero-slider.hero-in .hero-indicators { animation: hero-indicators-in 0.5s ease both; animation-delay: 1s; }
 
 /* Slide Indicators - Mobile */
 .hero-indicators {
