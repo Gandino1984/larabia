@@ -13,7 +13,7 @@ import './ProjectDetail.css';
 
 function ProjectDetail() {
   const { t } = useTranslation();
-  const { navigateBackFromProject } = useUI();
+  const { navigateBackFromProject, openAuthorCard } = useUI();
   const { selectedProject } = useMagazine();
   const { currentUser } = useAuth();
   const { isSubscribed, toggleSubscribe } = useEngagement();
@@ -121,7 +121,13 @@ function ProjectDetail() {
                 <div className="project-detail-authors-list">
                   {selectedProject.authors && selectedProject.authors.length > 0 ? (
                     selectedProject.authors.map(author => (
-                      <span key={author.id_user} className="project-detail-author-item">
+                      <span
+                        key={author.id_user}
+                        className="project-detail-author-item project-detail-author-item--clickable"
+                        onClick={() => openAuthorCard(author)}
+                        role="button"
+                        tabIndex={0}
+                      >
                         {getAuthorImageUrl(author) ? (
                           <img
                             src={getAuthorImageUrl(author)}

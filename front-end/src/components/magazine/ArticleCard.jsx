@@ -42,7 +42,7 @@ function ArticleCard({ article }) {
   const { t } = useTranslation();
   const { setSelectedArticle, deleteArticle } = useMagazine();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
-  const { navigateToArticle, showSuccess, showError } = useUI();
+  const { navigateToArticle, showSuccess, showError, openAuthorCard } = useUI();
 
   const handleClick = () => {
     setSelectedArticle(article);
@@ -127,7 +127,13 @@ function ArticleCard({ article }) {
             <span className="meta-item meta-item--authors">
               {article.authors?.length > 0 ? (
                 article.authors.map(author => (
-                  <span key={author.id_user || author.name_user} className="card-author">
+                  <span
+                    key={author.id_user || author.name_user}
+                    className="card-author card-author--clickable"
+                    onClick={(e) => { e.stopPropagation(); openAuthorCard(author); }}
+                    role="button"
+                    tabIndex={0}
+                  >
                     <CardAuthorAvatar author={author} />
                     <span className="card-author-name">{author.name_user}</span>
                   </span>

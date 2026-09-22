@@ -29,11 +29,14 @@ import LoginPage from './components/layout/LoginPage';
 import ForgotPasswordPage from './components/layout/ForgotPasswordPage';
 import CardDisplay from './components/notifications/CardDisplay';
 import LoadingScreen from './components/layout/LoadingScreen';
+import UserInfoCard from './components/user/UserInfoCard';
+import { useAuthor } from './app_context/AuthorContext';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showAbout, showAdmin, isFullscreen, navigateToArticle } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showAbout, showAdmin, isFullscreen, navigateToArticle, authorCardUser, closeAuthorCard } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
+  const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { loading: authLoading } = useAuth();
   const { isLoading, progress } = usePreloader();
   const { t } = useTranslation();
@@ -143,6 +146,24 @@ function App() {
     window.location.href = '/';
   }, []);
 
+  // Author info card (opened by clicking an author anywhere). Make sure the
+  // profiles are loaded so we can show the author's bio and full details.
+  useEffect(() => {
+    if (authorCardUser && authorProfiles.length === 0) fetchAllProfiles();
+  }, [authorCardUser, authorProfiles.length, fetchAllProfiles]);
+
+  const authorCardProfile = authorCardUser
+    ? authorProfiles.find((p) => String(p.user_id) === String(authorCardUser.id_user))
+    : null;
+  const authorCardResolvedUser = authorCardProfile?.user
+    ? {
+        ...authorCardProfile.user,
+        name_user: authorCardUser.name_user || authorCardProfile.user.name_user,
+        image_user: authorCardProfile.user.image_user || authorCardUser.image_user,
+      }
+    : authorCardUser;
+  const authorCardBio = authorCardProfile?.bio_text;
+
   return (
     <>
       {isPreview && showArticleDetail && (
@@ -177,6 +198,15 @@ function App() {
         </main>
         {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Footer />}
       </div>
+
+      {authorCardUser && (
+        <UserInfoCard
+          user={authorCardResolvedUser}
+          bioText={authorCardBio}
+          onClose={closeAuthorCard}
+          isOwner={false}
+        />
+      )}
     </>
   );
 }

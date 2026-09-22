@@ -45,6 +45,11 @@ export const UIProvider = ({ children }) => {
   const openNewsletterModal = useCallback(() => setShowNewsletterModal(true), []);
   const closeNewsletterModal = useCallback(() => setShowNewsletterModal(false), []);
 
+  // Author info card (opened by clicking an author's name/avatar anywhere).
+  const [authorCardUser, setAuthorCardUser] = useState(null);
+  const openAuthorCard = useCallback((user) => { if (user) setAuthorCardUser(user); }, []);
+  const closeAuthorCard = useCallback(() => setAuthorCardUser(null), []);
+
   // Navigation history (to track where user came from)
   const [previousView, setPreviousView] = useState('home');
   // Dedicated origin for the project detail view. The single `previousView`
@@ -372,6 +377,9 @@ export const UIProvider = ({ children }) => {
     showNewsletterModal,
     openNewsletterModal,
     closeNewsletterModal,
+    authorCardUser,
+    openAuthorCard,
+    closeAuthorCard,
 
     // Navigation methods
     navigateToHome,

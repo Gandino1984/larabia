@@ -27,7 +27,7 @@ const getCategoryDisplay = (cat) => {
 function ArticleDetail({ previewMode = false }) {
   const { t } = useTranslation();
   const { selectedArticle, setSelectedArticle, deleteArticle, fetchBlocksByArticleId, trackArticleView } = useMagazine();
-  const { navigateBack, showSuccess, showError, navigateToHome, navigateToEditorForEdit, isFullscreen, setIsFullscreen, getCurrentLocale, navigateToAuthorProfile } = useUI();
+  const { navigateBack, showSuccess, showError, navigateToHome, navigateToEditorForEdit, isFullscreen, setIsFullscreen, getCurrentLocale, navigateToAuthorProfile, openAuthorCard } = useUI();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { isLiked, isFavorited, toggleLike, toggleFavorite } = useEngagement();
@@ -142,8 +142,8 @@ function ArticleDetail({ previewMode = false }) {
   };
 
   const handleAuthorClick = (author) => {
-    const profile = authorProfiles?.find(p => p.user_id === author.id_user);
-    if (profile) navigateToAuthorProfile(profile);
+    // Open the author's info in the same modal used by the header profile.
+    openAuthorCard(author);
   };
 
   const authorHasProfile = (author) => !!authorProfiles?.find(p => p.user_id === author.id_user);

@@ -72,7 +72,7 @@ function ArticlesList() {
   const { t } = useTranslation();
   const { articles, loading, fetchArticles, setSelectedArticle, deleteArticle } = useMagazine();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
-  const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError } = useUI();
+  const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError, openAuthorCard } = useUI();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -229,7 +229,13 @@ function ArticlesList() {
             <span className="meta-item meta-item--authors">
               {article.authors?.length > 0 ? (
                 article.authors.map(author => (
-                  <span key={author.id_user || author.name_user} className="list-author">
+                  <span
+                    key={author.id_user || author.name_user}
+                    className="list-author list-author--clickable"
+                    onClick={(e) => { e.stopPropagation(); openAuthorCard(author); }}
+                    role="button"
+                    tabIndex={0}
+                  >
                     <AuthorAvatar author={author} />
                     <span className="list-author-name">{author.name_user}</span>
                   </span>
