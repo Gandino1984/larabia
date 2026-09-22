@@ -115,7 +115,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.59);
+  background: rgba(0, 0, 0, 0.49);
   pointer-events: none;
   z-index: 1;
 }
@@ -268,7 +268,7 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.25);
   border-radius: 12px;
   filter: blur(10px);
   pointer-events: none;
