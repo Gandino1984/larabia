@@ -414,7 +414,7 @@
   "article.list.viewCarousel": "Carrusel horizontal",
   "hero.scrollHint": "Puedes deslizar hacia arriba",
   "carousel.swipeHint": "Navega horizontalmente",
-  "hero.scrollHintDesktop": "Puedes desplazarte hacia abajo o navegar horizontalmente con el ratón",
+  "hero.scrollHintDesktop": "Con el ratón puedes navegar vertical y horizontalmente",
   "hero.scrollHintSides": "Puedes también deslizar contenido hacia los lados",
   "hero.scrollHintMobile": "Puedes deslizar hacia arriba o hacia los lados"
 }

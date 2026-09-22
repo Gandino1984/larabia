@@ -70,7 +70,8 @@ function HomePage({ ready = true }) {
     const showT = setTimeout(() => {
       scrollOverlayShown = true;
       setScrollOverlay(true);
-      hideT = setTimeout(() => setScrollOverlay(false), 4500);
+      const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+      hideT = setTimeout(() => setScrollOverlay(false), isDesktop ? 4000 : 4500);
     }, 1500);
     const dismiss = () => setScrollOverlay(false);
     window.addEventListener('wheel', dismiss, { passive: true });
