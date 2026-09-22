@@ -420,6 +420,8 @@
   "article.list.viewMode": "View mode",
   "article.list.viewGrid": "Grid",
   "article.list.viewCarousel": "Horizontal carousel",
+  "hero.share": "Share",
+  "hero.linkCopied": "Link copied!",
   "hero.enter": "Enter",
   "hero.scrollHint": "You can swipe up",
   "carousel.swipeHint": "Navigate horizontally",

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSpring, animated } from '@react-spring/web';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Share2 } from 'lucide-react';
 import SectionPreviews from './SectionPreviews';
 import ScrollHint from '../common/ScrollHint';
 import './HomePage.css';
@@ -40,7 +40,17 @@ let scrollOverlayShown = false;
 function HomePage({ ready = true }) {
   const { t } = useTranslation();
   const { featuredArticles, setSelectedArticle, fetchArticleById } = useMagazine();
-  const { navigateToArticle, openAuthorCard } = useUI();
+  const { navigateToArticle, openAuthorCard, showSuccess } = useUI();
+
+  const handleShare = (e, article) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}?article=${article.id_article}`;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url)
+        .then(() => showSuccess(t('hero.linkCopied', '¡Enlace copiado!')))
+        .catch(() => {});
+    }
+  };
   // Staggered fade-up of the hero content (project label → title → description/
   // date/authors), in sync with the create-button slide-in.
   // The cover image fades in slowly starting as soon as the hero is visible; the
@@ -342,14 +352,25 @@ function HomePage({ ready = true }) {
                   {currentArticle.category_article && currentArticle.category_article.toLowerCase() !== 'general' && (
                     <span className="hero-category">{currentArticle.category_article}</span>
                   )}
-                  <button
-                    type="button"
-                    className="hero-enter-btn"
-                    onClick={(e) => { e.stopPropagation(); handleArticleClick(currentArticle); }}
-                  >
-                    {t('hero.enter', 'Entrar')}
-                    <ChevronRight size={18} />
-                  </button>
+                  <div className="hero-actions">
+                    <button
+                      type="button"
+                      className="hero-share-btn"
+                      onClick={(e) => handleShare(e, currentArticle)}
+                      aria-label={t('hero.share', 'Compartir')}
+                      title={t('hero.share', 'Compartir')}
+                    >
+                      <Share2 size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      className="hero-enter-btn"
+                      onClick={(e) => { e.stopPropagation(); handleArticleClick(currentArticle); }}
+                    >
+                      {t('hero.enter', 'Entrar')}
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </animated.div>
