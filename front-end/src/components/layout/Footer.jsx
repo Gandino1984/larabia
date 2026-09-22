@@ -23,12 +23,14 @@ function Footer() {
             <div className="footer-subsection">
               <h4>{t('footer.contact')}</h4>
               <p>{t('footer.location')}</p>
-              <button className="footer-contact-btn" onClick={openContactModal}>
-                Escríbenos un correo
-              </button>
-              <button className="footer-contact-btn" onClick={openNewsletterModal}>
-                {t('footer.newsletter')}
-              </button>
+              <div className="footer-btns">
+                <button className="footer-contact-btn" onClick={openContactModal}>
+                  Escríbenos un correo
+                </button>
+                <button className="footer-contact-btn" onClick={openNewsletterModal}>
+                  {t('footer.newsletter')}
+                </button>
+              </div>
             </div>
           </div>
         </div>

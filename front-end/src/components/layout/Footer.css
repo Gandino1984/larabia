@@ -44,24 +44,30 @@
 
 .footer-info {
   display: flex;
-  flex-direction: row;
-  gap: 2rem;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  gap: 0.5rem;
 }
 
 .footer-subsection {
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
-.footer-subsection:last-child {
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-  padding-left: 2rem;
+/* The two contact buttons: stacked on mobile, side by side on desktop. */
+.footer-btns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
 }
 
 .footer-section h4 {
   margin: 0 0 0.875rem;
-  font-size: 1rem;
+  font-size: 1.15rem;
   color: var(--color-text, #ffffff);
   font-family: 'Alfa Slab One', serif;
 }
@@ -101,7 +107,7 @@
 
 .footer-contact-btn:hover {
   background: #000000;
-  border-color: #000000;
+  border-color: #ffffff;
   color: #ffffff;
 }
 
@@ -174,16 +180,28 @@
     padding: 0 2rem;
   }
 
+  /* Two halves of exactly equal width. column-gap is 0 so the divider
+     (border-left on the right half) sits precisely at the 50% line; each
+     half gets its own inner padding to keep content off the divider. */
   .footer-content {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 0;
     margin-bottom: 2rem;
-    text-align: left;
+    text-align: center;
+    align-items: center;
   }
 
   .footer-section:first-child {
     flex-direction: row;
+    justify-content: center;
     gap: 1.5rem;
+    padding-right: 2.5rem;
+  }
+
+  /* Divider exactly centred between the two halves. */
+  .footer-info {
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    padding-left: 2.5rem;
   }
 
   .footer-logo {
@@ -195,7 +213,13 @@
   }
 
   .footer-section h4 {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
+  }
+
+  /* Buttons side by side on desktop. */
+  .footer-btns {
+    flex-direction: row;
+    justify-content: center;
   }
 
   .footer-section p {
@@ -213,10 +237,6 @@
     max-width: 1100px;
   }
 
-  .footer-content {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
   .footer-section p {
     font-size: 0.95rem;
   }
@@ -226,10 +246,6 @@
 @media (min-width: 1200px) {
   .footer-container {
     max-width: 1200px;
-  }
-
-  .footer-content {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
 
   .footer-bottom p {

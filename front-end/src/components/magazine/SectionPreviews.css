@@ -20,6 +20,24 @@
   background: #191919;
 }
 
+/* First section (Barrio): no hard 1px line where it meets the hero — a soft,
+   diffused top edge instead. */
+.section-preview:first-child {
+  border-top: none;
+  position: relative;
+}
+
+.section-preview:first-child::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
 .section-preview__head {
   display: flex;
   align-items: center;
