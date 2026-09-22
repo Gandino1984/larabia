@@ -441,7 +441,8 @@
      declared (unconditionally) in ProjectDetail.css; depending on bundle order
      that copy can win and re-show the toggle here on phones. */
   .articles-view-toggle { display: none !important; }
-  .articles-carousel-wrap { padding: 0; }
+  /* Keep the column layout within the page container on phones (no full-bleed). */
+  .articles-carousel-wrap { padding: 0; width: auto; margin-left: 0; margin-right: 0; }
   .articles-carousel {
     flex-direction: column;
     overflow-x: visible;
@@ -465,6 +466,11 @@
 /* Carousel wrapper + navigation arrows */
 .articles-carousel-wrap {
   position: relative;
+  /* Full-bleed: break out of the centered page container and span the whole
+     viewport width. */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
   /* Room for the arrows outside the cards, with a small gap from them. */
   padding: 0 76px;
 }
