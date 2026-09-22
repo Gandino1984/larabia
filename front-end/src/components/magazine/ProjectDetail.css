@@ -295,26 +295,42 @@
   max-width: 85vw;
   scroll-snap-align: start;
 }
+/* Styled like the hero slider arrows: light-gray round button, black/white on
+   hover; sizes match the hero across breakpoints. */
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
-  width: 76px;
-  height: 76px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.42);
-  color: #fff;
+  background: lightgray;
+  color: #1a1a1a;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.3s ease;
 }
-.carousel-arrow:hover { background: #000; }
-.carousel-arrow--prev { left: 8px; }
-.carousel-arrow--next { right: 8px; }
+.carousel-arrow svg { width: 58%; height: 58%; }
+.carousel-arrow:hover {
+  background: #000000;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.1);
+}
+.carousel-arrow--prev { left: 6px; }
+.carousel-arrow--next { right: 6px; }
+
+@media (min-width: 1024px) {
+  .carousel-arrow { width: 52px; height: 52px; }
+  .project-detail-page .articles-carousel-wrap { padding: 0 84px; }
+}
+@media (min-width: 1200px) {
+  .carousel-arrow { width: 62px; height: 62px; }
+  .project-detail-page .articles-carousel-wrap { padding: 0 94px; }
+}
 
 @media (max-width: 768px) {
   .project-articles-toolbar { display: none; }

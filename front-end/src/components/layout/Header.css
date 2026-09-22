@@ -42,35 +42,6 @@
   pointer-events: auto;
 }
 
-/* Entrance: a bright border that "draws" and quickly fades, pulsing in time
-   with the header shake, then stops. */
-.header-bar::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  border: 2px solid transparent;
-  background:
-    linear-gradient(#0000, #0000) padding-box,
-    linear-gradient(135deg, #ffffff, #b9b9b9) border-box;
-  background-clip: padding-box, border-box;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.header-bar--entrance::after {
-  animation: header-border-flash 0.3s ease-out 6;
-}
-
-@keyframes header-border-flash {
-  0% { opacity: 0; }
-  25% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .header-bar--entrance::after { animation: none; }
-}
 
 /* Active state (on hover/click) */
 .header-bar.active {

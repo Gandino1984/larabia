@@ -355,6 +355,8 @@
   align-items: center;
   gap: 0.4rem;
 }
+.hero-author--clickable { cursor: pointer; }
+.hero-author--clickable:hover .hero-author-name { text-decoration: underline; }
 
 .hero-author-avatar {
   width: 38px;

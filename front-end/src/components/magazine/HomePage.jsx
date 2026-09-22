@@ -40,7 +40,7 @@ let scrollOverlayShown = false;
 function HomePage({ ready = true }) {
   const { t } = useTranslation();
   const { featuredArticles, setSelectedArticle, fetchArticleById } = useMagazine();
-  const { navigateToArticle } = useUI();
+  const { navigateToArticle, openAuthorCard } = useUI();
   // Staggered fade-up of the hero content (project label → title → description/
   // date/authors), in sync with the create-button slide-in.
   // The cover image fades in slowly starting as soon as the hero is visible; the
@@ -303,7 +303,13 @@ function HomePage({ ready = true }) {
                     <span className="meta-item hero-authors">
                       {currentArticle.authors?.length > 0
                         ? currentArticle.authors.map((author) => (
-                            <span key={author.id_user} className="hero-author">
+                            <span
+                              key={author.id_user}
+                              className="hero-author hero-author--clickable"
+                              onClick={(e) => { e.stopPropagation(); openAuthorCard(author); }}
+                              role="button"
+                              tabIndex={0}
+                            >
                               <AuthorAvatar author={author} getUrl={getAuthorImageUrl} />
                               <span className="hero-author-name">{author.name_user}</span>
                             </span>

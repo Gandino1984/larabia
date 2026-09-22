@@ -312,13 +312,13 @@ function ArticleDetail({ previewMode = false }) {
                 {selectedArticle.authors && selectedArticle.authors.length > 0 ? (
                   <>
                     {selectedArticle.authors.map((author, index) => {
-                      const hasProfile = !previewMode && authorHasProfile(author);
+                      const clickable = !previewMode;
                       return (
                         <span
                           key={author.id_user}
-                          className={`author-info${hasProfile ? ' author-info--clickable' : ''}`}
-                          onClick={hasProfile ? () => handleAuthorClick(author) : undefined}
-                          title={hasProfile ? `Ver perfil de ${author.name_user}` : undefined}
+                          className={`author-info${clickable ? ' author-info--clickable' : ''}`}
+                          onClick={clickable ? (e) => { e.stopPropagation(); handleAuthorClick(author); } : undefined}
+                          title={clickable ? `Ver perfil de ${author.name_user}` : undefined}
                         >
                           {getAuthorImageUrl(author) ? (
                             <>
