@@ -30,13 +30,22 @@
 .section-preview:first-child::before {
   content: '';
   position: absolute;
-  top: -90px;
+  top: -150px;
   left: 0;
   right: 0;
-  height: 90px;
+  height: 150px;
   /* The section's own gray tone, solid at the bottom (where it meets the
-     section) and fading up into transparency as it extends over the hero. */
-  background: linear-gradient(to top, #252525, rgba(37, 37, 37, 0));
+     section) and fading up into transparency as it extends over the hero.
+     Extra intermediate stops make the fade longer and gentler, so the change
+     from gray to transparent isn't abrupt. */
+  background: linear-gradient(
+    to top,
+    #252525 0%,
+    rgba(37, 37, 37, 0.88) 18%,
+    rgba(37, 37, 37, 0.6) 42%,
+    rgba(37, 37, 37, 0.28) 68%,
+    rgba(37, 37, 37, 0) 100%
+  );
   pointer-events: none;
 }
 
