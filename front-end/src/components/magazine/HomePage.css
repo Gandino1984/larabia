@@ -246,10 +246,9 @@
   line-height: 1.6;
   opacity: 0.95;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
-  /* Dark translucent panel with rounded corners so the text stays readable
-     over any hero image. */
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 12px;
+  /* Dark translucent panel behind the text (see ::before) with softly blurred,
+     feathered edges so it blends into the hero image. */
+  position: relative;
   padding: 1rem 1.25rem;
   box-sizing: border-box;
   /* No truncation — the full description flows downward. */
@@ -257,6 +256,19 @@
      the block is centered (margin auto) but the text itself reads left-aligned. */
   text-align: left;
   max-width: 300px;
+}
+
+/* Blurred, feathered dark panel sitting behind the excerpt text. The blur
+   softens the edges so there's no hard rectangle over the hero image. */
+.hero-excerpt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  filter: blur(10px);
+  pointer-events: none;
 }
 
 /* Publication date, centered below the article title. */
