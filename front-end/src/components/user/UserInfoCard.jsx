@@ -147,7 +147,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                 <p className="user-type">
                   {(() => {
                     const on = (v) => v === true || v === 1;
-                    if (on(user?.is_super_admin)) return 'Super admin';
+                    if (on(user?.is_super_admin)) return 'Director';
                     if (on(user?.is_admin)) return 'Admin';
                     if (on(user?.is_editor)) return 'Productor multimedia y editor';
                     return 'Reader';
