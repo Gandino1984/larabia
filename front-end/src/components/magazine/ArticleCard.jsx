@@ -38,7 +38,21 @@ const getCategoryDisplay = (cat) => {
   return cat;
 };
 
-function ArticleCard({ article }) {
+// Pretty labels for a project's type, shown as the card badge inside a project.
+const TYPE_DISPLAY = {
+  'no-ficcion': 'No-ficción',
+  'noficcion': 'No-ficción',
+  'ficcion': 'Ficción',
+  'periodistico': 'Periodístico',
+};
+const getTypeDisplay = (type) => {
+  if (!type) return null;
+  const n = normalize(type);
+  if (TYPE_DISPLAY[n]) return TYPE_DISPLAY[n];
+  return type.charAt(0).toUpperCase() + type.slice(1);
+};
+
+function ArticleCard({ article, typeBadge }) {
   const { t } = useTranslation();
   const { setSelectedArticle, deleteArticle } = useMagazine();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
@@ -101,9 +115,16 @@ function ArticleCard({ article }) {
             e.target.src = '/logoFondoNegro.jpg';
           }}
         />
-        {article.category_article && normalize(article.category_article) !== 'general' && (
-          <span className="article-category">{getCategoryDisplay(article.category_article)}</span>
-        )}
+        {(() => {
+          // Prefer an explicit type badge (e.g. the project's type); otherwise
+          // fall back to the article's category (hidden when it's "general").
+          const label = typeBadge
+            ? getTypeDisplay(typeBadge)
+            : (article.category_article && normalize(article.category_article) !== 'general'
+                ? getCategoryDisplay(article.category_article)
+                : null);
+          return label ? <span className="article-category">{label}</span> : null;
+        })()}
       </div>
 
       <div className="article-card-content">

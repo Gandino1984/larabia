@@ -212,7 +212,7 @@ function ProjectDetail() {
                     </button>
                     <div className="articles-carousel" ref={carouselRef}>
                       {ordered.map(article => (
-                        <ArticleCard key={article.id_article} article={article} />
+                        <ArticleCard key={article.id_article} article={article} typeBadge={selectedProject.type_project} />
                       ))}
                     </div>
                     <button type="button" className="carousel-arrow carousel-arrow--next" onClick={() => scrollCarousel(1)} aria-label="Siguiente">
@@ -222,7 +222,7 @@ function ProjectDetail() {
                 ) : (
                   <div className="project-articles-grid">
                     {ordered.map(article => (
-                      <ArticleCard key={article.id_article} article={article} />
+                      <ArticleCard key={article.id_article} article={article} typeBadge={selectedProject.type_project} />
                     ))}
                   </div>
                 )}
