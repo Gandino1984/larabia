@@ -30,11 +30,13 @@
 .section-preview:first-child::before {
   content: '';
   position: absolute;
-  top: 0;
+  top: -32px;
   left: 0;
   right: 0;
-  height: 28px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0));
+  height: 32px;
+  /* The section's own gray tone, solid at the bottom (where it meets the
+     section) and fading up into transparency as it extends over the hero. */
+  background: linear-gradient(to top, #252525, rgba(37, 37, 37, 0));
   pointer-events: none;
 }
 
