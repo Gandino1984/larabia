@@ -627,11 +627,8 @@ function Header({ ready = true }) {
 
           {renderNotifBell('desktop')}
 
-          <LanguageSelector />
-
           {isSuperAdmin && (
             <button className="nav-link nav-link--admin" onClick={handleAdminClick} title="Administración">
-              <Shield size={16} />
               <span>Admin</span>
               {totalPending > 0 && (
                 <span className="admin-pending-badge" title={`${totalPending} pendiente(s) de revisión`}>
@@ -640,6 +637,8 @@ function Header({ ready = true }) {
               )}
             </button>
           )}
+
+          <LanguageSelector />
 
         </nav>
 

@@ -9,7 +9,7 @@
   gap: 6px;
   padding: 8px 12px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: none;
   border-radius: 6px;
   color: white;
   cursor: pointer;
@@ -28,7 +28,6 @@
 /* Make text black when header is active (hovered) */
 .header-bar.active .language-selector-btn {
   color: black;
-  border-color: rgba(0, 0, 0, 0.2);
 }
 
 .header-bar.active .language-selector-btn:hover {

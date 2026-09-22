@@ -23,6 +23,7 @@
 /* Floating Header Bar - Mobile Base */
 .header-bar {
   background: var(--color-header-bg, #000000);
+  border: 1px solid #555555;
   border-radius: 8px;
   padding: 0.3rem 0.5rem;
   display: flex;
@@ -1501,12 +1502,11 @@
 /* ---- Review-queue notification badge on the Admin entry ---- */
 .nav-link--admin {
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: none;
   border-radius: 6px;
 }
-.nav-link--admin:hover { background: #000000; border-color: #000000; color: #ffffff; }
-.header-bar.active .nav-link--admin { border-color: rgba(0, 0, 0, 0.2); }
-.header-bar.active .nav-link--admin:hover { background: #000000; border-color: #000000; color: #ffffff; }
+.nav-link--admin:hover { background: #000000; color: #ffffff; }
+.header-bar.active .nav-link--admin:hover { background: #000000; color: #ffffff; }
 .admin-pending-badge {
   display: inline-flex;
   align-items: center;
