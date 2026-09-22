@@ -298,6 +298,13 @@
 @media (max-width: 767px) {
   .hero-meta-divider { display: none; }
 
+  /* Keep the project text clear of the left slider arrow on narrow phones. */
+  .hero-excerpt {
+    box-sizing: border-box;
+    padding-left: 2.25rem;
+    padding-right: 0.75rem;
+  }
+
   /* Narrow portrait phones: the slider arrows sit translucent over the image
      and only turn solid while pressed (on tap). */
   .hero-nav,
