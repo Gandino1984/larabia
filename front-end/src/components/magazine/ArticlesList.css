@@ -14,20 +14,11 @@
 }
 
 .header-title-row {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-bottom: 0.5rem;
-}
-
-/* Toggle sits to the right of the (centred) page title. */
-.header-title-row .articles-view-toggle {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 
@@ -457,8 +448,8 @@
 /* Carousel wrapper + navigation arrows */
 .articles-carousel-wrap {
   position: relative;
-  /* Room for the arrows just outside the cards, at a hero-like distance. */
-  padding: 0 60px;
+  /* Room for the arrows outside the cards, with a small gap from them. */
+  padding: 0 76px;
 }
 
 /* Swipe affordance centred over the start of a horizontal carousel. */
@@ -474,8 +465,10 @@
   .carousel-swipe-hint { display: none; }
 }
 /* Styled like the hero slider arrows: light-gray round button, black/white on
-   hover, placed just outside the cards. */
-.carousel-arrow {
+   hover, placed just outside the cards. Scoped to .articles-list-page so it
+   always beats the global .carousel-arrow rule in ProjectDetail.css regardless
+   of bundle order. */
+.articles-list-page .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -492,16 +485,16 @@
   justify-content: center;
   transition: background 0.25s ease, color 0.25s ease, transform 0.3s ease;
 }
-.carousel-arrow:hover {
+.articles-list-page .carousel-arrow:hover {
   background: #000000;
   color: #ffffff;
   transform: translateY(-50%) scale(1.1);
 }
-.carousel-arrow--prev { left: 4px; }
-.carousel-arrow--next { right: 4px; }
+.articles-list-page .carousel-arrow--prev { left: 6px; }
+.articles-list-page .carousel-arrow--next { right: 6px; }
 
 @media (max-width: 768px) {
-  .carousel-arrow { display: none; }
+  .articles-list-page .carousel-arrow { display: none; }
 }
 
 /* Back button pinned top-left of the page */
