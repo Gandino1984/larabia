@@ -256,7 +256,9 @@
   /* Narrower measure on mobile so the carousel arrows don't sit on the text;
      the block is centered (margin auto) but the text itself reads left-aligned. */
   text-align: left;
-  max-width: 300px;
+  /* Fluid on mobile so it grows with the screen (instead of staying stuck at a
+     small fixed width between ~400 and 767px). Desktop sets fixed widths ≥768. */
+  max-width: min(90vw, 680px);
 }
 
 /* Blurred, feathered dark panel sitting behind the excerpt text. The blur
@@ -293,9 +295,9 @@
   gap: 1rem;
   flex-wrap: wrap;
   /* Keep the authors + "Entrar" button within the same width as the project
-     excerpt so they don't overflow its margins. */
+     excerpt so they don't overflow its margins (fluid on mobile). */
   width: 100%;
-  max-width: 300px;
+  max-width: min(90vw, 680px);
   margin-left: auto;
   margin-right: auto;
   box-sizing: border-box;
@@ -346,11 +348,12 @@
 @media (max-width: 767px) {
   .hero-meta-divider { display: none; }
 
-  /* Keep the project text clear of the left slider arrow on narrow phones. */
+  /* Keep the project text clear of both slider arrows on narrow phones (the
+     block is now fluid, so its edges sit closer to the arrows). */
   .hero-excerpt {
     box-sizing: border-box;
     padding-left: 2.25rem;
-    padding-right: 0.75rem;
+    padding-right: 2.25rem;
   }
 
   /* Narrow portrait phones: the slider arrows sit translucent over the image

@@ -258,7 +258,7 @@ button:focus:not(:focus-visible) {
 /* Mobile-first: a row just below the header, back button on the left. */
 .btn-back-nav {
   position: fixed;
-  top: calc(0.5rem + var(--header-h) + 0.5rem);
+  top: calc(1.25rem + var(--header-h) + 0.5rem);
   left: 0.75rem;
   z-index: 1001;
   display: inline-flex;
@@ -287,7 +287,7 @@ button:focus:not(:focus-visible) {
   .btn-back-nav {
     width: var(--header-h);
     height: var(--header-h);
-    top: calc(0.5rem + var(--header-h) / 2 + 9px);
+    top: calc(1.25rem + var(--header-h) / 2 + 9px);
     left: max(0.75rem, calc((100% - 1200px) / 2 - var(--header-h) - 1.5rem));
     transform: translateY(-50%);
   }

@@ -6,8 +6,8 @@
 
 .floating-editor-btn {
   position: fixed;
-  /* +0.75rem to match the header bar's margin-top. */
-  top: calc(0.5rem + var(--header-h) + 0.5rem + 0.75rem);
+  /* 0.5rem below the header bar (which now sits at 1.25rem). */
+  top: calc(1.25rem + var(--header-h) + 0.5rem);
   right: 0.75rem;
   /* Below the header (1000) so the burger menu and notifications dropdown open
      over this button, not behind it. */
@@ -63,7 +63,7 @@
   .floating-editor-btn {
     width: 56px;
     height: 56px;
-    top: calc(0.5rem + 0.75rem + var(--header-h) / 2 + 9px);
+    top: calc(1.25rem + var(--header-h) / 2 + 9px);
     right: max(0.75rem, calc((100% - 1200px) / 2 - 56px - 1rem));
     transform: translateY(-50%) translateX(150px);
   }

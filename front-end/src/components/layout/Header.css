@@ -3,7 +3,7 @@
 /* Floating Header Container - Mobile Base */
 .header {
   position: fixed;
-  top: 0.5rem;
+  top: 1.25rem;
   left: 50%;
   transform: translateX(-50%);
   width: 98%;
@@ -32,7 +32,6 @@
   background-clip: padding-box, border-box;
   border-radius: 14px;
   padding: 0.3rem 0.5rem;
-  margin-top: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1615,7 +1614,7 @@
 @media (max-width: 767px) {
   .notif-dropdown {
     position: fixed;
-    top: calc(0.5rem + var(--header-h) + 0.75rem);
+    top: calc(1.25rem + var(--header-h) + 0.75rem);
     left: 8px;
     right: 8px;
     width: auto;
