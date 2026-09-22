@@ -213,12 +213,14 @@
   gap: 12px;
   padding: 14px 16px 18px;
   flex: 1;
+  min-width: 0;
 }
 
 .section-preview__text {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
 .section-preview__card-title {
@@ -227,6 +229,10 @@
   font-size: 1.05rem;
   font-weight: 700;
   line-height: 1.3;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  min-width: 0;
 }
 
 .section-preview__desc {
@@ -238,6 +244,9 @@
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .section-preview__cta {

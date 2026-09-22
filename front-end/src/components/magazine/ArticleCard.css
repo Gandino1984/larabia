@@ -125,6 +125,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  /* Allow children to shrink so long text wraps instead of overflowing. */
+  min-width: 0;
 }
 
 .article-project-label {
@@ -136,6 +138,8 @@
   letter-spacing: 0.12em;
   color: #aaa;
   margin-bottom: 0.3rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .article-card-title {
@@ -148,6 +152,11 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  /* Let long words / unbroken strings wrap instead of overflowing the card. */
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  min-width: 0;
 }
 
 .article-card-excerpt {
@@ -161,6 +170,9 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .article-card-meta {
