@@ -8,6 +8,7 @@ import { useUI } from '../../app_context/UIContext';
 import { ChevronLeft, ChevronRight, Calendar, Share2 } from 'lucide-react';
 import SectionPreviews from './SectionPreviews';
 import ScrollHint from '../common/ScrollHint';
+import RollText from '../common/RollText';
 import './HomePage.css';
 
 function AuthorAvatar({ author, getUrl }) {
@@ -360,14 +361,14 @@ function HomePage({ ready = true }) {
                       title={t('hero.share', 'Compartir')}
                     >
                       <Share2 size={18} />
-                      {t('hero.share', 'Compartir')}
+                      <RollText text={t('hero.share', 'Compartir')} />
                     </button>
                     <button
                       type="button"
                       className="hero-enter-btn"
                       onClick={(e) => { e.stopPropagation(); handleArticleClick(currentArticle); }}
                     >
-                      {t('hero.enter', 'Entrar')}
+                      <RollText text={t('hero.enter', 'Entrar')} />
                       <ChevronRight size={18} />
                     </button>
                   </div>

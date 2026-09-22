@@ -363,6 +363,17 @@
   color: #ffffff;
 }
 
+/* Roll-up text hover for the hero action buttons (styles for .roll* live in
+   Header.css, loaded globally). */
+.hero-enter-btn:hover .roll__line,
+.hero-share-btn:hover .roll__line {
+  transform: translateY(-100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-enter-btn:hover .roll__line,
+  .hero-share-btn:hover .roll__line { transform: none; }
+}
+
 /* Vertical divider between the publication date and the authors. */
 .hero-meta-divider {
   width: 1px;
