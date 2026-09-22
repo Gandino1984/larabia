@@ -90,6 +90,9 @@ function SectionPreviewRow({ title, items, onItemClick, enableSwipeHint = false 
       </div>
 
       <div className="section-preview__scroller">
+        {enableSwipeHint && (
+          <div className={`section-preview__hint-overlay${showSwipeHint ? ' is-visible' : ''}`} />
+        )}
         <div className="section-preview__track" ref={trackRef}>
           {items.map((item) => (
             <PreviewCard key={item.key} item={item} onClick={onItemClick} />
