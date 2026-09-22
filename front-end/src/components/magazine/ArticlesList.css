@@ -14,11 +14,20 @@
 }
 
 .header-title-row {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1rem;
   margin-bottom: 0.5rem;
+}
+
+/* Toggle sits to the right of the (centred) page title. */
+.header-title-row .articles-view-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 
@@ -72,38 +81,44 @@
   padding-bottom: 2rem;
 }
 
-/* The top copy of the pagination is mobile-only; on desktop only the bottom
-   one shows (the historical behaviour). */
+/* Grid view shows the pagination both above and below the grid. */
 .pagination--top {
-  display: none;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0;
 }
 
+/* Page-number buttons styled like the app's normal buttons. */
 .pagination-btn {
-  background: #2a2a2a;
-  color: #ccc;
-  border: 1px solid #3a3a3a;
-  border-radius: 6px;
-  width: 38px;
-  height: 38px;
+  background: lightgray;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-size: 0.9rem;
-  font-weight: 600;
-  transition: all 0.2s;
+  font-weight: 700;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
+  background: #000000;
+  color: #ffffff;
 }
 
 .pagination-btn.active {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
+  background: #000000;
+  color: #ffffff;
+}
+
+/* Prev/next arrows: same look but round. */
+.pagination-prev,
+.pagination-next {
+  border-radius: 50%;
 }
 
 .pagination-btn:disabled {
@@ -126,6 +141,10 @@
   transition: all 0.3s;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   position: relative;
+  /* Flex column so the image stays fixed, the content fills, and cards in a row
+     line up to the same height. */
+  display: flex;
+  flex-direction: column;
 }
 
 .list-delete-btn {
@@ -164,6 +183,7 @@
   height: 180px;
   overflow: hidden;
   background: #3a3a3a;
+  flex-shrink: 0;
 }
 
 .articles-list-page .article-card-image img {
@@ -397,6 +417,14 @@
   flex: 0 0 420px;
   max-width: 85vw;
   scroll-snap-align: start;
+  /* All cards the same height in the horizontal reading mode. */
+  height: 500px;
+}
+
+/* Keep the fixed-height card from pushing the engagement bar out of view. */
+.articles-carousel .article-card .article-card-content {
+  overflow: hidden;
+  min-height: 0;
 }
 
 /* Mobile: everything vertical; hide the toggle, carousel collapses to a column */
@@ -414,6 +442,7 @@
     flex: none;
     width: 100%;
     max-width: none;
+    height: auto;
   }
   /* On phones the grid list scrolls vertically, so surface the pagination at
      the top as well as the bottom. */
@@ -428,7 +457,8 @@
 /* Carousel wrapper + navigation arrows */
 .articles-carousel-wrap {
   position: relative;
-  padding: 0 96px;
+  /* Room for the arrows just outside the cards, at a hero-like distance. */
+  padding: 0 60px;
 }
 
 /* Swipe affordance centred over the start of a horizontal carousel. */
@@ -443,26 +473,32 @@
 @media (max-width: 768px) {
   .carousel-swipe-hint { display: none; }
 }
+/* Styled like the hero slider arrows: light-gray round button, black/white on
+   hover, placed just outside the cards. */
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
-  width: 76px;
-  height: 76px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.42);
-  color: #ffffff;
+  background: lightgray;
+  color: #1a1a1a;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.3s ease;
 }
-.carousel-arrow:hover { background: #000000; }
-.carousel-arrow--prev { left: 8px; }
-.carousel-arrow--next { right: 8px; }
+.carousel-arrow:hover {
+  background: #000000;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.1);
+}
+.carousel-arrow--prev { left: 4px; }
+.carousel-arrow--next { right: 4px; }
 
 @media (max-width: 768px) {
   .carousel-arrow { display: none; }

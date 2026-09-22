@@ -286,9 +286,6 @@ function ArticlesList() {
       <div className="articles-list-header">
         <div className="header-title-row">
           <h1>{t('article.list.title')}</h1>
-        </div>
-        <div className="articles-list-subheader">
-          <p className="articles-count">{articles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: articles.length })}</p>
           <div className="articles-view-toggle" data-mode={viewMode} role="group" aria-label={t('article.list.viewMode')}>
             <button
               type="button"
@@ -310,6 +307,9 @@ function ArticlesList() {
             </button>
           </div>
         </div>
+        <div className="articles-list-subheader">
+          <p className="articles-count">{articles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: articles.length })}</p>
+        </div>
       </div>
 
       {articles.length === 0 ? (
@@ -326,7 +326,7 @@ function ArticlesList() {
                 onClick={() => scrollCarousel(-1)}
                 aria-label="Anterior"
               >
-                <ChevronLeft size={44} />
+                <ChevronLeft size={24} />
               </button>
               <div className="articles-carousel" ref={carouselRef}>
                 {orderedArticles.map(renderCard)}
@@ -337,7 +337,7 @@ function ArticlesList() {
                 onClick={() => scrollCarousel(1)}
                 aria-label="Siguiente"
               >
-                <ChevronRight size={44} />
+                <ChevronRight size={24} />
               </button>
             </div>
           ) : (
