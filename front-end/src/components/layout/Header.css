@@ -1,5 +1,35 @@
 /* Mobile-First Header Styles */
 
+/* "Roll up" text hover for menu-bar buttons (added on top of the existing color
+   hover). The label slides up and an identical copy enters from below. */
+.roll {
+  display: inline-flex;
+  position: relative;
+  overflow: hidden;
+  vertical-align: top;
+}
+.roll__label {
+  display: block;
+  transition: transform 0.55s cubic-bezier(0.19, 1, 0.22, 1);
+  will-change: transform;
+}
+.roll__label::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  white-space: nowrap;
+}
+.nav-link:hover .roll__label,
+.more-dropdown-btn:hover .roll__label {
+  transform: translateY(-100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .roll__label { transition: none; }
+  .nav-link:hover .roll__label,
+  .more-dropdown-btn:hover .roll__label { transform: none; }
+}
+
 /* Floating Header Container - Mobile Base */
 .header {
   position: fixed;

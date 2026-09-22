@@ -17,6 +17,7 @@ import UserInfoCard from '../user/UserInfoCard';
 import LanguageSelector from './LanguageSelector';
 import NavGroupDropdown from './NavGroupDropdown';
 import SpringDropdown from './SpringDropdown';
+import RollText from '../common/RollText';
 import AnimatedLogo from './AnimatedLogo';
 import ContactModal from '../contact/ContactModal';
 import NewsletterModal from '../newsletter/NewsletterModal';
@@ -587,7 +588,7 @@ function Header({ ready = true }) {
               return (
                 <div className="projects-dropdown-wrapper" ref={projectsDropdownRef} key={item.id}>
                   <button className="nav-link" onClick={handleProyectosClick}>
-                    <span>{navLabel(item, currentLanguage)}</span>
+                    <RollText text={navLabel(item, currentLanguage)} />
                     <ChevronDown size={14} className={`chevron-icon ${showProjectsDropdown ? 'rotated' : ''}`} />
                   </button>
                   <SpringDropdown open={showProjectsDropdown} className="projects-dropdown-menu">
@@ -621,14 +622,14 @@ function Header({ ready = true }) {
             }
             return (
               <button key={item.id} className="nav-link" onClick={() => handleNavItemSelect(item)}>
-                <span>{navLabel(item, currentLanguage)}</span>
+                <RollText text={navLabel(item, currentLanguage)} />
               </button>
             );
           })}
 
           {isSuperAdmin && (
             <button className="nav-link nav-link--admin" onClick={handleAdminClick} title="Administración">
-              <span>Admin</span>
+              <RollText text="Admin" />
               {totalPending > 0 && (
                 <span className="admin-pending-badge" title={`${totalPending} pendiente(s) de revisión`}>
                   {totalPending}

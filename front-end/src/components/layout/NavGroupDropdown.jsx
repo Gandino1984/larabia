@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { navLabel, canSeeNavItem } from '../../app_context/navConfig';
 import SpringDropdown from './SpringDropdown';
+import RollText from '../common/RollText';
 import './MoreDropdown.css';
 
 function NavGroupDropdown({ item, lang, roles, onSelect }) {
@@ -35,7 +36,7 @@ function NavGroupDropdown({ item, lang, roles, onSelect }) {
         onClick={() => setIsOpen((o) => !o)}
         aria-label={navLabel(item, lang)}
       >
-        <span>{navLabel(item, lang)}</span>
+        <RollText text={navLabel(item, lang)} />
         <ChevronDown size={16} className={`chevron-icon ${isOpen ? 'rotated' : ''}`} />
       </button>
 
