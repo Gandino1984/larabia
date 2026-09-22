@@ -30,10 +30,10 @@
 .section-preview:first-child::before {
   content: '';
   position: absolute;
-  top: -32px;
+  top: -90px;
   left: 0;
   right: 0;
-  height: 32px;
+  height: 90px;
   /* The section's own gray tone, solid at the bottom (where it meets the
      section) and fading up into transparency as it extends over the hero. */
   background: linear-gradient(to top, #252525, rgba(37, 37, 37, 0));
