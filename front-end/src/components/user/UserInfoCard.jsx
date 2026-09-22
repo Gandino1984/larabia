@@ -145,7 +145,13 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
               <div className="user-name-container">
                 <h2 className="user-name">{user?.name_user}</h2>
                 <p className="user-type">
-                  {(user?.is_editor === true || user?.is_editor === 1) ? 'Productor multimedia y editor' : 'Reader'}
+                  {(() => {
+                    const on = (v) => v === true || v === 1;
+                    if (on(user?.is_super_admin)) return 'Super admin';
+                    if (on(user?.is_admin)) return 'Admin';
+                    if (on(user?.is_editor)) return 'Productor multimedia y editor';
+                    return 'Reader';
+                  })()}
                 </p>
               </div>
             </div>
