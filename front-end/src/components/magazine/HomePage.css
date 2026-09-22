@@ -246,6 +246,12 @@
   line-height: 1.6;
   opacity: 0.95;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+  /* Dark translucent panel with rounded corners so the text stays readable
+     over any hero image. */
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-sizing: border-box;
   /* No truncation — the full description flows downward. */
   /* Narrower measure on mobile so the carousel arrows don't sit on the text;
      the block is centered (margin auto) but the text itself reads left-aligned. */
@@ -428,7 +434,7 @@
 /* Slide Indicators - Mobile */
 .hero-indicators {
   position: absolute;
-  bottom: 5.5%;
+  bottom: 7%;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -513,7 +519,7 @@
   }
 
   .hero-indicators {
-    bottom: 5.5%;
+    bottom: 7%;
     gap: 0.6rem;
   }
 
@@ -587,7 +593,7 @@
   }
 
   .hero-indicators {
-    bottom: 6%;
+    bottom: 7.5%;
     gap: 0.7rem;
   }
 
@@ -660,7 +666,7 @@
   }
 
   .hero-indicators {
-    bottom: 6.5%;
+    bottom: 8%;
     gap: 0.75rem;
   }
 
@@ -754,7 +760,7 @@
   }
 
   .hero-indicators {
-    bottom: 4.5%;
+    bottom: 6%;
   }
 
   .hero-logo {
