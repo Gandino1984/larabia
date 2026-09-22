@@ -21,6 +21,7 @@ import AuthorPublications from './components/authors/AuthorPublications';
 import ProjectDetail from './components/magazine/ProjectDetail';
 import OpenMicPublications from './components/openmic/OpenMicPublications';
 import CategorySectionPage from './components/magazine/CategorySectionPage';
+import AboutRabia from './components/magazine/AboutRabia';
 import WorkshopsList from './components/workshops/WorkshopsList';
 import WorkshopDetail from './components/workshops/WorkshopDetail';
 import AdminPage from './components/admin/permissions/AdminPage';
@@ -31,7 +32,7 @@ import LoadingScreen from './components/layout/LoadingScreen';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showAdmin, isFullscreen, navigateToArticle } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showAbout, showAdmin, isFullscreen, navigateToArticle } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { loading: authLoading } = useAuth();
   const { isLoading, progress } = usePreloader();
@@ -99,6 +100,7 @@ function App() {
     if (showMicroPerfiles) return <CategorySectionPage category="micro-perfiles" titleKey="microperfiles.title" subtitleKey="microperfiles.subtitle" />;
     if (showWorkshopDetail) return <WorkshopDetail />;
     if (showTalleres) return <WorkshopsList />;
+    if (showAbout) return <AboutRabia />;
     if (showArticleDetail) return <ArticleDetail previewMode={isPreview} />;
     if (showArticlesList) return <ArticlesList />;
     if (showHome) return <HomePage ready={appReady} />;
@@ -123,6 +125,7 @@ function App() {
     (showMicroPerfiles && 'microperfiles') ||
     (showWorkshopDetail && 'workshopDetail') ||
     (showTalleres && 'talleres') ||
+    (showAbout && 'about') ||
     (showArticleDetail && 'articleDetail') ||
     (showArticlesList && 'articlesList') ||
     (showHome && 'home') ||

@@ -1358,7 +1358,7 @@
   left: 0;
   margin-top: 8px;
   background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: none;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   min-width: 200px;

@@ -347,6 +347,14 @@
   "notifications.info": "Informazioa",
   "microperfiles.title": "Mikro-profilak",
   "microperfiles.subtitle": "Auzoko pertsonen erretratu laburrak.",
+  "about.back": "Itzuli",
+  "about.title": "La Rabiari buruz",
+  "about.intro": "La Rabia Bilboko Uribarri auzoan sortutako komunitate-aldizkari bat da.",
+  "about.body": [
+    "Kazetaritza narratiboa, esperimentazio multimedia, artea eta fikzioa lantzen dituen proiektua gara, auzotik eta auzoarentzat egina.",
+    "Ohiko hedabideetan agertu ohi ez diren ahotsei ematen diegu lekua: auzokideak, kolektiboak, artistak eta zerbait kontatzeko duen edonor.",
+    "Kultura ireki, kolaboratibo eta hurbilekoan sinesten dugu. Parte hartu, idatzi edo istorio bat proposatu nahi baduzu, gustura entzungo dizugu."
+  ],
   "talleres.title": "Tailerrak",
   "talleres.subtitle": "La Rabiaren tailerrak eta jarduerak.",
   "categorySection.empty": "Oraindik ez dago argitalpenik atal honetan.",

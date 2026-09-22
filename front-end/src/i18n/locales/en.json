@@ -347,6 +347,14 @@
   "notifications.info": "Information",
   "microperfiles.title": "Micro-profiles",
   "microperfiles.subtitle": "Short portraits of people from the neighbourhood.",
+  "about.back": "Back",
+  "about.title": "About La Rabia",
+  "about.intro": "La Rabia is a community magazine born in the Uribarri district of Bilbao.",
+  "about.body": [
+    "We are a project of narrative journalism, multimedia experimentation, art and fiction made from the neighbourhood and for the neighbourhood.",
+    "We give space to the voices that rarely appear in mainstream media: neighbours, collectives, artists and anyone with something to tell.",
+    "We believe in an open, collaborative and local culture. If you want to take part, write to us or pitch a story, we'd love to hear from you."
+  ],
   "talleres.title": "Workshops",
   "talleres.subtitle": "Workshops and activities from La Rabia.",
   "categorySection.empty": "There are no publications in this section yet.",

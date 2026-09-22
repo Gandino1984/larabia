@@ -347,6 +347,14 @@
   "notifications.info": "Información",
   "microperfiles.title": "Micro-perfiles",
   "microperfiles.subtitle": "Retratos breves de personas del barrio.",
+  "about.back": "Volver",
+  "about.title": "Sobre La Rabia",
+  "about.intro": "La Rabia es una revista comunitaria nacida en el distrito de Uribarri, en Bilbao.",
+  "about.body": [
+    "Somos un proyecto de periodismo narrativo, experimentación multimedia, arte y ficción hecho desde el barrio y para el barrio.",
+    "Damos espacio a las voces que no suelen aparecer en los grandes medios: vecinas y vecinos, colectivos, artistas y quien tenga algo que contar.",
+    "Creemos en una cultura abierta, colaborativa y de proximidad. Si quieres participar, escribirnos o proponer una historia, estaremos encantadas de escucharte."
+  ],
   "talleres.title": "Talleres",
   "talleres.subtitle": "Talleres y actividades de La Rabia.",
   "categorySection.empty": "Todavía no hay publicaciones en esta sección.",

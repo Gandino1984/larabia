@@ -44,7 +44,9 @@ export const DEFAULT_NAV = [
       { id: 'contact', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Contacto', en: 'Contact' }, action: { type: 'modal', value: 'contact' } },
       { id: 'newsletter', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Newsletter', en: 'Newsletter' }, action: { type: 'modal', value: 'newsletter' } }
+        label: { es: 'Newsletter', en: 'Newsletter' }, action: { type: 'modal', value: 'newsletter' } },
+      { id: 'about', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Sobre La Rabia', en: 'About La Rabia' }, action: { type: 'section', value: 'about' } }
     ] }
 ];
 
@@ -65,7 +67,8 @@ export const SECTION_OPTIONS = [
   { value: 'authors', label: 'Autoras/es' },
   { value: 'openmic', label: 'Espacio abierto' },
   { value: 'microperfiles', label: 'Micro-perfiles' },
-  { value: 'talleres', label: 'Talleres' }
+  { value: 'talleres', label: 'Talleres' },
+  { value: 'about', label: 'Sobre La Rabia' }
 ];
 
 export const MODAL_OPTIONS = [

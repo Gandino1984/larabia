@@ -1,0 +1,94 @@
+/* "Sobre La Rabia" static page. Mobile-first, dark background to match the
+   magazine's editorial feel. */
+.about-page {
+  min-height: 100vh;
+  background: var(--landing-bg, #252525);
+  color: #f0f0f0;
+  padding: 8rem 1rem 3rem;
+}
+
+.about-container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.about-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  margin-bottom: 2rem;
+  border: none;
+  border-radius: 8px;
+  background: lightgray;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.about-back:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+.about-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.about-logo {
+  max-width: 180px;
+  height: auto;
+  margin: 0 auto 1.5rem;
+  display: block;
+}
+
+.about-title {
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  font-family: 'Alfa Slab One', serif;
+  color: #ffffff;
+}
+
+.about-intro {
+  margin: 0 auto;
+  max-width: 620px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #d0d0d0;
+}
+
+.about-body {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #dcdcdc;
+}
+
+.about-body p {
+  margin: 0 0 1.25rem;
+}
+
+/* Tablet / desktop */
+@media (min-width: 768px) {
+  .about-page {
+    padding: 9rem 2rem 4rem;
+  }
+
+  .about-logo {
+    max-width: 220px;
+  }
+
+  .about-title {
+    font-size: 2.5rem;
+  }
+
+  .about-intro {
+    font-size: 1.2rem;
+  }
+
+  .about-body {
+    font-size: 1.05rem;
+  }
+}

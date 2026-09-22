@@ -21,6 +21,7 @@ export const UIProvider = ({ children }) => {
   const [showMicroPerfiles, setShowMicroPerfiles] = useState(false);
   const [showTalleres, setShowTalleres] = useState(false);
   const [showWorkshopDetail, setShowWorkshopDetail] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [openEditorToEdit, setOpenEditorToEdit] = useState(false);
 
@@ -105,6 +106,7 @@ export const UIProvider = ({ children }) => {
     setShowMicroPerfiles(false);
     setShowTalleres(false);
     setShowWorkshopDetail(false);
+    setShowAbout(false);
     setShowAdmin(false);
   };
 
@@ -298,6 +300,12 @@ export const UIProvider = ({ children }) => {
     setShowWorkshopDetail(true);
   };
 
+  const navigateToAbout = () => {
+    setPreviousView('home');
+    resetAllViews();
+    setShowAbout(true);
+  };
+
   const navigateToAdmin = () => {
     setPreviousView('home');
     resetAllViews();
@@ -394,6 +402,8 @@ export const UIProvider = ({ children }) => {
     navigateToTalleres,
     showWorkshopDetail,
     navigateToWorkshopDetail,
+    showAbout,
+    navigateToAbout,
     showAdmin,
     navigateToAdmin,
     navigateBack,

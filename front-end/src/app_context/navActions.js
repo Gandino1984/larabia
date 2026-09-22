@@ -15,6 +15,7 @@ const SECTION_NAV = {
   openmic: 'navigateToOpenMic',
   microperfiles: 'navigateToMicroPerfiles',
   talleres: 'navigateToTalleres',
+  about: 'navigateToAbout',
   projects: 'navigateToProjectDetail'
 };
 
