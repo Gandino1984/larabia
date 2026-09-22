@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
-import { Calendar, User, ArrowLeft, Trash2, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal } from 'lucide-react';
+import { Calendar, User, ArrowLeft, Trash2, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal, Search, X } from 'lucide-react';
 import ArticleEngagementBar from './ArticleEngagementBar';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import './ArticlesList.css';
@@ -75,6 +75,7 @@ function ArticlesList() {
   const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError } = useUI();
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   // Grid vs horizontal carousel (desktop only; mobile is always vertical).
   const [viewMode, setViewMode] = useState(() => {
     try { return localStorage.getItem('larabia_articles_view') || 'grid'; } catch { return 'grid'; }
@@ -100,10 +101,10 @@ function ArticlesList() {
     fetchArticles();
   }, [fetchArticles]);
 
-  // Reset to page 1 whenever the article list changes (e.g. filter applied)
+  // Reset to page 1 whenever the article list or the search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [articles.length]);
+  }, [articles.length, searchTerm]);
 
   // Show articles in publication order: the first published article first.
   // (The API returns them newest-first, so sort ascending here.)
@@ -114,8 +115,24 @@ function ArticlesList() {
     return (a.id_article || 0) - (b.id_article || 0);
   });
 
-  const totalPages = Math.ceil(orderedArticles.length / ARTICLES_PER_PAGE);
-  const paginatedArticles = orderedArticles.slice(
+  // Live in-page search across the same fields as the header search bar.
+  const filteredArticles = searchTerm.trim()
+    ? orderedArticles.filter((article) => {
+        const q = normalize(searchTerm);
+        return (
+          normalize(article.title_article).includes(q) ||
+          normalize(article.excerpt_article).includes(q) ||
+          normalize(article.content_article).includes(q) ||
+          normalize(article.category_article).includes(q) ||
+          normalize(article.author_name).includes(q) ||
+          article.authors?.some((a) => normalize(a.name_user).includes(q)) ||
+          article.tags_article?.some((tag) => normalize(tag).includes(q))
+        );
+      })
+    : orderedArticles;
+
+  const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE);
+  const paginatedArticles = filteredArticles.slice(
     (currentPage - 1) * ARTICLES_PER_PAGE,
     currentPage * ARTICLES_PER_PAGE
   );
@@ -308,13 +325,34 @@ function ArticlesList() {
           </div>
         </div>
         <div className="articles-list-subheader">
-          <p className="articles-count">{articles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: articles.length })}</p>
+          <p className="articles-count">{filteredArticles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: filteredArticles.length })}</p>
+          <div className="articles-search">
+            <div className="search-input-wrapper">
+              <Search size={16} className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder={t('header.search.placeholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button className="search-clear-btn" onClick={() => setSearchTerm('')} aria-label={t('header.search.clear', 'Limpiar')}>
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       {articles.length === 0 ? (
         <div className="no-articles">
           <p>{t('article.list.empty')}</p>
+        </div>
+      ) : filteredArticles.length === 0 ? (
+        <div className="no-articles">
+          <p>{t('header.search.noResults', { query: searchTerm })}</p>
         </div>
       ) : (
         <>
@@ -329,7 +367,7 @@ function ArticlesList() {
                 <ChevronLeft size={24} />
               </button>
               <div className="articles-carousel" ref={carouselRef}>
-                {orderedArticles.map(renderCard)}
+                {filteredArticles.map(renderCard)}
               </div>
               <button
                 type="button"
