@@ -52,7 +52,7 @@ const getTypeDisplay = (type) => {
   return type.charAt(0).toUpperCase() + type.slice(1);
 };
 
-function ArticleCard({ article, typeBadge }) {
+function ArticleCard({ article, typeBadge, featuredBadge }) {
   const { t } = useTranslation();
   const { setSelectedArticle, deleteArticle } = useMagazine();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
@@ -118,12 +118,23 @@ function ArticleCard({ article, typeBadge }) {
         {(() => {
           // Prefer an explicit type badge (e.g. the project's type); otherwise
           // fall back to the article's category (hidden when it's "general").
-          const label = typeBadge
+          const typeLabel = typeBadge
             ? getTypeDisplay(typeBadge)
             : (article.category_article && normalize(article.category_article) !== 'general'
                 ? getCategoryDisplay(article.category_article)
                 : null);
-          return label ? <span className="article-category">{label}</span> : null;
+          const isFeatured = featuredBadge || article.featured_article;
+          if (!typeLabel && !isFeatured) return null;
+          return (
+            <div className="article-badges">
+              {isFeatured && (
+                <span className="article-badge article-featured-badge">{t('article.detail.featured')}</span>
+              )}
+              {typeLabel && (
+                <span className="article-badge article-category">{typeLabel}</span>
+              )}
+            </div>
+          );
         })()}
       </div>
 

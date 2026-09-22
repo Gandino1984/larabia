@@ -125,7 +125,7 @@
 }
 
 .articles-list-page .article-card {
-  background: #1f1f1f;
+  background: #181818;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
@@ -266,7 +266,7 @@
 .articles-list-page .article-meta {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #3a3a3a;
