@@ -471,8 +471,9 @@
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
-  /* Room for the arrows outside the cards, with a small gap from them. */
-  padding: 0 76px;
+  /* Room for the arrows: they keep a margin from the screen edge and a gap from
+     the cards. */
+  padding: 0 90px;
 }
 
 /* Swipe affordance centred over the start of a horizontal carousel. */
@@ -519,17 +520,19 @@
   color: #ffffff;
   transform: translateY(-50%) scale(1.1);
 }
-.articles-list-page .carousel-arrow--prev { left: 6px; }
-.articles-list-page .carousel-arrow--next { right: 6px; }
+.articles-list-page .carousel-arrow--prev { left: 24px; }
+.articles-list-page .carousel-arrow--next { right: 24px; }
 
 @media (min-width: 1024px) {
   .articles-list-page .carousel-arrow { width: 52px; height: 52px; }
-  .articles-carousel-wrap { padding: 0 84px; }
+  .articles-carousel-wrap { padding: 0 96px; }
 }
 
 @media (min-width: 1200px) {
   .articles-list-page .carousel-arrow { width: 62px; height: 62px; }
-  .articles-carousel-wrap { padding: 0 94px; }
+  .articles-carousel-wrap { padding: 0 110px; }
+  .articles-list-page .carousel-arrow--prev { left: 28px; }
+  .articles-list-page .carousel-arrow--next { right: 28px; }
 }
 
 @media (max-width: 768px) {
