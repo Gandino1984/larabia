@@ -91,13 +91,18 @@
    description slides up). Sits below the dark overlay and the content. */
 .hero-slide__bg {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  /* Extended above/below so the parallax translate never reveals an edge. */
+  top: -30%;
+  height: 160%;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   z-index: 0;
   opacity: 0;
   transition: opacity 2.2s ease;
+  will-change: transform;
 }
 .hero-slide.bg-in .hero-slide__bg {
   opacity: 1;
@@ -185,7 +190,7 @@
 .hero-project-label {
   display: block;
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-family: 'Source Code Pro', monospace;
   font-weight: 600;
   text-transform: none;

@@ -63,7 +63,7 @@
     width: 56px;
     height: 56px;
     top: calc(0.5rem + var(--header-h) / 2 + 9px);
-    right: max(0.75rem, calc((100% - 1200px) / 2 - 56px - 0.5rem));
+    right: max(0.75rem, calc((100% - 1200px) / 2 - 56px - 1rem));
     transform: translateY(-50%) translateX(150px);
   }
   .floating-editor-btn.is-in {

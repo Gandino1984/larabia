@@ -82,19 +82,17 @@ function NavSubGroup({ item, lang, roles, onSelect }) {
         <span>{navLabel(item, lang)}</span>
         <ChevronDown size={14} className={`chevron-icon ${open ? 'rotated' : ''}`} />
       </button>
-      {open && (
-        <div className="more-dropdown-submenu">
-          {children.map((child) => (
-            <button
-              key={child.id}
-              className="more-dropdown-item more-dropdown-subitem"
-              onClick={() => onSelect(child)}
-            >
-              {navLabel(child, lang)}
-            </button>
-          ))}
-        </div>
-      )}
+      <SpringDropdown open={open} className="more-dropdown-submenu">
+        {children.map((child) => (
+          <button
+            key={child.id}
+            className="more-dropdown-item more-dropdown-subitem"
+            onClick={() => onSelect(child)}
+          >
+            {navLabel(child, lang)}
+          </button>
+        ))}
+      </SpringDropdown>
     </div>
   );
 }

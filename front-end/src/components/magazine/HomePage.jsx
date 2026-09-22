@@ -50,6 +50,27 @@ function HomePage({ ready = true }) {
     if (ready) setHeroBgIn(true);
   }, [ready]);
 
+  // Parallax: the hero cover drifts slower than the page as the user scrolls
+  // down (wheel/keyboard/touch), so the section previews slide up over it.
+  const [parallaxY, setParallaxY] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        setParallaxY(
+          window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0
+        );
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   const [heroIn, setHeroIn] = useState(heroEntrancePlayed);
   useEffect(() => {
     if (!ready || heroEntrancePlayed) return;
@@ -239,10 +260,13 @@ function HomePage({ ready = true }) {
               }}
               onClick={() => { if (didDrag.current) { didDrag.current = false; return; } handleArticleClick(currentArticle); }}
             >
-              {/* Cover image on its own layer so it can fade in slowly. */}
+              {/* Cover image on its own layer so it can fade in slowly + parallax. */}
               <div
                 className="hero-slide__bg"
-                style={{ backgroundImage: `url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})` }}
+                style={{
+                  backgroundImage: `url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})`,
+                  transform: `translate3d(0, ${parallaxY * 0.25}px, 0)`,
+                }}
               />
               {/* Hidden img to detect broken cover images and fall back to logo */}
               <img
