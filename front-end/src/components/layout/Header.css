@@ -1,34 +1,34 @@
 /* Mobile-First Header Styles */
 
 /* "Roll up" text hover for menu-bar buttons (added on top of the existing color
-   hover). Two stacked copies; on hover the column slides up one line so the
-   first copy leaves and the identical copy enters from below. */
+   hover). The second copy sits one line below (absolute); on hover both slide up
+   one line so the first leaves upward and the second enters from below. */
 .roll {
-  display: inline-flex;
+  position: relative;
+  display: inline-block;
   overflow: hidden;
   vertical-align: top;
   line-height: 1.2;
-  height: 1.2em;
-}
-.roll__col {
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  will-change: transform;
 }
 .roll__line {
   display: block;
-  height: 1.2em;
   white-space: nowrap;
+  transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
+  will-change: transform;
 }
-.nav-link:hover .roll__col,
-.more-dropdown-btn:hover .roll__col {
-  transform: translateY(-50%);
+.roll__line:nth-child(2) {
+  position: absolute;
+  top: 100%;
+  left: 0;
+}
+.nav-link:hover .roll__line,
+.more-dropdown-btn:hover .roll__line {
+  transform: translateY(-100%);
 }
 @media (prefers-reduced-motion: reduce) {
-  .roll__col { transition: none; }
-  .nav-link:hover .roll__col,
-  .more-dropdown-btn:hover .roll__col { transform: none; }
+  .roll__line { transition: none; }
+  .nav-link:hover .roll__line,
+  .more-dropdown-btn:hover .roll__line { transform: none; }
 }
 
 /* Floating Header Container - Mobile Base */
