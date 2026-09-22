@@ -245,7 +245,8 @@
   margin: 2.25rem auto 1.5rem;
   line-height: 1.6;
   opacity: 0.95;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+  /* Subtle shadow just for legibility over the image. */
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
   /* Dark translucent panel behind the text (see ::before) with softly blurred,
      feathered edges so it blends into the hero image. */
   position: relative;
