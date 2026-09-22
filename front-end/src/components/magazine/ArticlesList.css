@@ -487,8 +487,9 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
-  width: 44px;
-  height: 44px;
+  /* Same size as the hero slider arrows (46px ≥768, 52px ≥1024, 62px ≥1200). */
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   border: none;
   background: lightgray;
@@ -499,6 +500,11 @@
   justify-content: center;
   transition: background 0.25s ease, color 0.25s ease, transform 0.3s ease;
 }
+/* Scale the chevron with the button, like the hero arrows. */
+.articles-list-page .carousel-arrow svg {
+  width: 58%;
+  height: 58%;
+}
 .articles-list-page .carousel-arrow:hover {
   background: #000000;
   color: #ffffff;
@@ -506,6 +512,16 @@
 }
 .articles-list-page .carousel-arrow--prev { left: 6px; }
 .articles-list-page .carousel-arrow--next { right: 6px; }
+
+@media (min-width: 1024px) {
+  .articles-list-page .carousel-arrow { width: 52px; height: 52px; }
+  .articles-carousel-wrap { padding: 0 84px; }
+}
+
+@media (min-width: 1200px) {
+  .articles-list-page .carousel-arrow { width: 62px; height: 62px; }
+  .articles-carousel-wrap { padding: 0 94px; }
+}
 
 @media (max-width: 768px) {
   .articles-list-page .carousel-arrow { display: none; }
