@@ -971,23 +971,27 @@
   /* Full-bleed, taller description on mobile; clamp keeps it within the slide. */
   .hero-desc-row .hero-excerpt {
     display: -webkit-box;
-    -webkit-line-clamp: 9;
+    -webkit-line-clamp: 11;
     -webkit-box-orient: vertical;
     overflow: hidden;
     width: 100%;
     max-width: none;
     margin: 0.35rem 0 0;
   }
-  /* Tighten the vertical rhythm below the text so more of it can show. */
+  /* Buttons + authors a little lower to breathe under the longer text. */
   .hero-actions {
     order: 1;
-    margin-top: 0.5rem;
+    margin-top: 0.8rem;
   }
   .hero-meta {
-    margin-top: 0.9rem;
+    margin-top: 1.3rem;
   }
   /* No slide indicators on mobile — reclaim the space for the text. */
   .hero-indicators {
     display: none;
+  }
+  /* Reclaim some space above the title (still clears the create-article button). */
+  .hero-content {
+    margin-top: 2.5rem;
   }
 }
