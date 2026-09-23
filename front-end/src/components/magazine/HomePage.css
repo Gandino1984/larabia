@@ -971,7 +971,7 @@
   /* Full-bleed, taller description on mobile; clamp keeps it within the slide. */
   .hero-desc-row .hero-excerpt {
     display: -webkit-box;
-    -webkit-line-clamp: 11;
+    -webkit-line-clamp: 12;
     -webkit-box-orient: vertical;
     overflow: hidden;
     width: 100%;
