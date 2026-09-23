@@ -392,12 +392,11 @@
 @media (max-width: 767px) {
   .hero-meta-divider { display: none; }
 
-  /* Keep the project text clear of both slider arrows on narrow phones (the
-     block is now fluid, so its edges sit closer to the arrows). */
+  /* Near full-bleed description on phones (only a small side gutter). */
   .hero-excerpt {
     box-sizing: border-box;
-    padding-left: 2.25rem;
-    padding-right: 2.25rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 
   /* Narrow portrait phones: the slider arrows sit translucent over the image
@@ -969,17 +968,18 @@
     border-radius: 6px;
     margin-bottom: 0.2rem;
   }
-  /* Clamp the description on mobile so image + text + buttons fit the slide. */
+  /* Full-bleed, taller description on mobile; clamp keeps it within the slide. */
   .hero-desc-row .hero-excerpt {
     display: -webkit-box;
-    -webkit-line-clamp: 5;
+    -webkit-line-clamp: 7;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    /* Sit close to the image above it. */
-    margin-top: 0.35rem;
+    width: 100%;
+    max-width: none;
+    margin: 0.35rem 0 0;
   }
   .hero-actions {
     order: 1;
-    margin-top: 0.5rem;
+    margin-top: 0.9rem;
   }
 }
