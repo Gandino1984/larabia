@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSpring, animated } from '@react-spring/web';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
-import { ChevronLeft, ChevronRight, Calendar, Share2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Share2, FileText, Image as ImageIcon, Music } from 'lucide-react';
 import SectionPreviews from './SectionPreviews';
 import ScrollHint from '../common/ScrollHint';
 import RollText from '../common/RollText';
@@ -40,7 +40,7 @@ let scrollOverlayShown = false;
 
 function HomePage({ ready = true }) {
   const { t } = useTranslation();
-  const { featuredArticles, setSelectedArticle, fetchArticleById } = useMagazine();
+  const { featuredArticles, setSelectedArticle, fetchArticleById, projects, fetchProjects } = useMagazine();
   const { navigateToArticle, openAuthorCard, showSuccess } = useUI();
 
   const handleShare = (e, article) => {
@@ -51,6 +51,21 @@ function HomePage({ ready = true }) {
         .then(() => showSuccess(t('hero.linkCopied', '¡Enlace copiado!')))
         .catch(() => {});
     }
+  };
+
+  // Projects hold the format (chosen in the editor) that drives the media-type
+  // icons next to the hero date; fetch them once so we can map project_id.
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  // Map a project's format to the media icons: audio (podcast), multimedia
+  // (text + image + audio) for multimedia/video, otherwise text + image.
+  const getFormatMedia = (format) => {
+    const f = (format || '').toLowerCase();
+    if (f === 'podcast') return ['audio'];
+    if (f === 'multimedia' || f === 'video') return ['text', 'image', 'audio'];
+    return ['text', 'image'];
   };
   // Staggered fade-up of the hero content (project label → title → description/
   // date/authors), in sync with the create-button slide-in.
@@ -325,6 +340,18 @@ function HomePage({ ready = true }) {
                   <span className="hero-date">
                     <Calendar size={18} />
                     {formatDate(currentArticle.date_published)}
+                    {(() => {
+                      const proj = (projects || []).find((p) => String(p.id_project) === String(currentArticle.project_id));
+                      if (!proj?.format_project) return null;
+                      const media = getFormatMedia(proj.format_project);
+                      return (
+                        <span className="hero-format" title={proj.format_project}>
+                          {media.includes('text') && <FileText size={16} />}
+                          {media.includes('image') && <ImageIcon size={16} />}
+                          {media.includes('audio') && <Music size={16} />}
+                        </span>
+                      );
+                    })()}
                   </span>
                 )}
                 <div className="hero-desc-row">

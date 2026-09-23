@@ -280,6 +280,19 @@
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
 }
 
+/* Media-type icons (text / image / audio) next to the publication date. */
+.hero-format {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.6rem;
+  padding-left: 0.6rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.4);
+}
+.hero-format svg {
+  opacity: 0.95;
+}
+
 .hero-meta {
   display: flex;
   align-items: center;
