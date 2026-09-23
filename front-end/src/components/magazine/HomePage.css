@@ -231,7 +231,7 @@
 .hero-title {
   font-family: 'Alfa Slab One', serif;
   font-size: 1.875rem;
-  margin: 0 0 1rem;
+  margin: 0 auto 1rem;
   line-height: 1.2;
   /* Slow shimmer between white and a slightly darker tone. */
   background: linear-gradient(100deg, #ffffff 0%, #ffffff 35%, #b9b9b9 50%, #ffffff 65%, #ffffff 100%);
