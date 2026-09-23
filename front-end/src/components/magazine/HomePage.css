@@ -204,6 +204,15 @@
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0, 0, 0, 0.8);
 }
 
+/* Keep both titles within the same measure (centered) so the project label
+   doesn't reach closer to the screen edges than the article title. */
+.hero-title,
+.hero-project-label {
+  max-width: min(92vw, 960px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .hero-category {
   display: inline-flex;
   align-items: center;
