@@ -115,7 +115,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.62);
   pointer-events: none;
   z-index: 1;
 }
@@ -268,7 +268,7 @@
   justify-content: center;
   gap: 0.4rem;
   color: #ffffff;
-  font-size: 0.85rem;
+  font-size: 1rem;
   opacity: 0.9;
   margin-top: 0.75rem;
   margin-bottom: 1rem;
@@ -287,6 +287,8 @@
   max-width: min(90vw, 680px);
   margin-left: auto;
   margin-right: auto;
+  /* Extra separation from the description above. */
+  margin-top: 1.75rem;
   box-sizing: border-box;
 }
 
@@ -891,7 +893,7 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    border-radius: 12px;
+    border-radius: 6px;
   }
 }
 @media (min-width: 1024px) { .hero-desc-row { max-width: 1040px; } }
