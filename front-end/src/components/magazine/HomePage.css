@@ -402,17 +402,13 @@
   /* Narrow portrait phones: the slider arrows sit translucent over the image
      and only turn solid while pressed (on tap). */
   .hero-nav,
-  .hero-nav:hover {
-    background: rgba(211, 211, 211, 0.4);
-    color: rgba(26, 26, 26, 0.85);
-    backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px);
-    transform: translateY(-50%);
-  }
-
+  .hero-nav:hover,
   .hero-nav:active {
-    background: lightgray;
-    color: #1a1a1a;
+    background: transparent;
+    color: #ffffff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transform: translateY(-50%);
   }
 }
 
