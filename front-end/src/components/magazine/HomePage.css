@@ -975,6 +975,8 @@
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    /* Sit close to the image above it. */
+    margin-top: 0.35rem;
   }
   .hero-actions {
     order: 1;
