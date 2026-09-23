@@ -149,6 +149,7 @@
 .hero-content.hero-anim .hero-date,
 .hero-content.hero-anim .hero-excerpt,
 .hero-content.hero-anim .hero-desc-image,
+.hero-content.hero-anim .hero-actions,
 .hero-content.hero-anim .hero-meta {
   opacity: 0;
 }
@@ -162,6 +163,7 @@
 .hero-content.hero-in .hero-date { animation: hero-rise 0.6s ease both; animation-delay: 0.2s; }
 .hero-content.hero-in .hero-excerpt { animation: hero-rise 0.6s ease both; animation-delay: 0.4s; }
 .hero-content.hero-in .hero-desc-image { animation: hero-rise 0.6s ease both; animation-delay: 0.4s; }
+.hero-content.hero-in .hero-actions { animation: hero-rise 0.6s ease both; animation-delay: 0.55s; }
 .hero-content.hero-in .hero-meta { animation: hero-rise 0.6s ease both; animation-delay: 0.55s; }
 
 /* Mobile: a very translucent black band behind the project + article titles,
@@ -308,12 +310,13 @@
   align-self: center;
 }
 
-/* Share + "Entrar" actions, pushed to the right edge of the meta row. */
+/* Share + "Entrar" actions, centered beneath the cover image. */
 .hero-actions {
-  margin-left: auto;
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 1rem;
+  margin-top: 0.85rem;
 }
 .hero-enter-btn {
   display: inline-flex;
@@ -872,7 +875,9 @@
 }
 
 /* Desktop/wide: show the project cover image beside the description (70% text /
-   30% image). On mobile only the description shows (the cover is the slide bg). */
+   30% media). The media column holds the cover image with the Share/Entrar
+   buttons centered beneath it (same width as the image). On mobile the image is
+   hidden (the cover is the slide bg) and the buttons stay centered. */
 .hero-desc-image { display: none; }
 @media (min-width: 768px) {
   .hero-desc-row {
@@ -888,15 +893,28 @@
     max-width: none;
     margin: 0;
   }
+  .hero-media {
+    flex: 3 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
   .hero-desc-image {
     display: block;
-    flex: 3 1 0;
-    align-self: stretch;
+    width: 100%;
+    flex: 1 1 auto;
     min-height: 160px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 6px;
+  }
+  /* Buttons centered beneath the image, matching the media (image) width. */
+  .hero-desc-row .hero-actions {
+    margin: 0;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
   }
 }
 @media (min-width: 1024px) { .hero-desc-row { max-width: 1040px; } }
