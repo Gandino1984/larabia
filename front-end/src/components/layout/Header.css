@@ -25,6 +25,18 @@
 .more-dropdown-btn:hover .roll__line {
   transform: translateY(-100%);
 }
+/* The generic `.nav-link span { display: inline }` rule (further down) would
+   flatten the roll spans to inline — and transform is ignored on inline
+   elements. These higher-specificity rules keep their block/inline-block display
+   so the roll animates. */
+.nav-link .roll,
+.more-dropdown-btn .roll {
+  display: inline-block;
+}
+.nav-link .roll__line,
+.more-dropdown-btn .roll__line {
+  display: block;
+}
 @media (prefers-reduced-motion: reduce) {
   .roll__line { transition: none; }
   .nav-link:hover .roll__line,
