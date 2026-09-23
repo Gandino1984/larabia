@@ -115,7 +115,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.62);
+  background: rgba(0, 0, 0, 0.68);
   pointer-events: none;
   z-index: 1;
 }
@@ -148,6 +148,7 @@
 .hero-content.hero-anim .hero-headline,
 .hero-content.hero-anim .hero-date,
 .hero-content.hero-anim .hero-excerpt,
+.hero-content.hero-anim .hero-desc-image,
 .hero-content.hero-anim .hero-meta {
   opacity: 0;
 }
@@ -160,6 +161,7 @@
 .hero-content.hero-in .hero-headline { animation: hero-rise 0.6s ease both; }
 .hero-content.hero-in .hero-date { animation: hero-rise 0.6s ease both; animation-delay: 0.2s; }
 .hero-content.hero-in .hero-excerpt { animation: hero-rise 0.6s ease both; animation-delay: 0.4s; }
+.hero-content.hero-in .hero-desc-image { animation: hero-rise 0.6s ease both; animation-delay: 0.4s; }
 .hero-content.hero-in .hero-meta { animation: hero-rise 0.6s ease both; animation-delay: 0.55s; }
 
 /* Mobile: a very translucent black band behind the project + article titles,
@@ -169,6 +171,7 @@
   margin-left: calc(50% - 50vw);
   padding: 0.7rem 1rem;
   background: rgba(0, 0, 0, 0.45);
+  border-bottom: 1px solid #333333;
   margin-bottom: 1rem;
 }
 .hero-headline .hero-project-label,
@@ -310,7 +313,7 @@
   margin-left: auto;
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 1rem;
 }
 .hero-enter-btn {
   display: inline-flex;
@@ -452,7 +455,7 @@
    chevrons; black bg + white on hover. */
 .hero-nav {
   position: absolute;
-  top: 50%;
+  top: 54%;
   transform: translateY(-50%);
   background: lightgray;
   border: none;
@@ -666,11 +669,11 @@
   }
 
   .hero-nav.prev {
-    left: 1.5rem;
+    left: 1rem;
   }
 
   .hero-nav.next {
-    right: 1.5rem;
+    right: 1rem;
   }
 
   .hero-indicators {
@@ -739,11 +742,11 @@
   }
 
   .hero-nav.prev {
-    left: 2rem;
+    left: 1.25rem;
   }
 
   .hero-nav.next {
-    right: 2rem;
+    right: 1.25rem;
   }
 
   .hero-indicators {
@@ -797,11 +800,11 @@
   /* Bring the arrows in next to the (max 1080px) content instead of the far
      screen edges on wide screens. */
   .hero-nav.prev {
-    left: max(2.5rem, calc(50% - 540px - 74px));
+    left: max(2rem, calc(50% - 540px - 110px));
   }
 
   .hero-nav.next {
-    right: max(2.5rem, calc(50% - 540px - 74px));
+    right: max(2rem, calc(50% - 540px - 110px));
   }
 }
 
@@ -898,3 +901,15 @@
 }
 @media (min-width: 1024px) { .hero-desc-row { max-width: 1040px; } }
 @media (min-width: 1200px) { .hero-desc-row { max-width: 1140px; } }
+
+/* Desktop: larger author avatars + names in the hero meta. */
+@media (min-width: 768px) {
+  .hero-author-avatar,
+  .hero-author-avatar--fallback {
+    width: 46px;
+    height: 46px;
+  }
+  .hero-author-name {
+    font-size: 1.05rem;
+  }
+}

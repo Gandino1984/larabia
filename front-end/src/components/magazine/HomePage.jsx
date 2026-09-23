@@ -183,7 +183,7 @@ function HomePage({ ready = true }) {
     if (!featuredArticles || featuredArticles.length <= 1) return;
     const interval = setInterval(() => {
       fadeTo((prev) => (prev + 1) % featuredArticles.length);
-    }, 12000);
+    }, 14000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [featuredArticles]);
