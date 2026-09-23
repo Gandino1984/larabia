@@ -478,10 +478,10 @@
 /* Carousel wrapper + navigation arrows */
 .articles-carousel-wrap {
   position: relative;
-  /* Constrained + centered (not full-bleed) so the slider is narrower and shows
-     roughly one card fewer between the arrows — more breathing room. */
+  /* Constrained + centered (not full-bleed) so the slider breathes; wide enough
+     to show 3 cards on landscape/desktop (see the per-card widths below). */
   width: 100%;
-  max-width: 1080px;
+  max-width: 1300px;
   margin-left: auto;
   margin-right: auto;
   /* Room for the arrows: they keep a margin from the edge and a gap from cards. */
@@ -538,6 +538,12 @@
 @media (min-width: 1024px) {
   .articles-list-page .carousel-arrow { width: 52px; height: 52px; }
   .articles-carousel-wrap { padding: 0 96px; }
+  /* Three cards per view on landscape/desktop: each fills a third of the track
+     (2rem/32px gaps between them). */
+  .articles-carousel .article-card {
+    flex: 0 0 calc((100% - 64px) / 3);
+    max-width: none;
+  }
 }
 
 @media (min-width: 1200px) {
