@@ -959,14 +959,15 @@
   .hero-desc-image {
     display: block;
     order: -1;
-    width: 100%;
+    align-self: center;
+    width: 88%;
     height: 16vh;
     max-height: 138px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 6px;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.2rem;
   }
   /* Clamp the description on mobile so image + text + buttons fit the slide. */
   .hero-desc-row .hero-excerpt {
