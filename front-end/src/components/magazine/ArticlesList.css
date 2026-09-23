@@ -201,7 +201,7 @@
 
 .list-type-badge,
 .list-featured-badge {
-  background: #1a1a1a;
+  background: rgba(0, 0, 0, 0.55);
   color: #ffffff;
   padding: 0.3rem 0.7rem;
   /* Fully rounded (pill) ends so they don't read like buttons. */
@@ -484,8 +484,8 @@
   max-width: 1300px;
   margin-left: auto;
   margin-right: auto;
-  /* Room for the arrows: they keep a margin from the edge and a gap from cards. */
-  padding: 0 90px;
+  /* Room for the arrows near the edge, with a clear gap from the cards. */
+  padding: 0 94px;
 }
 
 /* Swipe affordance centred over the start of a horizontal carousel. */
@@ -532,12 +532,12 @@
   color: #ffffff;
   transform: translateY(-50%) scale(1.1);
 }
-.articles-list-page .carousel-arrow--prev { left: 24px; }
-.articles-list-page .carousel-arrow--next { right: 24px; }
+.articles-list-page .carousel-arrow--prev { left: 8px; }
+.articles-list-page .carousel-arrow--next { right: 8px; }
 
 @media (min-width: 1024px) {
   .articles-list-page .carousel-arrow { width: 52px; height: 52px; }
-  .articles-carousel-wrap { padding: 0 96px; }
+  .articles-carousel-wrap { padding: 0 100px; }
   /* Three cards per view on landscape/desktop: each fills a third of the track
      (2rem/32px gaps between them). */
   .articles-carousel .article-card {
@@ -548,9 +548,7 @@
 
 @media (min-width: 1200px) {
   .articles-list-page .carousel-arrow { width: 62px; height: 62px; }
-  .articles-carousel-wrap { padding: 0 110px; }
-  .articles-list-page .carousel-arrow--prev { left: 28px; }
-  .articles-list-page .carousel-arrow--next { right: 28px; }
+  .articles-carousel-wrap { padding: 0 116px; }
 }
 
 @media (max-width: 768px) {
