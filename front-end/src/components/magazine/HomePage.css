@@ -195,7 +195,7 @@
 .hero-project-label {
   display: block;
   color: #ffffff;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-family: 'Source Code Pro', monospace;
   font-weight: 600;
   text-transform: none;
@@ -989,5 +989,19 @@
   /* Reclaim some space above the title (still clears the create-article button). */
   .hero-content {
     margin-top: 2.5rem;
+  }
+}
+
+/* Mobile: hero slider arrows are plain white chevrons, no background. Higher
+   specificity + placed last so it beats the base .hero-nav background. */
+@media (max-width: 767px) {
+  .hero-slider .hero-nav,
+  .hero-slider .hero-nav:hover,
+  .hero-slider .hero-nav:active {
+    background: transparent;
+    color: #ffffff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transform: translateY(-50%);
   }
 }
