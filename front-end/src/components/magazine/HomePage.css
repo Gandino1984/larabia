@@ -115,7 +115,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.49);
+  background: rgba(0, 0, 0, 0.55);
   pointer-events: none;
   z-index: 1;
 }
@@ -259,19 +259,6 @@
   /* Fluid on mobile so it grows with the screen (instead of staying stuck at a
      small fixed width between ~400 and 767px). Desktop sets fixed widths ≥768. */
   max-width: min(90vw, 680px);
-}
-
-/* Blurred, feathered dark panel sitting behind the excerpt text. The blur
-   softens the edges so there's no hard rectangle over the hero image. */
-.hero-excerpt::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 12px;
-  filter: blur(10px);
-  pointer-events: none;
 }
 
 /* Publication date, centered below the article title. */
@@ -878,3 +865,34 @@
     margin-left: 0;
   }
 }
+
+/* Desktop/wide: show the project cover image beside the description (70% text /
+   30% image). On mobile only the description shows (the cover is the slide bg). */
+.hero-desc-image { display: none; }
+@media (min-width: 768px) {
+  .hero-desc-row {
+    display: flex;
+    align-items: stretch;
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 2.25rem auto 1.5rem;
+    text-align: left;
+  }
+  .hero-desc-row .hero-excerpt {
+    flex: 7 1 0;
+    max-width: none;
+    margin: 0;
+  }
+  .hero-desc-image {
+    display: block;
+    flex: 3 1 0;
+    align-self: stretch;
+    min-height: 160px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 12px;
+  }
+}
+@media (min-width: 1024px) { .hero-desc-row { max-width: 1040px; } }
+@media (min-width: 1200px) { .hero-desc-row { max-width: 1140px; } }

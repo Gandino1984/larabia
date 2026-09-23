@@ -328,7 +328,15 @@ function HomePage({ ready = true }) {
                   </span>
                 )}
                 {currentArticle.excerpt_article && (
-                  <p className="hero-excerpt">{currentArticle.excerpt_article}</p>
+                  <div className="hero-desc-row">
+                    <p className="hero-excerpt">{currentArticle.excerpt_article}</p>
+                    <div
+                      className="hero-desc-image"
+                      style={{ backgroundImage: `url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})` }}
+                      role="img"
+                      aria-label={currentArticle.title_article}
+                    />
+                  </div>
                 )}
                 <div className="hero-meta">
                   {(currentArticle.authors?.length > 0 || currentArticle.author_name) && (
