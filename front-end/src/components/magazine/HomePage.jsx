@@ -346,9 +346,9 @@ function HomePage({ ready = true }) {
                       const media = getFormatMedia(proj.format_project);
                       return (
                         <span className="hero-format" title={proj.format_project}>
-                          {media.includes('text') && <FileText size={16} />}
-                          {media.includes('image') && <ImageIcon size={16} />}
-                          {media.includes('audio') && <Music size={16} />}
+                          {media.includes('text') && <FileText size={19} />}
+                          {media.includes('image') && <ImageIcon size={19} />}
+                          {media.includes('audio') && <Music size={19} />}
                         </span>
                       );
                     })()}

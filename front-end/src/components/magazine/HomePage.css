@@ -960,13 +960,13 @@
     display: block;
     order: -1;
     width: 100%;
-    height: 26vh;
-    max-height: 230px;
+    height: 16vh;
+    max-height: 138px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 6px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.4rem;
   }
   /* Clamp the description on mobile so image + text + buttons fit the slide. */
   .hero-desc-row .hero-excerpt {
