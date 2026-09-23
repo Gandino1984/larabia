@@ -15,8 +15,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   padding: 0;
   background: lightgray;
   color: #1a1a1a;
@@ -61,10 +61,10 @@
 /* Desktop: flank the header bar on the right, centered on its axis. */
 @media (min-width: 769px) {
   .floating-editor-btn {
-    width: 56px;
-    height: 56px;
+    width: 62px;
+    height: 62px;
     top: calc(1.25rem + var(--header-h) / 2 + 9px);
-    right: max(0.75rem, calc((100% - 1200px) / 2 - 56px - 1rem));
+    right: max(0.75rem, calc((100% - 1200px) / 2 - 62px - 1rem));
     transform: translateY(-50%) translateX(150px);
   }
   .floating-editor-btn.is-in {
