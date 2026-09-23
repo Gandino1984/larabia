@@ -201,8 +201,8 @@
 
 .list-type-badge,
 .list-featured-badge {
-  background: rgba(220, 220, 220, 0.85);
-  color: #1a1a1a;
+  background: #1a1a1a;
+  color: #ffffff;
   padding: 0.3rem 0.7rem;
   /* Fully rounded (pill) ends so they don't read like buttons. */
   border-radius: 999px;

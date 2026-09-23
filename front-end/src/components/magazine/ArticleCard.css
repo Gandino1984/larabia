@@ -116,19 +116,14 @@
 }
 .article-badge {
   font-family: 'Source Code Pro', monospace;
-  background: rgba(220, 220, 220, 0.85);
-  color: #1a1a1a;
+  background: #1a1a1a;
+  color: #ffffff;
   padding: 0.3rem 0.7rem;
   /* Fully rounded (pill) ends so they don't read like buttons. */
   border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 600;
   white-space: nowrap;
-}
-/* Featured stands out with the dark treatment. */
-.article-featured-badge {
-  background: #1a1a1a;
-  color: #ffffff;
 }
 
 .article-card-content {
