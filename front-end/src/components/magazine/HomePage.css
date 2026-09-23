@@ -971,15 +971,23 @@
   /* Full-bleed, taller description on mobile; clamp keeps it within the slide. */
   .hero-desc-row .hero-excerpt {
     display: -webkit-box;
-    -webkit-line-clamp: 7;
+    -webkit-line-clamp: 9;
     -webkit-box-orient: vertical;
     overflow: hidden;
     width: 100%;
     max-width: none;
     margin: 0.35rem 0 0;
   }
+  /* Tighten the vertical rhythm below the text so more of it can show. */
   .hero-actions {
     order: 1;
+    margin-top: 0.5rem;
+  }
+  .hero-meta {
     margin-top: 0.9rem;
+  }
+  /* No slide indicators on mobile — reclaim the space for the text. */
+  .hero-indicators {
+    display: none;
   }
 }
