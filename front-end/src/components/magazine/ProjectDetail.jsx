@@ -34,7 +34,11 @@ function ProjectDetail() {
   const articlesRef = useRef(null);
   const [articlesActive, setArticlesActive] = useState(false);
   const scrollCarousel = useCallback((dir) => {
-    setArticlesActive(true);
+    // On mobile tapping an arrow also triggers the darken; on desktop :hover
+    // owns it (so it clears when the mouse leaves).
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
+      setArticlesActive(true);
+    }
     const track = carouselRef.current;
     if (!track) return;
     const card = track.querySelector('.article-card');
