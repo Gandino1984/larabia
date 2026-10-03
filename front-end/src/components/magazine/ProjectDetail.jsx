@@ -29,7 +29,12 @@ function ProjectDetail() {
     try { localStorage.setItem('larabia_project_view', mode); } catch { /* ignore */ }
   }, []);
   const carouselRef = useRef(null);
+  // Darken the articles-section background (differentiating it from the project
+  // info): on hover (desktop via CSS) or when active (mobile — in view / arrow tap).
+  const articlesRef = useRef(null);
+  const [articlesActive, setArticlesActive] = useState(false);
   const scrollCarousel = useCallback((dir) => {
+    setArticlesActive(true);
     const track = carouselRef.current;
     if (!track) return;
     const card = track.querySelector('.article-card');
@@ -37,6 +42,23 @@ function ProjectDetail() {
     track.scrollBy({ left: dir * amount, behavior: 'smooth' });
   }, []);
   useDragScroll(carouselRef, viewMode === 'carousel');
+
+  // Mobile only: activate the darken effect when the articles section scrolls
+  // into view (desktop relies on :hover).
+  useEffect(() => {
+    const el = articlesRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (!isMobile) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => setArticlesActive(entry.isIntersecting));
+      },
+      { threshold: 0.35 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [projectArticles.length, viewMode]);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
@@ -193,7 +215,7 @@ function ProjectDetail() {
         />
       )}
 
-      <div className="project-detail-articles">
+      <div className={`project-detail-articles ${articlesActive ? 'project-detail-articles--active' : ''}`} ref={articlesRef}>
         {loading ? (
           <p className="project-detail-loading">{t('common.loading')}</p>
         ) : projectArticles.length > 0 ? (

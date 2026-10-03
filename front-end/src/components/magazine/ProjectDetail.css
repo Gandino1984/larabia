@@ -116,7 +116,24 @@
 /* Articles section */
 .project-detail-articles {
   border-top: 1px solid #333;
-  padding-top: 2rem;
+  /* Side padding + negative margin so the darkening reads as a full band that
+     reaches the page gutters, differentiating it from the project info above. */
+  padding: 2rem 1rem 1.25rem;
+  margin: 0 -1rem;
+  border-radius: 10px;
+  background: transparent;
+  transition: background 0.6s ease;
+}
+
+/* Gradual darken of the gray background: on hover (desktop) or when active
+   (mobile — section in view / arrow tapped). */
+.project-detail-articles:hover,
+.project-detail-articles--active {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-detail-articles { transition: none; }
 }
 
 .project-articles-grid {
