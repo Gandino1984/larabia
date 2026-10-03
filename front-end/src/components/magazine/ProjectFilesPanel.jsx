@@ -40,23 +40,22 @@ function ProjectFilesPanel({ projectId, projectTitle, onClose }) {
 
   const base = axiosInstance.defaults.baseURL || '';
 
-  const triggerAnchor = (href, filename) => {
+  // Trigger a download from an in-memory blob (same-origin object URL → never
+  // navigates the page, so the SPA state is preserved).
+  const downloadBlob = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = href;
-    if (filename) a.download = filename;
-    a.rel = 'noopener';
+    a.href = url;
+    a.download = filename || 'archivo';
     document.body.appendChild(a);
     a.click();
     a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   };
 
-  const downloadFile = useCallback((file) => {
+  const downloadFile = useCallback(async (file) => {
     if (file.type === 'text') {
-      // Build the .txt locally (same-origin blob → always downloads).
-      const blob = new Blob([file.text || ''], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      triggerAnchor(url, file.filename);
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      downloadBlob(new Blob([file.text || ''], { type: 'text/plain;charset=utf-8' }), file.filename);
       return;
     }
     if (file.external) {
@@ -64,15 +63,28 @@ function ProjectFilesPanel({ projectId, projectTitle, onClose }) {
       window.open(file.path, '_blank', 'noopener,noreferrer');
       return;
     }
-    // Stream through the backend so it comes down as an attachment (cross-origin).
-    const href = `${base}/magazine-project/download?path=${encodeURIComponent(file.path)}&name=${encodeURIComponent(file.filename)}`;
-    triggerAnchor(href, file.filename);
+    // Fetch the file through the (CORS-enabled) download route as a blob and save
+    // it — an <a href> to the cross-origin URL would navigate/reload instead.
+    try {
+      const res = await axiosInstance.get('/magazine-project/download', {
+        params: { path: file.path, name: file.filename },
+        responseType: 'blob',
+      });
+      downloadBlob(res.data, file.filename);
+    } catch {
+      // Last resort: open in a new tab so the current page is never reloaded.
+      const href = `${base}/magazine-project/download?path=${encodeURIComponent(file.path)}&name=${encodeURIComponent(file.filename)}`;
+      window.open(href, '_blank', 'noopener,noreferrer');
+    }
   }, [base]);
 
-  const downloadAll = useCallback(() => {
-    state.files.forEach((file, i) => {
-      setTimeout(() => downloadFile(file), i * 400);
-    });
+  const downloadAll = useCallback(async () => {
+    for (const file of state.files) {
+      // eslint-disable-next-line no-await-in-loop
+      await downloadFile(file);
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((r) => setTimeout(r, 250));
+    }
   }, [state.files, downloadFile]);
 
   const grouped = TYPE_ORDER
