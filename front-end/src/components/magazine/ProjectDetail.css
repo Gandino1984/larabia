@@ -402,3 +402,21 @@
   user-select: none;
 }
 .articles-carousel.is-dragging .article-card { pointer-events: none; }
+
+/* Desktop: make the small meta texts (type/format badges + authors label)
+   larger — closer to the author-name size — and bump the description on wide. */
+@media (min-width: 769px) {
+  .project-detail-collaborators-label {
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+  }
+  .project-detail-type,
+  .project-detail-format {
+    font-size: 0.9rem;
+  }
+}
+@media (min-width: 1200px) {
+  .project-detail-description {
+    font-size: 1.15rem;
+  }
+}
