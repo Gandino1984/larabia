@@ -2,9 +2,11 @@
 
 .project-detail-page {
   width: 100%;
-  max-width: none;
+  /* Same centered measure + side gutters as the articles list, so sections
+     share consistent left/right margins instead of spreading full-width. */
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 10rem 2.5rem 4rem;
+  padding: 10rem 1rem 4rem;
   min-height: calc(100vh - 150px);
 }
 
