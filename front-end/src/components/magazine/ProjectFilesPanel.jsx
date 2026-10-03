@@ -19,13 +19,17 @@ const TYPE_META = {
 };
 const TYPE_ORDER = ['image', 'audio', 'video', 'text'];
 
-function ProjectFilesPanel({ projectId, projectTitle, onClose }) {
+function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
   const [state, setState] = useState({ loading: true, error: '', files: [] });
+
+  // The backend authenticates gated requests with the x-user-id header; without
+  // it the manifest returns 401 and the axios interceptor would log out + reload.
+  const authHeaders = userId ? { 'x-user-id': userId } : {};
 
   useEffect(() => {
     let active = true;
     axiosInstance
-      .get(`/magazine-project/files/${projectId}`)
+      .get(`/magazine-project/files/${projectId}`, { headers: authHeaders })
       .then((res) => {
         if (!active) return;
         const files = res.data?.data?.files || [];
@@ -69,6 +73,7 @@ function ProjectFilesPanel({ projectId, projectTitle, onClose }) {
       const res = await axiosInstance.get('/magazine-project/download', {
         params: { path: file.path, name: file.filename },
         responseType: 'blob',
+        headers: authHeaders,
       });
       downloadBlob(res.data, file.filename);
     } catch {

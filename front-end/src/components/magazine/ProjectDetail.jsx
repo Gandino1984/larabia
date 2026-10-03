@@ -188,6 +188,7 @@ function ProjectDetail() {
         <ProjectFilesPanel
           projectId={selectedProject.id_project}
           projectTitle={selectedProject.title_project}
+          userId={currentUser?.id_user}
           onClose={() => setShowFilesPanel(false)}
         />
       )}
