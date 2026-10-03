@@ -1,6 +1,7 @@
 // back-end/controllers/magazine_project/magazine_project_controller.js
 import magazine_project_model from "../../models/magazine_project_model.js";
 import magazine_article_model from "../../models/magazine_article_model.js";
+import article_block_model from "../../models/article_block_model.js";
 import user_model from "../../models/user_model.js";
 import project_author_model from "../../models/project_author_model.js";
 import { Op } from "sequelize";
@@ -1003,6 +1004,89 @@ async function getPending() {
     }
 }
 
+// Build the downloadable-files manifest for a project: its cover plus every
+// article's cover, text and media blocks (images, audio, video embeds).
+function slugify(s) {
+    return (s || 'archivo')
+        .toString()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+        .slice(0, 60) || 'archivo';
+}
+
+async function buildFilesManifest(id_project) {
+    try {
+        const project = await magazine_project_model.findByPk(id_project, {
+            attributes: ['id_project', 'title_project', 'cover_image_project']
+        });
+        if (!project) return { error: 'Proyecto no encontrado' };
+
+        const articles = await magazine_article_model.findAll({
+            where: { project_id: id_project },
+            attributes: ['id_article', 'title_article', 'cover_image_article', 'content_article'],
+            include: [{ model: article_block_model, as: 'blocks' }],
+            order: [
+                ['id_article', 'ASC'],
+                [{ model: article_block_model, as: 'blocks' }, 'block_order', 'ASC']
+            ]
+        });
+
+        const files = [];
+        const seen = new Set();
+        const addFile = (type, label, rawPath) => {
+            if (!rawPath || typeof rawPath !== 'string') return;
+            const value = rawPath.trim();
+            if (!value) return;
+            const external = /^https?:\/\//i.test(value);
+            const norm = external ? value : value.replace(/^\/+/, '');
+            const key = `${type}|${norm}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+            const filename = external ? value : decodeURIComponent(norm.split('/').pop() || 'archivo');
+            files.push({ type, label, path: norm, filename, external });
+        };
+
+        if (project.cover_image_project) {
+            addFile('image', 'Portada del proyecto', project.cover_image_project);
+        }
+
+        for (const a of articles) {
+            const atitle = a.title_article || `Artículo ${a.id_article}`;
+            if (a.cover_image_article) addFile('image', `Portada · ${atitle}`, a.cover_image_article);
+            if (a.content_article && a.content_article.trim()) {
+                files.push({
+                    type: 'text',
+                    label: `Texto · ${atitle}`,
+                    filename: `${slugify(atitle)}.txt`,
+                    text: a.content_article
+                });
+            }
+            for (const b of (a.blocks || [])) {
+                if (b.image_url) addFile('image', `Imagen · ${atitle}`, b.image_url);
+                if (b.interaction_type === 'audio' && typeof b.interaction_data === 'string' && /\/?uploads\//i.test(b.interaction_data)) {
+                    addFile('audio', `Audio · ${atitle}`, b.interaction_data);
+                }
+                if (b.iframe_url) addFile('video', `Vídeo · ${atitle}`, b.iframe_url);
+                if (b.block_type === 'text' && b.content && b.content.trim()) {
+                    files.push({
+                        type: 'text',
+                        label: `Texto · ${atitle}`,
+                        filename: `${slugify(atitle)}-bloque-${b.block_order ?? ''}.txt`,
+                        text: b.content
+                    });
+                }
+            }
+        }
+
+        return { data: { project: { id: project.id_project, title: project.title_project }, files } };
+    } catch (err) {
+        console.error('-> buildFilesManifest() - Error =', err);
+        return { error: 'Error al obtener los archivos del proyecto' };
+    }
+}
+
 export default {
     getAll,
     getById,
@@ -1019,5 +1103,6 @@ export default {
     approveProject,
     rejectProject,
     getPending,
-    isProjectAuthor
+    isProjectAuthor,
+    buildFilesManifest
 };

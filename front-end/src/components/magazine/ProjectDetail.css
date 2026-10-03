@@ -233,6 +233,32 @@
   margin: 0 0 0 auto;
 }
 
+/* Download-files button (editors+) — gray button, sits next to subscribe. */
+.project-files-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: none;
+  background: lightgray;
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 0.82rem;
+  min-height: 36px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.project-files-btn:hover {
+  background: #000000;
+  color: #ffffff;
+}
+/* Keep the files button beside the subscribe button (which is pushed right). */
+.project-detail-meta-row .project-subscribe-btn + .project-files-btn {
+  margin-left: 0.5rem;
+}
+
 /* View toggle + carousel in the project articles section */
 .project-articles-toolbar {
   display: flex;

@@ -1,13 +1,14 @@
 // magazine-front/src/components/magazine/ProjectDetail.jsx
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, User, Bell, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, User, Bell, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useEngagement } from '../../app_context/EngagementContext';
 import axiosInstance from '../../utils/axiosConfig';
 import ArticleCard from './ArticleCard';
+import ProjectFilesPanel from './ProjectFilesPanel';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import './ProjectDetail.css';
 
@@ -15,8 +16,9 @@ function ProjectDetail() {
   const { t } = useTranslation();
   const { navigateBackFromProject, openAuthorCard } = useUI();
   const { selectedProject } = useMagazine();
-  const { currentUser } = useAuth();
+  const { currentUser, canCreateContent } = useAuth();
   const { isSubscribed, toggleSubscribe } = useEngagement();
+  const [showFilesPanel, setShowFilesPanel] = useState(false);
   const [projectArticles, setProjectArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState(() => {
@@ -165,9 +167,30 @@ function ProjectDetail() {
                 </button>
               );
             })()}
+
+            {/* Editors / admins / super admins: download the project's files. */}
+            {canCreateContent && (
+              <button
+                type="button"
+                className="project-files-btn"
+                onClick={() => setShowFilesPanel(true)}
+                title="Descargar archivos del proyecto"
+              >
+                <Download size={18} />
+                <span>Archivos</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {showFilesPanel && (
+        <ProjectFilesPanel
+          projectId={selectedProject.id_project}
+          projectTitle={selectedProject.title_project}
+          onClose={() => setShowFilesPanel(false)}
+        />
+      )}
 
       <div className="project-detail-articles">
         {loading ? (

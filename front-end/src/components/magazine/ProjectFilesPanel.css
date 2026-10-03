@@ -1,0 +1,184 @@
+/* Project files download panel (editors / admins / super admins only). */
+.project-files-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9600;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: project-files-fade 0.2s ease both;
+}
+
+.project-files-panel {
+  position: fixed;
+  z-index: 9601;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 560px);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  background: #1c1c1c;
+  color: #e8e8e8;
+  border: 1px solid #333;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: project-files-pop 0.22s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+@keyframes project-files-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes project-files-pop {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.97); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.project-files-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #333;
+}
+.project-files-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.project-files-title h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-family: 'Alfa Slab One', serif;
+  color: #fff;
+}
+.project-files-subtitle {
+  display: block;
+  font-size: 0.8rem;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 320px;
+}
+.project-files-close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: lightgray;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.project-files-close:hover { background: #000; color: #fff; }
+
+.project-files-body {
+  padding: 0.5rem 1.25rem 1rem;
+  overflow-y: auto;
+}
+
+.project-files-status {
+  text-align: center;
+  color: #aaa;
+  padding: 2.5rem 1rem;
+}
+.project-files-spinner { animation: project-files-spin 0.8s linear infinite; color: #ccc; }
+@keyframes project-files-spin { to { transform: rotate(360deg); } }
+
+.project-files-group { margin-top: 1rem; }
+.project-files-group-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #bdbdbd;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+.project-files-count {
+  margin-left: auto;
+  background: #2a2a2a;
+  color: #cfcfcf;
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.72rem;
+}
+
+.project-files-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.project-files-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  background: #232323;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+.project-files-item-info { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.project-files-item-label {
+  font-size: 0.9rem;
+  color: #f0f0f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.project-files-item-name {
+  font-size: 0.75rem;
+  color: #8f8f8f;
+  font-family: 'Source Code Pro', monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.project-files-download {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 8px;
+  background: lightgray;
+  color: #1a1a1a;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.project-files-download:hover { background: #000; color: #fff; }
+
+.project-files-footer {
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid #333;
+}
+.project-files-download-all {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: lightgray;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.project-files-download-all:hover { background: #000; color: #fff; }
+
+@media (max-width: 600px) {
+  .project-files-item { flex-wrap: wrap; }
+  .project-files-download span { display: none; }
+}

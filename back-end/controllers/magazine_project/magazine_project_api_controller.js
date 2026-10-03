@@ -1,6 +1,14 @@
 // back-end/controllers/magazine_project/magazine_project_api_controller.js
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import magazineProjectController from "./magazine_project_controller.js";
 import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// uploads dir lives at back-end/uploads (this file is back-end/controllers/magazine_project/*)
+const UPLOADS_DIR = path.resolve(__dirname, "../../uploads");
 
 async function getAll(req, res) {
     try {
@@ -419,6 +427,53 @@ async function getPending(req, res) {
     }
 }
 
+// Editors / admins / super admins: list a project's downloadable files.
+async function getProjectFiles(req, res) {
+    try {
+        const { id_project } = req.params;
+        if (!id_project) {
+            return res.status(400).json({ error: 'El ID del proyecto es obligatorio' });
+        }
+        const callerUser = await getRequestUser(req);
+        const ctx = roleSnapshot(callerUser);
+        if (!ctx.isAuthenticated) {
+            return res.status(401).json({ error: 'Autenticación requerida' });
+        }
+        if (!ctx.canCreateContent) {
+            return res.status(403).json({ error: 'No tienes permiso para descargar los archivos del proyecto' });
+        }
+        const { error, data } = await magazineProjectController.buildFilesManifest(id_project);
+        if (error) return res.status(404).json({ error });
+        res.json({ error: null, data });
+    } catch (err) {
+        console.error('-> getProjectFiles API - Error =', err);
+        res.status(500).json({ error: 'Error al obtener los archivos del proyecto', details: err.message });
+    }
+}
+
+// Stream an uploaded project file as an attachment (forces a download even
+// cross-origin). The bytes are already public via /uploads; this only adds the
+// Content-Disposition header and guards against path traversal.
+async function downloadFile(req, res) {
+    try {
+        const rel = String(req.query.path || '');
+        const name = String(req.query.name || 'archivo').replace(/[^\w.\-]+/g, '_') || 'archivo';
+        let sub = rel.replace(/^\/+/, '');
+        if (sub.toLowerCase().startsWith('uploads/')) sub = sub.slice('uploads/'.length);
+        const resolved = path.resolve(UPLOADS_DIR, sub);
+        if (resolved !== UPLOADS_DIR && !resolved.startsWith(UPLOADS_DIR + path.sep)) {
+            return res.status(400).json({ error: 'Ruta no válida' });
+        }
+        if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) {
+            return res.status(404).json({ error: 'Archivo no encontrado' });
+        }
+        return res.download(resolved, name);
+    } catch (err) {
+        console.error('-> downloadFile API - Error =', err);
+        res.status(500).json({ error: 'Error al descargar el archivo', details: err.message });
+    }
+}
+
 export default {
     getAll,
     getById,
@@ -434,5 +489,7 @@ export default {
     submitForApproval,
     approveProject,
     rejectProject,
-    getPending
+    getPending,
+    getProjectFiles,
+    downloadFile
 };

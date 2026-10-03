@@ -9,6 +9,8 @@ const router = Router();
 router.get("/", magazineProjectApiController.getAll);
 router.get("/featured", magazineProjectApiController.getFeatured);
 router.get("/pending", magazineProjectApiController.getPending);              // super-admin: approval queue
+router.get("/download", magazineProjectApiController.downloadFile);           // editors+: stream a file as attachment
+router.get("/files/:id_project", magazineProjectApiController.getProjectFiles); // editors+: list downloadable files
 router.get("/by-type/:type", magazineProjectApiController.getByType);
 router.get("/by-format/:format", magazineProjectApiController.getByFormat);
 router.get("/by-id/:id_project", magazineProjectApiController.getById);
