@@ -24,8 +24,8 @@
 
 .project-detail-cover {
   flex-shrink: 0;
-  width: 240px;
-  border-radius: 10px;
+  width: 360px;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -38,7 +38,8 @@
 
 .project-detail-info {
   flex: 1;
-  padding-top: 0.5rem;
+  min-width: 0;
+  padding: 0.5rem 2rem 0;
 }
 
 .project-detail-format {
