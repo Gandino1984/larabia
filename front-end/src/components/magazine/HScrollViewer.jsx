@@ -1,13 +1,13 @@
 // magazine-front/src/components/magazine/HScrollViewer.jsx
 import { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, ArrowRight, Play, Pause, X, Volume2, Link as LinkIcon, Bookmark, RotateCcw, Smartphone } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Play, Pause, X, Volume2, Link as LinkIcon, Bookmark, RotateCcw, Smartphone, Maximize } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext.jsx';
 import { useAuth } from '../../app_context/AuthContext.jsx';
 import './HScrollViewer.css';
 
-function HScrollViewer({ panels, articleId }) {
+function HScrollViewer({ panels, articleId, onFullscreen }) {
   const { t } = useTranslation();
   const { showInfo, showSuccess } = useUI();
   const { currentUser, loading: authLoading } = useAuth();
@@ -1078,6 +1078,17 @@ function HScrollViewer({ panels, articleId }) {
                 <RotateCcw size={16} />
                 <span>{t('hscroll.progress.restore')}</span>
               </button>
+              {onFullscreen && (
+                <button
+                  className="btn-progress-action"
+                  onClick={onFullscreen}
+                  title={t('article.detail.fullscreen')}
+                  aria-label={t('article.detail.fullscreen')}
+                >
+                  <Maximize size={16} />
+                  <span>{t('article.detail.fullscreen')}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

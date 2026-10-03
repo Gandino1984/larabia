@@ -6,7 +6,7 @@ import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useAuthor } from '../../app_context/AuthorContext';
 import { useEngagement } from '../../app_context/EngagementContext';
-import { Calendar, User, Eye, X, Trash2, Maximize, Minimize, Edit, Volume2, ArrowLeft, Share2, ThumbsUp, Bookmark, MessageCircle } from 'lucide-react';
+import { Calendar, User, Eye, X, Trash2, Minimize, Edit, ArrowLeft, Share2, ThumbsUp, Bookmark, MessageCircle } from 'lucide-react';
 import HScrollViewer from './HScrollViewer';
 import CommentsModal from './CommentsModal';
 import './ArticleDetail.css';
@@ -153,11 +153,6 @@ function ArticleDetail({ previewMode = false }) {
     return selectedArticle.blocks?.some(block => block.block_type === 'comic_panel') || false;
   }, [selectedArticle.blocks]);
 
-  // Detect if article has audio panels
-  const hasAudio = useMemo(() => {
-    return selectedArticle.blocks?.some(block => block.interaction_type === 'audio') || false;
-  }, [selectedArticle.blocks]);
-
   // Get comic panels for HScrollViewer
   const comicPanels = useMemo(() => {
     if (!isComicArticle) return [];
@@ -202,27 +197,6 @@ function ArticleDetail({ previewMode = false }) {
       <article className={`article-detail-container ${isComicArticle ? 'article-detail-container--comic' : ''}`}>
         {/* Top right controls: badges and buttons */}
         <div className="article-detail-top-controls">
-          {/* Audio badge and Fullscreen button */}
-          {hasAudio && (
-            <div
-              className="article-detail-audio-badge"
-              title={t('article.detail.audioAvailable')}
-              aria-label={t('article.detail.audioAvailable')}
-            >
-              <Volume2 size={24} />
-            </div>
-          )}
-          {isComicArticle && (
-            <button
-              className="article-detail-fullscreen-btn"
-              onClick={() => setIsFullscreen(true)}
-              title={t('article.detail.fullscreen')}
-              aria-label={t('article.detail.fullscreen')}
-            >
-              <Maximize size={24} />
-            </button>
-          )}
-
           {/* Editor buttons (Edit and Delete) — hidden in preview */}
           {!previewMode && canCreateContent && (isSuperAdmin || isArticleAuthor(selectedArticle)) && (
             <>
@@ -411,7 +385,7 @@ function ArticleDetail({ previewMode = false }) {
 
         <div className="article-detail-content">
           {isComicArticle ? (
-            <HScrollViewer panels={comicPanels} articleId={selectedArticle.id_article} />
+            <HScrollViewer panels={comicPanels} articleId={selectedArticle.id_article} onFullscreen={() => setIsFullscreen(true)} />
           ) : (
             <>
               {selectedArticle.blocks && selectedArticle.blocks.length > 0 ? (

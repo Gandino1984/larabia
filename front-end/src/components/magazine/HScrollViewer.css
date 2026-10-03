@@ -416,21 +416,21 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.4rem 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  color: #e0e0e0;
+  padding: 0.4rem 0.9rem;
+  background: lightgray;
+  border: none;
+  border-radius: 8px;
+  color: #1a1a1a;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
   white-space: nowrap;
 }
 
 .btn-progress-action:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: #000000;
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
