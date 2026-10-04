@@ -40,6 +40,14 @@
   font-family: monospace;
 }
 
+/* Same roll-up text hover as the other header buttons (.roll* in Header.css). */
+.language-selector-btn:hover .roll__line {
+  transform: translateY(-100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .language-selector-btn:hover .roll__line { transform: none; }
+}
+
 .language-dropdown {
   position: absolute;
   top: 100%;

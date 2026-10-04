@@ -428,14 +428,32 @@ async function getFeatured(roleCtx = EMPTY_ROLE_CTX) {
 
         const featuredProjectIds = [...new Set(articles.map(a => a.project_id).filter(Boolean))];
         const featuredProjectMap = {};
+        const featuredProjectFormatMap = {};
         if (featuredProjectIds.length > 0) {
             const projects = await magazine_project_model.findAll({
                 where: { id_project: featuredProjectIds },
-                attributes: ['id_project', 'title_project']
+                attributes: ['id_project', 'title_project', 'format_project']
             });
             for (const p of projects) {
                 featuredProjectMap[p.id_project] = p.title_project;
+                featuredProjectFormatMap[p.id_project] = p.format_project || null;
             }
+        }
+
+        // Media present in each article's blocks — drives the hero's format icons
+        // (e.g. a comic with audio panels or embedded video shows those icons).
+        const mediaFlags = new Map();
+        const blocks = await article_block_model.findAll({
+            where: { article_id: { [Op.in]: featuredArticleIds } },
+            attributes: ['article_id', 'block_type', 'content', 'image_url', 'iframe_url', 'interaction_type', 'interaction_data']
+        });
+        for (const b of blocks) {
+            const f = mediaFlags.get(b.article_id) || { has_text: false, has_images: false, has_audio: false, has_video: false };
+            if (b.block_type === 'text' && b.content && b.content.trim()) f.has_text = true;
+            if ((b.block_type === 'image' || b.block_type === 'comic_panel') && b.image_url) f.has_images = true;
+            if (b.interaction_type === 'audio' && b.interaction_data) f.has_audio = true;
+            if ((b.block_type === 'iframe' && b.iframe_url) || (b.interaction_type === 'iframe' && b.interaction_data)) f.has_video = true;
+            mediaFlags.set(b.article_id, f);
         }
 
         const featuredAuthorsMap = await loadBatchArticleAuthors(featuredArticleIds);
@@ -449,6 +467,8 @@ async function getFeatured(roleCtx = EMPTY_ROLE_CTX) {
             return {
                 ...article.toJSON(),
                 project_title: article.project_id ? (featuredProjectMap[article.project_id] || null) : null,
+                project_format: article.project_id ? (featuredProjectFormatMap[article.project_id] || null) : null,
+                media: mediaFlags.get(article.id_article) || { has_text: false, has_images: false, has_audio: false, has_video: false },
                 authors,
                 author: authors.length > 0 ? authors[0] : (legacyUser ? {
                     id_user: legacyUser.id_user,

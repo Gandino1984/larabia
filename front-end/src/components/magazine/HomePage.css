@@ -166,6 +166,20 @@
 .hero-content.hero-in .hero-actions { animation: hero-rise 0.6s ease both; animation-delay: 0.55s; }
 .hero-content.hero-in .hero-meta { animation: hero-rise 0.6s ease both; animation-delay: 0.55s; }
 
+/* Slide change: the title band fades out drifting upward while the slide fades
+   (the story is about to be replaced). Removing the class restarts hero-rise,
+   so the next title rises back in. */
+@keyframes hero-title-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-28px); }
+}
+.hero-content.hero-in .hero-headline.is-leaving {
+  animation: hero-title-out 0.32s ease-in both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-content.hero-in .hero-headline.is-leaving { animation: none; }
+}
+
 /* Mobile: a very translucent black band behind the project + article titles,
    edge-to-edge, to keep them readable over the cover image. */
 .hero-headline {
@@ -304,12 +318,11 @@
 
 .hero-meta {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  /* Keep the authors + "Entrar" button within the same width as the project
-     excerpt so they don't overflow its margins (fluid on mobile). */
+  gap: 0.5rem;
+  /* Keep the authors within the same width as the project excerpt so they
+     don't overflow its margins (fluid on mobile). */
   width: 100%;
   max-width: min(90vw, 680px);
   margin-left: auto;
@@ -330,6 +343,26 @@
 
 .hero-meta .hero-category {
   align-self: center;
+}
+
+/* Authors (+ category) row inside the meta block. */
+.hero-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* "Autoras/es" label above the author names — desktop only (see 768px block). */
+.hero-authors-label {
+  display: none;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.75);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 /* Share + "Entrar" actions, centered beneath the cover image. */
@@ -897,41 +930,77 @@
    hidden (the cover is the slide bg) and the buttons stay centered. */
 .hero-desc-image { display: none; }
 @media (min-width: 768px) {
+  /* Two-column grid so related pieces line up:
+       description  | project image
+       "Autoras/es" |
+       author names | Share / Entrar   (same row → horizontally aligned) */
   .hero-desc-row {
-    display: flex;
-    align-items: stretch;
-    gap: 1.5rem;
+    display: grid;
+    grid-template-columns: 7fr 3fr;
+    grid-template-areas:
+      "excerpt image"
+      "label   ."
+      "names   actions";
+    column-gap: 1.75rem;
+    align-items: start;
     max-width: 900px;
     margin: 2.25rem auto 1.5rem;
     text-align: left;
   }
+  .hero-media,
+  .hero-desc-row .hero-meta {
+    display: contents;
+  }
   .hero-desc-row .hero-excerpt {
-    flex: 7 1 0;
+    grid-area: excerpt;
     max-width: none;
     margin: 0;
-  }
-  .hero-media {
-    flex: 3 1 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
+    padding: 0;
   }
   .hero-desc-image {
+    grid-area: image;
     display: block;
     width: 100%;
-    flex: 1 1 auto;
+    align-self: stretch;
     min-height: 160px;
+    /* Top edge level with the first line of the description (line-height
+       half-leading of the excerpt text). */
+    margin-top: 0.4rem;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    border-radius: 6px;
+    border-radius: 3px;
   }
-  /* Buttons centered beneath the image, matching the media (image) width. */
+  .hero-authors-label {
+    grid-area: label;
+    display: block;
+    justify-self: start;
+    margin-top: 1.25rem;
+  }
+  .hero-desc-row .hero-meta-row {
+    grid-area: names;
+    justify-content: flex-start;
+    align-self: center;
+    margin-top: 0.4rem;
+  }
+  /* Buttons stay under the image, aligned with the author names' row. */
   .hero-desc-row .hero-actions {
-    margin: 0;
-    width: 100%;
+    grid-area: actions;
+    margin: 0.4rem 0 0;
+    align-self: center;
     justify-content: center;
     flex-wrap: wrap;
+  }
+  /* The meta wrapper is display:contents here (no box to animate), so its
+     pieces animate themselves in the staggered entrance. */
+  .hero-content.hero-anim .hero-authors-label,
+  .hero-content.hero-anim .hero-meta-row {
+    opacity: 0;
+  }
+  .hero-content.hero-in .hero-authors-label,
+  .hero-content.hero-in .hero-meta-row {
+    animation: hero-rise 0.6s ease both;
+    animation-delay: 0.55s;
   }
 }
 @media (min-width: 1024px) { .hero-desc-row { max-width: 1040px; } }
@@ -970,7 +1039,7 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    border-radius: 6px;
+    border-radius: 3px;
     margin-bottom: 0.2rem;
   }
   /* Full-bleed, taller description on mobile; clamp keeps it within the slide. */
@@ -989,6 +1058,7 @@
     margin-top: 0.8rem;
   }
   .hero-meta {
+    order: 2;
     margin-top: 1.3rem;
   }
   /* No slide indicators on mobile — reclaim the space for the text. */

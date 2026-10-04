@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useUI } from '../../app_context/UIContext';
 import { Globe } from 'lucide-react';
 import SpringDropdown from './SpringDropdown';
+import RollText from '../common/RollText';
 import './LanguageSelector.css';
 
 function LanguageSelector() {
@@ -42,7 +43,9 @@ function LanguageSelector() {
         aria-label="Select language"
       >
         <Globe size={18} />
-        <span className="current-lang-label">{currentLang?.code.toUpperCase()}</span>
+        <span className="current-lang-label">
+          <RollText text={currentLang?.code.toUpperCase() || ''} />
+        </span>
       </button>
 
       <SpringDropdown open={isOpen} className="language-dropdown">

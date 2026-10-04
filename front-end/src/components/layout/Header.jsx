@@ -327,6 +327,38 @@ function Header({ ready = true }) {
     );
   }) : [];
 
+  // Resolve an uploaded media path (or absolute URL) to a usable image URL.
+  const resolveMediaUrl = (path) => {
+    if (!path) return null;
+    if (/^https?:\/\//i.test(path)) return path;
+    return `${apiBaseUrl}/${path.replace(/^\/+/, '')}`;
+  };
+
+  // Projects, most recent first (dropdown shows ~5, the rest scroll inside it).
+  const sortedProjects = [...(projects || [])].sort((a, b) => {
+    const ta = new Date(a.date_published || a.created_at || 0).getTime();
+    const tb = new Date(b.date_published || b.created_at || 0).getTime();
+    if (tb !== ta) return tb - ta;
+    return (b.id_project || 0) - (a.id_project || 0);
+  });
+
+  // Projects matching the search query.
+  const projectResults = searchQuery.length > 0 ? sortedProjects.filter(project => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      project.title_project?.toLowerCase().includes(searchLower) ||
+      project.description_project?.toLowerCase().includes(searchLower) ||
+      project.type_project?.toLowerCase().includes(searchLower) ||
+      project.format_project?.toLowerCase().includes(searchLower)
+    );
+  }) : [];
+
+  const handleProjectResultClick = (project) => {
+    handleProjectSelect(project);
+    setSearchQuery('');
+    setShowSearchResults(false);
+  };
+
   // Filter authors based on search query (shown in dropdown on non-authors pages)
   const authorResults = !showAuthors && searchQuery.length > 0 ? authorProfiles.filter(profile => {
     const searchLower = searchQuery.toLowerCase();
@@ -509,10 +541,36 @@ function Header({ ready = true }) {
           </div>
           {showSearchResults && (
             <div className="search-results">
-              {authorResults.length === 0 && searchResults.length === 0 ? (
+              {authorResults.length === 0 && searchResults.length === 0 && projectResults.length === 0 ? (
                 <p className="search-no-results">{t('header.search.noResults', { query: searchQuery })}</p>
               ) : (
                 <>
+                  {projectResults.length > 0 && (
+                    <>
+                      <div className="search-results-header">
+                        <span className="search-results-count">{t('header.nav.projects', 'Proyectos')}</span>
+                      </div>
+                      <div className="search-results-list">
+                        {projectResults.map((project) => (
+                          <button
+                            key={`p-${project.id_project}`}
+                            className="search-result-item search-result-item--with-thumb"
+                            onClick={() => handleProjectResultClick(project)}
+                          >
+                            <div className="search-result-content">
+                              <h4 className="search-result-title">{project.title_project}</h4>
+                              {project.format_project && (
+                                <span className="search-result-category">{project.format_project}</span>
+                              )}
+                            </div>
+                            {project.cover_image_project && (
+                              <img className="search-result-thumb" src={resolveMediaUrl(project.cover_image_project)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                   {authorResults.length > 0 && (
                     <>
                       <div className="search-results-header">
@@ -548,7 +606,7 @@ function Header({ ready = true }) {
                         {searchResults.map((article) => (
                           <button
                             key={article.id_article}
-                            className="search-result-item"
+                            className="search-result-item search-result-item--with-thumb"
                             onClick={() => handleArticleResultClick(article)}
                           >
                             <div className="search-result-content">
@@ -570,6 +628,9 @@ function Header({ ready = true }) {
                                 </span>
                               )}
                             </div>
+                            {article.cover_image_article && (
+                              <img className="search-result-thumb" src={resolveMediaUrl(article.cover_image_article)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                            )}
                           </button>
                         ))}
                       </div>
@@ -592,14 +653,17 @@ function Header({ ready = true }) {
                     <ChevronDown size={14} className={`chevron-icon ${showProjectsDropdown ? 'rotated' : ''}`} />
                   </button>
                   <SpringDropdown open={showProjectsDropdown} className="projects-dropdown-menu">
-                    {projects.length > 0 ? (
-                      projects.map(project => (
+                    {sortedProjects.length > 0 ? (
+                      sortedProjects.map(project => (
                         <button
                           key={project.id_project}
                           className="projects-dropdown-item"
                           onClick={() => handleProjectSelect(project)}
                         >
-                          {project.title_project}
+                          <span className="projects-dropdown-title">{project.title_project}</span>
+                          {project.cover_image_project && (
+                            <img className="projects-dropdown-thumb" src={resolveMediaUrl(project.cover_image_project)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                          )}
                         </button>
                       ))
                     ) : (
@@ -705,34 +769,69 @@ function Header({ ready = true }) {
 
                 {searchQuery.length > 0 && (
                   <div className="mobile-search-results">
-                    {searchResults.length > 0 ? (
+                    {searchResults.length > 0 || projectResults.length > 0 ? (
                       <>
-                        <div className="mobile-search-results-header">
-                          <span className="mobile-search-results-count">
-                            {t('header.search.resultCount', { count: searchResults.length })}
-                          </span>
-                        </div>
-                        <div className="mobile-search-results-list">
-                          {searchResults.map((article) => (
-                            <button
-                              key={article.id_article}
-                              className="mobile-search-result-item"
-                              onClick={() => handleArticleResultClick(article)}
-                            >
-                              <h4 className="mobile-search-result-title">{article.title_article}</h4>
-                              {article.category_article && article.category_article.toLowerCase() !== 'general' && (
-                                <span className="mobile-search-result-category">{article.category_article}</span>
-                              )}
-                              {(article.authors?.length > 0 || article.author_name) && (
-                                <span className="mobile-search-result-author">
-                                  Por {article.authors?.length > 0
-                                    ? article.authors.map(a => a.name_user).join(', ')
-                                    : article.author_name}
-                                </span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
+                        {projectResults.length > 0 && (
+                          <>
+                            <div className="mobile-search-results-header">
+                              <span className="mobile-search-results-count">{t('header.nav.projects', 'Proyectos')}</span>
+                            </div>
+                            <div className="mobile-search-results-list">
+                              {projectResults.map((project) => (
+                                <button
+                                  key={`p-${project.id_project}`}
+                                  className="mobile-search-result-item mobile-search-result-item--with-thumb"
+                                  onClick={() => handleProjectResultClick(project)}
+                                >
+                                  <div className="mobile-search-result-text">
+                                    <h4 className="mobile-search-result-title">{project.title_project}</h4>
+                                    {project.format_project && (
+                                      <span className="mobile-search-result-category">{project.format_project}</span>
+                                    )}
+                                  </div>
+                                  {project.cover_image_project && (
+                                    <img className="search-result-thumb" src={resolveMediaUrl(project.cover_image_project)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                        {searchResults.length > 0 && (
+                          <>
+                            <div className="mobile-search-results-header">
+                              <span className="mobile-search-results-count">
+                                {t('header.search.resultCount', { count: searchResults.length })}
+                              </span>
+                            </div>
+                            <div className="mobile-search-results-list">
+                              {searchResults.map((article) => (
+                                <button
+                                  key={article.id_article}
+                                  className="mobile-search-result-item mobile-search-result-item--with-thumb"
+                                  onClick={() => handleArticleResultClick(article)}
+                                >
+                                  <div className="mobile-search-result-text">
+                                    <h4 className="mobile-search-result-title">{article.title_article}</h4>
+                                    {article.category_article && article.category_article.toLowerCase() !== 'general' && (
+                                      <span className="mobile-search-result-category">{article.category_article}</span>
+                                    )}
+                                    {(article.authors?.length > 0 || article.author_name) && (
+                                      <span className="mobile-search-result-author">
+                                        Por {article.authors?.length > 0
+                                          ? article.authors.map(a => a.name_user).join(', ')
+                                          : article.author_name}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {article.cover_image_article && (
+                                    <img className="search-result-thumb" src={resolveMediaUrl(article.cover_image_article)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </>
                     ) : (
                       <p className="mobile-search-no-results">{t('header.search.noResults', { query: searchQuery })}</p>
@@ -751,14 +850,17 @@ function Header({ ready = true }) {
                     </button>
                     {showMobileProjectsDropdown && (
                       <div className="mobile-projects-list">
-                        {projects.length > 0 ? (
-                          projects.map(project => (
+                        {sortedProjects.length > 0 ? (
+                          sortedProjects.map(project => (
                             <button
                               key={project.id_project}
                               className="mobile-project-item"
                               onClick={() => handleProjectSelect(project)}
                             >
-                              {project.title_project}
+                              <span className="projects-dropdown-title">{project.title_project}</span>
+                              {project.cover_image_project && (
+                                <img className="projects-dropdown-thumb" src={resolveMediaUrl(project.cover_image_project)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                              )}
                             </button>
                           ))
                         ) : (

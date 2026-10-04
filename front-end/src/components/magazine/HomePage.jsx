@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSpring, animated } from '@react-spring/web';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
-import { ChevronLeft, ChevronRight, Calendar, Share2, FileText, Image as ImageIcon, Music } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Share2, FileText, Image as ImageIcon, Music, Video } from 'lucide-react';
 import SectionPreviews from './SectionPreviews';
 import ScrollHint from '../common/ScrollHint';
 import RollText from '../common/RollText';
@@ -59,13 +59,20 @@ function HomePage({ ready = true }) {
     fetchProjects();
   }, [fetchProjects]);
 
-  // Map a project's format to the media icons: audio (podcast), multimedia
-  // (text + image + audio) for multimedia/video, otherwise text + image.
-  const getFormatMedia = (format) => {
+  // Media icons next to the date: a base set from the project's format, plus
+  // whatever the story actually contains (a comic with audio panels or an
+  // embedded video also gets those icons). `media` comes from the API.
+  const getFormatMedia = (format, media = {}) => {
     const f = (format || '').toLowerCase();
-    if (f === 'podcast') return ['audio'];
-    if (f === 'multimedia' || f === 'video') return ['text', 'image', 'audio'];
-    return ['text', 'image'];
+    let set;
+    if (f === 'podcast') set = ['audio'];
+    else if (f === 'video') set = ['video'];
+    else if (f === 'multimedia') set = ['text', 'image', 'audio'];
+    else if (f) set = ['text', 'image'];
+    else set = [...(media.has_text ? ['text'] : []), ...(media.has_images ? ['image'] : [])];
+    if (media.has_audio && !set.includes('audio')) set.push('audio');
+    if (media.has_video && !set.includes('video')) set.push('video');
+    return set;
   };
   // Staggered fade-up of the hero content (project label → title → description/
   // date/authors), in sync with the create-button slide-in.
@@ -163,6 +170,9 @@ function HomePage({ ready = true }) {
   // Opacity spring for cross-fading between featured stories (arrows + auto).
   const [{ op }, opApi] = useSpring(() => ({ op: 1 }));
   const transitioning = useRef(false);
+  // While the slide fades out, the title band fades + drifts upward (the story
+  // is about to be replaced); once swapped, the new title rises back in.
+  const [titleLeaving, setTitleLeaving] = useState(false);
 
   const slideCount = featuredArticles?.length || 0;
 
@@ -171,15 +181,17 @@ function HomePage({ ready = true }) {
     if (slideCount > 0) setCurrentSlide((prev) => (prev + dir + slideCount) % slideCount);
   };
 
-  // Quick fade-out of the current story, swap, quick fade-in of the next.
+  // Fade-out of the current story (title drifting up), swap, fade-in of the next.
   const fadeTo = (getIndex) => {
     if (slideCount <= 1 || transitioning.current) return;
     transitioning.current = true;
+    setTitleLeaving(true);
     opApi.start({
       op: 0,
-      config: { duration: 160 },
+      config: { duration: 320 },
       onRest: () => {
         setCurrentSlide(getIndex);
+        setTitleLeaving(false);
         opApi.start({
           op: 1,
           config: { duration: 220 },
@@ -188,6 +200,32 @@ function HomePage({ ready = true }) {
       },
     });
   };
+
+  // Desktop: vertically center the arrows on the project image beside the text.
+  // offsetTop is used (not getBoundingClientRect) so entrance/slide transforms
+  // don't skew the measurement. Mobile keeps the CSS position.
+  const sliderRef = useRef(null);
+  const [arrowTop, setArrowTop] = useState(null);
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return undefined;
+    const measure = () => {
+      if (!window.matchMedia('(min-width: 768px)').matches) { setArrowTop(null); return; }
+      const img = slider.querySelector('.hero-desc-image');
+      if (!img || !img.offsetHeight) { setArrowTop(null); return; }
+      let y = 0;
+      let el = img;
+      while (el && el !== slider) { y += el.offsetTop; el = el.offsetParent; }
+      if (el !== slider) { setArrowTop(null); return; }
+      setArrowTop(Math.round(y + img.offsetHeight / 2));
+    };
+    measure();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    const content = slider.querySelector('.hero-content');
+    if (ro) { ro.observe(slider); if (content) ro.observe(content); }
+    window.addEventListener('resize', measure);
+    return () => { if (ro) ro.disconnect(); window.removeEventListener('resize', measure); };
+  }, [currentSlide, featuredArticles]);
 
   const nextSlide = () => fadeTo((prev) => (prev + 1) % slideCount);
   const prevSlide = () => fadeTo((prev) => (prev - 1 + slideCount) % slideCount);
@@ -301,6 +339,7 @@ function HomePage({ ready = true }) {
       <section className="hero-section">
         {currentArticle ? (
           <div
+            ref={sliderRef}
             className={`hero-slider hero-anim ${heroIn ? 'hero-in' : ''}`}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -330,7 +369,7 @@ function HomePage({ ready = true }) {
                 onError={() => setBrokenImages(prev => ({ ...prev, [currentArticle.id_article]: true }))}
               />
               <div className={`hero-content hero-anim ${heroIn ? 'hero-in' : ''}`}>
-                <div className="hero-headline">
+                <div className={`hero-headline ${titleLeaving ? 'is-leaving' : ''}`}>
                   {currentArticle.project_title && (
                     <span className="hero-project-label">Proyecto: {currentArticle.project_title}</span>
                   )}
@@ -342,13 +381,15 @@ function HomePage({ ready = true }) {
                     {formatDate(currentArticle.date_published)}
                     {(() => {
                       const proj = (projects || []).find((p) => String(p.id_project) === String(currentArticle.project_id));
-                      if (!proj?.format_project) return null;
-                      const media = getFormatMedia(proj.format_project);
+                      const format = currentArticle.project_format || proj?.format_project || '';
+                      const media = getFormatMedia(format, currentArticle.media || {});
+                      if (media.length === 0) return null;
                       return (
-                        <span className="hero-format" title={proj.format_project}>
+                        <span className="hero-format" title={format || undefined}>
                           {media.includes('text') && <FileText size={19} />}
                           {media.includes('image') && <ImageIcon size={19} />}
                           {media.includes('audio') && <Music size={19} />}
+                          {media.includes('video') && <Video size={19} />}
                         </span>
                       );
                     })()}
@@ -385,30 +426,37 @@ function HomePage({ ready = true }) {
                       </button>
                     </div>
                   </div>
-                </div>
-                <div className="hero-meta">
-                  {(currentArticle.authors?.length > 0 || currentArticle.author_name) && (
-                    <span className="meta-item hero-authors">
-                      {currentArticle.authors?.length > 0
-                        ? currentArticle.authors.map((author) => (
-                            <span
-                              key={author.id_user}
-                              className="hero-author hero-author--clickable"
-                              onClick={(e) => { e.stopPropagation(); openAuthorCard(author); }}
-                              role="button"
-                              tabIndex={0}
-                            >
-                              <AuthorAvatar author={author} getUrl={getAuthorImageUrl} />
-                              <span className="hero-author-name">{author.name_user}</span>
-                            </span>
-                          ))
-                        : <span className="hero-author-name">{currentArticle.author_name}</span>
-                      }
-                    </span>
-                  )}
-                  {currentArticle.category_article && currentArticle.category_article.toLowerCase() !== 'general' && (
-                    <span className="hero-category">{currentArticle.category_article}</span>
-                  )}
+                  {/* Authors: inside the row so on desktop they share a grid row
+                      with the Share/Entrar buttons (horizontally aligned). */}
+                  <div className="hero-meta">
+                    {(currentArticle.authors?.length > 0 || currentArticle.author_name) && (
+                      <span className="hero-authors-label">{t('project.collaborators')}</span>
+                    )}
+                    <div className="hero-meta-row">
+                      {(currentArticle.authors?.length > 0 || currentArticle.author_name) && (
+                        <span className="meta-item hero-authors">
+                          {currentArticle.authors?.length > 0
+                            ? currentArticle.authors.map((author) => (
+                                <span
+                                  key={author.id_user}
+                                  className="hero-author hero-author--clickable"
+                                  onClick={(e) => { e.stopPropagation(); openAuthorCard(author); }}
+                                  role="button"
+                                  tabIndex={0}
+                                >
+                                  <AuthorAvatar author={author} getUrl={getAuthorImageUrl} />
+                                  <span className="hero-author-name">{author.name_user}</span>
+                                </span>
+                              ))
+                            : <span className="hero-author-name">{currentArticle.author_name}</span>
+                          }
+                        </span>
+                      )}
+                      {currentArticle.category_article && currentArticle.category_article.toLowerCase() !== 'general' && (
+                        <span className="hero-category">{currentArticle.category_article}</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </animated.div>
@@ -416,10 +464,18 @@ function HomePage({ ready = true }) {
             {/* Navigation Arrows */}
             {featuredArticles && featuredArticles.length > 1 && (
               <>
-                <button className="hero-nav prev" onClick={(e) => { e.stopPropagation(); prevSlide(); }}>
+                <button
+                  className="hero-nav prev"
+                  style={arrowTop != null ? { top: `${arrowTop}px` } : undefined}
+                  onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                >
                   <ChevronLeft size={32} />
                 </button>
-                <button className="hero-nav next" onClick={(e) => { e.stopPropagation(); nextSlide(); }}>
+                <button
+                  className="hero-nav next"
+                  style={arrowTop != null ? { top: `${arrowTop}px` } : undefined}
+                  onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                >
                   <ChevronRight size={32} />
                 </button>
 
