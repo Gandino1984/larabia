@@ -42,8 +42,8 @@
 
   /* Slider arrow buttons (hero, article carousels, section rows): light gray /
      black on hover, both slightly translucent with a soft blur behind. */
-  --slider-arrow-bg: rgba(211, 211, 211, 0.72);
-  --slider-arrow-bg-hover: rgba(0, 0, 0, 0.72);
+  --slider-arrow-bg: rgba(211, 211, 211, 0.45);
+  --slider-arrow-bg-hover: rgba(0, 0, 0, 0.55);
   --slider-arrow-blur: blur(6px);
 }
 
