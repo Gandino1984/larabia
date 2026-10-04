@@ -478,14 +478,10 @@
 /* Carousel wrapper + navigation arrows */
 .articles-carousel-wrap {
   position: relative;
-  /* Constrained + centered (not full-bleed) so the slider breathes; wide enough
-     to show 3 cards on landscape/desktop (see the per-card widths below). */
+  /* No side margins: the track spans the page's content width; the
+     (translucent) arrows sit over the edges of the cards. */
   width: 100%;
-  max-width: 1300px;
-  margin-left: auto;
-  margin-right: auto;
-  /* Room for the arrows near the edge, with a clear gap from the cards. */
-  padding: 0 94px;
+  padding: 0;
   /* Own stacking context so the darkening layer sits above the page bg but
      behind the cards. */
   isolation: isolate;
@@ -573,7 +569,6 @@
 
 @media (min-width: 1024px) {
   .articles-list-page .carousel-arrow { width: 52px; height: 52px; }
-  .articles-carousel-wrap { padding: 0 100px; }
   /* Three cards per view on landscape/desktop: each fills a third of the track
      (2rem/32px gaps between them). */
   .articles-carousel .article-card {
@@ -584,7 +579,6 @@
 
 @media (min-width: 1200px) {
   .articles-list-page .carousel-arrow { width: 62px; height: 62px; }
-  .articles-carousel-wrap { padding: 0 116px; }
 }
 
 @media (max-width: 768px) {

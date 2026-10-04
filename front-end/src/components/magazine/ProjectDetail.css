@@ -309,7 +309,9 @@
 .view-toggle-btn:hover { color: #ffffff; }
 .view-toggle-btn--active { color: #1a1a1a; }
 
-.articles-carousel-wrap { position: relative; padding: 0 96px; }
+/* No side margins: the track spans the content width; the (translucent)
+   arrows sit over the edges of the cards. */
+.articles-carousel-wrap { position: relative; padding: 0; }
 .articles-carousel {
   display: flex;
   gap: 1.5rem;
@@ -359,11 +361,9 @@
 
 @media (min-width: 1024px) {
   .carousel-arrow { width: 52px; height: 52px; }
-  .project-detail-page .articles-carousel-wrap { padding: 0 84px; }
 }
 @media (min-width: 1200px) {
   .carousel-arrow { width: 62px; height: 62px; }
-  .project-detail-page .articles-carousel-wrap { padding: 0 94px; }
 }
 
 @media (max-width: 768px) {
