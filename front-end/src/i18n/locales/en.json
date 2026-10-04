@@ -434,5 +434,8 @@
   "carousel.swipeHint": "Navigate horizontally",
   "hero.scrollHintDesktop": "You can scroll down",
   "hero.scrollHintSides": "You can also swipe content sideways",
-  "hero.scrollHintMobile": "You can swipe up or sideways"
+  "hero.scrollHintMobile": "You can swipe up or sideways",
+  "engagement.label.follow": "Follow",
+  "project.files.label": "Files",
+  "project.files.title": "Download project files"
 }

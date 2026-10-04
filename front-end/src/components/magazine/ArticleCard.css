@@ -437,6 +437,20 @@
   from { opacity: 0; transform: translateX(calc(var(--i) * -42px)) scale(0.85); }
   to   { opacity: 1; transform: translateX(0) scale(1); }
 }
+/* Right-anchored variant (align="end", e.g. the project header): the actions
+   stack behind the options button on the right and slide out leftward. */
+.engagement-options--end .engagement-options-items {
+  left: auto;
+  right: 0;
+  flex-direction: row-reverse;
+}
+.engagement-options--end.is-open .engagement-options-items .engagement-btn {
+  animation-name: engagement-slide-out-end;
+}
+@keyframes engagement-slide-out-end {
+  from { opacity: 0; transform: translateX(calc(var(--i) * 42px)) scale(0.85); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
 /* Hover: lighter gray (not black) and the label slides out. */
 .engagement-options.is-open .engagement-options-items .engagement-btn:hover {
   background: #7a7a7a;

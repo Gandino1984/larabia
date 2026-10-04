@@ -93,24 +93,37 @@
 .project-detail-author-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.5rem;
   color: #999;
   font-size: 1rem;
 }
 .project-detail-author-item--clickable { cursor: pointer; }
 .project-detail-author-item--clickable:hover { text-decoration: underline; }
 
+/* Author avatars sized in line with the rest of the site (cards 28px, hero
+   46px) — 32px, 40px on desktop. */
 .project-author-avatar {
-  width: 22px;
-  height: 22px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+@media (min-width: 769px) {
+  .project-author-avatar {
+    width: 40px;
+    height: 40px;
+  }
 }
 
-.project-author-icon {
-  color: #666;
-  flex-shrink: 0;
+/* No photo: a round placeholder with the user icon, same size as the avatars. */
+.project-author-avatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a2a;
+  color: #888;
 }
 
 /* Articles section */
@@ -232,34 +245,7 @@
   font-weight: 400;
 }
 
-/* Follow-project (bell) button — matches the article card "Comparte" button */
-.project-subscribe-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin: 0.5rem 0 0.75rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  border: none;
-  background: lightgray;
-  color: black;
-  font-weight: 600;
-  font-size: 0.82rem;
-  min-height: 36px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-.project-subscribe-btn:hover {
-  background: #000000;
-  color: white;
-  transform: scale(1.05);
-}
-.project-subscribe-btn--active {
-  background: #000000;
-  color: white;
-}
-
-/* Row holding the collaborators (left) and the follow button (right) */
+/* Row holding the collaborators (left) and the options button (right) */
 .project-detail-meta-row {
   display: flex;
   align-items: center;
@@ -268,34 +254,24 @@
   flex-wrap: wrap;
   margin-top: 0.5rem;
 }
-.project-detail-meta-row .project-subscribe-btn {
-  margin: 0 0 0 auto;
-}
 
-/* Download-files button (editors+) — gray button, sits next to subscribe. */
-.project-files-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin: 0.5rem 0 0.75rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  border: none;
-  background: lightgray;
-  color: #1a1a1a;
-  font-weight: 600;
-  font-size: 0.82rem;
-  min-height: 36px;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+/* Follow / download-files actions behind a ⋯ button (same reveal as the
+   article cards), pushed to the right of the row; the actions slide out
+   leftward. The reserved width keeps the revealed actions (and an expanded
+   label) clear of the author names — the row wraps instead. */
+.project-detail-meta-row .project-options {
+  margin-left: auto;
+  min-width: 180px;
+  justify-content: flex-end;
 }
-.project-files-btn:hover {
-  background: #000000;
-  color: #ffffff;
+.project-options .engagement-options-toggle {
+  width: 40px;
+  height: 40px;
 }
-/* Keep the files button beside the subscribe button (which is pushed right). */
-.project-detail-meta-row .project-subscribe-btn + .project-files-btn {
-  margin-left: 0.5rem;
+.project-options .engagement-options-items .engagement-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 11px;
 }
 
 /* View toggle + carousel in the project articles section */

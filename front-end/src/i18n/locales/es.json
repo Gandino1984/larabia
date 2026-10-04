@@ -434,5 +434,8 @@
   "carousel.swipeHint": "Navega horizontalmente",
   "hero.scrollHintDesktop": "Con el ratón puedes navegar vertical y horizontalmente",
   "hero.scrollHintSides": "Puedes también deslizar contenido hacia los lados",
-  "hero.scrollHintMobile": "Puedes deslizar hacia arriba o hacia los lados"
+  "hero.scrollHintMobile": "Puedes deslizar hacia arriba o hacia los lados",
+  "engagement.label.follow": "Seguir",
+  "project.files.label": "Archivos",
+  "project.files.title": "Descargar archivos del proyecto"
 }

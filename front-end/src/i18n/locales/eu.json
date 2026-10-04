@@ -434,5 +434,8 @@
   "carousel.swipeHint": "Nabigatu horizontalki",
   "hero.scrollHintDesktop": "Behera egin dezakezu",
   "hero.scrollHintSides": "Edukia alboetara ere lerra dezakezu",
-  "hero.scrollHintMobile": "Gora edo alboetara lerra dezakezu"
+  "hero.scrollHintMobile": "Gora edo alboetara lerra dezakezu",
+  "engagement.label.follow": "Jarraitu",
+  "project.files.label": "Fitxategiak",
+  "project.files.title": "Deskargatu proiektuaren fitxategiak"
 }

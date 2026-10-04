@@ -9,6 +9,7 @@ import { useEngagement } from '../../app_context/EngagementContext';
 import axiosInstance from '../../utils/axiosConfig';
 import ArticleCard from './ArticleCard';
 import ProjectFilesPanel from './ProjectFilesPanel';
+import OptionsReveal from './OptionsReveal';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import './ProjectDetail.css';
 
@@ -112,6 +113,29 @@ function ProjectDetail() {
     return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
   };
 
+  const projectActions = [];
+  if (currentUser) {
+    const subscribed = isSubscribed(selectedProject.id_project);
+    projectActions.push({
+      key: 'subscribe',
+      className: subscribed ? 'engagement-btn--active' : '',
+      onClick: () => toggleSubscribe(selectedProject.id_project),
+      title: subscribed ? t('subscribe.following') : t('subscribe.follow'),
+      label: subscribed ? t('subscribe.following') : t('engagement.label.follow', 'Seguir'),
+      pressed: subscribed,
+      icon: <Bell size={18} fill={subscribed ? 'currentColor' : 'none'} />,
+    });
+  }
+  if (canCreateContent) {
+    projectActions.push({
+      key: 'files',
+      onClick: () => setShowFilesPanel(true),
+      title: t('project.files.title', 'Descargar archivos del proyecto'),
+      label: t('project.files.label', 'Archivos'),
+      icon: <Download size={18} />,
+    });
+  }
+
   return (
     <div className="project-detail-page">
       <div className="project-detail-header">
@@ -164,14 +188,18 @@ function ProjectDetail() {
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
                         ) : (
-                          <User size={14} className="project-author-icon" />
+                          <span className="project-author-avatar project-author-avatar--fallback">
+                            <User size={18} />
+                          </span>
                         )}
                         <span>{author.name_user}</span>
                       </span>
                     ))
                   ) : (
                     <span className="project-detail-author-item">
-                      <User size={14} className="project-author-icon" />
+                      <span className="project-author-avatar project-author-avatar--fallback">
+                        <User size={18} />
+                      </span>
                       <span>{selectedProject.author_name}</span>
                     </span>
                   )}
@@ -179,33 +207,9 @@ function ProjectDetail() {
               </div>
             )}
 
-            {currentUser && (() => {
-              const subscribed = isSubscribed(selectedProject.id_project);
-              return (
-                <button
-                  type="button"
-                  className={`project-subscribe-btn ${subscribed ? 'project-subscribe-btn--active' : ''}`}
-                  onClick={() => toggleSubscribe(selectedProject.id_project)}
-                  title={subscribed ? t('subscribe.following') : t('subscribe.follow')}
-                >
-                  <Bell size={18} fill={subscribed ? 'currentColor' : 'none'} />
-                  <span>{subscribed ? t('subscribe.following') : t('subscribe.follow')}</span>
-                </button>
-              );
-            })()}
-
-            {/* Editors / admins / super admins: download the project's files. */}
-            {canCreateContent && (
-              <button
-                type="button"
-                className="project-files-btn"
-                onClick={() => setShowFilesPanel(true)}
-                title="Descargar archivos del proyecto"
-              >
-                <Download size={18} />
-                <span>Archivos</span>
-              </button>
-            )}
+            {/* Follow (logged-in users) and download files (editors+), grouped
+                behind a ⋯ button like the article card actions. */}
+            <OptionsReveal actions={projectActions} align="end" className="project-options" />
           </div>
         </div>
       </div>
