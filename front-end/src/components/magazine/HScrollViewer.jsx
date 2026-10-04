@@ -402,7 +402,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
           // Tell the reader why the comic didn't open at the start (not when the
           // saved position is the first panel — that's just the beginning).
           if (panelNumber > 1) {
-            showInfo(t('hscroll.resumingReading', 'Reanudando la lectura donde la dejaste'));
+            showInfo(t('hscroll.resumingReading', 'Vamos donde lo dejaste...'));
           }
         } else {
           console.warn(`⚠️ Could not find panel ${panelNumber} to restore`);
