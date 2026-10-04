@@ -267,9 +267,14 @@
 }
 
 /* View toggle + carousel in the project articles section */
+/* Article count + grid/carousel toggle, side by side and centered (wrapping
+   on narrow widths). */
 .project-articles-toolbar {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
+  gap: 0.5rem 1rem;
   margin-bottom: 1rem;
 }
 .articles-view-toggle {
@@ -358,7 +363,7 @@
 }
 
 @media (max-width: 768px) {
-  .project-articles-toolbar { display: none; }
+  .project-articles-toolbar .articles-view-toggle { display: none; }
   .articles-carousel-wrap { padding: 0; }
   .articles-carousel { flex-direction: column; overflow-x: visible; }
   .articles-carousel .article-card { flex: none; width: 100%; max-width: none; }
@@ -367,7 +372,7 @@
 
 /* Article count in the project detail */
 .project-articles-count {
-  margin: 0 0 1rem;
+  margin: 0;
   text-align: center;
   color: #999;
   font-size: 1rem;

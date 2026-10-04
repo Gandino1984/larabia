@@ -203,12 +203,13 @@ function ProjectDetail() {
             const ordered = [...projectArticles].sort((a, b) => (a.id_article || 0) - (b.id_article || 0));
             return (
               <>
-                <p className="project-articles-count">
-                  {ordered.length === 1
-                    ? t('project.articlesCount', { count: 1 })
-                    : t('project.articlesCount_plural', { count: ordered.length })}
-                </p>
+                {/* Article count with the grid / carousel toggle beside it. */}
                 <div className="project-articles-toolbar">
+                  <p className="project-articles-count">
+                    {ordered.length === 1
+                      ? t('project.articlesCount', { count: 1 })
+                      : t('project.articlesCount_plural', { count: ordered.length })}
+                  </p>
                   <div className="articles-view-toggle" data-mode={viewMode} role="group" aria-label={t('article.list.viewMode')}>
                     <button
                       type="button"
