@@ -382,7 +382,7 @@
   z-index: 2;
   transition: background 0.15s ease, color 0.15s ease, opacity 0.2s ease, transform 0.25s ease;
 }
-.engagement-options-toggle:hover {
+.engagement-options .engagement-options-toggle:hover {
   background: #7a7a7a;
   color: #ffffff;
 }
@@ -471,41 +471,6 @@
     opacity: 1;
   }
   .engagement-btn-label { transition: none; }
-}
-
-.engagement-btn {
-  opacity: 0;
-  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease, scale 0.12s ease;
-}
-.engagement-options.is-open .engagement-options-items {
-  pointer-events: auto;
-}
-.engagement-options.is-open .engagement-options-items .engagement-btn {
-  animation: engagement-slide-out 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--i) * 60ms);
-}
-@keyframes engagement-slide-out {
-  from { opacity: 0; transform: translateX(calc(var(--i) * -46px)) scale(0.85); }
-  to   { opacity: 1; transform: translateX(0) scale(1); }
-}
-/* Hover uses the independent `scale` property (the entrance animation owns
-   `transform`). */
-.engagement-options.is-open .engagement-options-items .engagement-btn:hover {
-  scale: 1.08;
-}
-.engagement-btn--danger {
-  background: #dc2626;
-  color: #ffffff;
-}
-.engagement-btn--danger:hover {
-  background: #b91c1c;
-  color: #ffffff;
-}
-@media (prefers-reduced-motion: reduce) {
-  .engagement-options.is-open .engagement-options-items .engagement-btn {
-    animation: none;
-    opacity: 1;
-  }
 }
 
 .engagement-btn {
