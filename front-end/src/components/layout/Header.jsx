@@ -96,6 +96,20 @@ function Header({ ready = true }) {
   }, [ready, fadeApi, shakeApi]);
   const [showUserCard, setShowUserCard] = useState(false);
   const [isHeaderActive, setIsHeaderActive] = useState(false);
+  // Publish the header bar's real height as --header-bar-h so the fixed
+  // create-article button can line up with it exactly (offsetHeight ignores
+  // the entrance/shake transforms).
+  const headerBarRef = useRef(null);
+  useEffect(() => {
+    const bar = headerBarRef.current;
+    if (!bar || typeof ResizeObserver === 'undefined') return undefined;
+    const root = document.documentElement;
+    const update = () => root.style.setProperty('--header-bar-h', `${bar.offsetHeight}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(bar);
+    return () => ro.disconnect();
+  }, []);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [imageLoadError, setImageLoadError] = useState(false);
   const [imageTimestamp, setImageTimestamp] = useState(Date.now());
@@ -449,6 +463,7 @@ function Header({ ready = true }) {
   return (
     <header className={`header ${showArticleDetail ? 'header-hidden' : ''}`}>
       <animated.div
+        ref={headerBarRef}
         className={`header-bar ${isHeaderActive ? 'active' : ''}`}
         onMouseEnter={() => setIsHeaderActive(true)}
         onMouseLeave={() => setIsHeaderActive(false)}

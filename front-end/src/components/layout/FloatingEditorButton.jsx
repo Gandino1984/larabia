@@ -42,7 +42,7 @@ function FloatingEditorButton({ ready = true }) {
       title={t('header.user.createArticle')}
       aria-label={t('header.user.createArticle')}
     >
-      <Edit size={24} />
+      <Edit size={26} />
       <span className="floating-btn-text">{t('floatingEditor.label', 'Publica')}</span>
     </button>
   );

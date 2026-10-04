@@ -1,27 +1,29 @@
-/* Create-article button — flanks the header bar on the right, mirroring the
-   back button on the left. Mobile-first: a row just below the header; desktop:
-   beside the header bar, vertically centered on its axis. Square with rounded
-   corners, matching the header bar height (--header-h from index.css).
+/* Create-article button, lined up with the header bar. The header bar is 98%
+   wide (max 1200px) and centered, sitting 1.25rem from the top; its real height
+   comes from --header-bar-h (measured in Header.jsx, falling back to the
+   --header-h estimate from index.css).
+   - Up to 1409px there's no room beside the bar: the button sits just below
+     it, its right edge flush with the bar's right edge.
+   - From 1410px: beside the bar on the right, centered on its axis.
    It slides in from the right (off-screen) after the header entrance. */
 
 .floating-editor-btn {
   position: fixed;
-  /* 0.5rem below the header bar (which now sits at 1.25rem). */
-  top: calc(1.25rem + var(--header-h) + 0.5rem);
-  right: 0.75rem;
+  top: calc(1.25rem + var(--header-bar-h, var(--header-h)) + 0.5rem);
+  right: max(1%, calc((100% - 1200px) / 2));
   /* Below the header (1000) so the burger menu and notifications dropdown open
      over this button, not behind it. */
   z-index: 999;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* A 52px circle at rest (24px icon + 14px padding each side) that widens into
+  /* A 58px circle at rest (26px icon + 16px padding each side) that widens into
      a pill revealing "Publica" on hover; it's anchored by `right`, so it grows
      leftward. */
   width: auto;
-  min-width: 52px;
-  height: 52px;
-  padding: 0 14px;
+  min-width: 58px;
+  height: 58px;
+  padding: 0 16px;
   background: lightgray;
   color: #1a1a1a;
   border: none;
@@ -80,15 +82,26 @@
   .floating-btn-text { transition: none; }
 }
 
-/* Desktop: flank the header bar on the right, centered on its axis. */
+/* Desktop: bigger — a 70px circle at rest (26px icon + 22px padding). */
 @media (min-width: 769px) {
   .floating-editor-btn {
-    /* 62px circle at rest: 24px icon + 19px padding each side. */
-    min-width: 62px;
-    height: 62px;
-    padding: 0 19px;
-    top: calc(1.25rem + var(--header-h) / 2 + 9px);
-    right: max(0.75rem, calc((100% - 1200px) / 2 - 62px - 1rem));
+    min-width: 70px;
+    height: 70px;
+    padding: 0 22px;
+  }
+  .floating-editor-btn:hover {
+    transform: scale(1.03);
+  }
+}
+
+/* Wide screens: beside the header bar (its right edge + 1rem), centered on its
+   axis. Anchored by its left edge so the "Publica" label grows rightward
+   instead of sliding under the header. */
+@media (min-width: 1410px) {
+  .floating-editor-btn {
+    top: calc(1.25rem + var(--header-bar-h, var(--header-h)) / 2);
+    right: auto;
+    left: calc(50% + 600px + 1rem);
     transform: translateY(-50%) translateX(150px);
   }
   .floating-editor-btn.is-in {
@@ -97,17 +110,10 @@
   .floating-editor-btn:hover {
     transform: translateY(-50%) scale(1.03);
   }
+  .floating-editor-btn:active {
+    transform: translateY(-50%) scale(0.96);
+  }
   .floating-editor-btn.hidden {
     transform: translateY(-50%) scale(0.8);
-  }
-}
-
-/* Wide screens: the button sits in the free space right of the header bar.
-   Anchor it by its left edge (same resting spot: header right + 1rem) so the
-   "Publica" label grows rightward instead of sliding under the header. */
-@media (min-width: 1380px) {
-  .floating-editor-btn {
-    right: auto;
-    left: calc(50% + 600px + 1rem);
   }
 }
