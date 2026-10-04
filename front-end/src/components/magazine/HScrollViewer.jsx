@@ -5,9 +5,12 @@ import { ArrowLeft, ArrowRight, Play, Pause, X, Volume2, Link as LinkIcon, Bookm
 import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext.jsx';
 import { useAuth } from '../../app_context/AuthContext.jsx';
+import OptionsReveal from './OptionsReveal';
 import './HScrollViewer.css';
 
-function HScrollViewer({ panels, articleId, onFullscreen }) {
+// optionsActions: the reader's ⋯ actions (engagement, share, edit/delete),
+// repeated at the right of the bottom bar when provided.
+function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
   const { t } = useTranslation();
   const { showInfo, showSuccess } = useUI();
   const { currentUser, loading: authLoading } = useAuth();
@@ -1090,6 +1093,13 @@ function HScrollViewer({ panels, articleId, onFullscreen }) {
                 </button>
               )}
             </div>
+            {optionsActions?.length > 0 && (
+              <OptionsReveal
+                actions={optionsActions}
+                align="end"
+                className="article-detail-options article-detail-options--compact hscroll-progress-options"
+              />
+            )}
           </div>
         </div>
       </div>

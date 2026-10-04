@@ -118,12 +118,13 @@
    Same reveal as the article cards (OptionsReveal; base styles in
    ArticleCard.css), but the buttons look like the reader's top controls:
    50px dark circles that turn white on hover, widening into a pill that
-   shows the button's word. The extra .article-detail-top-controls prefix
-   outranks the card styles. */
-.article-detail-top-controls .engagement-options {
+   shows the button's word. The extra .article-detail-options class outranks
+   the card styles. Used top-right and repeated in the comic reader's bottom
+   bar (--compact, 42px). */
+.engagement-options.article-detail-options {
   --slide-step: 58px; /* 50px button + 8px gap */
 }
-.article-detail-top-controls .engagement-options .engagement-btn,
+.engagement-options.article-detail-options .engagement-btn,
 .article-detail-close-btn {
   display: inline-flex;
   align-items: center;
@@ -141,8 +142,8 @@
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
-.article-detail-top-controls .engagement-options .engagement-options-toggle:hover,
-.article-detail-top-controls .engagement-options.is-open .engagement-options-items .engagement-btn:hover,
+.engagement-options.article-detail-options .engagement-options-toggle:hover,
+.engagement-options.article-detail-options.is-open .engagement-options-items .engagement-btn:hover,
 .article-detail-close-btn:hover {
   background: rgba(255, 255, 255, 0.95);
   color: #000000;
@@ -150,27 +151,27 @@
 }
 /* Active (liked / favorited / comments open): the inverse of rest, like the
    cards (white instead of black). */
-.article-detail-top-controls .engagement-options .engagement-btn.engagement-btn--active {
+.engagement-options.article-detail-options .engagement-btn.engagement-btn--active {
   background: rgba(255, 255, 255, 0.95);
   color: #000000;
 }
-.article-detail-top-controls .engagement-options .engagement-btn.engagement-btn--danger {
+.engagement-options.article-detail-options .engagement-btn.engagement-btn--danger {
   background: rgba(220, 38, 38, 0.95);
   color: #ffffff;
   box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
 }
-.article-detail-top-controls .engagement-options.is-open .engagement-options-items .engagement-btn.engagement-btn--danger:hover {
+.engagement-options.article-detail-options.is-open .engagement-options-items .engagement-btn.engagement-btn--danger:hover {
   background: rgba(185, 28, 28, 0.95);
   color: #ffffff;
 }
 
 /* Labels: hidden at rest (ArticleCard.css), slide out on hover for every
    button — the actions (rule in ArticleCard.css), the ⋯ button and close. */
-.article-detail-top-controls .engagement-btn-label,
+.article-detail-options .engagement-btn-label,
 .article-detail-close-btn .engagement-btn-label {
   font-size: 0.85rem;
 }
-.article-detail-top-controls .engagement-options-toggle:hover .engagement-btn-label,
+.article-detail-options .engagement-options-toggle:hover .engagement-btn-label,
 .article-detail-close-btn:hover .engagement-btn-label,
 .article-detail-close-btn:focus-visible .engagement-btn-label {
   max-width: 120px;
@@ -194,9 +195,26 @@
   transform: scale(0.95);
 }
 
-.article-detail-top-controls .engagement-options-toggle svg {
+.article-detail-options .engagement-options-toggle svg {
   width: 24px;
   height: 24px;
+}
+
+/* Compact (comic reader bottom bar): 42px, so the bar keeps its height. */
+.engagement-options.article-detail-options--compact {
+  --slide-step: 48px; /* 42px button + 6px gap */
+}
+.article-detail-options--compact .engagement-options-items {
+  gap: 6px;
+}
+.engagement-options.article-detail-options--compact .engagement-btn {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 10px;
+}
+.article-detail-options--compact .engagement-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* Small phones: slightly smaller buttons so up to six actions fit to the left
@@ -205,19 +223,19 @@
   .article-detail-top-controls {
     gap: 0.5rem;
   }
-  .article-detail-top-controls .engagement-options {
+  .engagement-options.article-detail-options {
     --slide-step: 48px; /* 42px button + 6px gap */
   }
-  .article-detail-top-controls .engagement-options-items {
+  .article-detail-options .engagement-options-items {
     gap: 6px;
   }
-  .article-detail-top-controls .engagement-options .engagement-btn,
+  .engagement-options.article-detail-options .engagement-btn,
   .article-detail-close-btn {
     min-width: 42px;
     height: 42px;
     padding: 0 10px;
   }
-  .article-detail-top-controls .engagement-btn svg,
+  .article-detail-options .engagement-btn svg,
   .article-detail-close-btn svg {
     width: 20px;
     height: 20px;

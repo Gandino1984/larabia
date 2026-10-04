@@ -335,7 +335,7 @@ function ArticleDetail({ previewMode = false }) {
 
         <div className="article-detail-content">
           {isComicArticle ? (
-            <HScrollViewer panels={comicPanels} articleId={selectedArticle.id_article} onFullscreen={() => setIsFullscreen(true)} />
+            <HScrollViewer panels={comicPanels} articleId={selectedArticle.id_article} onFullscreen={() => setIsFullscreen(true)} optionsActions={detailActions} />
           ) : (
             <>
               {selectedArticle.blocks && selectedArticle.blocks.length > 0 ? (
