@@ -437,5 +437,7 @@
   "hero.scrollHintMobile": "Puedes deslizar hacia arriba o hacia los lados",
   "engagement.label.follow": "Seguir",
   "project.files.label": "Archivos",
-  "project.files.title": "Descargar archivos del proyecto"
+  "project.files.title": "Descargar archivos del proyecto",
+  "project.articlesCount": "Este proyecto contiene {{count}} artículo",
+  "project.articlesCount_plural": "Este proyecto contiene {{count}} artículos"
 }

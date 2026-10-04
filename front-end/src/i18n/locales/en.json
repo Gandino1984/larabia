@@ -437,5 +437,7 @@
   "hero.scrollHintMobile": "You can swipe up or sideways",
   "engagement.label.follow": "Follow",
   "project.files.label": "Files",
-  "project.files.title": "Download project files"
+  "project.files.title": "Download project files",
+  "project.articlesCount": "This project contains {{count}} article",
+  "project.articlesCount_plural": "This project contains {{count}} articles"
 }

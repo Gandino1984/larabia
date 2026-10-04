@@ -245,7 +245,7 @@
   font-weight: 400;
 }
 
-/* Row holding the collaborators (left) and the options button (right) */
+/* Row holding the collaborators */
 .project-detail-meta-row {
   display: flex;
   align-items: center;
@@ -255,12 +255,25 @@
   margin-top: 0.5rem;
 }
 
-/* Follow / download-files actions behind a ⋯ button (same reveal as the
-   article cards), pushed to the right of the row; the actions slide out
-   leftward. The reserved width keeps the revealed actions (and an expanded
-   label) clear of the author names — the row wraps instead. */
-.project-detail-meta-row .project-options {
+/* Top row of the info column: type/format badges on the left, the ⋯ options
+   button (follow / download files) top-right, on the same line. */
+.project-detail-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.project-detail-top-row .project-detail-tags {
+  margin-bottom: 0;
+}
+
+/* Same reveal as the article cards; the actions slide out leftward. The
+   reserved width keeps the revealed actions (and an expanded label) clear of
+   the badges. */
+.project-detail-top-row .project-options {
   margin-left: auto;
+  flex-shrink: 0;
   min-width: 180px;
   justify-content: flex-end;
 }

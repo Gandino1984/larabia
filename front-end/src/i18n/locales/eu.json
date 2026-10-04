@@ -437,5 +437,7 @@
   "hero.scrollHintMobile": "Gora edo alboetara lerra dezakezu",
   "engagement.label.follow": "Jarraitu",
   "project.files.label": "Fitxategiak",
-  "project.files.title": "Deskargatu proiektuaren fitxategiak"
+  "project.files.title": "Deskargatu proiektuaren fitxategiak",
+  "project.articlesCount": "Proiektu honek artikulu {{count}} du",
+  "project.articlesCount_plural": "Proiektu honek {{count}} artikulu ditu"
 }

@@ -150,14 +150,21 @@ function ProjectDetail() {
         )}
 
         <div className="project-detail-info">
-          {(selectedProject.type_project || selectedProject.format_project) && (
-            <div className="project-detail-tags">
-              {selectedProject.type_project && (
-                <span className="project-detail-type">{selectedProject.type_project}</span>
+          {/* Top row: type/format badges (left) and, top-right, the ⋯ button that
+              groups follow (logged-in users) and download files (editors+). */}
+          {(selectedProject.type_project || selectedProject.format_project || projectActions.length > 0) && (
+            <div className="project-detail-top-row">
+              {(selectedProject.type_project || selectedProject.format_project) && (
+                <div className="project-detail-tags">
+                  {selectedProject.type_project && (
+                    <span className="project-detail-type">{selectedProject.type_project}</span>
+                  )}
+                  {selectedProject.format_project && (
+                    <span className="project-detail-format">{selectedProject.format_project}</span>
+                  )}
+                </div>
               )}
-              {selectedProject.format_project && (
-                <span className="project-detail-format">{selectedProject.format_project}</span>
-              )}
+              <OptionsReveal actions={projectActions} align="end" className="project-options" />
             </div>
           )}
           <h1 className="project-detail-title">{selectedProject.title_project}</h1>
@@ -206,10 +213,6 @@ function ProjectDetail() {
                 </div>
               </div>
             )}
-
-            {/* Follow (logged-in users) and download files (editors+), grouped
-                behind a ⋯ button like the article card actions. */}
-            <OptionsReveal actions={projectActions} align="end" className="project-options" />
           </div>
         </div>
       </div>
@@ -233,8 +236,8 @@ function ProjectDetail() {
               <>
                 <p className="project-articles-count">
                   {ordered.length === 1
-                    ? t('article.list.count', { count: 1 })
-                    : t('article.list.count_plural', { count: ordered.length })}
+                    ? t('project.articlesCount', { count: 1 })
+                    : t('project.articlesCount_plural', { count: ordered.length })}
                 </p>
                 <div className="project-articles-toolbar">
                   <div className="articles-view-toggle" data-mode={viewMode} role="group" aria-label={t('article.list.viewMode')}>
