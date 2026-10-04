@@ -442,5 +442,6 @@
   "project.articlesCount_plural": "This project contains {{count}} articles",
   "engagement.label.edit": "Edit",
   "engagement.label.close": "Close",
-  "image.viewFullscreen": "View image full screen"
+  "image.viewFullscreen": "View image full screen",
+  "hscroll.resumingReading": "Resuming where you left off"
 }

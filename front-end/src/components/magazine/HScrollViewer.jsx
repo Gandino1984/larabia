@@ -399,6 +399,11 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
           hasRestoredRef.current = true;
           // Use instant scroll for better UX when restoring position
           targetPanel.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
+          // Tell the reader why the comic didn't open at the start (not when the
+          // saved position is the first panel — that's just the beginning).
+          if (panelNumber > 1) {
+            showInfo(t('hscroll.resumingReading', 'Reanudando la lectura donde la dejaste'));
+          }
         } else {
           console.warn(`⚠️ Could not find panel ${panelNumber} to restore`);
           // Check how many panels exist
