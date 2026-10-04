@@ -1193,3 +1193,20 @@
   margin-bottom: 0.75rem;
 }
 .article-detail-date svg { flex-shrink: 0; }
+
+/* Comic reader on desktop. The header bar hides while an article is open, so
+   drop the top padding reserved for it: the comic sits as close to the top as
+   to the sides (the base .article-detail--comic padding is overridden by the
+   breakpoint rules above, hence the extra specificity). The cover becomes a
+   300px band — 40% lower than the 500px default — with the image undistorted
+   (object-fit: cover) and centered on its subject instead of cropped from the
+   top. */
+@media (min-width: 1024px) {
+  .article-detail.article-detail--comic {
+    padding-top: 2rem;
+  }
+  .article-detail--comic .article-detail-cover {
+    height: 300px;
+    max-height: none;
+  }
+}
