@@ -1,6 +1,6 @@
 // magazine-front/src/components/magazine/ArticleCard.jsx
 import { useState } from 'react';
-import { Calendar, User, Trash2 } from 'lucide-react';
+import { Calendar, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -99,14 +99,6 @@ function ArticleCard({ article, typeBadge, featuredBadge }) {
 
   return (
     <article className="article-card" onClick={handleClick}>
-      {canCreateContent && (isSuperAdmin || isArticleAuthor(article)) && (
-        <div className="article-action-buttons">
-          <button className="article-delete-btn" onClick={handleDelete} title="Eliminar artículo">
-            <Trash2 size={18} />
-          </button>
-        </div>
-      )}
-
       <div className="article-card-image">
         <img
           src={getCoverImageUrl()}
@@ -182,7 +174,10 @@ function ArticleCard({ article, typeBadge, featuredBadge }) {
       </div>
 
       {/* Engagement bar at the bottom: like / favorite / comments + views */}
-      <ArticleEngagementBar article={article} />
+      <ArticleEngagementBar
+        article={article}
+        onDelete={canCreateContent && (isSuperAdmin || isArticleAuthor(article)) ? handleDelete : undefined}
+      />
     </article>
   );
 }

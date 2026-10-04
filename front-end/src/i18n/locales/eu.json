@@ -403,6 +403,7 @@
   "editor.microperfil.needCaption": "Oin-testua beharrezkoa da.",
   "editor.microperfil.captionTooLong": "Oin-testua luzeegia da ({{count}}/700).",
   "editor.microperfil.categoryLocked": "Mikro-profilak beti Mikro-profilak atalean argitaratzen dira.",
+  "engagement.options": "Aukerak",
   "engagement.like": "Atsegin dut",
   "engagement.favorite": "Gorde gogokoetan",
   "engagement.comments": "Iruzkinak",

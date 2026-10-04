@@ -366,11 +366,69 @@
   z-index: 2;
 }
 
-/* When an admin delete button sits at the bottom-right, reserve room so the
-   engagement items don't slide under it. */
-.article-card:has(.article-action-buttons) .article-engagement-bar,
-.article-card:has(.list-delete-btn) .article-engagement-bar {
-  padding-right: 2.9rem;
+/* ---- Options button (bottom-left) that reveals the card actions ---- */
+.engagement-options {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.engagement-options-toggle {
+  position: relative;
+  z-index: 2;
+  transition: background 0.15s ease, color 0.15s ease, opacity 0.2s ease, transform 0.25s ease;
+}
+/* Once opened, the options button steps aside for the actions. */
+.engagement-options.is-open .engagement-options-toggle {
+  opacity: 0;
+  transform: scale(0.6) rotate(-90deg);
+  pointer-events: none;
+}
+/* Actions sit stacked behind the options button; they slide out one after
+   another when it's clicked. */
+.engagement-options-items {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1;
+  pointer-events: none;
+}
+.engagement-options-items .engagement-btn {
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease, scale 0.12s ease;
+}
+.engagement-options.is-open .engagement-options-items {
+  pointer-events: auto;
+}
+.engagement-options.is-open .engagement-options-items .engagement-btn {
+  animation: engagement-slide-out 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i) * 60ms);
+}
+@keyframes engagement-slide-out {
+  from { opacity: 0; transform: translateX(calc(var(--i) * -46px)) scale(0.85); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+/* Hover uses the independent `scale` property (the entrance animation owns
+   `transform`). */
+.engagement-options.is-open .engagement-options-items .engagement-btn:hover {
+  scale: 1.08;
+}
+.engagement-btn--danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+.engagement-btn--danger:hover {
+  background: #b91c1c;
+  color: #ffffff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .engagement-options.is-open .engagement-options-items .engagement-btn {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 .engagement-btn {
@@ -402,8 +460,9 @@
   color: #ffffff;
 }
 
-/* View counter inside the engagement bar, grouped right after the buttons */
+/* View counter: always visible, bottom-right of the card. */
 .engagement-views {
+  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 4px;

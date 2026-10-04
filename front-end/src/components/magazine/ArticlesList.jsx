@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
-import { Calendar, User, ArrowLeft, Trash2, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal, Search, X } from 'lucide-react';
+import { Calendar, User, ArrowLeft, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal, Search, X } from 'lucide-react';
 import ArticleEngagementBar from './ArticleEngagementBar';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import './ArticlesList.css';
@@ -96,6 +96,22 @@ function ArticlesList() {
   }, []);
   useDragScroll(carouselRef, viewMode === 'carousel');
 
+  // Darken behind the slider (same effect as the project page): on hover on
+  // desktop (CSS), and while the slider is on screen on mobile.
+  const carouselWrapRef = useRef(null);
+  const [carouselActive, setCarouselActive] = useState(false);
+  useEffect(() => {
+    const el = carouselWrapRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+    if (!window.matchMedia('(max-width: 768px)').matches) return undefined;
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => setCarouselActive(entry.isIntersecting)),
+      { threshold: 0.05 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [viewMode, articles.length]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchArticles();
@@ -183,15 +199,6 @@ function ArticlesList() {
       className="article-card"
       onClick={() => handleArticleClick(article)}
     >
-      {canCreateContent && (isSuperAdmin || isArticleAuthor(article)) && (
-        <button
-          className="list-delete-btn"
-          onClick={(e) => handleDelete(e, article)}
-          title={t('article.detail.deleteArticle')}
-        >
-          <Trash2 size={18} />
-        </button>
-      )}
       <div className="article-card-image">
         <img
           src={getCoverImageUrl(article)}
@@ -250,7 +257,10 @@ function ArticlesList() {
           )}
         </div>
       </div>
-      <ArticleEngagementBar article={article} />
+      <ArticleEngagementBar
+        article={article}
+        onDelete={canCreateContent && (isSuperAdmin || isArticleAuthor(article)) ? (e) => handleDelete(e, article) : undefined}
+      />
     </article>
   );
 
@@ -363,7 +373,10 @@ function ArticlesList() {
       ) : (
         <>
           {viewMode === 'carousel' ? (
-            <div className="articles-carousel-wrap">
+            <div
+              ref={carouselWrapRef}
+              className={`articles-carousel-wrap ${carouselActive ? 'articles-carousel-wrap--active' : ''}`}
+            >
               <button
                 type="button"
                 className="carousel-arrow carousel-arrow--prev"

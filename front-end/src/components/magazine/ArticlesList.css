@@ -486,6 +486,40 @@
   margin-right: auto;
   /* Room for the arrows near the edge, with a clear gap from the cards. */
   padding: 0 94px;
+  /* Own stacking context so the darkening layer sits above the page bg but
+     behind the cards. */
+  isolation: isolate;
+}
+
+/* Darkening behind the slider (like the project page), spanning the full screen
+   width and fading to transparent toward the sides. Shown on hover (desktop) or
+   while on screen (mobile, via --active). */
+.articles-list-page .articles-carousel-wrap::before {
+  content: '';
+  position: absolute;
+  top: -1.25rem;
+  bottom: -0.5rem;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.3) 22%,
+    rgba(0, 0, 0, 0.3) 78%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+.articles-list-page .articles-carousel-wrap:hover::before,
+.articles-list-page .articles-carousel-wrap--active::before {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .articles-list-page .articles-carousel-wrap::before { transition: none; }
 }
 
 /* Swipe affordance centred over the start of a horizontal carousel. */

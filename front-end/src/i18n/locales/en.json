@@ -403,6 +403,7 @@
   "editor.microperfil.needCaption": "The caption is required.",
   "editor.microperfil.captionTooLong": "The caption is too long ({{count}}/700).",
   "editor.microperfil.categoryLocked": "Micro-profiles are always published in the Micro-profiles section.",
+  "engagement.options": "Options",
   "engagement.like": "Like",
   "engagement.favorite": "Save to favorites",
   "engagement.comments": "Comments",
