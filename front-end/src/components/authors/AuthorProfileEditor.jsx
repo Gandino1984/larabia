@@ -28,6 +28,11 @@ function AuthorProfileEditor() {
     status_profile: 'draft'
   });
 
+  // Raw text of the specialties field. The list (formData.specialty_tags) is
+  // derived from it, but the field shows exactly what was typed — rebuilding
+  // it from the list on every keystroke used to swallow commas and spaces
+  // (typing "audio, " collapsed back to "audio"), merging all the tags.
+  const [tagsInput, setTagsInput] = useState('');
   const [imageError, setImageError] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
@@ -63,6 +68,7 @@ function AuthorProfileEditor() {
         instagram_handle: targetProfile.instagram_handle || '',
         status_profile: targetProfile.status_profile || 'draft'
       });
+      setTagsInput((targetProfile.specialty_tags || []).join(', '));
     }
   }, [targetProfile]);
 
@@ -124,8 +130,9 @@ function AuthorProfileEditor() {
 
   const handleTagsChange = (e) => {
     const tagsString = e.target.value;
+    setTagsInput(tagsString);
     const tagsArray = tagsString
-      .split(',')
+      .split(/[,;]/)
       .map(t => t.trim())
       .filter(t => t);
     setFormData({ ...formData, specialty_tags: tagsArray });
@@ -243,7 +250,7 @@ function AuthorProfileEditor() {
               type="text"
               id="specialty_tags"
               placeholder="Ej: Cómic, Ilustración, Narrativa (separados por comas)"
-              value={formData.specialty_tags.join(', ')}
+              value={tagsInput}
               onChange={handleTagsChange}
             />
             <span className="field-hint">
