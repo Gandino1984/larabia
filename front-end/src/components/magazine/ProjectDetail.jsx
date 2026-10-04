@@ -13,6 +13,7 @@ import OptionsReveal from './OptionsReveal';
 import AuthorChip from '../common/AuthorChip';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import './ProjectDetail.css';
+import './ArticlesCarousel.css';
 
 function ProjectDetail() {
   const { t } = useTranslation();

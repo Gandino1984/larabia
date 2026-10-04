@@ -309,9 +309,9 @@
 .view-toggle-btn:hover { color: #ffffff; }
 .view-toggle-btn--active { color: #1a1a1a; }
 
-/* No side margins: the track spans the content width; the (translucent)
-   arrows sit over the edges of the cards. */
-.articles-carousel-wrap { position: relative; padding: 0; }
+/* No side margins on wide screens: the arrows sit outside the card track
+   (ArticlesCarousel.css). */
+.articles-carousel-wrap { position: relative; }
 .articles-carousel {
   display: flex;
   gap: 1.5rem;
@@ -336,8 +336,7 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
-  width: 46px;
-  height: 46px;
+  /* Size + horizontal position: ArticlesCarousel.css. */
   border-radius: 50%;
   border: none;
   background: var(--slider-arrow-bg);
@@ -355,15 +354,6 @@
   background: var(--slider-arrow-bg-hover);
   color: #ffffff;
   transform: translateY(-50%) scale(1.1);
-}
-.carousel-arrow--prev { left: 6px; }
-.carousel-arrow--next { right: 6px; }
-
-@media (min-width: 1024px) {
-  .carousel-arrow { width: 52px; height: 52px; }
-}
-@media (min-width: 1200px) {
-  .carousel-arrow { width: 62px; height: 62px; }
 }
 
 @media (max-width: 768px) {

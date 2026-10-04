@@ -1,0 +1,37 @@
+/* Article carousels (articles list + project page): the arrow buttons sit
+   outside the card track, never over the cards.
+
+   Wide screens: the arrows live in the page's side space, a small gap away
+   from the cards, and the track has no side margins. When that side space is
+   too narrow for an arrow, the wrap pads itself just enough to make room.
+
+   --carousel-outer: space between the wrap and the viewport edge (100% is the
+   wrap's width, both where it pads and where the arrows are positioned).
+   --carousel-pad:   the padding that's still needed (0 on wide screens). */
+@media (min-width: 769px) {
+  .articles-carousel-wrap {
+    --carousel-arrow: 46px;
+    --carousel-arrow-gap: 16px;
+    --carousel-outer: calc((100vw - 100%) / 2);
+    --carousel-pad: max(0px, calc(var(--carousel-arrow) + 2 * var(--carousel-arrow-gap) - var(--carousel-outer)));
+    padding-left: var(--carousel-pad);
+    padding-right: var(--carousel-pad);
+  }
+  .articles-carousel-wrap .carousel-arrow {
+    width: var(--carousel-arrow);
+    height: var(--carousel-arrow);
+  }
+  .articles-carousel-wrap .carousel-arrow--prev {
+    left: calc(var(--carousel-pad) - var(--carousel-arrow-gap) - var(--carousel-arrow));
+  }
+  .articles-carousel-wrap .carousel-arrow--next {
+    right: calc(var(--carousel-pad) - var(--carousel-arrow-gap) - var(--carousel-arrow));
+  }
+}
+/* Arrow size steps, like the hero arrows. */
+@media (min-width: 1024px) {
+  .articles-carousel-wrap { --carousel-arrow: 52px; }
+}
+@media (min-width: 1200px) {
+  .articles-carousel-wrap { --carousel-arrow: 62px; }
+}

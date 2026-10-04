@@ -8,6 +8,7 @@ import { Calendar, User, ArrowLeft, ChevronLeft, ChevronRight, LayoutGrid, Galle
 import ArticleEngagementBar from './ArticleEngagementBar';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import './ArticlesList.css';
+import './ArticlesCarousel.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 

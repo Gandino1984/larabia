@@ -478,10 +478,9 @@
 /* Carousel wrapper + navigation arrows */
 .articles-carousel-wrap {
   position: relative;
-  /* No side margins: the track spans the page's content width; the
-     (translucent) arrows sit over the edges of the cards. */
+  /* No side margins on wide screens: the track spans the page's content
+     width and the arrows sit outside it (ArticlesCarousel.css). */
   width: 100%;
-  padding: 0;
   /* Own stacking context so the darkening layer sits above the page bg but
      behind the cards. */
   isolation: isolate;
@@ -539,9 +538,8 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
-  /* Same size as the hero slider arrows (46px ≥768, 52px ≥1024, 62px ≥1200). */
-  width: 46px;
-  height: 46px;
+  /* Size + horizontal position: ArticlesCarousel.css (shared with the project
+     page) — outside the card track, never over the cards. */
   border-radius: 50%;
   border: none;
   background: var(--slider-arrow-bg);
@@ -564,21 +562,14 @@
   color: #ffffff;
   transform: translateY(-50%) scale(1.1);
 }
-.articles-list-page .carousel-arrow--prev { left: 8px; }
-.articles-list-page .carousel-arrow--next { right: 8px; }
 
 @media (min-width: 1024px) {
-  .articles-list-page .carousel-arrow { width: 52px; height: 52px; }
   /* Three cards per view on landscape/desktop: each fills a third of the track
      (2rem/32px gaps between them). */
   .articles-carousel .article-card {
     flex: 0 0 calc((100% - 64px) / 3);
     max-width: none;
   }
-}
-
-@media (min-width: 1200px) {
-  .articles-list-page .carousel-arrow { width: 62px; height: 62px; }
 }
 
 @media (max-width: 768px) {
