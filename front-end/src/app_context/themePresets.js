@@ -56,7 +56,7 @@ export const THEME_PRESETS = {
   default: {
     label: 'Por defecto',
     tokens: {
-      '--color-bg': '#252525',
+      '--color-bg': '#303030',
       '--color-surface': '#2a2a2a',
       '--color-surface-alt': '#1a1a1a',
       '--color-surface-3': '#3a3a3a',
@@ -76,7 +76,7 @@ export const THEME_PRESETS = {
       '--color-header-bg-active': '#ffffff',
       '--color-header-text-active': '#000000'
     },
-    landing_bg: '#252525'
+    landing_bg: '#303030'
   },
   light: {
     label: 'Claro',
