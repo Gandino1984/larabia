@@ -975,7 +975,7 @@
     grid-area: label;
     display: block;
     justify-self: start;
-    margin-top: 1.25rem;
+    margin-top: 1.75rem;
   }
   .hero-desc-row .hero-meta-row {
     grid-area: names;
