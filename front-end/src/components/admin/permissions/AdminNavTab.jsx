@@ -32,7 +32,9 @@ const blankGroup = () => ({
 });
 
 /** Editor for a link's action (type + value). */
-function ActionEditor({ action, onChange }) {
+function ActionEditor({ action: rawAction, onChange }) {
+  // Items without an action (e.g. legacy/malformed config) get a safe default.
+  const action = rawAction || { type: 'section', value: 'home' };
   const set = (patch) => onChange({ ...action, ...patch });
   const onType = (type) => {
     // sensible default value per type
@@ -97,6 +99,44 @@ function ItemMeta({ item, onChange, onMove, onDelete, canDelete, isFirst, isLast
           <button type="button" className="nav-icon-btn nav-icon-btn--danger" onClick={onDelete} title="Eliminar"><Trash2 size={16} /></button>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Nested subgroup inside a group (e.g. "Barrio" inside "Más"): edits its own
+    links. Subgroups have no action of their own, only children. */
+function SubGroupEditor({ group, onChange }) {
+  const kids = group.children || [];
+  const setKids = (next) => onChange({ ...group, children: next });
+  const moveKid = (k, dir) => {
+    const j = k + dir;
+    if (j < 0 || j >= kids.length) return;
+    const copy = [...kids];
+    [copy[k], copy[j]] = [copy[j], copy[k]];
+    setKids(copy);
+  };
+  return (
+    <div className="nav-children nav-children--nested">
+      {kids.map((kid, k) => (
+        <div key={kid.id} className="nav-child">
+          <ItemMeta
+            item={kid}
+            onChange={(next) => setKids(kids.map((c, i) => (i === k ? next : c)))}
+            onMove={(dir) => moveKid(k, dir)}
+            onDelete={() => setKids(kids.filter((_, i) => i !== k))}
+            canDelete
+            isFirst={k === 0}
+            isLast={k === kids.length - 1}
+          />
+          <ActionEditor
+            action={kid.action}
+            onChange={(action) => setKids(kids.map((c, i) => (i === k ? { ...kid, action } : c)))}
+          />
+        </div>
+      ))}
+      <button type="button" className="admin-nav__add-child" onClick={() => setKids([...kids, blankLink()])}>
+        <Plus size={14} /> Añadir elemento al subgrupo
+      </button>
     </div>
   );
 }
@@ -193,7 +233,11 @@ function AdminNavTab() {
                       isFirst={cIdx === 0}
                       isLast={cIdx === item.children.length - 1}
                     />
-                    <ActionEditor action={child.action} onChange={(action) => updateChild(idx, cIdx, { ...child, action })} />
+                    {child.kind === 'group' ? (
+                      <SubGroupEditor group={child} onChange={(next) => updateChild(idx, cIdx, next)} />
+                    ) : (
+                      <ActionEditor action={child.action} onChange={(action) => updateChild(idx, cIdx, { ...child, action })} />
+                    )}
                   </div>
                 ))}
                 <button type="button" className="admin-nav__add-child" onClick={() => addChild(idx)}>

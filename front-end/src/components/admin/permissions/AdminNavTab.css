@@ -80,6 +80,11 @@
   gap: 0.6rem;
 }
 
+/* Subgroup's own children (e.g. Barrio's links), one level deeper. */
+.nav-children--nested {
+  margin-top: 0.6rem;
+}
+
 .nav-child {
   background: var(--color-surface-alt, #1a1a1a);
   border-radius: 8px;
