@@ -341,3 +341,70 @@ html[data-animations="off"] *::after {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---- User profile images: gentle zoom on mouse hover, site-wide ----
+   Small avatars scale up a little; framed photos (author cards, profile/user
+   cards) zoom inside their frame. Also triggers when hovering the clickable
+   author chip/button that contains the avatar. :root raises specificity so
+   component stylesheets (loaded later) don't drop the transition. */
+:root .user-profile-image,
+:root .mobile-user-header-img,
+:root .hero-author-avatar,
+:root .card-author-avatar,
+:root .list-author-avatar,
+:root .project-author-avatar,
+:root .author-avatar,
+:root .search-result-author-avatar,
+:root .comment-avatar,
+:root .workshop-author-avatar,
+:root .author-avatar-small,
+:root .author-avatar-tiny,
+:root .author-card-image img,
+:root .profile-image-container .profile-image,
+:root .profile-image-section .profile-image {
+  transition: transform 0.25s ease, border-color 0.3s ease;
+}
+
+:root .user-profile-image:hover,
+:root .user-info-btn:hover .user-profile-image,
+:root .mobile-user-header-img:hover,
+:root .mobile-user-header-main:hover .mobile-user-header-img,
+:root .hero-author-avatar:hover,
+:root .hero-author--clickable:hover .hero-author-avatar,
+:root .card-author-avatar:hover,
+:root .card-author--clickable:hover .card-author-avatar,
+:root .list-author-avatar:hover,
+:root .list-author--clickable:hover .list-author-avatar,
+:root .project-author-avatar:hover,
+:root .project-detail-author-item--clickable:hover .project-author-avatar,
+:root .author-avatar:hover,
+:root .author-info--clickable:hover .author-avatar,
+:root .search-result-author-avatar:hover,
+:root .search-result-author-item:hover .search-result-author-avatar,
+:root .comment-avatar:hover,
+:root .workshop-author-avatar:hover,
+:root .author-avatar-small:hover,
+:root .author-avatar-tiny:hover {
+  transform: scale(1.12);
+}
+
+/* Framed photos zoom inside their (overflow-hidden) frame. */
+:root .author-card:hover .author-card-image img,
+:root .profile-image-container:hover .profile-image,
+:root .profile-image-section .profile-image:hover {
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root .user-profile-image,
+  :root .hero-author-avatar,
+  :root .card-author-avatar,
+  :root .list-author-avatar,
+  :root .project-author-avatar,
+  :root .author-avatar,
+  :root .comment-avatar,
+  :root .author-card-image img,
+  :root .profile-image-container .profile-image {
+    transition: none;
+  }
+}
