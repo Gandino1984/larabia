@@ -425,7 +425,7 @@
 
 .hscroll-progress-controls {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
 .btn-progress-action {
@@ -810,6 +810,7 @@
   .hscroll-progress-controls {
     justify-self: stretch;
     justify-content: center;
+    gap: 0.75rem;
   }
 
   .btn-progress-action {
