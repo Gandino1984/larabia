@@ -200,7 +200,10 @@
   height: 24px;
 }
 
-/* Compact (comic reader bottom bar): 42px, so the bar keeps its height. */
+/* Compact (comic reader bottom bar): 42px, so the bar keeps its height, and
+   gray like the bar's other buttons — light gray, a darker gray on hover,
+   black while active (as in the article cards). Delete stays red (its rule
+   above is more specific). */
 .engagement-options.article-detail-options--compact {
   --slide-step: 48px; /* 42px button + 6px gap */
 }
@@ -211,6 +214,19 @@
   min-width: 42px;
   height: 42px;
   padding: 0 10px;
+  background: lightgray;
+  color: #1a1a1a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.engagement-options.article-detail-options--compact .engagement-options-toggle:hover,
+.engagement-options.article-detail-options--compact.is-open .engagement-options-items .engagement-btn:hover {
+  background: #7a7a7a;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.engagement-options.article-detail-options--compact .engagement-btn.engagement-btn--active {
+  background: #000000;
+  color: #ffffff;
 }
 .article-detail-options--compact .engagement-btn svg {
   width: 20px;
