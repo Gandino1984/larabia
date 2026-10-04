@@ -5,7 +5,7 @@
 // plus delete for authors/admins), which slide out one after another as if they
 // had been stacked behind it. Bottom-right: the view counter, always visible.
 // Manages its own comments modal. Used by both ArticleCard and the articles list.
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThumbsUp, Bookmark, MessageCircle, Share2, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
 import { useEngagement } from '../../app_context/EngagementContext';
@@ -22,6 +22,22 @@ function ArticleEngagementBar({ article, onDelete }) {
 
   const liked = isLiked(article.id_article);
   const favorited = isFavorited(article.id_article);
+
+  // Auto-collapse 10s after opening (back to the ⋯ button). The countdown pauses
+  // while the pointer is over the actions and restarts after each use.
+  const closeTimer = useRef(null);
+  const clearCloseTimer = useCallback(() => {
+    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; }
+  }, []);
+  const scheduleClose = useCallback(() => {
+    clearCloseTimer();
+    closeTimer.current = setTimeout(() => setOpen(false), 10000);
+  }, [clearCloseTimer]);
+  useEffect(() => {
+    if (open) scheduleClose();
+    else clearCloseTimer();
+    return clearCloseTimer;
+  }, [open, scheduleClose, clearCloseTimer]);
 
   // Collapse the options when clicking anywhere else or pressing Escape.
   useEffect(() => {
@@ -53,6 +69,7 @@ function ArticleEngagementBar({ article, onDelete }) {
       className: liked ? 'engagement-btn--active' : '',
       onClick: () => toggleLike(article.id_article),
       title: t('engagement.like'),
+      label: t('engagement.label.like', 'Me gusta'),
       pressed: liked,
       icon: <ThumbsUp size={18} fill={liked ? 'currentColor' : 'none'} />,
     },
@@ -61,6 +78,7 @@ function ArticleEngagementBar({ article, onDelete }) {
       className: favorited ? 'engagement-btn--active' : '',
       onClick: () => toggleFavorite(article.id_article),
       title: t('engagement.favorite'),
+      label: t('engagement.label.favorite', 'Favoritos'),
       pressed: favorited,
       icon: <Bookmark size={18} fill={favorited ? 'currentColor' : 'none'} />,
     },
@@ -69,6 +87,7 @@ function ArticleEngagementBar({ article, onDelete }) {
       className: showComments ? 'engagement-btn--active' : '',
       onClick: () => setShowComments(true),
       title: t('engagement.comments'),
+      label: t('engagement.label.comments', 'Comentarios'),
       icon: <MessageCircle size={18} fill={showComments ? 'currentColor' : 'none'} />,
     },
     {
@@ -76,6 +95,7 @@ function ArticleEngagementBar({ article, onDelete }) {
       className: '',
       onClick: handleShare,
       title: t('common.buttons.share'),
+      label: t('engagement.label.share', 'Compartir'),
       icon: <Share2 size={18} />,
     },
   ];
@@ -85,13 +105,19 @@ function ArticleEngagementBar({ article, onDelete }) {
       className: 'engagement-btn--danger',
       onClick: (e) => onDelete(e),
       title: t('article.detail.deleteArticle'),
+      label: t('engagement.label.delete', 'Eliminar'),
       icon: <Trash2 size={18} />,
     });
   }
 
   return (
     <div className="article-engagement-bar" onClick={(e) => e.stopPropagation()}>
-      <div ref={optionsRef} className={`engagement-options ${open ? 'is-open' : ''}`}>
+      <div
+        ref={optionsRef}
+        className={`engagement-options ${open ? 'is-open' : ''}`}
+        onMouseEnter={() => { if (open) clearCloseTimer(); }}
+        onMouseLeave={() => { if (open) scheduleClose(); }}
+      >
         <button
           type="button"
           className="engagement-btn engagement-options-toggle"
@@ -110,12 +136,13 @@ function ArticleEngagementBar({ article, onDelete }) {
               type="button"
               className={`engagement-btn ${a.className}`}
               style={{ '--i': i }}
-              onClick={stop(a.onClick)}
+              onClick={stop((e) => { a.onClick(e); if (open) scheduleClose(); })}
               title={a.title}
               aria-pressed={a.pressed}
               tabIndex={open ? 0 : -1}
             >
               {a.icon}
+              <span className="engagement-btn-label">{a.label}</span>
             </button>
           ))}
         </div>

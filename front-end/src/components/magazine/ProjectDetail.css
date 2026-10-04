@@ -115,25 +115,44 @@
 
 /* Articles section */
 .project-detail-articles {
+  position: relative;
+  /* Own stacking context: the darkening layer sits above the page background
+     but behind the cards. */
+  isolation: isolate;
   border-top: 1px solid #333;
-  /* Side padding + negative margin so the darkening reads as a full band that
-     reaches the page gutters, differentiating it from the project info above. */
-  padding: 2rem 1rem 1.25rem;
-  margin: 0 -1rem;
-  border-radius: 10px;
-  background: transparent;
-  transition: background 0.6s ease;
+  padding: 2rem 0 1.25rem;
 }
 
-/* Gradual darken of the gray background: on hover (desktop) or when active
+/* Gradual darken behind the article cards, spanning the full screen width and
+   fading to transparent toward the sides. On hover (desktop) or when active
    (mobile — section in view / arrow tapped). */
-.project-detail-articles:hover,
-.project-detail-articles--active {
-  background: rgba(0, 0, 0, 0.28);
+.project-detail-articles::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.3) 22%,
+    rgba(0, 0, 0, 0.3) 78%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+.project-detail-articles:hover::before,
+.project-detail-articles--active::before {
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .project-detail-articles { transition: none; }
+  .project-detail-articles::before { transition: none; }
 }
 
 .project-articles-grid {

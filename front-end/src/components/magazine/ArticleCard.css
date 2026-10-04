@@ -367,6 +367,11 @@
 }
 
 /* ---- Options button (bottom-left) that reveals the card actions ---- */
+/* The bar is a size container so a narrow card can make room (see the
+   @container rule below) when a label expands. */
+.article-engagement-bar {
+  container-type: inline-size;
+}
 .engagement-options {
   position: relative;
   display: inline-flex;
@@ -377,6 +382,10 @@
   z-index: 2;
   transition: background 0.15s ease, color 0.15s ease, opacity 0.2s ease, transform 0.25s ease;
 }
+.engagement-options-toggle:hover {
+  background: #7a7a7a;
+  color: #ffffff;
+}
 /* Once opened, the options button steps aside for the actions. */
 .engagement-options.is-open .engagement-options-toggle {
   opacity: 0;
@@ -384,7 +393,7 @@
   pointer-events: none;
 }
 /* Actions sit stacked behind the options button; they slide out one after
-   another when it's clicked. */
+   another when it's clicked (and fade back behind it when it closes). */
 .engagement-options-items {
   position: absolute;
   left: 0;
@@ -392,11 +401,79 @@
   transform: translateY(-50%);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   z-index: 1;
   pointer-events: none;
 }
+/* Pill-shaped: a 34px circle at rest that widens to show its label on hover,
+   pushing the buttons on its right along to make room. */
 .engagement-options-items .engagement-btn {
+  width: auto;
+  min-width: 34px;
+  padding: 0 8px;
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.engagement-btn-label {
+  display: inline-block;
+  max-width: 0;
+  margin-left: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: max-width 0.3s cubic-bezier(0.22, 1, 0.36, 1), margin-left 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+.engagement-options.is-open .engagement-options-items {
+  pointer-events: auto;
+}
+.engagement-options.is-open .engagement-options-items .engagement-btn {
+  animation: engagement-slide-out 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i) * 60ms);
+}
+@keyframes engagement-slide-out {
+  from { opacity: 0; transform: translateX(calc(var(--i) * -42px)) scale(0.85); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+/* Hover: lighter gray (not black) and the label slides out. */
+.engagement-options.is-open .engagement-options-items .engagement-btn:hover {
+  background: #7a7a7a;
+  color: #ffffff;
+}
+.engagement-options.is-open .engagement-options-items .engagement-btn:hover .engagement-btn-label {
+  max-width: 120px;
+  margin-left: 6px;
+  opacity: 1;
+}
+.engagement-btn.engagement-btn--danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+.engagement-options.is-open .engagement-options-items .engagement-btn--danger:hover {
+  background: #b91c1c;
+  color: #ffffff;
+}
+/* Narrow cards: while a label is expanded, fade the view counter so the
+   widened row doesn't collide with it. */
+.engagement-views {
+  transition: opacity 0.2s ease;
+}
+@container (max-width: 380px) {
+  .engagement-options.is-open:hover + .engagement-views {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .engagement-options.is-open .engagement-options-items .engagement-btn {
+    animation: none;
+    opacity: 1;
+  }
+  .engagement-btn-label { transition: none; }
+}
+
+.engagement-btn {
   opacity: 0;
   transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease, scale 0.12s ease;
 }
