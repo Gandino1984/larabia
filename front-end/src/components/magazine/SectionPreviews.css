@@ -79,14 +79,16 @@
   height: 46px;
   border-radius: 50%;
   border: none;
-  background: lightgray;
+  background: var(--slider-arrow-bg);
+  -webkit-backdrop-filter: var(--slider-arrow-blur);
+  backdrop-filter: var(--slider-arrow-blur);
   color: #1a1a1a;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
 .section-preview__arrow:hover {
-  background: #000000;
+  background: var(--slider-arrow-bg-hover);
   color: #ffffff;
 }
 

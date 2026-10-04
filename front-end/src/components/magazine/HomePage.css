@@ -510,7 +510,9 @@
   position: absolute;
   top: 54%;
   transform: translateY(-50%);
-  background: lightgray;
+  background: var(--slider-arrow-bg);
+  -webkit-backdrop-filter: var(--slider-arrow-blur);
+  backdrop-filter: var(--slider-arrow-blur);
   border: none;
   color: #1a1a1a;
   width: 34px;
@@ -531,7 +533,7 @@
 }
 
 .hero-nav:hover {
-  background: #000000;
+  background: var(--slider-arrow-bg-hover);
   color: #ffffff;
   transform: translateY(-50%) scale(1.1);
 }

@@ -347,7 +347,9 @@
   height: 46px;
   border-radius: 50%;
   border: none;
-  background: lightgray;
+  background: var(--slider-arrow-bg);
+  -webkit-backdrop-filter: var(--slider-arrow-blur);
+  backdrop-filter: var(--slider-arrow-blur);
   color: #1a1a1a;
   cursor: pointer;
   display: inline-flex;
@@ -357,7 +359,7 @@
 }
 .carousel-arrow svg { width: 58%; height: 58%; }
 .carousel-arrow:hover {
-  background: #000000;
+  background: var(--slider-arrow-bg-hover);
   color: #ffffff;
   transform: translateY(-50%) scale(1.1);
 }
