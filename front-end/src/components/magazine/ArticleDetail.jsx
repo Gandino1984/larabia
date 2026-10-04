@@ -298,13 +298,18 @@ function ArticleDetail({ previewMode = false }) {
           <div className="article-detail-meta">
 
             {(selectedArticle.authors?.length > 0 || selectedArticle.author_name) && (
-              <span className="meta-item meta-item-author">
-                {selectedArticle.authors?.length > 0
-                  ? selectedArticle.authors.map((author) => (
-                      <AuthorChip key={author.id_user} author={author} clickable={!previewMode} />
-                    ))
-                  : <AuthorChip name={selectedArticle.author_name} clickable={false} />}
-              </span>
+              <div className="article-detail-authors">
+                {/* "Autoras/es" label above the names, as in the hero and the
+                    project page. */}
+                <span className="article-detail-authors-label">{t('project.collaborators')}</span>
+                <span className="meta-item meta-item-author">
+                  {selectedArticle.authors?.length > 0
+                    ? selectedArticle.authors.map((author) => (
+                        <AuthorChip key={author.id_user} author={author} clickable={!previewMode} />
+                      ))
+                    : <AuthorChip name={selectedArticle.author_name} clickable={false} />}
+                </span>
+              </div>
             )}
 
             {/* In draft preview the engagement bar is hidden, so show views on

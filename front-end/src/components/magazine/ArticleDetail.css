@@ -582,6 +582,31 @@
   gap: 0.75rem 1.5rem;
 }
 
+/* "Autoras/es" label above the author names (same type as the hero and the
+   project page labels). */
+.article-detail-authors {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.article-detail-authors-label {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--on-light-muted, #666);
+}
+@media (min-width: 769px) {
+  .article-detail-authors-label {
+    font-size: 0.95rem;
+  }
+}
+@media (min-width: 768px) {
+  .article-detail-views {
+    min-height: 46px;
+  }
+}
+
 .article-detail-content {
   padding: 1.5rem;
   font-size: 1rem;
@@ -1155,6 +1180,10 @@
    live in the ⋯ menu at the top right). */
 .article-detail-views {
   margin-left: auto;
+  /* Level with the author names (below their "Autoras/es" label): same height
+     as an author photo, at the bottom of the row. */
+  align-self: flex-end;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
