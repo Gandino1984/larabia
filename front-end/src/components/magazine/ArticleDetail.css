@@ -487,15 +487,18 @@
   margin-bottom: 1rem;
 }
 
+/* Project name above the title — centered, sentence case, same size as the
+   hero's project label. */
 .article-project-label {
   display: block;
   font-family: 'Source Code Pro', monospace;
-  font-size: 0.72rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  text-transform: none;
+  letter-spacing: 1px;
   color: #888;
-  margin-bottom: 0.4rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
 }
 
 .article-detail-title {
@@ -507,18 +510,21 @@
   text-align: center;
 }
 
+/* Description: same sizes as the hero description at each breakpoint (1rem →
+   1.3rem), upright (no italics). */
 .article-detail-excerpt {
   margin: 0 0 1.5rem;
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: #555;
   text-align: center;
   line-height: 1.6;
-  font-style: italic;
+  font-style: normal;
 }
 
 .article-detail-meta {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 1rem;
 }
 
@@ -534,41 +540,10 @@
   flex-shrink: 0;
 }
 
+/* Authors (AuthorChip — photo + name, same measures as the hero). */
 .meta-item-author {
   flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.author-info .author-avatar {
-  width: 24px !important;
-  height: 24px !important;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.author-icon-fallback {
-  flex-shrink: 0;
-}
-
-.author-info--clickable {
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.author-info--clickable:hover {
-  opacity: 0.7;
-}
-
-.author-info {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.author-text {
-  display: inline;
-  white-space: nowrap;
+  gap: 0.75rem 1.5rem;
 }
 
 .article-detail-content {
@@ -849,7 +824,7 @@
   }
 
   .article-detail-excerpt {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
   }
 
   .article-detail-meta {
@@ -913,7 +888,7 @@
   }
 
   .article-detail-excerpt {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     margin-bottom: 1.75rem;
   }
 
@@ -995,7 +970,7 @@
   }
 
   .article-detail-excerpt {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     margin-bottom: 2rem;
   }
 
@@ -1055,9 +1030,8 @@
 
 /* Large Desktop: 1200px and up */
 @media (min-width: 1200px) {
-  .author-info .author-avatar {
-    width: 30px !important;
-    height: 30px !important;
+  .article-detail-excerpt {
+    font-size: 1.3rem;
   }
 
   .article-detail-header {
@@ -1110,7 +1084,7 @@
   }
 
   .article-detail-excerpt {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     margin-bottom: 1rem;
   }
 

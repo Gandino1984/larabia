@@ -1,7 +1,7 @@
 // magazine-front/src/components/magazine/ProjectDetail.jsx
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, User, Bell, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { ArrowLeft, Bell, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -10,12 +10,13 @@ import axiosInstance from '../../utils/axiosConfig';
 import ArticleCard from './ArticleCard';
 import ProjectFilesPanel from './ProjectFilesPanel';
 import OptionsReveal from './OptionsReveal';
+import AuthorChip from '../common/AuthorChip';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import './ProjectDetail.css';
 
 function ProjectDetail() {
   const { t } = useTranslation();
-  const { navigateBackFromProject, openAuthorCard } = useUI();
+  const { navigateBackFromProject } = useUI();
   const { selectedProject } = useMagazine();
   const { currentUser, canCreateContent } = useAuth();
   const { isSubscribed, toggleSubscribe } = useEngagement();
@@ -106,13 +107,6 @@ function ProjectDetail() {
 
   const coverUrl = getCoverImageUrl();
 
-  const getAuthorImageUrl = (author) => {
-    const img = author?.image_user;
-    if (!img) return null;
-    if (img.startsWith('http://') || img.startsWith('https://')) return img;
-    return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
-  };
-
   const projectActions = [];
   if (currentUser) {
     const subscribed = isSubscribed(selectedProject.id_project);
@@ -178,38 +172,11 @@ function ProjectDetail() {
               <div className="project-detail-collaborators">
                 <span className="project-detail-collaborators-label">{t('project.collaborators')}</span>
                 <div className="project-detail-authors-list">
-                  {selectedProject.authors && selectedProject.authors.length > 0 ? (
-                    selectedProject.authors.map(author => (
-                      <span
-                        key={author.id_user}
-                        className="project-detail-author-item project-detail-author-item--clickable"
-                        onClick={() => openAuthorCard(author)}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        {getAuthorImageUrl(author) ? (
-                          <img
-                            src={getAuthorImageUrl(author)}
-                            alt={author.name_user}
-                            className="project-author-avatar"
-                            onError={(e) => { e.target.style.display = 'none'; }}
-                          />
-                        ) : (
-                          <span className="project-author-avatar project-author-avatar--fallback">
-                            <User size={18} />
-                          </span>
-                        )}
-                        <span>{author.name_user}</span>
-                      </span>
-                    ))
-                  ) : (
-                    <span className="project-detail-author-item">
-                      <span className="project-author-avatar project-author-avatar--fallback">
-                        <User size={18} />
-                      </span>
-                      <span>{selectedProject.author_name}</span>
-                    </span>
-                  )}
+                  {selectedProject.authors?.length > 0
+                    ? selectedProject.authors.map((author) => (
+                        <AuthorChip key={author.id_user} author={author} tone="dark" />
+                      ))
+                    : <AuthorChip name={selectedProject.author_name} clickable={false} tone="dark" />}
                 </div>
               </div>
             )}

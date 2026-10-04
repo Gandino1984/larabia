@@ -1,0 +1,69 @@
+/* Author photo + name (AuthorChip) — same measures as the hero authors. */
+.author-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.author-chip--clickable {
+  cursor: pointer;
+}
+.author-chip--clickable:hover .author-chip__name,
+.author-chip--clickable:focus-visible .author-chip__name {
+  text-decoration: underline;
+}
+
+.author-chip__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2.5px solid transparent;
+  transition: transform 0.25s ease;
+}
+.author-chip--clickable:hover .author-chip__avatar {
+  transform: scale(1.12);
+}
+.author-chip__avatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* On light backgrounds (article reader). */
+.author-chip--light .author-chip__avatar {
+  border-color: #e0e0e0;
+}
+.author-chip--light .author-chip__avatar--fallback {
+  background: #ececec;
+  color: #555555;
+}
+
+/* On dark backgrounds (project page). */
+.author-chip--dark .author-chip__avatar {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+.author-chip--dark .author-chip__avatar--fallback {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+@media (min-width: 768px) {
+  .author-chip {
+    font-size: 1.05rem;
+  }
+  .author-chip__avatar {
+    width: 46px;
+    height: 46px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .author-chip__avatar { transition: none; }
+  .author-chip--clickable:hover .author-chip__avatar { transform: none; }
+}

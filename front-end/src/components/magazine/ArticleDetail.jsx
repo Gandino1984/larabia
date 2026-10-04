@@ -6,10 +6,11 @@ import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useAuthor } from '../../app_context/AuthorContext';
 import { useEngagement } from '../../app_context/EngagementContext';
-import { Calendar, User, Eye, X, Trash2, Minimize, Edit, ArrowLeft, Share2, ThumbsUp, Bookmark, MessageCircle } from 'lucide-react';
+import { Calendar, Eye, X, Trash2, Minimize, Edit, ArrowLeft, Share2, ThumbsUp, Bookmark, MessageCircle } from 'lucide-react';
 import HScrollViewer from './HScrollViewer';
 import CommentsModal from './CommentsModal';
 import OptionsReveal from './OptionsReveal';
+import AuthorChip from '../common/AuthorChip';
 import './ArticleDetail.css';
 
 const CATEGORY_DISPLAY = {
@@ -28,7 +29,7 @@ const getCategoryDisplay = (cat) => {
 function ArticleDetail({ previewMode = false }) {
   const { t } = useTranslation();
   const { selectedArticle, setSelectedArticle, deleteArticle, fetchBlocksByArticleId, trackArticleView } = useMagazine();
-  const { navigateBack, showSuccess, showError, navigateToHome, navigateToEditorForEdit, isFullscreen, setIsFullscreen, getCurrentLocale, navigateToAuthorProfile, openAuthorCard } = useUI();
+  const { navigateBack, showSuccess, showError, navigateToHome, navigateToEditorForEdit, isFullscreen, setIsFullscreen, getCurrentLocale, navigateToAuthorProfile } = useUI();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { isLiked, isFavorited, toggleLike, toggleFavorite } = useEngagement();
@@ -132,19 +133,6 @@ function ArticleDetail({ previewMode = false }) {
       return `${apiUrl}/${selectedArticle.cover_image_article}`;
     }
     return null;
-  };
-
-  const getAuthorImageUrl = (author) => {
-    const img = author?.image_user;
-    if (!img) return null;
-    if (img.startsWith('http://') || img.startsWith('https://')) return img;
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
-    return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
-  };
-
-  const handleAuthorClick = (author) => {
-    // Open the author's info in the same modal used by the header profile.
-    openAuthorCard(author);
   };
 
   const liked = isLiked(selectedArticle.id_article);
@@ -311,47 +299,11 @@ function ArticleDetail({ previewMode = false }) {
 
             {(selectedArticle.authors?.length > 0 || selectedArticle.author_name) && (
               <span className="meta-item meta-item-author">
-                {selectedArticle.authors && selectedArticle.authors.length > 0 ? (
-                  <>
-                    {selectedArticle.authors.map((author, index) => {
-                      const clickable = !previewMode;
-                      return (
-                        <span
-                          key={author.id_user}
-                          className={`author-info${clickable ? ' author-info--clickable' : ''}`}
-                          onClick={clickable ? (e) => { e.stopPropagation(); handleAuthorClick(author); } : undefined}
-                          title={clickable ? `Ver perfil de ${author.name_user}` : undefined}
-                        >
-                          {getAuthorImageUrl(author) ? (
-                            <>
-                              <img
-                                src={getAuthorImageUrl(author)}
-                                alt={author.name_user}
-                                className="author-avatar"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.nextElementSibling.style.display = 'flex';
-                                }}
-                              />
-                              <User size={24} className="author-icon-fallback" style={{ display: 'none' }} />
-                            </>
-                          ) : (
-                            <User size={24} className="author-icon-fallback" />
-                          )}
-                          <span className="author-text">
-                            {author.name_user}
-                            {index < selectedArticle.authors.length - 1 && ', '}
-                          </span>
-                        </span>
-                      );
-                    })}
-                  </>
-                ) : (
-                  <>
-                    <User size={24} className="author-icon-fallback" />
-                    {selectedArticle.author_name}
-                  </>
-                )}
+                {selectedArticle.authors?.length > 0
+                  ? selectedArticle.authors.map((author) => (
+                      <AuthorChip key={author.id_user} author={author} clickable={!previewMode} />
+                    ))
+                  : <AuthorChip name={selectedArticle.author_name} clickable={false} />}
               </span>
             )}
 
