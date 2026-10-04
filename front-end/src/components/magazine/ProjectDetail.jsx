@@ -144,10 +144,12 @@ function ProjectDetail() {
         )}
 
         <div className="project-detail-info">
-          {/* Top row: type/format badges (left) and, top-right, the ⋯ button that
-              groups follow (logged-in users) and download files (editors+). */}
+          {/* Top row: the ⋯ button grouping follow (logged-in users) and download
+              files (editors+) on the left, revealing rightward; the type/format
+              badges on the right. */}
           {(selectedProject.type_project || selectedProject.format_project || projectActions.length > 0) && (
             <div className="project-detail-top-row">
+              <OptionsReveal actions={projectActions} className="project-options" />
               {(selectedProject.type_project || selectedProject.format_project) && (
                 <div className="project-detail-tags">
                   {selectedProject.type_project && (
@@ -158,7 +160,6 @@ function ProjectDetail() {
                   )}
                 </div>
               )}
-              <OptionsReveal actions={projectActions} align="end" className="project-options" />
             </div>
           )}
           <h1 className="project-detail-title">{selectedProject.title_project}</h1>

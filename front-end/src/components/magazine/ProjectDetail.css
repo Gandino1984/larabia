@@ -227,8 +227,8 @@
   margin-top: 0.5rem;
 }
 
-/* Top row of the info column: type/format badges on the left, the ⋯ options
-   button (follow / download files) top-right, on the same line. */
+/* Top row of the info column: the ⋯ options button (follow / download files)
+   top-left, the type/format badges on the right, on the same line. */
 .project-detail-top-row {
   display: flex;
   align-items: center;
@@ -240,14 +240,17 @@
   margin-bottom: 0;
 }
 
-/* Same reveal as the article cards; the actions slide out leftward. The
+.project-detail-top-row .project-detail-tags {
+  margin-left: auto;
+}
+
+/* Same reveal as the article cards — the actions slide out rightward. The
    reserved width keeps the revealed actions (and an expanded label) clear of
    the badges. */
 .project-detail-top-row .project-options {
-  margin-left: auto;
   flex-shrink: 0;
   min-width: 180px;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 .project-options {
   --slide-step: 48px;
