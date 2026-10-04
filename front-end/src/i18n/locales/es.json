@@ -441,5 +441,6 @@
   "project.articlesCount": "Este proyecto contiene {{count}} artículo",
   "project.articlesCount_plural": "Este proyecto contiene {{count}} artículos",
   "engagement.label.edit": "Editar",
-  "engagement.label.close": "Cerrar"
+  "engagement.label.close": "Cerrar",
+  "image.viewFullscreen": "Ver imagen en pantalla completa"
 }

@@ -441,5 +441,6 @@
   "project.articlesCount": "Proiektu honek artikulu {{count}} du",
   "project.articlesCount_plural": "Proiektu honek {{count}} artikulu ditu",
   "engagement.label.edit": "Editatu",
-  "engagement.label.close": "Itxi"
+  "engagement.label.close": "Itxi",
+  "image.viewFullscreen": "Ikusi irudia pantaila osoan"
 }

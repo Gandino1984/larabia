@@ -11,6 +11,7 @@ import ArticleCard from './ArticleCard';
 import ProjectFilesPanel from './ProjectFilesPanel';
 import OptionsReveal from './OptionsReveal';
 import AuthorChip from '../common/AuthorChip';
+import ImageLightbox from '../common/ImageLightbox';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import './ProjectDetail.css';
 import './ArticlesCarousel.css';
@@ -22,6 +23,8 @@ function ProjectDetail() {
   const { currentUser, canCreateContent } = useAuth();
   const { isSubscribed, toggleSubscribe } = useEngagement();
   const [showFilesPanel, setShowFilesPanel] = useState(false);
+  const [showCoverViewer, setShowCoverViewer] = useState(false);
+  const closeCoverViewer = useCallback(() => setShowCoverViewer(false), []);
   const [projectArticles, setProjectArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState(() => {
@@ -136,11 +139,20 @@ function ProjectDetail() {
       <div className="project-detail-header">
         {coverUrl && (
           <div className="project-detail-cover">
-            <img
-              src={coverUrl}
-              alt={selectedProject.title_project}
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
+            {/* Click to view the image full screen in its own modal. */}
+            <button
+              type="button"
+              className="project-detail-cover-btn"
+              onClick={() => setShowCoverViewer(true)}
+              title={t('image.viewFullscreen', 'Ver imagen en pantalla completa')}
+              aria-label={t('image.viewFullscreen', 'Ver imagen en pantalla completa')}
+            >
+              <img
+                src={coverUrl}
+                alt={selectedProject.title_project}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </button>
           </div>
         )}
 
@@ -185,6 +197,15 @@ function ProjectDetail() {
           </div>
         </div>
       </div>
+
+      {showCoverViewer && coverUrl && (
+        <ImageLightbox
+          src={coverUrl}
+          alt={selectedProject.title_project}
+          caption={selectedProject.title_project}
+          onClose={closeCoverViewer}
+        />
+      )}
 
       {showFilesPanel && (
         <ProjectFilesPanel

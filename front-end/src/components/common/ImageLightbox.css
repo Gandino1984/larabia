@@ -1,0 +1,88 @@
+/* Full-screen image viewer (ImageLightbox). Above the header (1000) and every
+   page control. */
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4.5rem 1rem 1.5rem;
+  background: rgba(0, 0, 0, 0.92);
+  cursor: zoom-out;
+  animation: image-lightbox-fade 0.25s ease both;
+}
+
+.image-lightbox__figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 100%;
+  max-height: 100%;
+  cursor: default;
+  animation: image-lightbox-zoom 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* As large as the screen allows, proportions kept. */
+.image-lightbox__img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 8rem);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.image-lightbox__caption {
+  color: #e0e0e0;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Close: light gray circle, black on hover (like the site's other buttons). */
+.image-lightbox__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 50px;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: lightgray;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+.image-lightbox__close svg {
+  transition: transform 0.3s ease;
+}
+.image-lightbox__close:hover,
+.image-lightbox__close:focus-visible {
+  background: #000000;
+  color: #ffffff;
+}
+.image-lightbox__close:hover svg {
+  transform: rotate(90deg);
+}
+
+@keyframes image-lightbox-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes image-lightbox-zoom {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image-lightbox,
+  .image-lightbox__figure { animation: none; }
+}
