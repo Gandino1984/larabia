@@ -488,8 +488,10 @@
 }
 
 /* Project name above the title — centered, sentence case, same size as the
-   hero's project label. */
-.article-project-label {
+   hero's project label. Scoped to the reader header: the class is shared with
+   the article cards (ArticleCard.css), whose compact style must not leak in
+   either direction. */
+.article-detail-header .article-project-label {
   display: block;
   font-family: 'Source Code Pro', monospace;
   font-size: 1.05rem;
