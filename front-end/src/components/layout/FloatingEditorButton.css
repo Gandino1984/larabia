@@ -15,13 +15,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
+  /* A 52px circle at rest (24px icon + 14px padding each side) that widens into
+     a pill revealing "Publica" on hover; it's anchored by `right`, so it grows
+     leftward. */
+  width: auto;
+  min-width: 52px;
   height: 52px;
-  padding: 0;
+  padding: 0 14px;
   background: lightgray;
   color: #1a1a1a;
   border: none;
-  border-radius: 50%;
+  border-radius: 999px;
   cursor: pointer;
   /* Start off-screen to the right; .is-in slides it into place. */
   opacity: 0;
@@ -53,16 +57,36 @@
   transform: translateX(150px);
 }
 
-/* Icon-only for a compact square button */
+/* Label hidden (zero width) at rest; slides out on hover. */
 .floating-btn-text {
-  display: none;
+  display: inline-block;
+  max-width: 0;
+  margin-left: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: max-width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    margin-left 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+}
+.floating-editor-btn:hover .floating-btn-text,
+.floating-editor-btn:focus-visible .floating-btn-text {
+  max-width: 120px;
+  margin-left: 8px;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .floating-btn-text { transition: none; }
 }
 
 /* Desktop: flank the header bar on the right, centered on its axis. */
 @media (min-width: 769px) {
   .floating-editor-btn {
-    width: 62px;
+    /* 62px circle at rest: 24px icon + 19px padding each side. */
+    min-width: 62px;
     height: 62px;
+    padding: 0 19px;
     top: calc(1.25rem + var(--header-h) / 2 + 9px);
     right: max(0.75rem, calc((100% - 1200px) / 2 - 62px - 1rem));
     transform: translateY(-50%) translateX(150px);
@@ -75,5 +99,15 @@
   }
   .floating-editor-btn.hidden {
     transform: translateY(-50%) scale(0.8);
+  }
+}
+
+/* Wide screens: the button sits in the free space right of the header bar.
+   Anchor it by its left edge (same resting spot: header right + 1rem) so the
+   "Publica" label grows rightward instead of sliding under the header. */
+@media (min-width: 1380px) {
+  .floating-editor-btn {
+    right: auto;
+    left: calc(50% + 600px + 1rem);
   }
 }
