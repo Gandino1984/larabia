@@ -439,5 +439,7 @@
   "project.files.label": "Archivos",
   "project.files.title": "Descargar archivos del proyecto",
   "project.articlesCount": "Este proyecto contiene {{count}} artículo",
-  "project.articlesCount_plural": "Este proyecto contiene {{count}} artículos"
+  "project.articlesCount_plural": "Este proyecto contiene {{count}} artículos",
+  "engagement.label.edit": "Editar",
+  "engagement.label.close": "Cerrar"
 }

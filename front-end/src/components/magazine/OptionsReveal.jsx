@@ -72,6 +72,8 @@ function OptionsReveal({ actions, align = 'start', className = '' }) {
         tabIndex={open ? -1 : 0}
       >
         <MoreHorizontal size={18} />
+        {/* Hidden by default; contexts may reveal it on hover (article reader). */}
+        <span className="engagement-btn-label">{t('engagement.options', 'Opciones')}</span>
       </button>
       <div className="engagement-options-items">
         {actions.map((a, i) => (

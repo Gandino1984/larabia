@@ -114,111 +114,114 @@
   transform: scale(0.95);
 }
 
-.article-detail-edit-btn {
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.85);
-  border: none;
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+/* ---- ⋯ options (engagement, share, edit, delete) + close button ----
+   Same reveal as the article cards (OptionsReveal; base styles in
+   ArticleCard.css), but the buttons look like the reader's top controls:
+   50px dark circles that turn white on hover, widening into a pill that
+   shows the button's word. The extra .article-detail-top-controls prefix
+   outranks the card styles. */
+.article-detail-top-controls .engagement-options {
+  --slide-step: 58px; /* 50px button + 8px gap */
 }
-
-.article-detail-edit-btn:hover {
-  background: rgba(255, 255, 255, 0.95);
-  color: black;
-  transform: scale(1.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-.article-detail-edit-btn:active {
-  transform: scale(0.95);
-}
-
-.article-detail-delete-btn {
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(220, 38, 38, 0.95);
-  border: none;
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
-}
-
-.article-detail-delete-btn:hover {
-  background: rgba(185, 28, 28, 0.95);
-  transform: scale(1.1);
-  box-shadow: 0 8px 32px rgba(220, 38, 38, 0.4);
-}
-
-.article-detail-delete-btn:active {
-  transform: scale(0.95);
-}
-
-.article-detail-share-btn {
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.85);
-  border: none;
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.article-detail-share-btn:hover {
-  background: rgba(255, 255, 255, 0.95);
-  color: black;
-  transform: scale(1.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-.article-detail-share-btn:active {
-  transform: scale(0.95);
-}
-
+.article-detail-top-controls .engagement-options .engagement-btn,
 .article-detail-close-btn {
-  width: 50px;
-  height: 50px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.95);
+  width: auto;
+  min-width: 50px;
+  height: 50px;
+  padding: 0 13px;
   border: none;
-  border-radius: 50%;
-  color: white;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #ffffff;
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
-
+.article-detail-top-controls .engagement-options .engagement-options-toggle:hover,
+.article-detail-top-controls .engagement-options.is-open .engagement-options-items .engagement-btn:hover,
 .article-detail-close-btn:hover {
   background: rgba(255, 255, 255, 0.95);
-  color: black;
-  transform: rotate(90deg) scale(1.1);
+  color: #000000;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
+/* Active (liked / favorited / comments open): the inverse of rest, like the
+   cards (white instead of black). */
+.article-detail-top-controls .engagement-options .engagement-btn.engagement-btn--active {
+  background: rgba(255, 255, 255, 0.95);
+  color: #000000;
+}
+.article-detail-top-controls .engagement-options .engagement-btn.engagement-btn--danger {
+  background: rgba(220, 38, 38, 0.95);
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+}
+.article-detail-top-controls .engagement-options.is-open .engagement-options-items .engagement-btn.engagement-btn--danger:hover {
+  background: rgba(185, 28, 28, 0.95);
+  color: #ffffff;
+}
 
+/* Labels: hidden at rest (ArticleCard.css), slide out on hover for every
+   button — the actions (rule in ArticleCard.css), the ⋯ button and close. */
+.article-detail-top-controls .engagement-btn-label,
+.article-detail-close-btn .engagement-btn-label {
+  font-size: 0.85rem;
+}
+.article-detail-top-controls .engagement-options-toggle:hover .engagement-btn-label,
+.article-detail-close-btn:hover .engagement-btn-label,
+.article-detail-close-btn:focus-visible .engagement-btn-label {
+  max-width: 120px;
+  margin-left: 6px;
+  opacity: 1;
+}
+
+/* Close: the X turns a quarter on hover (the button itself no longer rotates,
+   so its label stays upright). */
+.article-detail-close-btn {
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+.article-detail-close-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+.article-detail-close-btn:hover svg {
+  transform: rotate(90deg);
+}
 .article-detail-close-btn:active {
-  transform: rotate(90deg) scale(0.95);
+  transform: scale(0.95);
+}
+
+.article-detail-top-controls .engagement-options-toggle svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Small phones: slightly smaller buttons so up to six actions fit to the left
+   of the ⋯ button. */
+@media (max-width: 480px) {
+  .article-detail-top-controls {
+    gap: 0.5rem;
+  }
+  .article-detail-top-controls .engagement-options {
+    --slide-step: 48px; /* 42px button + 6px gap */
+  }
+  .article-detail-top-controls .engagement-options-items {
+    gap: 6px;
+  }
+  .article-detail-top-controls .engagement-options .engagement-btn,
+  .article-detail-close-btn {
+    min-width: 42px;
+    height: 42px;
+    padding: 0 10px;
+  }
+  .article-detail-top-controls .engagement-btn svg,
+  .article-detail-close-btn svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 /* Fullscreen Mode */
@@ -1138,42 +1141,10 @@
   margin: 0.75rem auto 0;
 }
 
-/* Engagement buttons in the article reader meta row (right of views/authors) */
-.article-detail-engagement {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  margin-left: auto;
-}
-
-.article-detail-engagement .engagement-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: none;
-  background: lightgray;
-  color: #1a1a1a;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
-}
-.article-detail-engagement .engagement-btn:hover {
-  background: #000000;
-  color: #ffffff;
-  transform: scale(1.05);
-}
-.article-detail-engagement .engagement-btn:active {
-  transform: scale(0.9);
-}
-.article-detail-engagement .engagement-btn--active {
-  background: #000000;
-  color: #ffffff;
-}
-
-/* View counter inside the reader engagement section */
+/* View counter, right end of the reader's meta row (the engagement actions
+   live in the ⋯ menu at the top right). */
 .article-detail-views {
+  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 4px;

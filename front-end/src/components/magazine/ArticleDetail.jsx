@@ -9,6 +9,7 @@ import { useEngagement } from '../../app_context/EngagementContext';
 import { Calendar, User, Eye, X, Trash2, Minimize, Edit, ArrowLeft, Share2, ThumbsUp, Bookmark, MessageCircle } from 'lucide-react';
 import HScrollViewer from './HScrollViewer';
 import CommentsModal from './CommentsModal';
+import OptionsReveal from './OptionsReveal';
 import './ArticleDetail.css';
 
 const CATEGORY_DISPLAY = {
@@ -146,6 +147,63 @@ function ArticleDetail({ previewMode = false }) {
     openAuthorCard(author);
   };
 
+  const liked = isLiked(selectedArticle.id_article);
+  const favorited = isFavorited(selectedArticle.id_article);
+  const detailActions = [
+    {
+      key: 'like',
+      className: liked ? 'engagement-btn--active' : '',
+      onClick: () => toggleLike(selectedArticle.id_article),
+      title: t('engagement.like'),
+      label: t('engagement.label.like', 'Me gusta'),
+      pressed: liked,
+      icon: <ThumbsUp size={22} fill={liked ? 'currentColor' : 'none'} />,
+    },
+    {
+      key: 'favorite',
+      className: favorited ? 'engagement-btn--active' : '',
+      onClick: () => toggleFavorite(selectedArticle.id_article),
+      title: t('engagement.favorite'),
+      label: t('engagement.label.favorite', 'Favoritos'),
+      pressed: favorited,
+      icon: <Bookmark size={22} fill={favorited ? 'currentColor' : 'none'} />,
+    },
+    {
+      key: 'comments',
+      className: showComments ? 'engagement-btn--active' : '',
+      onClick: () => setShowComments(true),
+      title: t('engagement.comments'),
+      label: t('engagement.label.comments', 'Comentarios'),
+      icon: <MessageCircle size={22} fill={showComments ? 'currentColor' : 'none'} />,
+    },
+    {
+      key: 'share',
+      onClick: handleShareClick,
+      title: t('common.buttons.share'),
+      label: t('engagement.label.share', 'Compartir'),
+      icon: <Share2 size={22} />,
+    },
+  ];
+  if (canCreateContent && (isSuperAdmin || isArticleAuthor(selectedArticle))) {
+    detailActions.push(
+      {
+        key: 'edit',
+        onClick: handleEditClick,
+        title: t('article.detail.editArticle'),
+        label: t('engagement.label.edit', 'Editar'),
+        icon: <Edit size={22} />,
+      },
+      {
+        key: 'delete',
+        className: 'engagement-btn--danger',
+        onClick: handleDeleteClick,
+        title: t('article.detail.deleteArticle'),
+        label: t('engagement.label.delete', 'Eliminar'),
+        icon: <Trash2 size={22} />,
+      },
+    );
+  }
+
   const authorHasProfile = (author) => !!authorProfiles?.find(p => p.user_id === author.id_user);
 
   // Detect if this is a comic article
@@ -195,44 +253,13 @@ function ArticleDetail({ previewMode = false }) {
   return (
     <div className={`article-detail ${isComicArticle ? 'article-detail--comic' : ''}`}>
       <article className={`article-detail-container ${isComicArticle ? 'article-detail-container--comic' : ''}`}>
-        {/* Top right controls: badges and buttons */}
-        <div className="article-detail-top-controls">
-          {/* Editor buttons (Edit and Delete) — hidden in preview */}
-          {!previewMode && canCreateContent && (isSuperAdmin || isArticleAuthor(selectedArticle)) && (
-            <>
-              <button
-                className="article-detail-edit-btn"
-                onClick={handleEditClick}
-                title={t('article.detail.editArticle')}
-                aria-label={t('article.detail.editArticle')}
-              >
-                <Edit size={24} />
-              </button>
-              <button
-                className="article-detail-delete-btn"
-                onClick={handleDeleteClick}
-                title={t('article.detail.deleteArticle')}
-                aria-label={t('article.detail.deleteArticle')}
-              >
-                <Trash2 size={24} />
-              </button>
-            </>
-          )}
-
-          {/* Share button — hidden in preview (draft isn't public) */}
-          {!previewMode && (
-            <button
-              className="article-detail-share-btn"
-              onClick={handleShareClick}
-              title="Compartir artículo"
-              aria-label="Compartir artículo"
-            >
-              <Share2 size={24} />
-            </button>
-          )}
-
-          {/* Close button — hidden in preview (use the preview banner instead) */}
-          {!previewMode && (
+        {/* Top right controls: a ⋯ button grouping the engagement actions,
+            share and (authors/admins) edit + delete — same reveal as the article
+            cards — plus the close button. Every button shows its word on hover.
+            All hidden in preview (draft isn't public; use the preview banner). */}
+        {!previewMode && (
+          <div className="article-detail-top-controls">
+            <OptionsReveal actions={detailActions} align="end" className="article-detail-options" />
             <button
               className="article-detail-close-btn"
               onClick={navigateBack}
@@ -240,9 +267,10 @@ function ArticleDetail({ previewMode = false }) {
               aria-label={t('article.detail.closeArticle')}
             >
               <X size={24} />
+              <span className="engagement-btn-label">{t('engagement.label.close', 'Cerrar')}</span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {getCoverImageUrl() && (
           <div className="article-detail-cover">
@@ -337,39 +365,9 @@ function ArticleDetail({ previewMode = false }) {
             )}
 
             {!previewMode && (
-              <span className="article-detail-engagement">
-                <button
-                  type="button"
-                  className={`engagement-btn ${isLiked(selectedArticle.id_article) ? 'engagement-btn--active' : ''}`}
-                  onClick={() => toggleLike(selectedArticle.id_article)}
-                  title={t('engagement.like')}
-                  aria-pressed={isLiked(selectedArticle.id_article)}
-                >
-                  <ThumbsUp size={20} fill={isLiked(selectedArticle.id_article) ? 'currentColor' : 'none'} />
-                </button>
-                <button
-                  type="button"
-                  className={`engagement-btn ${isFavorited(selectedArticle.id_article) ? 'engagement-btn--active' : ''}`}
-                  onClick={() => toggleFavorite(selectedArticle.id_article)}
-                  title={t('engagement.favorite')}
-                  aria-pressed={isFavorited(selectedArticle.id_article)}
-                >
-                  <Bookmark size={20} fill={isFavorited(selectedArticle.id_article) ? 'currentColor' : 'none'} />
-                </button>
-                <button
-                  type="button"
-                  className={`engagement-btn ${showComments ? 'engagement-btn--active' : ''}`}
-                  onClick={() => setShowComments(true)}
-                  title={t('engagement.comments')}
-                >
-                  <MessageCircle size={20} fill={showComments ? 'currentColor' : 'none'} />
-                </button>
-                {selectedArticle.view_count_article > 0 && (
-                  <span className="article-detail-views">
-                    <Eye size={20} />
-                    {selectedArticle.view_count_article}
-                  </span>
-                )}
+              <span className="article-detail-views" title={t('article.detail.views')}>
+                <Eye size={20} />
+                {selectedArticle.view_count_article || 0}
               </span>
             )}
           </div>

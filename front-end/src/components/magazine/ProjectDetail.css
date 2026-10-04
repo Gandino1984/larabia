@@ -277,6 +277,9 @@
   min-width: 180px;
   justify-content: flex-end;
 }
+.project-options {
+  --slide-step: 48px;
+}
 .project-options .engagement-options-toggle {
   width: 40px;
   height: 40px;
