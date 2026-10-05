@@ -7,6 +7,8 @@ import { useUI } from '../../app_context/UIContext';
 import { Calendar, User, ArrowLeft, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal, Library, Search, X } from 'lucide-react';
 import ArticleEngagementBar from './ArticleEngagementBar';
 import { useDragScroll } from '../../hooks/useDragScroll';
+import ArticleFilters from '../common/ArticleFilters';
+import { EMPTY_ARTICLE_FILTERS, applyArticleFilters, countActiveFilters } from '../../utils/articleFilters';
 import './ArticlesList.css';
 import './ArticlesCarousel.css';
 
@@ -71,12 +73,24 @@ function getPageNumbers(currentPage, totalPages) {
 
 function ArticlesList() {
   const { t } = useTranslation();
-  const { articles, loading, fetchArticles, setSelectedArticle, deleteArticle } = useMagazine();
+  const { articles, loading, fetchArticles, setSelectedArticle, deleteArticle, filters: navFilters, setFilters: setNavFilters } = useMagazine();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError, openAuthorCard, navigateToMyPublications } = useUI();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  // Category / project / author / date filters + sort (ArticleFilters).
+  const [listFilters, setListFilters] = useState(EMPTY_ARTICLE_FILTERS);
+
+  // A category picked in the header ("Más" → Internacional…) arrives as a
+  // server-side filter; turn it into this list's category filter and fetch
+  // everything, so it can be changed or cleared from the filter bar.
+  useEffect(() => {
+    if (navFilters?.category) {
+      setListFilters({ ...EMPTY_ARTICLE_FILTERS, category: navFilters.category });
+      setNavFilters(prev => ({ ...prev, category: null, searchTerm: '' }));
+    }
+  }, [navFilters?.category, setNavFilters]);
   // Grid vs horizontal carousel (desktop only; mobile is always vertical).
   const [viewMode, setViewMode] = useState(() => {
     try { return localStorage.getItem('larabia_articles_view') || 'grid'; } catch { return 'grid'; }
@@ -118,19 +132,14 @@ function ArticlesList() {
     fetchArticles();
   }, [fetchArticles]);
 
-  // Reset to page 1 whenever the article list or the search changes
+  // Reset to page 1 whenever the article list, the search or the filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [articles.length, searchTerm]);
+  }, [articles.length, searchTerm, listFilters]);
 
-  // Show articles in publication order: the first published article first.
-  // (The API returns them newest-first, so sort ascending here.)
-  const orderedArticles = [...articles].sort((a, b) => {
-    const ta = a.date_published ? new Date(a.date_published).getTime() : 0;
-    const tb = b.date_published ? new Date(b.date_published).getTime() : 0;
-    if (ta !== tb) return ta - tb;
-    return (a.id_article || 0) - (b.id_article || 0);
-  });
+  // Filters + order. By default, publication order: the first published
+  // article first.
+  const orderedArticles = applyArticleFilters(articles, listFilters, 'oldest');
 
   // Live in-page search across the same fields as the header search bar.
   const filteredArticles = searchTerm.trim()
@@ -371,6 +380,13 @@ function ArticlesList() {
               )}
             </div>
           </div>
+          <ArticleFilters
+            articles={articles}
+            filters={listFilters}
+            onChange={setListFilters}
+            defaultSort="oldest"
+            tone="dark"
+          />
           <p className="articles-count">{filteredArticles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: filteredArticles.length })}</p>
         </div>
       </div>
@@ -381,7 +397,21 @@ function ArticlesList() {
         </div>
       ) : filteredArticles.length === 0 ? (
         <div className="no-articles">
-          <p>{t('header.search.noResults', { query: searchTerm })}</p>
+          <p>
+            {searchTerm.trim()
+              ? t('header.search.noResults', { query: searchTerm })
+              : t('filters.noResults', 'Ninguna publicación coincide con los filtros.')}
+          </p>
+          {countActiveFilters(listFilters) > 0 && (
+            <button
+              type="button"
+              className="articles-my-publications-btn"
+              onClick={() => setListFilters(prev => ({ ...EMPTY_ARTICLE_FILTERS, sort: prev.sort }))}
+            >
+              <X size={16} />
+              <span>{t('filters.clear', 'Limpiar filtros')}</span>
+            </button>
+          )}
         </div>
       ) : (
         <>

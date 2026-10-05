@@ -614,3 +614,9 @@
   background: #000000;
   color: #ffffff;
 }
+
+/* Filter bar (ArticleFilters) under the search. */
+.articles-list-subheader .article-filters {
+  max-width: 1100px;
+  margin-bottom: 0;
+}

@@ -1,0 +1,159 @@
+/* Filter bar for article lists (ArticleFilters). `--dark` on the dark pages
+   (Artículos), `--light` on the white creator ("Mis publicaciones"). */
+.article-filters {
+  width: 100%;
+  margin: 0 auto 1.5rem;
+}
+
+/* The "Filtros" toggle only exists on small screens. */
+.article-filters__toggle {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 auto;
+  padding: 0.55rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: lightgray;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.article-filters__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: #000000;
+  color: #ffffff;
+  font-size: 0.72rem;
+}
+
+.article-filters__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+}
+
+.article-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 150px;
+  max-width: 220px;
+  flex: 1 1 150px;
+}
+.article-filters__field--short {
+  min-width: 100px;
+  flex-basis: 100px;
+  max-width: 130px;
+}
+.article-filters__field > span {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.article-filters__field select {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border-radius: 6px;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.article-filters__field select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.article-filters__clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Dark pages */
+.article-filters--dark .article-filters__field > span {
+  color: #9a9a9a;
+}
+.article-filters--dark .article-filters__field select {
+  border: 1px solid #4a4a4a;
+  background: #1f1f1f;
+  color: #e0e0e0;
+}
+.article-filters--dark .article-filters__field select:focus {
+  outline: none;
+  border-color: #e0e0e0;
+}
+.article-filters--dark .article-filters__clear {
+  color: #e0e0e0;
+}
+
+/* Light pages */
+.article-filters--light .article-filters__field > span {
+  color: #666666;
+}
+.article-filters--light .article-filters__field select {
+  border: 1px solid #d6d6d6;
+  background: #f5f5f5;
+  color: #1a1a1a;
+}
+.article-filters--light .article-filters__field select:focus {
+  outline: none;
+  border-color: #000000;
+}
+.article-filters--light .article-filters__clear {
+  color: #1a1a1a;
+}
+.article-filters--light .article-filters__toggle {
+  background: #e4e4e4;
+}
+
+/* Small screens: folded behind "Filtros"; open, the fields stack two by two. */
+@media (max-width: 700px) {
+  .article-filters {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .article-filters__toggle {
+    display: inline-flex;
+  }
+  .article-filters__bar {
+    display: none;
+    width: 100%;
+    margin-top: 1rem;
+  }
+  .article-filters.is-open .article-filters__bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .article-filters__field,
+  .article-filters__field--short {
+    min-width: 0;
+    max-width: none;
+  }
+  .article-filters__clear {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+}

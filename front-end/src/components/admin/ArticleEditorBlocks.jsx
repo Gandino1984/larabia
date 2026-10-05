@@ -14,6 +14,8 @@ import ImageBlock from './blocks/ImageBlock';
 import IframeBlock from './blocks/IframeBlock';
 import HScrollEditor from './HScrollEditor';
 import MicroPerfilEditor from './MicroPerfilEditor';
+import ArticleFilters from '../common/ArticleFilters';
+import { CATEGORIES, EMPTY_ARTICLE_FILTERS, applyArticleFilters } from '../../utils/articleFilters';
 import axios from 'axios';
 import './ArticleEditorBlocks.css';
 
@@ -49,20 +51,6 @@ const PROJECT_FORMATS = [
   ['podcast', 'Podcast'], ['video', 'Video'], ['fotografía', 'Fotografía'], ['ilustración', 'Ilustración'],
   ['performance', 'Performance'], ['instalación', 'Instalación'], ['novela', 'Novela'], ['artículo', 'Artículo'],
   ['reportaje', 'Reportaje'], ['entrevista', 'Entrevista'], ['poesía', 'Poesía']
-];
-// Publication categories: [value, i18n key].
-const CATEGORIES = [
-  ['reportaje', 'editor.category.reportage'], ['multimedia', 'editor.category.multimedia'],
-  ['cultura', 'editor.category.culture'], ['sociedad', 'editor.category.society'],
-  ['opinion', 'editor.category.opinion'], ['crónica', 'editor.category.cronica'],
-  ['entrevista', 'editor.category.entrevista'], ['editorial', 'editor.category.editorial'],
-  ['fotoreportaje', 'editor.category.fotoreportaje'], ['video reportaje', 'editor.category.videoreportaje'],
-  ['podcast', 'editor.category.podcast'], ['cómic multimedia', 'editor.category.comic'],
-  ['crítica', 'editor.category.critica'], ['ensayo', 'editor.category.ensayo'],
-  ['terrenito en pluton', 'editor.category.microAbierto'], ['internacional', 'editor.category.internacional'],
-  ['no-ficcion', 'editor.category.noficcion'], ['ficcion', 'editor.category.ficcion'],
-  ['micro-perfiles', 'editor.category.microperfiles'], ['talleres', 'editor.category.talleres'],
-  ['infantil', 'editor.category.infantil']
 ];
 
 const EMPTY_WIZARD_PROJECT = { title_project: '', description_project: '', type_project: '', format_project: '' };
@@ -135,6 +123,8 @@ function ArticleEditorBlocks() {
   // Articles (incl. comics) that belong to the project being edited, so the
   // author can jump straight into editing their panels in the article creator.
   const [projectArticles, setProjectArticles] = useState([]);
+  // "Mis publicaciones": category / project / author / date filters + sort.
+  const [mineFilters, setMineFilters] = useState(EMPTY_ARTICLE_FILTERS);
   // Editor article-list filter: 'all' | 'draft' | 'pending_approval' | 'published'.
   const [articleListFilter, setArticleListFilter] = useState('all');
   const [newProjectData, setNewProjectData] = useState({
@@ -1818,7 +1808,8 @@ function ArticleEditorBlocks() {
   );
 
   // ---- "Mis publicaciones" -----------------------------------------------
-  const mine = editorArticles.filter(a => isSuperAdmin || isArticleAuthor(a));
+  const mineAll = editorArticles.filter(a => isSuperAdmin || isArticleAuthor(a));
+  const mine = applyArticleFilters(mineAll, mineFilters, 'newest');
   const mineCounts = {
     all: mine.length,
     draft: mine.filter(a => a.status_article === 'draft').length,
@@ -1837,44 +1828,59 @@ function ArticleEditorBlocks() {
     <div className="article-editor-blocks">
       <div className="editor-container pub-editor">
         <header className="pub-editor-header">
-          {/* Close (top-right): back to where the editor was opened from. */}
-          <button
-            type="button"
-            className="pub-editor-close"
-            onClick={handleClose}
-            title={t('editor.wizard.close', 'Cerrar el editor')}
-            aria-label={t('editor.wizard.close', 'Cerrar el editor')}
-          >
-            <X size={24} />
-          </button>
+          {/* Top-right toolbar: switch between the creator and "Mis
+              publicaciones", then close (back to where the editor was opened). */}
+          <div className="pub-editor-toolbar">
+            {view === 'wizard' ? (
+              <button
+                type="button"
+                className="pub-btn pub-btn--ghost"
+                onClick={() => setView('mine')}
+                title={t('editor.mine.button', 'Mis publicaciones')}
+              >
+                <Library size={18} />
+                <span className="pub-btn__text">{t('editor.mine.button', 'Mis publicaciones')}</span>
+              </button>
+            ) : (
+              <>
+                {(editingArticle || hasUnsavedNewWork()) && (
+                  <button
+                    type="button"
+                    className="pub-btn pub-btn--ghost"
+                    onClick={() => setView('wizard')}
+                    title={t('editor.mine.backToEditor', 'Volver a la publicación en curso')}
+                  >
+                    <Edit size={18} />
+                    <span className="pub-btn__text">{t('editor.mine.backToEditor', 'Volver a la publicación en curso')}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="pub-btn pub-btn--primary"
+                  onClick={startNewPublication}
+                  title={t('editor.mine.new', 'Nueva publicación')}
+                >
+                  <Plus size={18} />
+                  <span className="pub-btn__text">{t('editor.mine.new', 'Nueva publicación')}</span>
+                </button>
+              </>
+            )}
+            <button
+              type="button"
+              className="pub-editor-close"
+              onClick={handleClose}
+              title={t('editor.wizard.close', 'Cerrar el editor')}
+              aria-label={t('editor.wizard.close', 'Cerrar el editor')}
+            >
+              <X size={24} />
+            </button>
+          </div>
 
           <h1 className="pub-editor-title">
             {view === 'mine'
               ? t('editor.mine.title', 'Mis publicaciones')
               : editingArticle ? t('editor.title.edit') : t('editor.title.create')}
           </h1>
-
-          <div className="pub-editor-header-actions">
-            {view === 'wizard' ? (
-              <button type="button" className="pub-btn pub-btn--ghost" onClick={() => setView('mine')}>
-                <Library size={18} />
-                <span>{t('editor.mine.button', 'Mis publicaciones')}</span>
-              </button>
-            ) : (
-              <>
-                {(editingArticle || hasUnsavedNewWork()) && (
-                  <button type="button" className="pub-btn pub-btn--ghost" onClick={() => setView('wizard')}>
-                    <Edit size={18} />
-                    <span>{t('editor.mine.backToEditor', 'Volver a la publicación en curso')}</span>
-                  </button>
-                )}
-                <button type="button" className="pub-btn pub-btn--primary" onClick={startNewPublication}>
-                  <Plus size={18} />
-                  <span>{t('editor.mine.new', 'Nueva publicación')}</span>
-                </button>
-              </>
-            )}
-          </div>
 
           {/* Progress: completed steps, current step, next steps. */}
           {view === 'wizard' && (
@@ -1987,6 +1993,13 @@ function ArticleEditorBlocks() {
                 </button>
               ))}
             </div>
+            <ArticleFilters
+              articles={mineAll}
+              filters={mineFilters}
+              onChange={setMineFilters}
+              defaultSort="newest"
+              tone="light"
+            />
             {mineVisible.length === 0 ? (
               <div className="empty-state">
                 <p>{t('editor.articlesList.empty')}</p>

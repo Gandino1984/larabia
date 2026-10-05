@@ -2188,3 +2188,52 @@
     display: none;
   }
 }
+
+/* Top-right toolbar: "Mis publicaciones" / "Nueva publicación" beside the
+   round close button (the close button is no longer positioned on its own). */
+.pub-editor-toolbar {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.pub-editor-toolbar .pub-editor-close {
+  position: static;
+}
+.pub-editor-toolbar .pub-btn {
+  min-height: 48px;
+}
+/* Keep the centered title clear of the toolbar. */
+.pub-editor-header {
+  padding-top: 1rem;
+}
+@media (max-width: 900px) {
+  /* Narrower: icon-only toolbar buttons (the label stays as the tooltip). */
+  .pub-editor-toolbar .pub-btn {
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+  }
+  .pub-editor-toolbar .pub-btn__text {
+    display: none;
+  }
+}
+@media (max-width: 599px) {
+  .pub-editor-toolbar {
+    top: 1rem;
+    right: 1rem;
+    gap: 0.5rem;
+  }
+  .pub-editor-toolbar .pub-btn {
+    width: 42px;
+    min-height: 42px;
+  }
+}
+
+/* "Mis publicaciones": filter bar under the status chips. */
+.pub-mine .article-filters {
+  margin: 1.25rem 0 0.5rem;
+}
