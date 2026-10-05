@@ -2,7 +2,7 @@ import { Router } from "express";
 import userApiController from "../controllers/user/user_api_controller.js";
 import userController from "../controllers/user/user_controller.js";
 import { handleProfileImageUpload } from "../middleware/ProfileUploadMiddleware.js";
-import { requireSuperAdmin } from "../utils/authHelper.js";
+import { requireSuperAdmin, requireAdmin } from "../utils/authHelper.js";
 import { isSuperAdminEmail } from "../config/environment.js";
 import user_model from '../models/user_model.js';
 import magazine_article_model from '../models/magazine_article_model.js';
@@ -235,9 +235,9 @@ router.post('/toggle-newsletter', async (req, res) => {
     }
 });
 
-// Subscriber count (editor-only — no PII returned)
+// Subscriber count (admins + super admins — no PII returned)
 router.get('/newsletter-subscribers', async (req, res) => {
-    const admin = await requireSuperAdmin(req, res);
+    const admin = await requireAdmin(req, res);
     if (!admin) return; // 403 already sent
     try {
         const count = await user_model.count({ where: { receives_newsletter: true } });
@@ -248,9 +248,9 @@ router.get('/newsletter-subscribers', async (req, res) => {
     }
 });
 
-// Send newsletter to all subscribers
+// Send newsletter (recommendations) to all subscribers — admins + super admins
 router.post('/send-newsletter', async (req, res) => {
-    const admin = await requireSuperAdmin(req, res);
+    const admin = await requireAdmin(req, res);
     if (!admin) return; // 403 already sent
     try {
         const { articleIds, introText } = req.body;

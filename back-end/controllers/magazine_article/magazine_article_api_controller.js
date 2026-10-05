@@ -586,6 +586,23 @@ async function submitForApproval(req, res) {
     }
 }
 
+async function revertToDraft(req, res) {
+    try {
+        const { id_article } = req.params;
+        if (!id_article) return res.status(400).json({ error: 'El ID del artículo es obligatorio' });
+
+        const callerUser = await getRequestUser(req);
+        if (!callerUser) return res.status(401).json({ error: 'Autenticación requerida' });
+
+        const result = await magazineArticleController.revertToDraft(id_article, roleSnapshot(callerUser));
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error('-> revertToDraft API - Error =', err);
+        res.status(500).json({ error: 'Error al pasar el artículo a borrador', details: err.message });
+    }
+}
+
 async function approveArticle(req, res) {
     try {
         const admin = await requireSuperAdmin(req, res);
@@ -645,6 +662,7 @@ export default {
     getPendingInvitations,
     respondToInvitation,
     submitForApproval,
+    revertToDraft,
     approveArticle,
     rejectArticle,
     getPending

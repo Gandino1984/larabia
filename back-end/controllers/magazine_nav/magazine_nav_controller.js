@@ -14,8 +14,8 @@ import magazine_nav_model from "../../models/magazine_nav_model.js";
 
 const ACTION_TYPES = new Set(['section', 'modal', 'url', 'article', 'project', 'author', 'category']);
 const SECTIONS = new Set(['home', 'articles', 'authors', 'openmic', 'humor', 'projects']);
-const MODALS = new Set(['contact', 'newsletter']);
-const ROLES = new Set(['all', 'editor', 'super_admin']);
+const MODALS = new Set(['contact', 'newsletter', 'recommendations']);
+const ROLES = new Set(['all', 'editor', 'admin', 'super_admin']);
 
 const MAX_ITEMS = 30;
 const MAX_CHILDREN = 20;

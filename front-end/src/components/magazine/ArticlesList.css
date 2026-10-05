@@ -589,3 +589,28 @@
   user-select: none;
 }
 .articles-carousel.is-dragging .article-card { pointer-events: none; }
+
+/* "Mis publicaciones" (editors+): beside the title row's view toggle. */
+.header-title-row {
+  flex-wrap: wrap;
+}
+.articles-my-publications-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: lightgray;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.articles-my-publications-btn:hover,
+.articles-my-publications-btn:focus-visible {
+  background: #000000;
+  color: #ffffff;
+}

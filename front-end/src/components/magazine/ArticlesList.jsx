@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
-import { Calendar, User, ArrowLeft, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal, Search, X } from 'lucide-react';
+import { Calendar, User, ArrowLeft, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal, Library, Search, X } from 'lucide-react';
 import ArticleEngagementBar from './ArticleEngagementBar';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import './ArticlesList.css';
@@ -73,7 +73,7 @@ function ArticlesList() {
   const { t } = useTranslation();
   const { articles, loading, fetchArticles, setSelectedArticle, deleteArticle } = useMagazine();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
-  const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError, openAuthorCard } = useUI();
+  const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError, openAuthorCard, navigateToMyPublications } = useUI();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -340,6 +340,18 @@ function ArticlesList() {
               <GalleryHorizontal size={18} />
             </button>
           </div>
+          {/* Editors+: their own publications (edit / delete / status) in the
+              publication creator. */}
+          {canCreateContent && (
+            <button
+              type="button"
+              className="articles-my-publications-btn"
+              onClick={() => navigateToMyPublications('articlesList')}
+            >
+              <Library size={18} />
+              <span>{t('editor.mine.button', 'Mis publicaciones')}</span>
+            </button>
+          )}
         </div>
         <div className="articles-list-subheader">
           <div className="articles-search">

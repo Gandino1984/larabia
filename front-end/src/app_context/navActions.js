@@ -36,6 +36,7 @@ export function useNavActions() {
       case 'modal':
         if (value === 'contact') ui.openContactModal?.();
         else if (value === 'newsletter') ui.openNewsletterModal?.();
+        else if (value === 'recommendations') ui.openRecommendationsModal?.();
         break;
       case 'category':
         // Open the article list pre-filtered to a category (e.g. "internacional").

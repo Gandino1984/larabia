@@ -532,6 +532,30 @@ export const MagazineProvider = ({ children }) => {
     }
   }, [currentUser, fetchArticles, fetchEditorArticles, fetchAllArticles, showSuccess, showError]);
 
+  // Take a published / in-review article back to draft (its authors or a
+  // super admin).
+  const revertToDraft = useCallback(async (id_article) => {
+    try {
+      const res = await axiosInstance.patch(
+        `/magazine-article/revert-to-draft/${id_article}`,
+        {},
+        { headers: { 'x-user-id': currentUser?.id_user } }
+      );
+      if (res.data.error) {
+        showError(res.data.error);
+        return { error: res.data.error };
+      }
+      showSuccess(res.data.success || 'Artículo devuelto a borrador');
+      await Promise.all([fetchArticles(), fetchEditorArticles(), fetchAllArticles()]);
+      return { success: true, data: res.data.data };
+    } catch (err) {
+      console.error('Error reverting to draft:', err);
+      const msg = err.response?.data?.error || 'Error al pasar el artículo a borrador';
+      showError(msg);
+      return { error: msg };
+    }
+  }, [currentUser, fetchArticles, fetchEditorArticles, fetchAllArticles, showSuccess, showError]);
+
   // Respond to a co-author invitation
   const respondToInvitation = useCallback(async (invitationId, response) => {
     try {
@@ -614,6 +638,7 @@ export const MagazineProvider = ({ children }) => {
     fetchPendingInvitations,
     respondToInvitation,
     submitForApproval,
+    revertToDraft,
     // Block functions
     fetchBlocksByArticleId,
     createBlock,

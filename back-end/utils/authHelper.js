@@ -74,8 +74,23 @@ export async function requireSuperAdmin(req, res) {
     return user;
 }
 
+/**
+ * Reject the request unless the caller is an admin or a super admin. Sends the
+ * 403 itself; returns the user iff the request should proceed.
+ */
+export async function requireAdmin(req, res) {
+    const user = await getRequestUser(req);
+    const role = roleSnapshot(user);
+    if (!user || !(role.isAdmin || role.isSuperAdmin)) {
+        res.status(403).json({ error: 'Solo los administradores pueden realizar esta acción' });
+        return null;
+    }
+    return user;
+}
+
 export default {
     getRequestUser,
     roleSnapshot,
-    requireSuperAdmin
+    requireSuperAdmin,
+    requireAdmin
 };

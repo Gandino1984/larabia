@@ -45,6 +45,9 @@ export const DEFAULT_NAV = [
         label: { es: 'Contacto', en: 'Contact' }, action: { type: 'modal', value: 'contact' } },
       { id: 'newsletter', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Newsletter', en: 'Newsletter' }, action: { type: 'modal', value: 'newsletter' } },
+      // Admins: send article recommendations to the newsletter subscribers.
+      { id: 'recommendations', kind: 'link', visible: true, min_role: 'admin',
+        label: { es: 'Recomendaciones', en: 'Recommendations' }, action: { type: 'modal', value: 'recommendations' } },
       { id: 'about', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Sobre La Rabia', en: 'About La Rabia' }, action: { type: 'section', value: 'about' } }
     ] }
@@ -73,12 +76,14 @@ export const SECTION_OPTIONS = [
 
 export const MODAL_OPTIONS = [
   { value: 'contact', label: 'Contacto' },
-  { value: 'newsletter', label: 'Newsletter' }
+  { value: 'newsletter', label: 'Newsletter' },
+  { value: 'recommendations', label: 'Recomendaciones (admins)' }
 ];
 
 export const ROLE_OPTIONS = [
   { value: 'all', label: 'Todo el mundo' },
   { value: 'editor', label: 'Editores y superiores' },
+  { value: 'admin', label: 'Admins y super-admin' },
   { value: 'super_admin', label: 'Solo super-admin' }
 ];
 
@@ -92,6 +97,7 @@ export function navLabel(item, lang) {
 export function canSeeNavItem(item, { isEditor, isAdmin, isSuperAdmin } = {}) {
   switch (item?.min_role) {
     case 'super_admin': return !!isSuperAdmin;
+    case 'admin': return !!(isAdmin || isSuperAdmin);
     case 'editor': return !!(isEditor || isAdmin || isSuperAdmin);
     case 'all':
     default: return true;

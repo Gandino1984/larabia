@@ -24,6 +24,11 @@ export const UIProvider = ({ children }) => {
   const [showAbout, setShowAbout] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [openEditorToEdit, setOpenEditorToEdit] = useState(false);
+  // Publication creator: which view it opens on ('wizard' = the step-by-step
+  // creator, 'mine' = "Mis publicaciones"), and where its close button returns
+  // ('home' | 'articlesList').
+  const [editorInitialView, setEditorInitialView] = useState('wizard');
+  const [editorReturnTo, setEditorReturnTo] = useState('home');
 
   // Selected data for views
   const [selectedAuthorProfile, setSelectedAuthorProfile] = useState(null);
@@ -39,6 +44,12 @@ export const UIProvider = ({ children }) => {
   const [showContactModal, setShowContactModal] = useState(false);
   const openContactModal = useCallback(() => setShowContactModal(true), []);
   const closeContactModal = useCallback(() => setShowContactModal(false), []);
+
+  // Recommendations modal (admins: send article recommendations to the
+  // newsletter subscribers) — opened from the header's "Más" menu.
+  const [showRecommendationsModal, setShowRecommendationsModal] = useState(false);
+  const openRecommendationsModal = useCallback(() => setShowRecommendationsModal(true), []);
+  const closeRecommendationsModal = useCallback(() => setShowRecommendationsModal(false), []);
 
   // Newsletter modal
   const [showNewsletterModal, setShowNewsletterModal] = useState(false);
@@ -176,12 +187,26 @@ export const UIProvider = ({ children }) => {
   const navigateToEditor = () => {
     resetAllViews();
     setOpenEditorToEdit(false);
+    setEditorInitialView('wizard');
+    setEditorReturnTo('home');
     setShowEditor(true);
   };
 
   const navigateToEditorForEdit = () => {
     resetAllViews();
     setOpenEditorToEdit(true);
+    setEditorInitialView('wizard');
+    setEditorReturnTo('home');
+    setShowEditor(true);
+  };
+
+  // Open the creator on "Mis publicaciones" (the author's own list). `from`
+  // is where its close button should return.
+  const navigateToMyPublications = (from = 'home') => {
+    resetAllViews();
+    setOpenEditorToEdit(false);
+    setEditorInitialView('mine');
+    setEditorReturnTo(from);
     setShowEditor(true);
   };
 
@@ -377,6 +402,9 @@ export const UIProvider = ({ children }) => {
     showNewsletterModal,
     openNewsletterModal,
     closeNewsletterModal,
+    showRecommendationsModal,
+    openRecommendationsModal,
+    closeRecommendationsModal,
     authorCardUser,
     openAuthorCard,
     closeAuthorCard,
@@ -388,6 +416,9 @@ export const UIProvider = ({ children }) => {
     navigateToArticlesList,
     navigateToEditor,
     navigateToEditorForEdit,
+    navigateToMyPublications,
+    editorInitialView,
+    editorReturnTo,
     openEditorToEdit,
     setOpenEditorToEdit,
     navigateToLogin,

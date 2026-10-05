@@ -21,6 +21,7 @@ import RollText from '../common/RollText';
 import AnimatedLogo from './AnimatedLogo';
 import ContactModal from '../contact/ContactModal';
 import NewsletterModal from '../newsletter/NewsletterModal';
+import RecommendationsModal from '../admin/RecommendationsModal';
 import './Header.css';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -54,7 +55,7 @@ function Header({ ready = true }) {
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { totalPending } = usePendingReview();
   const { notifications, count: notifCount, markAllSeen } = useNotifications();
-  const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, navigateToAuthorProfile } = useUI();
+  const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, showRecommendationsModal, closeRecommendationsModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
   const { metadata, resolveLogoUrl } = useMetadata();
@@ -1001,6 +1002,10 @@ function Header({ ready = true }) {
       )}
 
       {/* Newsletter Modal */}
+      {/* Admins only — the menu item is admin-gated; re-check here too. */}
+      {showRecommendationsModal && (isAdmin || isSuperAdmin) && (
+        <RecommendationsModal onClose={closeRecommendationsModal} />
+      )}
       {showNewsletterModal && (
         <NewsletterModal onClose={closeNewsletterModal} />
       )}

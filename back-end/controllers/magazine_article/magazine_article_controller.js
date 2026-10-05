@@ -873,6 +873,41 @@ async function trackView(id_article) {
 }
 
 /**
+ * Author flow: take a published (or in-review) article back to draft, e.g. to
+ * rework it or withdraw it from the review queue. Allowed for the article's
+ * authors and super admins. Publishing again goes through the usual flow.
+ */
+async function revertToDraft(id_article, roleCtx) {
+    try {
+        const article = await magazine_article_model.findByPk(id_article);
+        if (!article) return { error: 'Artículo no encontrado' };
+
+        const isAuthor = roleCtx?.userId
+            ? !!(await article_author_model.findOne({
+                where: { article_id: article.id_article, user_id: roleCtx.userId }
+            }))
+            : false;
+
+        if (!isAuthor && !roleCtx?.isSuperAdmin) {
+            return { error: 'Solo el autor del artículo o el super-administrador pueden pasarlo a borrador' };
+        }
+
+        if (!['published', 'pending_approval'].includes(article.status_article)) {
+            return { error: `El artículo ya está en estado '${article.status_article}'` };
+        }
+
+        await article.update({ status_article: 'draft' });
+        return {
+            success: 'Artículo devuelto a borrador',
+            data: { id_article: article.id_article, status_article: 'draft' }
+        };
+    } catch (err) {
+        console.error('-> revertToDraft() - Error =', err);
+        return { error: 'Error al pasar el artículo a borrador' };
+    }
+}
+
+/**
  * Author/editor flow: move a draft into the super-admin review queue.
  */
 async function submitForApproval(id_article, roleCtx) {
@@ -1005,6 +1040,7 @@ export default {
     getEditors,
     trackView,
     submitForApproval,
+    revertToDraft,
     approveArticle,
     rejectArticle,
     getPending

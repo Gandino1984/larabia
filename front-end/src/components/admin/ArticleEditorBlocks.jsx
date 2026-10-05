@@ -1,17 +1,19 @@
 // magazine-front/src/components/admin/ArticleEditorBlocks.jsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../app_context/AuthContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
-import { Plus, Save, ArrowLeft, Edit, Trash2, FileText, Image as ImageIcon, Video, FolderPlus, X, User, Eye } from 'lucide-react';
+import {
+  Plus, Save, ArrowLeft, Edit, Trash2, FileText, Image as ImageIcon, Video, FolderPlus, FolderOpen,
+  X, User, Eye, Check, ChevronLeft, ChevronRight, Send, Undo2, Layers, Library, AlertCircle
+} from 'lucide-react';
 import TextBlock from './blocks/TextBlock';
 import ImageBlock from './blocks/ImageBlock';
 import IframeBlock from './blocks/IframeBlock';
 import HScrollEditor from './HScrollEditor';
 import MicroPerfilEditor from './MicroPerfilEditor';
-import NewsletterTab from './NewsletterTab';
 import axios from 'axios';
 import './ArticleEditorBlocks.css';
 
@@ -22,6 +24,49 @@ const detectContentType = (blocks, category) => {
   if ((category || '').toLowerCase() === 'micro-perfiles') return 'microperfil';
   return 'regular';
 };
+
+// A block counts as content once it has something in it (empty blocks are
+// skipped on save).
+const isBlockComplete = (block) => {
+  if (block.block_type === 'text') return !!(block.content && block.content.trim() !== '');
+  if (block.block_type === 'image') return !!(block.image_url && block.image_url.trim() !== '');
+  if (block.block_type === 'iframe') return !!(block.iframe_url && block.iframe_url.trim() !== '');
+  if (block.block_type === 'comic_panel') {
+    if (block.interaction_type === 'iframe') return !!(block.interaction_data && block.interaction_data.trim() !== '');
+    return !!(block.image_url && block.image_url.trim() !== '');
+  }
+  return false;
+};
+
+// Project classification options (new-project step + edit-project modal).
+const PROJECT_TYPES = [
+  ['ficción', 'Ficción'], ['no-ficción', 'No-ficción'], ['ensayo', 'Ensayo'], ['académico', 'Académico'],
+  ['científico', 'Científico'], ['periodístico', 'Periodístico'], ['poético', 'Poético'], ['narrativo', 'Narrativo'],
+  ['experimental', 'Experimental'], ['documental', 'Documental'], ['autobiográfico', 'Autobiográfico']
+];
+const PROJECT_FORMATS = [
+  ['cómic', 'Cómic'], ['crónica', 'Crónica'], ['ensayo', 'Ensayo'], ['cuento', 'Cuento'], ['multimedia', 'Multimedia'],
+  ['podcast', 'Podcast'], ['video', 'Video'], ['fotografía', 'Fotografía'], ['ilustración', 'Ilustración'],
+  ['performance', 'Performance'], ['instalación', 'Instalación'], ['novela', 'Novela'], ['artículo', 'Artículo'],
+  ['reportaje', 'Reportaje'], ['entrevista', 'Entrevista'], ['poesía', 'Poesía']
+];
+// Publication categories: [value, i18n key].
+const CATEGORIES = [
+  ['reportaje', 'editor.category.reportage'], ['multimedia', 'editor.category.multimedia'],
+  ['cultura', 'editor.category.culture'], ['sociedad', 'editor.category.society'],
+  ['opinion', 'editor.category.opinion'], ['crónica', 'editor.category.cronica'],
+  ['entrevista', 'editor.category.entrevista'], ['editorial', 'editor.category.editorial'],
+  ['fotoreportaje', 'editor.category.fotoreportaje'], ['video reportaje', 'editor.category.videoreportaje'],
+  ['podcast', 'editor.category.podcast'], ['cómic multimedia', 'editor.category.comic'],
+  ['crítica', 'editor.category.critica'], ['ensayo', 'editor.category.ensayo'],
+  ['terrenito en pluton', 'editor.category.microAbierto'], ['internacional', 'editor.category.internacional'],
+  ['no-ficcion', 'editor.category.noficcion'], ['ficcion', 'editor.category.ficcion'],
+  ['micro-perfiles', 'editor.category.microperfiles'], ['talleres', 'editor.category.talleres'],
+  ['infantil', 'editor.category.infantil']
+];
+
+const EMPTY_WIZARD_PROJECT = { title_project: '', description_project: '', type_project: '', format_project: '' };
+const TOTAL_STEPS = 6;
 
 function ArticleEditorBlocks() {
   const { currentUser, isArticleAuthor, isSuperAdmin, canPublishDirectly, canCreateContent } = useAuth();
@@ -43,12 +88,27 @@ function ArticleEditorBlocks() {
     reorderBlocks,
     uploadBlockImage,
     uploadPanelAudio,
-    submitForApproval
+    submitForApproval,
+    revertToDraft
   } = useMagazine();
-  const { showSuccess, showError, navigateToHome, showEditor, openEditorToEdit, setOpenEditorToEdit } = useUI();
+  const {
+    showSuccess, showError, navigateToHome, navigateToArticlesList, showEditor,
+    openEditorToEdit, setOpenEditorToEdit, editorInitialView, editorReturnTo
+  } = useUI();
   const { t } = useTranslation();
 
-  const [activeTab, setActiveTab] = useState('articles');
+  // The creator is a step-by-step process ('wizard'); the author's own list
+  // lives apart in "Mis publicaciones" ('mine').
+  const [view, setView] = useState(editorInitialView || 'wizard');
+  const [step, setStep] = useState(1);
+  // Step 1: the publication goes in a new project or an existing one.
+  const [projectMode, setProjectMode] = useState(null); // 'new' | 'existing' | null
+  // The new project being set up in the wizard (created on the first save).
+  const [wizardProject, setWizardProject] = useState(EMPTY_WIZARD_PROJECT);
+  const [wizardProjectCoverFile, setWizardProjectCoverFile] = useState(null);
+  const [wizardProjectCoverPreview, setWizardProjectCoverPreview] = useState(null);
+  // Show the current step's missing requirement after a "Next" attempt.
+  const [nextAttempted, setNextAttempted] = useState(false);
   const [editingArticle, setEditingArticle] = useState(null);
   const [formData, setFormData] = useState({
     title_article: '',
@@ -79,9 +139,6 @@ function ArticleEditorBlocks() {
   const [projectArticles, setProjectArticles] = useState([]);
   // Editor article-list filter: 'all' | 'draft' | 'pending_approval' | 'published'.
   const [articleListFilter, setArticleListFilter] = useState('all');
-  // Ref to the create/edit form so "Edit" from the list scrolls straight to it
-  // (the list now sits above the form).
-  const editorFormRef = useRef(null);
   const [newProjectData, setNewProjectData] = useState({
     title_project: '',
     description_project: '',
@@ -105,25 +162,32 @@ function ArticleEditorBlocks() {
     fetchEditorArticles();
   }, [fetchEditorArticles]);
 
-  // Load blocks when editing an article
+  // Open on the requested view ("Mis publicaciones" from the articles section).
   useEffect(() => {
-    if (editingArticle?.id_article) {
-      loadArticleBlocks(editingArticle.id_article);
-    }
-  }, [editingArticle]);
+    if (showEditor) setView(editorInitialView || 'wizard');
+  }, [showEditor, editorInitialView]);
 
-  // Detect project format when project_id changes (only updates content type default, not a lock)
+  // Each step / view starts at the top of the page.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setNextAttempted(false);
+  }, [step, view]);
+
+  // Detect project format when project_id changes. A comic project suggests the
+  // comic content type for a new, still-empty publication (never a lock).
   useEffect(() => {
     if (formData.project_id) {
       const selectedProject = projects.find(p => p.id_project === parseInt(formData.project_id));
       if (selectedProject) {
         setSelectedProjectFormat(selectedProject.format_project);
-        // Suggest content type based on project format, but editor can override
-        setArticleContentType(selectedProject.format_project === 'cómic' ? 'cómic' : 'regular');
+        if (!editingArticle && selectedProject.format_project === 'cómic' && !blocks.some(isBlockComplete)) {
+          setArticleContentType('cómic');
+        }
       }
     } else {
       setSelectedProjectFormat(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.project_id, projects]);
 
   // Load selected article for editing when editor opens via Edit button from ArticleDetail
@@ -146,6 +210,10 @@ function ArticleEditorBlocks() {
 
       // Detect content type from blocks + category (micro-perfil is category-driven).
       setArticleContentType(detectContentType(selectedArticle.blocks, selectedArticle.category_article));
+      loadArticleBlocks(selectedArticle.id_article, selectedArticle.category_article);
+      setProjectMode(selectedArticle.project_id ? 'existing' : null);
+      setView('wizard');
+      setStep(1);
 
       // Set cover image preview if exists
       if (selectedArticle.cover_image_article) {
@@ -321,11 +389,6 @@ function ArticleEditorBlocks() {
     setProjectCoverPreview(null);
   };
 
-  const openCreateProjectModal = () => {
-    resetProjectModal();
-    setShowProjectModal(true);
-  };
-
   const openEditProjectModal = (project) => {
     if (!project) return;
     setEditingProjectId(project.id_project);
@@ -454,15 +517,30 @@ function ArticleEditorBlocks() {
     }
   };
 
-  const loadArticleBlocks = async (article_id) => {
+  const loadArticleBlocks = async (article_id, category) => {
     const result = await fetchBlocksByArticleId(article_id);
     if (result.success) {
       const fetchedBlocks = result.data || [];
       setBlocks(fetchedBlocks);
       // Detect content type from the actual blocks + category. Micro-perfil is
       // driven by the category since it stores a plain image block.
-      setArticleContentType(detectContentType(fetchedBlocks, editingArticle?.category_article || formData.category_article));
+      setArticleContentType(detectContentType(fetchedBlocks, category ?? formData.category_article));
     }
+  };
+
+  // After a save, take the saved blocks (now with ids, so the next save updates
+  // instead of duplicating) without re-detecting the content type — a comic
+  // saved before its first panel must stay a comic. Unsaved (empty) blocks are
+  // kept at the end so nothing the author added disappears.
+  const reloadSavedBlocks = async (article_id) => {
+    const result = await fetchBlocksByArticleId(article_id);
+    if (!result.success) return;
+    const fetched = result.data || [];
+    setBlocks(prev => {
+      const pending = prev.filter(b => !isBlockComplete(b));
+      if (articleContentType === 'microperfil' && !fetched.some(b => b.block_type === 'image')) return prev;
+      return [...fetched, ...pending];
+    });
   };
 
   const handleInputChange = (e) => {
@@ -589,152 +667,318 @@ function ArticleEditorBlocks() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // ---------------------------------------------------------------------
+  // Step-by-step creator
+  // ---------------------------------------------------------------------
 
-    const errors = {};
-
-    if (!formData.title_article.trim()) {
-      errors.title_article = 'El título es obligatorio';
-    } else if (formData.title_article.length > 200) {
-      errors.title_article = `El título es demasiado largo (${formData.title_article.length}/200 caracteres máx.)`;
-    }
-
-    if (formData.excerpt_article && formData.excerpt_article.length > 500) {
-      errors.excerpt_article = `El extracto es demasiado largo (${formData.excerpt_article.length}/500 caracteres máx.)`;
-    }
-
-    if (formData.authors.length === 0) {
-      errors.authors = 'El artículo debe tener al menos un autor';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      showError(Object.values(errors).join(' · '));
-      return;
-    }
-
-    setFieldErrors({});
-
-    // Check if there's at least one complete block
-    const hasCompleteBlock = blocks.some(block => {
-      if (block.block_type === 'text') {
-        return block.content && block.content.trim() !== '';
+  // What still blocks a step (null when it's complete). Steps 1–3 gate the
+  // "Next" button; content is only required to publish.
+  const stepIssue = (n) => {
+    if (n === 1) {
+      if (projectMode === 'new') {
+        return wizardProject.title_project.trim() ? null : t('editor.wizard.need.projectTitle', 'Ponle un título al nuevo proyecto');
       }
-      if (block.block_type === 'image') {
-        return block.image_url && block.image_url.trim() !== '';
+      if (projectMode === 'existing') {
+        return formData.project_id ? null : t('editor.wizard.need.projectPick', 'Elige un proyecto');
       }
-      if (block.block_type === 'iframe') {
-        return block.iframe_url && block.iframe_url.trim() !== '';
+      return editingArticle ? null : t('editor.wizard.need.projectMode', 'Elige si la publicación va en un proyecto nuevo o en uno existente');
+    }
+    if (n === 2) {
+      if (projectMode === 'new' && !wizardProject.type_project) {
+        return t('editor.wizard.need.projectType', 'Elige el tipo del proyecto');
       }
-      if (block.block_type === 'comic_panel') {
-        return block.image_url && block.image_url.trim() !== '';
+      if (!editingArticle && (!formData.category_article || formData.category_article === 'general')) {
+        return t('editor.wizard.need.category', 'Elige la categoría de la publicación');
       }
-      return false;
-    });
+      if (formData.authors.length === 0) return t('editor.wizard.need.authors', 'Añade al menos una autora o autor');
+      return null;
+    }
+    if (n === 3) {
+      if (!formData.title_article.trim()) return t('editor.wizard.need.title', 'Escribe un título');
+      if (formData.title_article.length > 200) {
+        return t('editor.wizard.need.titleLong', { count: formData.title_article.length, defaultValue: 'El título es demasiado largo ({{count}}/200 caracteres)' });
+      }
+      if (formData.excerpt_article && formData.excerpt_article.length > 500) {
+        return t('editor.wizard.need.excerptLong', { count: formData.excerpt_article.length, defaultValue: 'El extracto es demasiado largo ({{count}}/500 caracteres)' });
+      }
+      return null;
+    }
+    return null;
+  };
 
-    if (!hasCompleteBlock) {
-      const errorMessage = articleContentType === 'cómic'
+  // What the content still needs before it can be published (null = ready).
+  const contentIssue = () => {
+    if (!blocks.some(isBlockComplete)) {
+      return articleContentType === 'cómic'
         ? t('editor.validation.addComicPanel')
         : articleContentType === 'microperfil'
         ? t('editor.microperfil.needImage')
         : t('editor.validation.addContentBlock');
-      showError(errorMessage);
-      return;
     }
-
-    // Micro-perfil: caption is required and capped at 700 characters.
     if (articleContentType === 'microperfil') {
       const caption = (blocks[0]?.image_caption || '').trim();
-      if (!caption) {
-        showError(t('editor.microperfil.needCaption'));
+      if (!caption) return t('editor.microperfil.needCaption');
+      if (caption.length > 700) return t('editor.microperfil.captionTooLong', { count: caption.length });
+    }
+    return null;
+  };
+
+  const goNext = () => {
+    const issue = stepIssue(step);
+    if (issue) {
+      setNextAttempted(true);
+      showError(issue);
+      return;
+    }
+    setStep(prev => Math.min(TOTAL_STEPS, prev + 1));
+  };
+
+  const goPrev = () => setStep(prev => Math.max(1, prev - 1));
+
+  // A step can be opened from the progress bar once the earlier gated steps are
+  // complete (any step while editing a saved publication).
+  const canVisitStep = (n) => !!editingArticle || [1, 2, 3].filter(k => k < n).every(k => !stepIssue(k));
+
+  // Step 4: changing the content type clears content that isn't of that type.
+  const chooseContentType = (type) => {
+    if (type === articleContentType) return;
+    if (blocks.some(isBlockComplete) && !confirm(t('editor.wizard.confirmTypeChange', 'Cambiar el tipo de contenido borrará el contenido que ya has añadido. ¿Continuar?'))) {
+      return;
+    }
+    if (type === 'microperfil') {
+      setBlocks([]);
+      selectMicroPerfil();
+      return;
+    }
+    setArticleContentType(type);
+    setBlocks([]);
+    clearMicroPerfilCategory();
+  };
+
+  const handleWizardProjectCoverChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (!file.type.startsWith('image/')) {
+        showError(t('editor.coverImage.mustBeImage'));
+        e.target.value = '';
         return;
       }
-      if (caption.length > 700) {
-        showError(t('editor.microperfil.captionTooLong', { count: caption.length }));
+      setWizardProjectCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setWizardProjectCoverPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearWizardProject = () => {
+    setWizardProject(EMPTY_WIZARD_PROJECT);
+    setWizardProjectCoverFile(null);
+    setWizardProjectCoverPreview(null);
+  };
+
+  // Create the new project set up in steps 1–2 (its authors are the
+  // publication's). Returns its id.
+  const createWizardProject = async (status) => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+    const authHeader = { headers: { 'x-user-id': currentUser?.id_user } };
+    const authorIds = formData.authors.length ? formData.authors : [currentUser.id_user];
+    const primary = getAuthorDetails(authorIds[0]) || currentUser;
+    const payload = {
+      title_project: wizardProject.title_project.trim(),
+      description_project: wizardProject.description_project,
+      type_project: wizardProject.type_project,
+      format_project: wizardProject.format_project,
+      status_project: status,
+      author_id: authorIds[0],
+      author_name: primary?.name_user || currentUser.name_user,
+      authors: authorIds.map((id, index) => ({ user_id: id, author_order: index }))
+    };
+    const response = await axios.post(`${apiUrl}/magazine-project/create`, payload, authHeader);
+    const id = response.data?.data?.id_project;
+    if (!id) throw new Error(response.data?.error || 'No project id returned');
+    if (wizardProjectCoverFile) {
+      const fd = new FormData();
+      fd.append('image', wizardProjectCoverFile);
+      await axios.post(`${apiUrl}/magazine-project/upload-cover-image`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data', 'x-user-id': currentUser?.id_user, 'x-project-id': id }
+      });
+    }
+    return id;
+  };
+
+  // Save the publication.
+  //   'draft'   — save as a draft (every new publication stays a draft until published)
+  //   'publish' — super admins publish; everyone else submits it for review
+  //   'update'  — save changes to a published / in-review publication, keeping its status
+  const saveArticle = async (intent) => {
+    // A new publication needs its project (step 1) and a title (step 3) even as
+    // a draft; publishing needs every step complete plus some content.
+    const required = intent === 'draft' ? [1, 3] : [1, 2, 3];
+    for (const n of required) {
+      const issue = stepIssue(n);
+      if (issue) {
+        showError(issue);
+        if (n === 3) {
+          setFieldErrors(formData.title_article.trim() ? {} : { title_article: issue });
+        }
+        setStep(n);
         return;
       }
     }
-
+    if (intent !== 'draft') {
+      const issue = contentIssue();
+      if (issue) {
+        showError(issue);
+        setStep(5);
+        return;
+      }
+    }
+    setFieldErrors({});
     setSaving(true);
 
     try {
-      // Decide intent: did an editor pick "Enviar para aprobación"?
-      // Only editors (non-admin, non-super-admin) go through the approval flow.
-      // Admins + super admins publish directly via the regular update endpoint.
-      const wantsSubmission = !canPublishDirectly && formData.status_article === 'pending_approval';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+      const authHeader = { headers: { 'x-user-id': currentUser?.id_user } };
+      const publishNow = intent === 'publish' && canPublishDirectly;
+      const submitForReview = intent === 'publish' && !canPublishDirectly;
 
-      let articleResult;
+      // New project: create it first (published along with the publication by
+      // a super admin; otherwise a draft, submitted for review with it).
+      let projectId = formData.project_id || null;
+      let createdProjectId = null;
+      if (projectMode === 'new') {
+        createdProjectId = await createWizardProject(publishNow ? 'published' : 'draft');
+        projectId = createdProjectId;
+        setFormData(prev => ({ ...prev, project_id: createdProjectId }));
+        setProjectMode('existing');
+        clearWizardProject();
+        fetchProjects();
+      }
+
+      const currentStatus = editingArticle?.status_article || 'draft';
+      const targetStatus = publishNow ? 'published' : intent === 'update' ? currentStatus : 'draft';
       const articleData = {
         ...formData,
         author_id: currentUser.id_user,
         authors: formData.authors,
-        project_id: formData.project_id || null,
-        // For editors who picked "submit", persist as draft first; the transition
-        // happens via /submit-for-approval below. Admins keep their chosen status.
-        status_article: wantsSubmission ? 'draft' : formData.status_article,
+        project_id: projectId,
+        status_article: targetStatus,
         content_article: 'Block-based content' // Placeholder for backward compatibility
       };
-
       // If the author removed the cover (no new file and no preview left), clear
       // it on save. Otherwise leave it untouched (a new file is uploaded below).
       if (!coverImageFile && !coverImagePreview) {
         articleData.cover_image_article = null;
       }
 
-      // Create or update article
-      if (editingArticle) {
-        articleResult = await updateArticle(editingArticle.id_article, articleData);
-      } else {
-        articleResult = await createArticle(articleData);
-      }
-
+      const articleResult = editingArticle
+        ? await updateArticle(editingArticle.id_article, articleData)
+        : await createArticle(articleData);
       if (articleResult.error) {
         showError(articleResult.error);
-        setSaving(false);
         return;
       }
-
       const article_id = articleResult.data.id_article;
 
-      // Upload cover image if provided
       if (coverImageFile) {
         const uploadResult = await uploadCoverImage(article_id, coverImageFile);
-        if (uploadResult.error) {
-          showError(uploadResult.error);
-        }
+        if (uploadResult.error) showError(uploadResult.error);
+        else setCoverImageFile(null);
       }
 
-      // Save blocks
-      const { failedCount = 0 } = await saveBlocks(article_id) || {};
+      const { failedCount = 0 } = await saveBlocks(article_id, !!editingArticle) || {};
       if (failedCount > 0) {
         // Some blocks didn't persist — warn instead of a misleading success.
         showError(t('editor.blocks.saveFailed', { count: failedCount }));
       }
 
-      // If the editor chose "Submit for approval", transition the article now.
-      if (wantsSubmission) {
-        const submitResult = await submitForApproval(article_id);
-        if (submitResult.error) {
-          // Article + blocks did save, but the transition failed. Tell user.
-          showError(submitResult.error);
+      if (submitForReview) {
+        // Shows its own success / error message.
+        await submitForApproval(article_id);
+        if (createdProjectId) {
+          try {
+            await axios.post(`${apiUrl}/magazine-project/submit-for-approval/${createdProjectId}`, {}, authHeader);
+          } catch (error) {
+            console.error('Error submitting the new project for review:', error);
+          }
         }
       } else if (failedCount === 0) {
-        showSuccess(editingArticle ? t('messages.success.articleUpdated') : t('messages.success.articleCreated'));
+        showSuccess(
+          intent === 'draft'
+            ? t('editor.wizard.draftSaved', 'Borrador guardado')
+            : publishNow
+            ? (editingArticle ? t('messages.success.articleUpdated') : t('messages.success.articleCreated'))
+            : t('messages.success.articleUpdated')
+        );
       }
       await Promise.all([fetchArticles(), fetchEditorArticles()]);
-      resetForm();
+
+      if (intent === 'publish') {
+        // Done: back to the author's list, where the new status shows.
+        resetForm();
+        setView('mine');
+      } else {
+        // Keep working on the saved publication: further saves update it.
+        setEditingArticle(prev => ({ ...(prev || {}), ...articleResult.data, status_article: targetStatus }));
+        await reloadSavedBlocks(article_id);
+      }
     } catch (err) {
-      showError(t('messages.error.saveArticle'));
+      showError(err.response?.data?.error || t('messages.error.saveArticle'));
       console.error('Submit error:', err);
     } finally {
       setSaving(false);
     }
   };
 
-  const saveBlocks = async (article_id) => {
+  // Take a published / in-review publication back to draft.
+  const handleRevertToDraft = async (article) => {
+    const confirmed = confirm(t('editor.mine.confirmRevert', {
+      title: article.title_article,
+      defaultValue: '¿Pasar «{{title}}» a borrador? Dejará de estar visible hasta que la vuelvas a publicar.'
+    }));
+    if (!confirmed) return;
+    const result = await revertToDraft(article.id_article);
+    if (!result.error && editingArticle?.id_article === article.id_article) {
+      setEditingArticle(prev => ({ ...prev, status_article: 'draft' }));
+      setFormData(prev => ({ ...prev, status_article: 'draft' }));
+    }
+  };
+
+  // Unsaved work that closing / starting over would lose (a never-saved
+  // publication with something in it).
+  const hasUnsavedNewWork = () => !editingArticle && (
+    !!formData.title_article.trim() || blocks.some(isBlockComplete) || !!wizardProject.title_project.trim() || !!coverImageFile
+  );
+
+  const handleClose = () => {
+    if (hasUnsavedNewWork() && !confirm(t('editor.wizard.confirmClose', 'Tienes cambios sin guardar. ¿Cerrar el editor igualmente?'))) {
+      return;
+    }
+    resetForm();
+    if (editorReturnTo === 'articlesList') navigateToArticlesList();
+    else navigateToHome();
+  };
+
+  // "Nueva publicación" from "Mis publicaciones".
+  const startNewPublication = () => {
+    if (hasUnsavedNewWork() && !confirm(t('editor.mine.confirmDiscard', 'Tienes una publicación sin guardar. ¿Descartarla?'))) {
+      return;
+    }
+    resetForm();
+    setView('wizard');
+  };
+
+  // "Editar" from "Mis publicaciones".
+  const openPublicationForEdit = (article) => {
+    if (hasUnsavedNewWork() && !confirm(t('editor.mine.confirmDiscard', 'Tienes una publicación sin guardar. ¿Descartarla?'))) {
+      return;
+    }
+    handleEdit(article);
+  };
+
+  const saveBlocks = async (article_id, isExistingArticle = !!editingArticle) => {
     // Delete removed blocks (if editing)
-    if (editingArticle) {
+    if (isExistingArticle) {
       const existingBlocks = await fetchBlocksByArticleId(article_id);
       if (existingBlocks.success) {
         const currentBlockIds = blocks
@@ -819,6 +1063,7 @@ function ArticleEditorBlocks() {
     const result = await deleteArticle(id_article);
     if (!result.error) {
       showSuccess(t('messages.success.articleDeleted'));
+      if (editingArticle?.id_article === id_article) resetForm();
       await fetchEditorArticles();
     }
   };
@@ -846,10 +1091,12 @@ function ArticleEditorBlocks() {
     } else {
       setCoverImagePreview(null);
     }
-    // Scroll to the form (it sits below the stories list) so the edit is visible.
-    setTimeout(() => {
-      editorFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+    loadArticleBlocks(article.id_article, article.category_article);
+    setProjectMode(article.project_id ? 'existing' : null);
+    clearWizardProject();
+    setFieldErrors({});
+    setView('wizard');
+    setStep(1);
   };
 
   // Open the saved draft in a new tab (renders images + comic panels/audio like
@@ -877,6 +1124,9 @@ function ArticleEditorBlocks() {
     setSelectedProjectFormat(null);
     setArticleContentType('regular');
     setSelectedAuthorToAdd('');
+    setProjectMode(null);
+    clearWizardProject();
+    setStep(1);
   };
 
   const handleAddAuthor = (rawId) => {
@@ -920,264 +1170,158 @@ function ArticleEditorBlocks() {
     );
   }
 
-  return (
-    <div className="article-editor-blocks">
-      <div className="editor-container">
-        <div className="editor-header">
-          {/* Row 1: back + title */}
-          <div className="editor-header-top">
-            <div className="editor-title-section">
-              <button onClick={navigateToHome} className="btn-back-nav" title={t('common.buttons.backToHome')}>
-                <ArrowLeft size={24} />
-              </button>
-              <h1>{activeTab === 'newsletter' ? 'Envía tus recomendaciones' : (editingArticle ? t('editor.title.edit') : t('editor.title.create'))}</h1>
-            </div>
-          </div>
+  const STEPS = [
+    { n: 1, short: t('editor.wizard.step.project', 'Proyecto'), long: t('editor.wizard.step.projectLong', 'Elige el proyecto') },
+    { n: 2, short: t('editor.wizard.step.classification', 'Clasificación'), long: t('editor.wizard.step.classificationLong', 'Clasificación y autoras/es') },
+    { n: 3, short: t('editor.wizard.step.basics', 'Portada y título'), long: t('editor.wizard.step.basicsLong', 'Portada, título y extracto') },
+    { n: 4, short: t('editor.wizard.step.type', 'Tipo'), long: t('editor.wizard.step.typeLong', 'Tipo de contenido') },
+    { n: 5, short: t('editor.wizard.step.content', 'Contenido'), long: t('editor.wizard.step.contentLong', 'Contenido') },
+    { n: 6, short: t('editor.wizard.step.review', 'Publicar'), long: t('editor.wizard.step.reviewLong', 'Revisar y publicar') }
+  ];
+  const CONTENT_TYPES = [
+    { key: 'regular', Icon: FileText, title: t('editor.contentType.regular'), desc: t('editor.wizard.type.regularDesc', 'Texto, imágenes y vídeos organizados en bloques.') },
+    { key: 'cómic', Icon: Layers, title: t('editor.contentType.comic'), desc: t('editor.wizard.type.comicDesc', 'Viñetas que se leen en horizontal, con audio y paneles interactivos.') },
+    { key: 'microperfil', Icon: User, title: t('editor.contentType.microperfil'), desc: t('editor.wizard.type.microperfilDesc', 'Una imagen con su texto y audio opcional. Se publica en Micro-perfiles.') }
+  ];
 
-          {/* Row 2: project selector + create new project button */}
-          <div className="editor-project-row">
-            <div className="form-group-inline">
-              <label htmlFor="project-header">{t('editor.project.label')}</label>
-              <div className="project-selector-row">
-                <select
-                  id="project-header"
-                  name="project_id"
-                  value={formData.project_id}
-                  onChange={handleInputChange}
-                  className={`project-selector-header ${!formData.project_id ? 'select-placeholder' : ''}`}
-                >
-                  <option value="">{t('editor.project.noProject')}</option>
-                  {projects.map(project => {
-                    const statusTag = project.status_project === 'draft'
-                      ? ` · ${t('editor.status.draft')}`
-                      : project.status_project === 'pending_approval'
-                      ? ` · ${t('editor.review.statusShort')}`
-                      : '';
-                    return (
-                      <option key={project.id_project} value={project.id_project}>
-                        {project.title_project}{statusTag}
-                      </option>
-                    );
-                  })}
-                </select>
-                {formData.project_id && (() => {
-                  const selectedProject = projects.find(p => p.id_project === parseInt(formData.project_id));
-                  // A project can be managed (edited/deleted) by a super admin or
-                  // by one of its authors. Super admins can manage every project.
-                  const canManageProject = selectedProject && (
-                    isSuperAdmin
-                    || selectedProject.author_id === currentUser?.id_user
-                    || selectedProject.authors?.some(a => a.id_user === currentUser?.id_user)
-                  );
-                  return (
-                    <>
-                      {canManageProject && (
-                        <button
-                          type="button"
-                          className="btn-edit-project"
-                          onClick={() => openEditProjectModal(selectedProject)}
-                          title={t('editor.project.editTitle')}
-                        >
-                          <Edit size={15} />
-                        </button>
-                      )}
-                      {canManageProject && (
-                        <button
-                          type="button"
-                          className="btn-delete-project"
-                          onClick={handleDeleteProject}
-                          title={t('editor.project.deleteTitle')}
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      )}
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-            <button
-              type="button"
-              className="btn-create-project-header"
-              onClick={openCreateProjectModal}
-              title={t('editor.project.createNew')}
+  const status = editingArticle?.status_article || 'draft';
+  const statusLabel = (s) => (
+    s === 'published' ? t('editor.status.published')
+      : s === 'pending_approval' ? t('editor.review.statusShort')
+      : t('editor.status.draft')
+  );
+  const selectedProject = projects.find(p => p.id_project === parseInt(formData.project_id));
+  // A project can be managed (edited/deleted) by a super admin or by one of its
+  // authors.
+  const canManageProject = !!selectedProject && (
+    isSuperAdmin
+    || selectedProject.author_id === currentUser?.id_user
+    || selectedProject.authors?.some(a => a.id_user === currentUser?.id_user)
+  );
+  const categoryLabel = (() => {
+    const found = CATEGORIES.find(([value]) => value === formData.category_article);
+    return found ? t(found[1]) : t('editor.category.general');
+  })();
+  const currentIssue = stepIssue(step);
+  const publishIssues = [1, 2, 3].map(stepIssue).filter(Boolean);
+  const pendingContent = contentIssue();
+  if (pendingContent) publishIssues.push(pendingContent);
+  const completeBlocks = blocks.filter(isBlockComplete).length;
+  const saveIntent = status === 'draft' ? 'draft' : 'update';
+
+  // ---- Step 1: project ---------------------------------------------------
+  const stepProject = (
+    <>
+      <p className="pub-step-hint">
+        {t('editor.wizard.projectHint', 'Cada publicación forma parte de un proyecto. Crea uno nuevo o añádela a uno que ya exista.')}
+      </p>
+      <div className="pub-choice-grid">
+        <button
+          type="button"
+          className={`pub-choice ${projectMode === 'new' ? 'is-selected' : ''}`}
+          onClick={() => setProjectMode('new')}
+          aria-pressed={projectMode === 'new'}
+        >
+          <FolderPlus size={28} />
+          <span className="pub-choice__title">{t('editor.wizard.newProject', 'Nuevo proyecto')}</span>
+          <span className="pub-choice__desc">{t('editor.wizard.newProjectDesc', 'Crea un proyecto que contenga esta publicación.')}</span>
+        </button>
+        <button
+          type="button"
+          className={`pub-choice ${projectMode === 'existing' ? 'is-selected' : ''}`}
+          onClick={() => setProjectMode('existing')}
+          aria-pressed={projectMode === 'existing'}
+        >
+          <FolderOpen size={28} />
+          <span className="pub-choice__title">{t('editor.wizard.existingProject', 'Proyecto existente')}</span>
+          <span className="pub-choice__desc">{t('editor.wizard.existingProjectDesc', 'Añade la publicación a un proyecto que ya existe.')}</span>
+        </button>
+      </div>
+
+      {projectMode === 'existing' && (
+        <div className="form-group pub-field">
+          <label htmlFor="pub-project">{t('editor.project.label')}</label>
+          <div className="project-selector-row">
+            <select
+              id="pub-project"
+              name="project_id"
+              value={formData.project_id}
+              onChange={handleInputChange}
+              className={!formData.project_id ? 'select-placeholder' : ''}
             >
-              <FolderPlus size={18} />
-              <span>{t('editor.project.createNew')}</span>
-            </button>
-          </div>
-
-          {/* Row 3: authors + category + status inline */}
-          <div className="editor-selectors-row">
-            <div className="form-group-inline authors-section">
-              <label>{t('editor.authors.label')}</label>
-              <div className="authors-list-compact">
-                {formData.authors.map((authorId, index) => {
-                  const author = getAuthorDetails(authorId);
-                  return (
-                    <div key={authorId} className="author-item-compact">
-                      <span className="author-order">{index + 1}.</span>
-                      {author?.image_user && (
-                        <img
-                          src={resolveUserImage(author.image_user)}
-                          alt={author.name_user}
-                          className="author-avatar-tiny"
-                        />
-                      )}
-                      {!author?.image_user && <User className="author-icon-placeholder" size={14} />}
-                      <span className="author-name-compact">{author?.name_user || t('editor.author.unknown', { id: authorId })}</span>
-                      {index === 0 && <span className="first-author-badge-compact">{t('editor.author.firstBadge')}</span>}
-                      {formData.authors.length > 1 && (
-                        <button
-                          type="button"
-                          className="btn-remove-author-compact"
-                          onClick={() => handleRemoveAuthor(authorId)}
-                          title={t('editor.author.remove')}
-                        >
-                          <X size={14} />
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="add-author-row-compact">
-                <select
-                  className="author-selector-compact"
-                  value=""
-                  onChange={(e) => { if (e.target.value) handleAddAuthor(e.target.value); }}
+              <option value="">{t('editor.wizard.pickProject', 'Elige un proyecto…')}</option>
+              {projects.map(project => {
+                const statusTag = project.status_project === 'draft'
+                  ? ` · ${t('editor.status.draft')}`
+                  : project.status_project === 'pending_approval'
+                  ? ` · ${t('editor.review.statusShort')}`
+                  : '';
+                return (
+                  <option key={project.id_project} value={project.id_project}>
+                    {project.title_project}{statusTag}
+                  </option>
+                );
+              })}
+            </select>
+            {canManageProject && (
+              <>
+                <button
+                  type="button"
+                  className="btn-edit-project"
+                  onClick={() => openEditProjectModal(selectedProject)}
+                  title={t('editor.project.editTitle')}
                 >
-                  <option value="">{t('editor.author.add')}</option>
-                  {editors.filter(e => !formData.authors.includes(e.id_user)).map(editor => (
-                    <option key={editor.id_user} value={editor.id_user}>{editor.name_user}</option>
-                  ))}
-                </select>
-              </div>
-              {fieldErrors.authors && (
-                <span className="field-error-msg">{fieldErrors.authors}</span>
-              )}
-            </div>
-
-            <div className="form-group-inline">
-              <label htmlFor="category-header">{t('editor.category.label')}</label>
-              <select
-                id="category-header"
-                name="category_article"
-                value={formData.category_article}
-                onChange={handleInputChange}
-                disabled={articleContentType === 'microperfil'}
-                title={articleContentType === 'microperfil' ? t('editor.microperfil.categoryLocked') : undefined}
-                className={`project-selector-header ${formData.category_article === 'general' ? 'select-placeholder' : ''}`}
-              >
-                <option value="general">{t('editor.category.general')}</option>
-                <option value="reportaje">{t('editor.category.reportage')}</option>
-                <option value="multimedia">{t('editor.category.multimedia')}</option>
-                <option value="cultura">{t('editor.category.culture')}</option>
-                <option value="sociedad">{t('editor.category.society')}</option>
-                <option value="opinion">{t('editor.category.opinion')}</option>
-                <option value="crónica">{t('editor.category.cronica')}</option>
-                <option value="entrevista">{t('editor.category.entrevista')}</option>
-                <option value="editorial">{t('editor.category.editorial')}</option>
-                <option value="fotoreportaje">{t('editor.category.fotoreportaje')}</option>
-                <option value="video reportaje">{t('editor.category.videoreportaje')}</option>
-                <option value="podcast">{t('editor.category.podcast')}</option>
-                <option value="cómic multimedia">{t('editor.category.comic')}</option>
-                <option value="crítica">{t('editor.category.critica')}</option>
-                <option value="ensayo">{t('editor.category.ensayo')}</option>
-                <option value="terrenito en pluton">{t('editor.category.microAbierto')}</option>
-                <option value="internacional">{t('editor.category.internacional')}</option>
-                <option value="no-ficcion">{t('editor.category.noficcion')}</option>
-                <option value="ficcion">{t('editor.category.ficcion')}</option>
-                <option value="micro-perfiles">{t('editor.category.microperfiles')}</option>
-                <option value="talleres">{t('editor.category.talleres')}</option>
-                <option value="infantil">{t('editor.category.infantil')}</option>
-              </select>
-            </div>
-
-            <div className="form-group-inline">
-              <label htmlFor="status-header">{t('editor.status.label')}</label>
-              <select
-                id="status-header"
-                name="status_article"
-                value={formData.status_article}
-                onChange={handleInputChange}
-                className={`project-selector-header ${formData.status_article === 'draft' ? 'select-placeholder' : ''}`}
-              >
-                <option value="draft">{t('editor.status.draft')}</option>
-                {canPublishDirectly ? (
-                  // Admin / super-admin: direct publish, no approval round-trip.
-                  <option value="published">{t('editor.status.published')}</option>
-                ) : (
-                  // Editor: goes through pending_approval → super-admin approves.
-                  <option value="pending_approval">Enviar para aprobación</option>
-                )}
-                {/* Show current state read-only for editors viewing their pending/published articles. */}
-                {editingArticle?.status_article === 'pending_approval' && !canPublishDirectly && (
-                  <option value="pending_approval" disabled>En revisión (pendiente)</option>
-                )}
-                {editingArticle?.status_article === 'published' && !canPublishDirectly && (
-                  <option value="published" disabled>Publicado</option>
-                )}
-              </select>
-            </div>
-            {editingArticle?.status_article === 'pending_approval' && (
-              <div className="editor-review-banner" role="status">
-                <strong>{t('editor.review.pendingTitle')}</strong>
-                <p>{t('editor.review.pendingBody')}</p>
-              </div>
-            )}
-            {editingArticle?.rejection_reason && editingArticle?.status_article === 'draft' && (
-              <div className="editor-rejection-banner" role="alert">
-                <strong>{t('editor.rejection.title')}</strong>
-                <p>{editingArticle.rejection_reason}</p>
-              </div>
+                  <Edit size={15} />
+                </button>
+                <button
+                  type="button"
+                  className="btn-delete-project"
+                  onClick={handleDeleteProject}
+                  title={t('editor.project.deleteTitle')}
+                >
+                  <Trash2 size={15} />
+                </button>
+              </>
             )}
           </div>
+          {selectedProject?.description_project && (
+            <p className="pub-project-desc">{selectedProject.description_project}</p>
+          )}
         </div>
+      )}
 
-        {/* The tab switcher only makes sense for super admins, who have the
-            extra "Recomendaciones" tab. Everyone else just edits articles. */}
-        {isSuperAdmin && (
-          <div className="editor-tabs-switch">
-            <div className="content-type-switch">
-              <button
-                type="button"
-                className={`switch-option ${activeTab === 'articles' ? 'switch-active' : ''}`}
-                onClick={() => setActiveTab('articles')}
-              >
-                {t('editor.title.create').split(' ')[0]}
-              </button>
-              <button
-                type="button"
-                className={`switch-option ${activeTab === 'newsletter' ? 'switch-active' : ''}`}
-                onClick={() => setActiveTab('newsletter')}
-              >
-                Recomendaciones
-              </button>
-            </div>
+      {projectMode === 'new' && (
+        <div className="pub-new-project">
+          <div className="form-group">
+            <label htmlFor="pub-project-title">{t('editor.project.titleLabel')}</label>
+            <input
+              type="text"
+              id="pub-project-title"
+              value={wizardProject.title_project}
+              onChange={(e) => setWizardProject(prev => ({ ...prev, title_project: e.target.value }))}
+              placeholder={t('editor.project.titlePlaceholder')}
+            />
           </div>
-        )}
-
-        {isSuperAdmin && activeTab === 'newsletter' && <NewsletterTab />}
-
-        {activeTab === 'articles' && <form className="editor-form" ref={editorFormRef} onSubmit={handleSubmit}>
-          {/* Cover Image */}
-          <div className="form-group full-width cover-image-group">
+          <div className="form-group">
+            <label htmlFor="pub-project-description">{t('editor.project.descriptionLabel')}</label>
+            <textarea
+              id="pub-project-description"
+              rows="3"
+              value={wizardProject.description_project}
+              onChange={(e) => setWizardProject(prev => ({ ...prev, description_project: e.target.value }))}
+              placeholder={t('editor.project.descriptionPlaceholder')}
+            />
+          </div>
+          <div className="form-group cover-image-group">
+            <label>{t('editor.project.coverLabel')}</label>
             <div className="cover-image-upload">
-              {coverImagePreview ? (
+              {wizardProjectCoverPreview ? (
                 <div className="cover-image-preview">
-                  <img src={coverImagePreview} alt={t('editor.coverImage.preview')} />
+                  <img src={wizardProjectCoverPreview} alt={t('editor.coverImage.preview')} />
                   <button
                     type="button"
                     className="btn-remove-preview"
-                    onClick={() => {
-                      setCoverImageFile(null);
-                      setCoverImagePreview(null);
-                      // The file <input> is only mounted when there's no preview,
-                      // so it may not exist here — guard against a null crash.
-                      const coverInput = document.getElementById('cover');
-                      if (coverInput) coverInput.value = '';
-                    }}
+                    onClick={() => { setWizardProjectCoverFile(null); setWizardProjectCoverPreview(null); }}
                   >
                     <X size={16} />
                   </button>
@@ -1186,12 +1330,12 @@ function ArticleEditorBlocks() {
                 <>
                   <input
                     type="file"
-                    id="cover"
+                    id="wizard_project_cover"
                     accept="image/*"
-                    onChange={handleCoverImageChange}
+                    onChange={handleWizardProjectCoverChange}
                     className="cover-image-input"
                   />
-                  <label htmlFor="cover" className="cover-image-label">
+                  <label htmlFor="wizard_project_cover" className="cover-image-label">
                     <Plus size={24} />
                     <span>{t('editor.coverImage.select')}</span>
                   </label>
@@ -1199,275 +1343,647 @@ function ArticleEditorBlocks() {
               )}
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Title */}
-          <div className="form-group full-width">
-            <input
-              type="text"
-              id="title"
-              name="title_article"
-              value={formData.title_article}
-              onChange={handleInputChange}
-              placeholder={t('editor.title.placeholder')}
-              className={fieldErrors.title_article ? 'input-error' : ''}
-              required
-            />
-            {fieldErrors.title_article && (
-              <span className="field-error-msg">{fieldErrors.title_article}</span>
-            )}
-          </div>
+      {editingArticle && !projectMode && (
+        <p className="pub-step-note">{t('editor.wizard.noProjectNote', 'Esta publicación no pertenece a ningún proyecto.')}</p>
+      )}
+    </>
+  );
 
-          {/* Excerpt */}
-          <div className="form-group full-width">
-            <textarea
-              id="excerpt"
-              name="excerpt_article"
-              value={formData.excerpt_article}
-              onChange={handleInputChange}
-              rows="3"
-              placeholder={t('editor.excerpt.placeholder')}
-              className={fieldErrors.excerpt_article ? 'input-error' : ''}
-            />
-            {fieldErrors.excerpt_article && (
-              <span className="field-error-msg">{fieldErrors.excerpt_article}</span>
-            )}
-          </div>
-
-          {/* Content type toggle switch */}
-          <div className="form-group full-width">
-            <div className="content-type-switch">
-              <button
-                type="button"
-                className={`switch-option ${articleContentType === 'regular' ? 'switch-active' : ''}`}
-                onClick={() => { setArticleContentType('regular'); setBlocks([]); clearMicroPerfilCategory(); }}
+  // ---- Step 2: classification + authors ----------------------------------
+  const stepClassification = (
+    <>
+      {projectMode === 'new' && (
+        <fieldset className="pub-fieldset">
+          <legend>{t('editor.wizard.projectClassification', 'Clasificación del proyecto')}</legend>
+          <div className="form-row-2">
+            <div className="form-group">
+              <label htmlFor="pub-project-type">{t('editor.project.typeLabel')}</label>
+              <select
+                id="pub-project-type"
+                value={wizardProject.type_project}
+                onChange={(e) => setWizardProject(prev => ({ ...prev, type_project: e.target.value }))}
+                className={!wizardProject.type_project ? 'select-placeholder' : ''}
               >
-                {t('editor.contentType.regular')}
-              </button>
-              <button
-                type="button"
-                className={`switch-option ${articleContentType === 'cómic' ? 'switch-active' : ''}`}
-                onClick={() => { setArticleContentType('cómic'); setBlocks([]); clearMicroPerfilCategory(); }}
+                <option value="">{t('editor.project.selectType')}</option>
+                {PROJECT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="pub-project-format">{t('editor.project.formatLabel')}</label>
+              <select
+                id="pub-project-format"
+                value={wizardProject.format_project}
+                onChange={(e) => {
+                  const format = e.target.value;
+                  setWizardProject(prev => ({ ...prev, format_project: format }));
+                  // A comic project suggests the comic content type (step 4).
+                  if (format === 'cómic' && !blocks.some(isBlockComplete)) setArticleContentType('cómic');
+                }}
+                className={!wizardProject.format_project ? 'select-placeholder' : ''}
               >
-                {t('editor.contentType.comic')}
-              </button>
-              <button
-                type="button"
-                className={`switch-option ${articleContentType === 'microperfil' ? 'switch-active' : ''}`}
-                onClick={selectMicroPerfil}
-              >
-                {t('editor.contentType.microperfil')}
-              </button>
+                <option value="">{t('editor.project.selectFormat')}</option>
+                {PROJECT_FORMATS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
             </div>
           </div>
+        </fieldset>
+      )}
 
-          {/* Content Blocks - Conditional based on article content type */}
-          <div className="form-group full-width">
-            {articleContentType === 'cómic' ? (
-              // H-Scroll Editor for Comics
-              <HScrollEditor
-                panels={blocks.filter(b => b.block_type === 'comic_panel')}
-                onPanelsChange={(newPanels) => {
-                  setBlocks(newPanels);
-                }}
-                onUploadPanel={async (index, file) => {
-                  const imageUrl = await uploadBlockImage(file);
-                  return { image_url: imageUrl };
-                }}
-                onUploadAudio={uploadPanelAudio}
-              />
-            ) : articleContentType === 'microperfil' ? (
-              // Dedicated micro-perfil UI (single image + caption + optional audio)
-              <MicroPerfilEditor
-                block={blocks[0]}
-                onChange={(newBlock) => setBlocks([newBlock])}
-                onUploadImage={uploadBlockImage}
-                onUploadAudio={uploadPanelAudio}
-              />
-            ) : (
-              // Regular Block Editor for non-comic articles
-              <>
-                <label className="content-label">{t('editor.content.label')}</label>
-                <div className="blocks-container">
-                  {blocks.map((block, index) => (
-                    <div key={block.id_block || block.tempId} className="block-wrapper">
-                      {block.block_type === 'text' && (
-                        <TextBlock
-                          block={block}
-                          onUpdate={handleBlockUpdate}
-                          onDelete={handleBlockDelete}
-                          isEditing={true}
-                        />
-                      )}
-                      {block.block_type === 'image' && (
-                        <ImageBlock
-                          block={block}
-                          onUpdate={handleBlockUpdate}
-                          onDelete={handleBlockDelete}
-                          onUploadImage={uploadBlockImage}
-                          isEditing={true}
-                        />
-                      )}
-                      {block.block_type === 'iframe' && (
-                        <IframeBlock
-                          block={block}
-                          onUpdate={handleBlockUpdate}
-                          onDelete={handleBlockDelete}
-                          isEditing={true}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
+      <fieldset className="pub-fieldset">
+        <legend>{t('editor.wizard.publicationCategory', 'Categoría de la publicación')}</legend>
+        <div className="form-group">
+          <select
+            id="pub-category"
+            name="category_article"
+            value={formData.category_article}
+            onChange={handleInputChange}
+            disabled={articleContentType === 'microperfil'}
+            title={articleContentType === 'microperfil' ? t('editor.microperfil.categoryLocked') : undefined}
+            className={formData.category_article === 'general' ? 'select-placeholder' : ''}
+            aria-label={t('editor.wizard.publicationCategory', 'Categoría de la publicación')}
+          >
+            <option value="general">{editingArticle ? t('editor.category.general') : t('editor.wizard.pickCategory', 'Elige una categoría…')}</option>
+            {CATEGORIES.map(([value, key]) => <option key={value} value={value}>{t(key)}</option>)}
+          </select>
+        </div>
+      </fieldset>
 
-                {/* Add Block Buttons */}
-                <div className="add-block-buttons">
-                  <button type="button" className="btn-add-block" onClick={() => addBlock('text')}>
-                    <FileText size={20} />
-                    {t('editor.blocks.addText')}
+      <fieldset className="pub-fieldset">
+        <legend>{t('editor.authors.label')}</legend>
+        <p className="pub-step-hint">
+          {t('editor.wizard.authorsHint', '¿Quieres añadir colaboradoras/es? La primera persona de la lista figura como autora principal.')}
+        </p>
+        <div className="authors-list-compact">
+          {formData.authors.map((authorId, index) => {
+            const author = getAuthorDetails(authorId);
+            return (
+              <div key={authorId} className="author-item-compact">
+                <span className="author-order">{index + 1}.</span>
+                {author?.image_user
+                  ? <img src={resolveUserImage(author.image_user)} alt={author.name_user} className="author-avatar-tiny" />
+                  : <User className="author-icon-placeholder" size={14} />}
+                <span className="author-name-compact">{author?.name_user || t('editor.author.unknown', { id: authorId })}</span>
+                {index === 0 && <span className="first-author-badge-compact">{t('editor.author.firstBadge')}</span>}
+                {formData.authors.length > 1 && (
+                  <button
+                    type="button"
+                    className="btn-remove-author-compact"
+                    onClick={() => handleRemoveAuthor(authorId)}
+                    title={t('editor.author.remove')}
+                  >
+                    <X size={14} />
                   </button>
-                  <button type="button" className="btn-add-block" onClick={() => addBlock('image')}>
-                    <ImageIcon size={20} />
-                    {t('editor.blocks.addImage')}
-                  </button>
-                  <button type="button" className="btn-add-block" onClick={() => addBlock('iframe')}>
-                    <Video size={20} />
-                    {t('editor.blocks.addIframe')}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="add-author-row-compact">
+          <select
+            className="author-selector-compact"
+            value=""
+            onChange={(e) => { if (e.target.value) handleAddAuthor(e.target.value); }}
+            aria-label={t('editor.author.add')}
+          >
+            <option value="">{t('editor.author.add')}</option>
+            {editors.filter(e => !formData.authors.includes(e.id_user)).map(editor => (
+              <option key={editor.id_user} value={editor.id_user}>{editor.name_user}</option>
+            ))}
+          </select>
+        </div>
+      </fieldset>
+    </>
+  );
 
-          {/* Featured Article */}
-          <div className="form-group full-width">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="featured_article"
-                checked={formData.featured_article}
-                onChange={handleInputChange}
-              />
-              <span>{t('editor.featured.label')}</span>
-            </label>
-          </div>
-
-          {/* Form Actions */}
-          <div className="form-actions">
-            <button type="submit" className="btn-save" disabled={saving}>
-              <Save size={20} />
-              {saving
-                ? t('editor.saving')
-                : formData.status_article === 'pending_approval'
-                ? 'Enviar para aprobación'
-                : formData.status_article === 'published'
-                ? (editingArticle ? t('editor.updateArticle') : t('editor.publishArticle'))
-                : t('editor.project.saveDraftButton') /* status = draft */}
-            </button>
-            {editingArticle?.id_article && (
+  // ---- Step 3: cover, title, excerpt -------------------------------------
+  const stepBasics = (
+    <>
+      <div className="form-group full-width cover-image-group">
+        <label>{t('editor.wizard.coverLabel', 'Imagen de portada')}</label>
+        <div className="cover-image-upload">
+          {coverImagePreview ? (
+            <div className="cover-image-preview">
+              <img src={coverImagePreview} alt={t('editor.coverImage.preview')} />
               <button
                 type="button"
-                className="btn-preview-draft"
-                onClick={handlePreviewDraft}
-                title={t('editor.previewDraftHint')}
+                className="btn-remove-preview"
+                onClick={() => {
+                  setCoverImageFile(null);
+                  setCoverImagePreview(null);
+                  // The file <input> is only mounted when there's no preview,
+                  // so it may not exist here — guard against a null crash.
+                  const coverInput = document.getElementById('cover');
+                  if (coverInput) coverInput.value = '';
+                }}
               >
-                <Eye size={20} />
-                {t('editor.previewDraft')}
+                <X size={16} />
               </button>
-            )}
-            {editingArticle && (
-              <button type="button" className="btn-cancel" onClick={resetForm}>
-                {t('editor.cancelEdit')}
-              </button>
-            )}
-          </div>
-        </form>}
+            </div>
+          ) : (
+            <>
+              <input
+                type="file"
+                id="cover"
+                accept="image/*"
+                onChange={handleCoverImageChange}
+                className="cover-image-input"
+              />
+              <label htmlFor="cover" className="cover-image-label">
+                <Plus size={24} />
+                <span>{t('editor.coverImage.select')}</span>
+              </label>
+            </>
+          )}
+        </div>
+      </div>
 
-        {activeTab === 'articles' && <div className="articles-list">
-          <h2>{t('editor.articlesList.title')}</h2>
-          <p className="list-subtitle">{t('editor.articlesList.subtitle')}</p>
+      <div className="form-group full-width">
+        <label htmlFor="title">{t('editor.wizard.titleLabel', 'Título *')}</label>
+        <input
+          type="text"
+          id="title"
+          name="title_article"
+          value={formData.title_article}
+          onChange={handleInputChange}
+          placeholder={t('editor.title.placeholder')}
+          className={fieldErrors.title_article ? 'input-error' : ''}
+        />
+        {fieldErrors.title_article && <span className="field-error-msg">{fieldErrors.title_article}</span>}
+      </div>
 
-          {(() => {
-            const mine = editorArticles.filter(a => isSuperAdmin || isArticleAuthor(a));
-            const counts = {
-              all: mine.length,
-              draft: mine.filter(a => a.status_article === 'draft').length,
-              pending_approval: mine.filter(a => a.status_article === 'pending_approval').length,
-              published: mine.filter(a => a.status_article === 'published').length
-            };
-            const visible = articleListFilter === 'all'
-              ? mine
-              : mine.filter(a => a.status_article === articleListFilter);
-            const FILTERS = [
-              { key: 'all', label: t('editor.articlesList.filterAll') },
-              { key: 'draft', label: t('editor.status.draft') },
-              { key: 'pending_approval', label: t('editor.review.statusShort') },
-              { key: 'published', label: t('editor.status.published') }
-            ];
-            return (
-              <>
-                <div className="articles-filter">
-                  {FILTERS.map(f => (
-                    <button
-                      key={f.key}
-                      type="button"
-                      className={`articles-filter__btn ${articleListFilter === f.key ? 'is-active' : ''}`}
-                      onClick={() => setArticleListFilter(f.key)}
-                    >
-                      {f.label} <span className="articles-filter__count">{counts[f.key]}</span>
-                    </button>
-                  ))}
-                </div>
-                {visible.length === 0 ? (
-                  <div className="empty-state">
-                    <p>{t('editor.articlesList.empty')}</p>
-                    <p>{t('editor.articlesList.emptyHint')}</p>
-                  </div>
-                ) : (
-                  <div className="articles-grid">
-                    {visible.map((article) => (
-                      <div key={article.id_article} className="article-item">
-                  <div className="article-item-info">
-                    <h4>{article.title_article}</h4>
-                    <p className="article-meta">
-                      <span className={`status status-${article.status_article}`}>
-                        {article.status_article === 'published'
-                          ? t('editor.status.published')
-                          : article.status_article === 'pending_approval'
-                          ? 'En revisión'
-                          : t('editor.status.draft')}
-                      </span>
-                      <span className="category-badge">{article.category_article}</span>
-                    </p>
-                    <p className="article-author">
-                      {t('article.detail.by')} {article.authors?.map(a => a.name_user).join(', ') || article.author_name || t('editor.author.unknownAuthor')}
-                    </p>
-                  </div>
-                  {(isSuperAdmin || isArticleAuthor(article)) && (
-                  <div className="article-item-actions">
-                    <button
-                      className="btn-edit"
-                      onClick={() => handleEdit(article)}
-                      title={t('common.buttons.edit')}
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      className="btn-delete"
-                      onClick={() => handleDelete(article.id_article)}
-                      title={t('common.buttons.delete')}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+      <div className="form-group full-width">
+        <label htmlFor="excerpt">{t('editor.wizard.excerptLabel', 'Extracto')}</label>
+        <textarea
+          id="excerpt"
+          name="excerpt_article"
+          value={formData.excerpt_article}
+          onChange={handleInputChange}
+          rows="3"
+          placeholder={t('editor.excerpt.placeholder')}
+          className={fieldErrors.excerpt_article ? 'input-error' : ''}
+        />
+        {fieldErrors.excerpt_article && <span className="field-error-msg">{fieldErrors.excerpt_article}</span>}
+      </div>
+    </>
+  );
+
+  // ---- Step 4: content type ----------------------------------------------
+  const stepType = (
+    <>
+      <p className="pub-step-hint">{t('editor.wizard.typeHint', 'Elige cómo se va a leer tu publicación.')}</p>
+      <div className="pub-choice-grid pub-choice-grid--3">
+        {CONTENT_TYPES.map(({ key, Icon, title, desc }) => (
+          <button
+            key={key}
+            type="button"
+            className={`pub-choice ${articleContentType === key ? 'is-selected' : ''}`}
+            onClick={() => chooseContentType(key)}
+            aria-pressed={articleContentType === key}
+          >
+            <Icon size={28} />
+            <span className="pub-choice__title">{title}</span>
+            <span className="pub-choice__desc">{desc}</span>
+          </button>
+        ))}
+      </div>
+    </>
+  );
+
+  // ---- Step 5: content ---------------------------------------------------
+  const stepContent = (
+    <>
+      <p className="pub-step-hint">
+        {CONTENT_TYPES.find(c => c.key === articleContentType)?.title}
+        {' · '}
+        <button type="button" className="pub-link" onClick={() => setStep(4)}>
+          {t('editor.wizard.changeType', 'Cambiar tipo')}
+        </button>
+      </p>
+      <div className="form-group full-width">
+        {articleContentType === 'cómic' ? (
+          // H-Scroll Editor for Comics
+          <HScrollEditor
+            panels={blocks.filter(b => b.block_type === 'comic_panel')}
+            onPanelsChange={(newPanels) => {
+              setBlocks(newPanels);
+            }}
+            onUploadPanel={async (index, file) => {
+              const imageUrl = await uploadBlockImage(file);
+              return { image_url: imageUrl };
+            }}
+            onUploadAudio={uploadPanelAudio}
+          />
+        ) : articleContentType === 'microperfil' ? (
+          // Dedicated micro-perfil UI (single image + caption + optional audio)
+          <MicroPerfilEditor
+            block={blocks[0]}
+            onChange={(newBlock) => setBlocks([newBlock])}
+            onUploadImage={uploadBlockImage}
+            onUploadAudio={uploadPanelAudio}
+          />
+        ) : (
+          // Regular Block Editor for non-comic articles
+          <>
+            <div className="blocks-container">
+              {blocks.map((block) => (
+                <div key={block.id_block || block.tempId} className="block-wrapper">
+                  {block.block_type === 'text' && (
+                    <TextBlock block={block} onUpdate={handleBlockUpdate} onDelete={handleBlockDelete} isEditing={true} />
+                  )}
+                  {block.block_type === 'image' && (
+                    <ImageBlock
+                      block={block}
+                      onUpdate={handleBlockUpdate}
+                      onDelete={handleBlockDelete}
+                      onUploadImage={uploadBlockImage}
+                      isEditing={true}
+                    />
+                  )}
+                  {block.block_type === 'iframe' && (
+                    <IframeBlock block={block} onUpdate={handleBlockUpdate} onDelete={handleBlockDelete} isEditing={true} />
                   )}
                 </div>
-                    ))}
-                  </div>
+              ))}
+            </div>
+
+            {/* Add Block Buttons */}
+            <div className="add-block-buttons">
+              <button type="button" className="btn-add-block" onClick={() => addBlock('text')}>
+                <FileText size={20} />
+                {t('editor.blocks.addText')}
+              </button>
+              <button type="button" className="btn-add-block" onClick={() => addBlock('image')}>
+                <ImageIcon size={20} />
+                {t('editor.blocks.addImage')}
+              </button>
+              <button type="button" className="btn-add-block" onClick={() => addBlock('iframe')}>
+                <Video size={20} />
+                {t('editor.blocks.addIframe')}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+
+  // ---- Step 6: review + publish ------------------------------------------
+  const reviewProjectName = projectMode === 'new'
+    ? t('editor.wizard.review.newProject', { title: wizardProject.title_project || '—', defaultValue: '{{title}} (nuevo)' })
+    : selectedProject?.title_project || t('editor.project.noProject');
+  const reviewContent = articleContentType === 'cómic'
+    ? t('editor.wizard.review.panels', { count: completeBlocks, defaultValue: 'Viñetas: {{count}}' })
+    : articleContentType === 'microperfil'
+    ? (completeBlocks ? t('editor.wizard.review.microperfil', 'Imagen con texto') : '—')
+    : t('editor.wizard.review.blocks', { count: completeBlocks, defaultValue: 'Bloques: {{count}}' });
+  const publishLabel = canPublishDirectly
+    ? t('editor.wizard.publish', 'Publicar')
+    : t('editor.wizard.submitReview', 'Enviar a revisión');
+
+  const stepReview = (
+    <div className="pub-review">
+      <dl className="pub-review__list">
+        <dt>{t('editor.wizard.step.project', 'Proyecto')}</dt>
+        <dd>
+          {reviewProjectName}
+          <button type="button" className="pub-link" onClick={() => setStep(1)}>{t('editor.wizard.review.change', 'Cambiar')}</button>
+        </dd>
+        <dt>{t('editor.category.label')}</dt>
+        <dd>
+          {categoryLabel}
+          <button type="button" className="pub-link" onClick={() => setStep(2)}>{t('editor.wizard.review.change', 'Cambiar')}</button>
+        </dd>
+        <dt>{t('editor.authors.label')}</dt>
+        <dd>{formData.authors.map(id => getAuthorDetails(id)?.name_user).filter(Boolean).join(', ') || '—'}</dd>
+        <dt>{t('editor.wizard.titleLabel', 'Título *').replace(' *', '')}</dt>
+        <dd>
+          {formData.title_article || '—'}
+          <button type="button" className="pub-link" onClick={() => setStep(3)}>{t('editor.wizard.review.change', 'Cambiar')}</button>
+        </dd>
+        <dt>{t('editor.wizard.coverLabel', 'Imagen de portada')}</dt>
+        <dd>
+          {coverImagePreview
+            ? <img src={coverImagePreview} alt="" className="pub-review__cover" />
+            : t('editor.wizard.review.noCover', 'Sin portada')}
+        </dd>
+        <dt>{t('editor.wizard.step.typeLong', 'Tipo de contenido')}</dt>
+        <dd>{CONTENT_TYPES.find(c => c.key === articleContentType)?.title}</dd>
+        <dt>{t('editor.wizard.step.content', 'Contenido')}</dt>
+        <dd>
+          {reviewContent}
+          <button type="button" className="pub-link" onClick={() => setStep(5)}>{t('editor.wizard.review.change', 'Cambiar')}</button>
+        </dd>
+        <dt>{t('editor.status.label')}</dt>
+        <dd><span className={`status status-${status}`}>{statusLabel(status)}</span></dd>
+      </dl>
+
+      {publishIssues.length > 0 && (
+        <div className="pub-review__issues" role="status">
+          <AlertCircle size={18} />
+          <div>
+            <strong>{t('editor.wizard.review.issuesTitle', 'Antes de publicar:')}</strong>
+            <ul>{publishIssues.map(issue => <li key={issue}>{issue}</li>)}</ul>
+          </div>
+        </div>
+      )}
+
+      <label className="checkbox-label">
+        <input
+          type="checkbox"
+          name="featured_article"
+          checked={!!formData.featured_article}
+          onChange={handleInputChange}
+        />
+        <span>{t('editor.featured.label')}</span>
+      </label>
+
+      {status === 'draft' && (
+        <p className="pub-step-note">{t('editor.wizard.review.draftNote', 'La publicación se guarda como borrador hasta que la publiques.')}</p>
+      )}
+
+      <div className="pub-review__actions">
+        {editingArticle?.id_article ? (
+          <button type="button" className="pub-btn pub-btn--ghost" onClick={handlePreviewDraft} title={t('editor.previewDraftHint')}>
+            <Eye size={18} />
+            <span>{t('editor.previewDraft')}</span>
+          </button>
+        ) : (
+          <span className="pub-review__preview-hint">{t('editor.wizard.review.previewNeedsSave', 'Guarda el borrador para ver la vista previa.')}</span>
+        )}
+
+        {status === 'draft' ? (
+          <>
+            <button type="button" className="pub-btn pub-btn--ghost" onClick={() => saveArticle('draft')} disabled={saving}>
+              <Save size={18} />
+              <span>{saving ? t('editor.saving') : t('editor.project.saveDraftButton')}</span>
+            </button>
+            <button
+              type="button"
+              className="pub-btn pub-btn--primary"
+              onClick={() => saveArticle('publish')}
+              disabled={saving || publishIssues.length > 0}
+            >
+              <Send size={18} />
+              <span>{publishLabel}</span>
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" className="pub-btn pub-btn--ghost" onClick={() => handleRevertToDraft(editingArticle)} disabled={saving}>
+              <Undo2 size={18} />
+              <span>
+                {status === 'pending_approval'
+                  ? t('editor.mine.withdraw', 'Retirar de revisión')
+                  : t('editor.mine.revert', 'Pasar a borrador')}
+              </span>
+            </button>
+            {status === 'pending_approval' && canPublishDirectly && (
+              <button type="button" className="pub-btn pub-btn--ghost" onClick={() => saveArticle('publish')} disabled={saving || publishIssues.length > 0}>
+                <Send size={18} />
+                <span>{t('editor.wizard.publish', 'Publicar')}</span>
+              </button>
+            )}
+            <button
+              type="button"
+              className="pub-btn pub-btn--primary"
+              onClick={() => saveArticle('update')}
+              disabled={saving || publishIssues.length > 0}
+            >
+              <Save size={18} />
+              <span>{saving ? t('editor.saving') : t('editor.wizard.saveChanges', 'Guardar cambios')}</span>
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  // ---- "Mis publicaciones" -----------------------------------------------
+  const mine = editorArticles.filter(a => isSuperAdmin || isArticleAuthor(a));
+  const mineCounts = {
+    all: mine.length,
+    draft: mine.filter(a => a.status_article === 'draft').length,
+    pending_approval: mine.filter(a => a.status_article === 'pending_approval').length,
+    published: mine.filter(a => a.status_article === 'published').length
+  };
+  const mineVisible = articleListFilter === 'all' ? mine : mine.filter(a => a.status_article === articleListFilter);
+  const MINE_FILTERS = [
+    { key: 'all', label: t('editor.articlesList.filterAll') },
+    { key: 'draft', label: t('editor.status.draft') },
+    { key: 'pending_approval', label: t('editor.review.statusShort') },
+    { key: 'published', label: t('editor.status.published') }
+  ];
+
+  return (
+    <div className="article-editor-blocks">
+      <div className="editor-container pub-editor">
+        <header className="pub-editor-header">
+          {/* Close (top-right): back to where the editor was opened from. */}
+          <button
+            type="button"
+            className="pub-editor-close"
+            onClick={handleClose}
+            title={t('editor.wizard.close', 'Cerrar el editor')}
+            aria-label={t('editor.wizard.close', 'Cerrar el editor')}
+          >
+            <X size={24} />
+          </button>
+
+          <h1 className="pub-editor-title">
+            {view === 'mine'
+              ? t('editor.mine.title', 'Mis publicaciones')
+              : editingArticle ? t('editor.title.edit') : t('editor.title.create')}
+          </h1>
+
+          <div className="pub-editor-header-actions">
+            {view === 'wizard' ? (
+              <button type="button" className="pub-btn pub-btn--ghost" onClick={() => setView('mine')}>
+                <Library size={18} />
+                <span>{t('editor.mine.button', 'Mis publicaciones')}</span>
+              </button>
+            ) : (
+              <>
+                {(editingArticle || hasUnsavedNewWork()) && (
+                  <button type="button" className="pub-btn pub-btn--ghost" onClick={() => setView('wizard')}>
+                    <Edit size={18} />
+                    <span>{t('editor.mine.backToEditor', 'Volver a la publicación en curso')}</span>
+                  </button>
                 )}
+                <button type="button" className="pub-btn pub-btn--primary" onClick={startNewPublication}>
+                  <Plus size={18} />
+                  <span>{t('editor.mine.new', 'Nueva publicación')}</span>
+                </button>
               </>
-            );
-          })()}
-        </div>}
+            )}
+          </div>
+
+          {/* Progress: completed steps, current step, next steps. */}
+          {view === 'wizard' && (
+            <nav className="pub-progress" aria-label={t('editor.wizard.stepsLabel', 'Pasos de la publicación')}>
+              <ol className="pub-steps">
+                {STEPS.map(({ n, short }) => {
+                  const state = n < step ? 'is-done' : n === step ? 'is-current' : 'is-next';
+                  const clickable = n !== step && canVisitStep(n);
+                  return (
+                    <li key={n} className={`pub-step ${state}`}>
+                      <button
+                        type="button"
+                        className="pub-step__btn"
+                        onClick={() => clickable && setStep(n)}
+                        disabled={!clickable && n !== step}
+                        aria-current={n === step ? 'step' : undefined}
+                      >
+                        <span className="pub-step__num">{n < step ? <Check size={16} /> : n}</span>
+                        <span className="pub-step__label">{short}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+              <p className="pub-progress__mobile">
+                {t('editor.wizard.stepOf', { n: step, total: TOTAL_STEPS, defaultValue: 'Paso {{n}} de {{total}}' })} · {STEPS[step - 1].short}
+              </p>
+            </nav>
+          )}
+        </header>
+
+        {view === 'wizard' && (
+          <div className="pub-wizard">
+            {status === 'pending_approval' && (
+              <div className="editor-review-banner" role="status">
+                <strong>{t('editor.review.pendingTitle')}</strong>
+                <p>{t('editor.review.pendingBody')}</p>
+              </div>
+            )}
+            {editingArticle?.rejection_reason && status === 'draft' && (
+              <div className="editor-rejection-banner" role="alert">
+                <strong>{t('editor.rejection.title')}</strong>
+                <p>{editingArticle.rejection_reason}</p>
+              </div>
+            )}
+
+            <section className="pub-step-panel" aria-labelledby="pub-step-title">
+              <h2 id="pub-step-title" className="pub-step-title">
+                <span className="pub-step-title__num">{step}</span>
+                {STEPS[step - 1].long}
+              </h2>
+              {step === 1 && stepProject}
+              {step === 2 && stepClassification}
+              {step === 3 && stepBasics}
+              {step === 4 && stepType}
+              {step === 5 && stepContent}
+              {step === 6 && stepReview}
+            </section>
+
+            {nextAttempted && currentIssue && (
+              <p className="pub-step-issue" role="alert">
+                <AlertCircle size={16} />
+                {currentIssue}
+              </p>
+            )}
+
+            <div className="pub-wizard-footer">
+              <div className="pub-wizard-footer__side">
+                {step > 1 && (
+                  <button type="button" className="pub-btn pub-btn--ghost" onClick={goPrev}>
+                    <ChevronLeft size={18} />
+                    <span>{t('editor.wizard.prev', 'Anterior')}</span>
+                  </button>
+                )}
+              </div>
+              {step < TOTAL_STEPS && (
+                <button type="button" className="pub-btn pub-btn--ghost" onClick={() => saveArticle(saveIntent)} disabled={saving}>
+                  <Save size={18} />
+                  <span>
+                    {saving
+                      ? t('editor.saving')
+                      : saveIntent === 'draft'
+                      ? t('editor.project.saveDraftButton')
+                      : t('editor.wizard.saveChanges', 'Guardar cambios')}
+                  </span>
+                </button>
+              )}
+              <div className="pub-wizard-footer__side pub-wizard-footer__side--end">
+                {step < TOTAL_STEPS && (
+                  <button type="button" className="pub-btn pub-btn--primary" onClick={goNext}>
+                    <span>{t('editor.wizard.next', 'Siguiente')}</span>
+                    <ChevronRight size={18} />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {view === 'mine' && (
+          <div className="pub-mine">
+            <p className="list-subtitle">
+              {t('editor.mine.subtitle', 'Edita, elimina o revisa el estado de tus publicaciones.')}
+            </p>
+            <div className="articles-filter">
+              {MINE_FILTERS.map(f => (
+                <button
+                  key={f.key}
+                  type="button"
+                  className={`articles-filter__btn ${articleListFilter === f.key ? 'is-active' : ''}`}
+                  onClick={() => setArticleListFilter(f.key)}
+                >
+                  {f.label} <span className="articles-filter__count">{mineCounts[f.key]}</span>
+                </button>
+              ))}
+            </div>
+            {mineVisible.length === 0 ? (
+              <div className="empty-state">
+                <p>{t('editor.articlesList.empty')}</p>
+                <p>{t('editor.articlesList.emptyHint')}</p>
+              </div>
+            ) : (
+              <div className="articles-grid">
+                {mineVisible.map((article) => (
+                  <div key={article.id_article} className="article-item">
+                    <div className="article-item-info">
+                      <h4>{article.title_article}</h4>
+                      <p className="article-meta">
+                        <span className={`status status-${article.status_article}`}>{statusLabel(article.status_article)}</span>
+                        <span className="category-badge">{article.category_article}</span>
+                      </p>
+                      <p className="article-author">
+                        {t('article.detail.by')} {article.authors?.map(a => a.name_user).join(', ') || article.author_name || t('editor.author.unknownAuthor')}
+                      </p>
+                      {article.rejection_reason && article.status_article === 'draft' && (
+                        <p className="pub-mine__rejection">
+                          <strong>{t('editor.rejection.title')}</strong> {article.rejection_reason}
+                        </p>
+                      )}
+                    </div>
+                    <div className="article-item-actions">
+                      <button className="btn-edit" onClick={() => openPublicationForEdit(article)} title={t('common.buttons.edit')}>
+                        <Edit size={18} />
+                      </button>
+                      {(article.status_article === 'published' || article.status_article === 'pending_approval') && (
+                        <button
+                          className="btn-edit"
+                          onClick={() => handleRevertToDraft(article)}
+                          title={article.status_article === 'pending_approval'
+                            ? t('editor.mine.withdraw', 'Retirar de revisión')
+                            : t('editor.mine.revert', 'Pasar a borrador')}
+                        >
+                          <Undo2 size={18} />
+                        </button>
+                      )}
+                      <button className="btn-delete" onClick={() => handleDelete(article.id_article)} title={t('common.buttons.delete')}>
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Create Project Modal — rendered via portal to escape overflow/transform ancestors */}
@@ -1566,17 +2082,7 @@ function ArticleEditorBlocks() {
                     className={!newProjectData.type_project ? 'select-placeholder' : ''}
                   >
                     <option value="">{t('editor.project.selectType')}</option>
-                    <option value="ficción">Ficción</option>
-                    <option value="no-ficción">No-ficción</option>
-                    <option value="ensayo">Ensayo</option>
-                    <option value="académico">Académico</option>
-                    <option value="científico">Científico</option>
-                    <option value="periodístico">Periodístico</option>
-                    <option value="poético">Poético</option>
-                    <option value="narrativo">Narrativo</option>
-                    <option value="experimental">Experimental</option>
-                    <option value="documental">Documental</option>
-                    <option value="autobiográfico">Autobiográfico</option>
+                    {PROJECT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                   </select>
                 </div>
 
@@ -1590,22 +2096,7 @@ function ArticleEditorBlocks() {
                     className={!newProjectData.format_project ? 'select-placeholder' : ''}
                   >
                     <option value="">{t('editor.project.selectFormat')}</option>
-                    <option value="cómic">Cómic</option>
-                    <option value="crónica">Crónica</option>
-                    <option value="ensayo">Ensayo</option>
-                    <option value="cuento">Cuento</option>
-                    <option value="multimedia">Multimedia</option>
-                    <option value="podcast">Podcast</option>
-                    <option value="video">Video</option>
-                    <option value="fotografía">Fotografía</option>
-                    <option value="ilustración">Ilustración</option>
-                    <option value="performance">Performance</option>
-                    <option value="instalación">Instalación</option>
-                    <option value="novela">Novela</option>
-                    <option value="artículo">Artículo</option>
-                    <option value="reportaje">Reportaje</option>
-                    <option value="entrevista">Entrevista</option>
-                    <option value="poesía">Poesía</option>
+                    {PROJECT_FORMATS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                   </select>
                 </div>
               </div>

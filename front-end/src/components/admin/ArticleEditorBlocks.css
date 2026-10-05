@@ -1434,3 +1434,526 @@
 .editor-header .editor-title-section .btn-back-nav:hover {
   transform: translateY(-50%) translateX(-3px);
 }
+
+/* ======================================================================
+   Step-by-step publication creator ("Crea una publicación")
+   ====================================================================== */
+.pub-editor {
+  position: relative;
+}
+
+/* Header: title, "Mis publicaciones", progress — close button top-right. */
+.pub-editor-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2.25rem;
+  padding: 0 3.5rem;
+}
+.pub-editor-title {
+  margin: 0;
+  text-align: center;
+  color: #1a1a2e;
+  font-size: 2.5rem;
+  font-family: 'Alfa Slab One', sans-serif;
+  line-height: 1.15;
+}
+.pub-editor-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/* Close: round, no shadow, top-right corner of the editor. */
+.pub-editor-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #ececec;
+  color: #1a1a1a;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.pub-editor-close:hover,
+.pub-editor-close:focus-visible {
+  background: #000000;
+  color: #ffffff;
+}
+
+/* Buttons */
+.pub-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.35rem;
+  border: 2px solid #1a1a1a;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.pub-btn:hover:not(:disabled) {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+.pub-btn--primary {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+.pub-btn--primary:hover:not(:disabled) {
+  background: #ffffff;
+  color: #1a1a1a;
+}
+.pub-btn--ghost {
+  border-color: #d0d0d0;
+}
+.pub-btn--ghost:hover:not(:disabled) {
+  border-color: #1a1a1a;
+}
+.pub-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pub-link {
+  margin-left: 0.6rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.pub-link:hover {
+  color: #666666;
+}
+
+/* Progress bar: done (filled + check), current (ring), next (outline),
+   joined by a line. */
+.pub-progress {
+  width: 100%;
+  max-width: 860px;
+}
+.pub-steps {
+  display: flex;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pub-step {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+}
+/* Connector from the previous step. */
+.pub-step + .pub-step::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  right: calc(50% + 24px);
+  left: calc(-50% + 24px);
+  height: 2px;
+  background: #dcdcdc;
+}
+.pub-step.is-done + .pub-step::before {
+  background: #1a1a1a;
+}
+.pub-step__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.pub-step__btn:disabled {
+  cursor: default;
+}
+.pub-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 2px solid #cfcfcf;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #999999;
+  font-family: 'Source Code Pro', monospace;
+  font-weight: 700;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.pub-step__label {
+  max-width: 100%;
+  padding: 0 0.25rem;
+  color: #999999;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.pub-step.is-done .pub-step__num {
+  border-color: #1a1a1a;
+  background: #1a1a1a;
+  color: #ffffff;
+}
+.pub-step.is-done .pub-step__label {
+  color: #555555;
+}
+.pub-step.is-current .pub-step__num {
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+.pub-step.is-current .pub-step__label {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+.pub-step__btn:not(:disabled):hover .pub-step__num {
+  border-color: #1a1a1a;
+}
+.pub-progress__mobile {
+  display: none;
+  margin: 0.6rem 0 0;
+  text-align: center;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Current step */
+.pub-wizard,
+.pub-mine {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.pub-step-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.pub-step-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  color: #1a1a2e;
+  font-family: 'Alfa Slab One', sans-serif;
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+.pub-step-title__num {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  color: #ffffff;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 1rem;
+}
+.pub-step-hint {
+  margin: 0;
+  color: #555555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.pub-step-note {
+  margin: 0;
+  color: #777777;
+  font-size: 0.85rem;
+}
+.pub-step-issue {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0;
+  color: #c62828;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Choice cards (step 1: project, step 4: content type) */
+.pub-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.pub-choice-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.pub-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fafafa;
+  color: #1a1a1a;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.pub-choice:hover {
+  border-color: #1a1a1a;
+}
+.pub-choice.is-selected {
+  border-color: #1a1a1a;
+  background: #1a1a1a;
+  color: #ffffff;
+}
+.pub-choice__title {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.pub-choice__desc {
+  color: #666666;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+.pub-choice.is-selected .pub-choice__desc {
+  color: #cfcfcf;
+}
+
+.pub-field .project-selector-row select {
+  flex: 1;
+  min-width: 0;
+}
+.pub-project-desc {
+  margin: 0.6rem 0 0;
+  color: #666666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.pub-new-project {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Step 2 groups */
+.pub-fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1.25rem;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  min-width: 0;
+}
+.pub-fieldset legend {
+  padding: 0 0.4rem;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.pub-fieldset .authors-list-compact {
+  justify-content: flex-start;
+}
+.pub-fieldset .add-author-row-compact {
+  justify-content: flex-start;
+}
+
+/* Step 6: review */
+.pub-review {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.pub-review__list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.7rem 1.5rem;
+  margin: 0;
+  padding: 1.25rem;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+}
+.pub-review__list dt {
+  color: #777777;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.pub-review__list dd {
+  margin: 0;
+  color: #1a1a1a;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.pub-review__cover {
+  display: block;
+  width: 160px;
+  max-width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.pub-review__issues {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 10px;
+  background: #fff4e5;
+  color: #8a4b00;
+}
+.pub-review__issues svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.pub-review__issues ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+}
+.pub-review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 2px solid #f0f0f0;
+}
+.pub-review__preview-hint {
+  margin-right: auto;
+  color: #777777;
+  font-size: 0.85rem;
+}
+.pub-review__actions .pub-btn--ghost:first-child {
+  margin-right: auto;
+}
+
+/* Footer navigation: Anterior · Guardar · Siguiente */
+.pub-wizard-footer {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f0f0f0;
+}
+.pub-wizard-footer__side {
+  display: flex;
+}
+.pub-wizard-footer__side--end {
+  justify-content: flex-end;
+}
+
+/* "Mis publicaciones" */
+.pub-mine .articles-grid {
+  margin-top: 1rem;
+}
+.pub-mine__rejection {
+  margin: 0.4rem 0 0;
+  color: #b23c17;
+  font-size: 0.85rem;
+}
+
+/* Small screens: numbers only in the progress bar (+ the current step's name
+   below), cards in one column, footer buttons sharing the row. */
+@media (max-width: 700px) {
+  .pub-editor-header {
+    padding: 0 3rem;
+  }
+  .pub-editor-title {
+    font-size: 1.8rem;
+  }
+  .pub-editor-close {
+    width: 42px;
+    height: 42px;
+  }
+  .pub-step__label {
+    display: none;
+  }
+  .pub-step__num {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+  .pub-step + .pub-step::before {
+    top: 15px;
+    right: calc(50% + 20px);
+    left: calc(-50% + 20px);
+  }
+  .pub-progress__mobile {
+    display: block;
+  }
+  .pub-choice-grid,
+  .pub-choice-grid--3 {
+    grid-template-columns: 1fr;
+  }
+  .pub-step-title {
+    font-size: 1.3rem;
+  }
+  .pub-review__list {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+  .pub-review__list dd {
+    margin-bottom: 0.6rem;
+  }
+  .pub-wizard-footer {
+    grid-template-columns: 1fr 1fr;
+  }
+  /* Save spans the full row under Anterior / Siguiente. */
+  .pub-wizard-footer > .pub-btn {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .pub-review__actions {
+    justify-content: stretch;
+  }
+  .pub-review__actions .pub-btn {
+    flex: 1 1 100%;
+  }
+}
+@media (max-width: 420px) {
+  .pub-editor-header {
+    padding: 0 2.75rem;
+  }
+  .pub-btn {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+  }
+}
