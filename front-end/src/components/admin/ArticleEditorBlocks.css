@@ -1957,3 +1957,26 @@
     font-size: 0.85rem;
   }
 }
+
+/* The creator is a full-screen page (no header / footer while it's open): the
+   white sheet covers the whole viewport, with no outer margins showing the
+   dark page background below or around it. */
+.article-editor-blocks {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+  background: #ffffff;
+}
+.article-editor-blocks .editor-container {
+  flex: 1;
+  min-height: 100vh;
+  padding: 2.5rem 2rem 3rem;
+  border-radius: 0;
+  box-shadow: none;
+}
+@media (max-width: 599px) {
+  .article-editor-blocks .editor-container {
+    padding: 1.5rem 1rem 2rem;
+  }
+}
