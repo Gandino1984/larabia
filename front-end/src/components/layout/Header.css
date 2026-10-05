@@ -167,8 +167,15 @@
   overflow: hidden;
 }
 
+/* With a profile photo: the photo zooms on hover (index.css) — let it grow
+   without clipping its ring, and skip the translucent circle behind it. */
 .user-info-btn:has(img) {
   padding: 0.2rem;
+  overflow: visible;
+}
+.user-info-btn:has(img):hover,
+.header-bar.active .user-info-btn:has(img):hover {
+  background: none;
 }
 
 .header-bar.active .user-info-btn,
