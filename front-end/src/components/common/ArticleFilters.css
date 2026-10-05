@@ -100,10 +100,9 @@
 .article-filters__field > span {
   color: var(--af-label);
   font-family: 'Source Code Pro', monospace;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 /* Dropdowns: button-like, with their own chevron (dark, white on hover). */
