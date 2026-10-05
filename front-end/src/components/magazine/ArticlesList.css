@@ -620,3 +620,12 @@
   max-width: 1100px;
   margin-bottom: 0;
 }
+
+/* More air under the title row and under the search box (this page only —
+   .search-input-wrapper is shared with the header search). */
+.articles-list-header .header-title-row {
+  margin-bottom: 2.5rem;
+}
+.articles-search .search-input-wrapper {
+  margin-bottom: 1rem;
+}
