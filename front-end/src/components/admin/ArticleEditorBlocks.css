@@ -1671,19 +1671,6 @@
   font-size: 1.6rem;
   line-height: 1.2;
 }
-.pub-step-title__num {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #1a1a1a;
-  color: #ffffff;
-  font-family: 'Source Code Pro', monospace;
-  font-size: 1rem;
-}
 .pub-step-hint {
   margin: 0;
   color: #555555;
@@ -2038,5 +2025,166 @@
   }
   .pub-wizard-footer {
     margin-top: 2.25rem;
+  }
+}
+
+/* ---- Buttons: the site's style — light gray with dark text, black with
+   white text on hover; the main action in black. Small corners: only the
+   close button is round. ---- */
+.pub-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.3rem;
+  background: #e4e4e4;
+  color: #1a1a1a;
+  font-size: 0.88rem;
+  letter-spacing: 0.02em;
+}
+.pub-btn:hover:not(:disabled),
+.pub-btn--ghost:hover:not(:disabled) {
+  background: #000000;
+  color: #ffffff;
+}
+.pub-btn--ghost {
+  background: #e4e4e4;
+}
+.pub-btn--primary {
+  background: #000000;
+  color: #ffffff;
+}
+.pub-btn--primary:hover:not(:disabled) {
+  background: #3a3a3a;
+  color: #ffffff;
+}
+.pub-btn:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+/* Cards, groups and chips follow the same small corners. */
+.pub-choice {
+  border-radius: 8px;
+}
+.pub-fieldset,
+.pub-review__list,
+.pub-review__issues {
+  border-radius: 8px;
+}
+.article-editor-blocks .articles-filter__btn {
+  border-radius: 6px;
+}
+.article-editor-blocks .articles-filter__count {
+  border-radius: 4px;
+}
+
+/* ---- Progress bar: a thin segmented bar — one segment per step (black when
+   done or current, light gray ahead) with "01 Proyecto" under each. Space
+   above and below it. ---- */
+.pub-progress {
+  margin: 1.25rem 0 0.75rem;
+}
+.pub-steps {
+  gap: 10px;
+}
+.pub-step + .pub-step::before {
+  display: none;
+}
+.pub-step__btn {
+  align-items: flex-start;
+  gap: 0.4rem;
+  text-align: left;
+}
+.pub-step__bar {
+  display: block;
+  width: 100%;
+  height: 3px;
+  margin-bottom: 0.45rem;
+  border-radius: 2px;
+  background: #e2e2e2;
+  transition: background 0.25s ease;
+}
+.pub-step.is-done .pub-step__bar,
+.pub-step.is-current .pub-step__bar {
+  background: #000000;
+}
+.pub-step__btn:not(:disabled):hover .pub-step__bar {
+  background: #7a7a7a;
+}
+.pub-step.is-done .pub-step__btn:not(:disabled):hover .pub-step__bar {
+  background: #3a3a3a;
+}
+.pub-step__num {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: auto;
+  height: auto;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #a5a5a5;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+.pub-step.is-done .pub-step__num {
+  background: none;
+  color: #555555;
+}
+.pub-step.is-current .pub-step__num {
+  color: #000000;
+  box-shadow: none;
+}
+.pub-step__check {
+  flex-shrink: 0;
+}
+.pub-step__label {
+  padding: 0;
+  color: #a5a5a5;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: left;
+}
+.pub-step.is-done .pub-step__label {
+  color: #555555;
+}
+.pub-step.is-current .pub-step__label {
+  color: #000000;
+  font-weight: 700;
+}
+.pub-progress__mobile {
+  display: none;
+}
+
+/* Step heading: "Paso 2 de 6" eyebrow above the title. */
+.pub-step-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.pub-step-eyebrow {
+  color: #8a8a8a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 700px) {
+  .pub-steps {
+    gap: 6px;
+  }
+  /* Narrow: just the numbered segments; the step's name is in its heading. */
+  .pub-step__label {
+    display: none;
+  }
+  .pub-step__num {
+    width: auto;
+    height: auto;
+    font-size: 0.68rem;
+  }
+  .pub-step__check {
+    display: none;
   }
 }

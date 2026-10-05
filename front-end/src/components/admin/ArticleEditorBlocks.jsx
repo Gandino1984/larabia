@@ -1892,16 +1892,17 @@ function ArticleEditorBlocks() {
                         disabled={!clickable && n !== step}
                         aria-current={n === step ? 'step' : undefined}
                       >
-                        <span className="pub-step__num">{n < step ? <Check size={16} /> : n}</span>
+                        <span className="pub-step__bar" aria-hidden="true" />
+                        <span className="pub-step__num">
+                          {String(n).padStart(2, '0')}
+                          {n < step && <Check size={13} className="pub-step__check" />}
+                        </span>
                         <span className="pub-step__label">{short}</span>
                       </button>
                     </li>
                   );
                 })}
               </ol>
-              <p className="pub-progress__mobile">
-                {t('editor.wizard.stepOf', { n: step, total: TOTAL_STEPS, defaultValue: 'Paso {{n}} de {{total}}' })} · {STEPS[step - 1].short}
-              </p>
             </nav>
           )}
         </header>
@@ -1922,10 +1923,12 @@ function ArticleEditorBlocks() {
             )}
 
             <section className="pub-step-panel" aria-labelledby="pub-step-title">
-              <h2 id="pub-step-title" className="pub-step-title">
-                <span className="pub-step-title__num">{step}</span>
-                {STEPS[step - 1].long}
-              </h2>
+              <div className="pub-step-heading">
+                <span className="pub-step-eyebrow">
+                  {t('editor.wizard.stepOf', { n: step, total: TOTAL_STEPS, defaultValue: 'Paso {{n}} de {{total}}' })}
+                </span>
+                <h2 id="pub-step-title" className="pub-step-title">{STEPS[step - 1].long}</h2>
+              </div>
               {step === 1 && stepProject}
               {step === 2 && stepClassification}
               {step === 3 && stepBasics}
