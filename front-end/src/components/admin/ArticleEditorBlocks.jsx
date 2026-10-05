@@ -107,8 +107,6 @@ function ArticleEditorBlocks() {
   const [wizardProject, setWizardProject] = useState(EMPTY_WIZARD_PROJECT);
   const [wizardProjectCoverFile, setWizardProjectCoverFile] = useState(null);
   const [wizardProjectCoverPreview, setWizardProjectCoverPreview] = useState(null);
-  // Show the current step's missing requirement after a "Next" attempt.
-  const [nextAttempted, setNextAttempted] = useState(false);
   const [editingArticle, setEditingArticle] = useState(null);
   const [formData, setFormData] = useState({
     title_article: '',
@@ -167,10 +165,15 @@ function ArticleEditorBlocks() {
     if (showEditor) setView(editorInitialView || 'wizard');
   }, [showEditor, editorInitialView]);
 
+  // The content mark (step 5) clears as soon as there is some content.
+  useEffect(() => {
+    if (blocks.some(isBlockComplete)) clearFieldError('content');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blocks]);
+
   // Each step / view starts at the top of the page.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setNextAttempted(false);
   }, [step, view]);
 
   // Detect project format when project_id changes. A comic project suggests the
@@ -671,39 +674,81 @@ function ArticleEditorBlocks() {
   // Step-by-step creator
   // ---------------------------------------------------------------------
 
-  // What still blocks a step (null when it's complete). Steps 1–3 gate the
-  // "Next" button; content is only required to publish.
-  const stepIssue = (n) => {
+  // What still blocks a step: the field at fault and why (null when it's
+  // complete). Steps 1–3 gate the "Next" button; content is only required to
+  // publish.
+  const stepProblem = (n) => {
+    const problem = (field, message) => ({ field, message });
     if (n === 1) {
       if (projectMode === 'new') {
-        return wizardProject.title_project.trim() ? null : t('editor.wizard.need.projectTitle', 'Ponle un título al nuevo proyecto');
+        return wizardProject.title_project.trim() ? null
+          : problem('project_title', t('editor.wizard.need.projectTitle', 'Ponle un título al nuevo proyecto'));
       }
       if (projectMode === 'existing') {
-        return formData.project_id ? null : t('editor.wizard.need.projectPick', 'Elige un proyecto');
+        return formData.project_id ? null
+          : problem('project_id', t('editor.wizard.need.projectPick', 'Elige un proyecto'));
       }
-      return editingArticle ? null : t('editor.wizard.need.projectMode', 'Elige si la publicación va en un proyecto nuevo o en uno existente');
+      return editingArticle ? null
+        : problem('project_mode', t('editor.wizard.need.projectMode', 'Elige si la publicación va en un proyecto nuevo o en uno existente'));
     }
     if (n === 2) {
       if (projectMode === 'new' && !wizardProject.type_project) {
-        return t('editor.wizard.need.projectType', 'Elige el tipo del proyecto');
+        return problem('project_type', t('editor.wizard.need.projectType', 'Elige el tipo del proyecto'));
       }
       if (!editingArticle && (!formData.category_article || formData.category_article === 'general')) {
-        return t('editor.wizard.need.category', 'Elige la categoría de la publicación');
+        return problem('category_article', t('editor.wizard.need.category', 'Elige la categoría de la publicación'));
       }
-      if (formData.authors.length === 0) return t('editor.wizard.need.authors', 'Añade al menos una autora o autor');
+      if (formData.authors.length === 0) {
+        return problem('authors', t('editor.wizard.need.authors', 'Añade al menos una autora o autor'));
+      }
       return null;
     }
     if (n === 3) {
-      if (!formData.title_article.trim()) return t('editor.wizard.need.title', 'Escribe un título');
+      if (!formData.title_article.trim()) return problem('title_article', t('editor.wizard.need.title', 'Escribe un título'));
       if (formData.title_article.length > 200) {
-        return t('editor.wizard.need.titleLong', { count: formData.title_article.length, defaultValue: 'El título es demasiado largo ({{count}}/200 caracteres)' });
+        return problem('title_article', t('editor.wizard.need.titleLong', { count: formData.title_article.length, defaultValue: 'El título es demasiado largo ({{count}}/200 caracteres)' }));
       }
       if (formData.excerpt_article && formData.excerpt_article.length > 500) {
-        return t('editor.wizard.need.excerptLong', { count: formData.excerpt_article.length, defaultValue: 'El extracto es demasiado largo ({{count}}/500 caracteres)' });
+        return problem('excerpt_article', t('editor.wizard.need.excerptLong', { count: formData.excerpt_article.length, defaultValue: 'El extracto es demasiado largo ({{count}}/500 caracteres)' }));
       }
       return null;
     }
     return null;
+  };
+  const stepIssue = (n) => stepProblem(n)?.message || null;
+
+  // The element to focus for each field with a problem.
+  const FIELD_IDS = {
+    project_mode: 'pub-choice-new',
+    project_title: 'pub-project-title',
+    project_id: 'pub-project',
+    project_type: 'pub-project-type',
+    category_article: 'pub-category',
+    authors: 'pub-add-author',
+    title_article: 'title',
+    excerpt_article: 'excerpt'
+  };
+
+  // Mark the field at fault in red (with its message under it), show the error
+  // card, go to its step and put the cursor on it.
+  const flagProblem = (field, message, n) => {
+    setFieldErrors({ [field]: message });
+    showError(message);
+    setStep(n);
+    setTimeout(() => {
+      const el = document.getElementById(FIELD_IDS[field]);
+      if (el) el.focus({ preventScroll: false });
+    }, 350);
+  };
+
+  // A field stops being marked as soon as the author touches it.
+  const clearFieldError = (field) => {
+    setFieldErrors(prev => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
   };
 
   // What the content still needs before it can be published (null = ready).
@@ -724,12 +769,12 @@ function ArticleEditorBlocks() {
   };
 
   const goNext = () => {
-    const issue = stepIssue(step);
-    if (issue) {
-      setNextAttempted(true);
-      showError(issue);
+    const problem = stepProblem(step);
+    if (problem) {
+      flagProblem(problem.field, problem.message, step);
       return;
     }
+    setFieldErrors({});
     setStep(prev => Math.min(TOTAL_STEPS, prev + 1));
   };
 
@@ -741,6 +786,7 @@ function ArticleEditorBlocks() {
 
   // Step 4: changing the content type clears content that isn't of that type.
   const chooseContentType = (type) => {
+    clearFieldError('content');
     if (type === articleContentType) return;
     if (blocks.some(isBlockComplete) && !confirm(t('editor.wizard.confirmTypeChange', 'Cambiar el tipo de contenido borrará el contenido que ya has añadido. ¿Continuar?'))) {
       return;
@@ -815,21 +861,16 @@ function ArticleEditorBlocks() {
     // a draft; publishing needs every step complete plus some content.
     const required = intent === 'draft' ? [1, 3] : [1, 2, 3];
     for (const n of required) {
-      const issue = stepIssue(n);
-      if (issue) {
-        showError(issue);
-        if (n === 3) {
-          setFieldErrors(formData.title_article.trim() ? {} : { title_article: issue });
-        }
-        setStep(n);
+      const problem = stepProblem(n);
+      if (problem) {
+        flagProblem(problem.field, problem.message, n);
         return;
       }
     }
     if (intent !== 'draft') {
       const issue = contentIssue();
       if (issue) {
-        showError(issue);
-        setStep(5);
+        flagProblem('content', issue, 5);
         return;
       }
     }
@@ -1202,7 +1243,6 @@ function ArticleEditorBlocks() {
     const found = CATEGORIES.find(([value]) => value === formData.category_article);
     return found ? t(found[1]) : t('editor.category.general');
   })();
-  const currentIssue = stepIssue(step);
   const publishIssues = [1, 2, 3].map(stepIssue).filter(Boolean);
   const pendingContent = contentIssue();
   if (pendingContent) publishIssues.push(pendingContent);
@@ -1215,11 +1255,12 @@ function ArticleEditorBlocks() {
       <p className="pub-step-hint">
         {t('editor.wizard.projectHint', 'Cada publicación forma parte de un proyecto. Crea uno nuevo o añádela a uno que ya exista.')}
       </p>
-      <div className="pub-choice-grid">
+      <div className={`pub-choice-grid ${fieldErrors.project_mode ? 'has-error' : ''}`}>
         <button
           type="button"
+          id="pub-choice-new"
           className={`pub-choice ${projectMode === 'new' ? 'is-selected' : ''}`}
-          onClick={() => setProjectMode('new')}
+          onClick={() => { setProjectMode('new'); clearFieldError('project_mode'); }}
           aria-pressed={projectMode === 'new'}
         >
           <FolderPlus size={28} />
@@ -1229,7 +1270,7 @@ function ArticleEditorBlocks() {
         <button
           type="button"
           className={`pub-choice ${projectMode === 'existing' ? 'is-selected' : ''}`}
-          onClick={() => setProjectMode('existing')}
+          onClick={() => { setProjectMode('existing'); clearFieldError('project_mode'); }}
           aria-pressed={projectMode === 'existing'}
         >
           <FolderOpen size={28} />
@@ -1237,6 +1278,7 @@ function ArticleEditorBlocks() {
           <span className="pub-choice__desc">{t('editor.wizard.existingProjectDesc', 'Añade la publicación a un proyecto que ya existe.')}</span>
         </button>
       </div>
+      {fieldErrors.project_mode && <span className="field-error-msg" role="alert">{fieldErrors.project_mode}</span>}
 
       {projectMode === 'existing' && (
         <div className="form-group pub-field">
@@ -1247,7 +1289,8 @@ function ArticleEditorBlocks() {
               name="project_id"
               value={formData.project_id}
               onChange={handleInputChange}
-              className={!formData.project_id ? 'select-placeholder' : ''}
+              className={`${!formData.project_id ? 'select-placeholder' : ''} ${fieldErrors.project_id ? 'input-error' : ''}`}
+              aria-invalid={!!fieldErrors.project_id}
             >
               <option value="">{t('editor.wizard.pickProject', 'Elige un proyecto…')}</option>
               {projects.map(project => {
@@ -1284,6 +1327,7 @@ function ArticleEditorBlocks() {
               </>
             )}
           </div>
+          {fieldErrors.project_id && <span className="field-error-msg" role="alert">{fieldErrors.project_id}</span>}
           {selectedProject?.description_project && (
             <p className="pub-project-desc">{selectedProject.description_project}</p>
           )}
@@ -1298,9 +1342,12 @@ function ArticleEditorBlocks() {
               type="text"
               id="pub-project-title"
               value={wizardProject.title_project}
-              onChange={(e) => setWizardProject(prev => ({ ...prev, title_project: e.target.value }))}
+              onChange={(e) => { setWizardProject(prev => ({ ...prev, title_project: e.target.value })); clearFieldError('project_title'); }}
               placeholder={t('editor.project.titlePlaceholder')}
+              className={fieldErrors.project_title ? 'input-error' : ''}
+              aria-invalid={!!fieldErrors.project_title}
             />
+            {fieldErrors.project_title && <span className="field-error-msg" role="alert">{fieldErrors.project_title}</span>}
           </div>
           <div className="form-group">
             <label htmlFor="pub-project-description">{t('editor.project.descriptionLabel')}</label>
@@ -1364,12 +1411,14 @@ function ArticleEditorBlocks() {
               <select
                 id="pub-project-type"
                 value={wizardProject.type_project}
-                onChange={(e) => setWizardProject(prev => ({ ...prev, type_project: e.target.value }))}
-                className={!wizardProject.type_project ? 'select-placeholder' : ''}
+                onChange={(e) => { setWizardProject(prev => ({ ...prev, type_project: e.target.value })); clearFieldError('project_type'); }}
+                className={`${!wizardProject.type_project ? 'select-placeholder' : ''} ${fieldErrors.project_type ? 'input-error' : ''}`}
+                aria-invalid={!!fieldErrors.project_type}
               >
                 <option value="">{t('editor.project.selectType')}</option>
                 {PROJECT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
               </select>
+              {fieldErrors.project_type && <span className="field-error-msg" role="alert">{fieldErrors.project_type}</span>}
             </div>
             <div className="form-group">
               <label htmlFor="pub-project-format">{t('editor.project.formatLabel')}</label>
@@ -1402,16 +1451,18 @@ function ArticleEditorBlocks() {
             onChange={handleInputChange}
             disabled={articleContentType === 'microperfil'}
             title={articleContentType === 'microperfil' ? t('editor.microperfil.categoryLocked') : undefined}
-            className={formData.category_article === 'general' ? 'select-placeholder' : ''}
+            className={`${formData.category_article === 'general' ? 'select-placeholder' : ''} ${fieldErrors.category_article ? 'input-error' : ''}`}
             aria-label={t('editor.wizard.publicationCategory', 'Categoría de la publicación')}
+            aria-invalid={!!fieldErrors.category_article}
           >
             <option value="general">{editingArticle ? t('editor.category.general') : t('editor.wizard.pickCategory', 'Elige una categoría…')}</option>
             {CATEGORIES.map(([value, key]) => <option key={value} value={value}>{t(key)}</option>)}
           </select>
+          {fieldErrors.category_article && <span className="field-error-msg" role="alert">{fieldErrors.category_article}</span>}
         </div>
       </fieldset>
 
-      <fieldset className="pub-fieldset">
+      <fieldset className={`pub-fieldset ${fieldErrors.authors ? 'has-error' : ''}`}>
         <legend>{t('editor.authors.label')}</legend>
         <p className="pub-step-hint">
           {t('editor.wizard.authorsHint', '¿Quieres añadir colaboradoras/es? La primera persona de la lista figura como autora principal.')}
@@ -1443,9 +1494,10 @@ function ArticleEditorBlocks() {
         </div>
         <div className="add-author-row-compact">
           <select
+            id="pub-add-author"
             className="author-selector-compact"
             value=""
-            onChange={(e) => { if (e.target.value) handleAddAuthor(e.target.value); }}
+            onChange={(e) => { if (e.target.value) { handleAddAuthor(e.target.value); clearFieldError('authors'); } }}
             aria-label={t('editor.author.add')}
           >
             <option value="">{t('editor.author.add')}</option>
@@ -1454,6 +1506,7 @@ function ArticleEditorBlocks() {
             ))}
           </select>
         </div>
+        {fieldErrors.authors && <span className="field-error-msg" role="alert">{fieldErrors.authors}</span>}
       </fieldset>
     </>
   );
@@ -1510,8 +1563,9 @@ function ArticleEditorBlocks() {
           onChange={handleInputChange}
           placeholder={t('editor.title.placeholder')}
           className={fieldErrors.title_article ? 'input-error' : ''}
+          aria-invalid={!!fieldErrors.title_article}
         />
-        {fieldErrors.title_article && <span className="field-error-msg">{fieldErrors.title_article}</span>}
+        {fieldErrors.title_article && <span className="field-error-msg" role="alert">{fieldErrors.title_article}</span>}
       </div>
 
       <div className="form-group full-width">
@@ -1524,8 +1578,9 @@ function ArticleEditorBlocks() {
           rows="3"
           placeholder={t('editor.excerpt.placeholder')}
           className={fieldErrors.excerpt_article ? 'input-error' : ''}
+          aria-invalid={!!fieldErrors.excerpt_article}
         />
-        {fieldErrors.excerpt_article && <span className="field-error-msg">{fieldErrors.excerpt_article}</span>}
+        {fieldErrors.excerpt_article && <span className="field-error-msg" role="alert">{fieldErrors.excerpt_article}</span>}
       </div>
     </>
   );
@@ -1562,7 +1617,8 @@ function ArticleEditorBlocks() {
           {t('editor.wizard.changeType', 'Cambiar tipo')}
         </button>
       </p>
-      <div className="form-group full-width">
+      {fieldErrors.content && <span className="field-error-msg" role="alert">{fieldErrors.content}</span>}
+      <div className={`form-group full-width pub-content ${fieldErrors.content ? 'has-error' : ''}`}>
         {articleContentType === 'cómic' ? (
           // H-Scroll Editor for Comics
           <HScrollEditor
@@ -1877,13 +1933,6 @@ function ArticleEditorBlocks() {
               {step === 5 && stepContent}
               {step === 6 && stepReview}
             </section>
-
-            {nextAttempted && currentIssue && (
-              <p className="pub-step-issue" role="alert">
-                <AlertCircle size={16} />
-                {currentIssue}
-              </p>
-            )}
 
             <div className="pub-wizard-footer">
               <div className="pub-wizard-footer__side">
