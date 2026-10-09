@@ -550,5 +550,6 @@
   "subscription.error": "No se pudo iniciar el pago",
   "subscription.portalError": "No se pudo abrir la gestión de la suscripción",
   "subscription.badge": "Suscriptor/a",
-  "subscription.manage": "Gestionar suscripción"
+  "subscription.manage": "Gestionar suscripción",
+  "subscription.preview": "Vista previa (solo super admins): los pagos se activarán cuando Stripe esté conectado en el servidor."
 }

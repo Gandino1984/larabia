@@ -2,9 +2,9 @@
 //
 // "Suscríbete": a red button flanking the header bar on the LEFT (mirror of
 // the "Publica" button on the right). Opens the plan picker (SubscribeModal);
-// readers who aren't signed in are sent to log in first. Hidden while Stripe
-// isn't configured, for readers who already subscribe, and wherever the header
-// is hidden (editor, article reader).
+// readers who aren't signed in are sent to log in first. Hidden for readers
+// who already subscribe and wherever the header is hidden (editor, article
+// reader). While Stripe isn't configured only super admins see it (preview).
 import { useEffect, useRef, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +19,7 @@ let slideInPlayed = false;
 
 function SubscribeButton({ ready = true }) {
   const { t } = useTranslation();
-  const { currentUser } = useAuth();
+  const { currentUser, isSuperAdmin } = useAuth();
   const { navigateToLogin, showInfo, showEditor, showArticleDetail } = useUI();
   const subscription = useSubscription();
   const [isIn, setIsIn] = useState(slideInPlayed);
@@ -34,7 +34,8 @@ function SubscribeButton({ ready = true }) {
     return () => clearTimeout(timerRef.current);
   }, [ready]);
 
-  if (!subscription?.enabled || subscription.isSubscriber) return null;
+  if (!subscription || subscription.isSubscriber) return null;
+  if (!subscription.enabled && !isSuperAdmin) return null;
 
   const isHidden = showEditor || showArticleDetail;
   const label = t('subscription.button', 'Suscríbete');

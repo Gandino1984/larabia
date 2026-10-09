@@ -550,5 +550,6 @@
   "subscription.error": "Ezin izan da ordainketa hasi",
   "subscription.portalError": "Ezin izan da harpidetzaren kudeaketa ireki",
   "subscription.badge": "Harpideduna",
-  "subscription.manage": "Kudeatu harpidetza"
+  "subscription.manage": "Kudeatu harpidetza",
+  "subscription.preview": "Aurrebista (super adminentzat soilik): ordainketak Stripe zerbitzarian konektatzean aktibatuko dira."
 }

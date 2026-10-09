@@ -11,8 +11,9 @@ import './SubscribeButton.css';
 
 function SubscribeModal({ onClose }) {
   const { t, i18n } = useTranslation();
-  const { prices, startCheckout, busy } = useSubscription();
-  const plans = ['monthly', 'yearly'].filter((p) => prices[p]);
+  const { enabled, prices, startCheckout, busy } = useSubscription();
+  // Preview (Stripe not configured): both plans, without prices.
+  const plans = enabled ? ['monthly', 'yearly'].filter((p) => prices[p]) : ['monthly', 'yearly'];
   const [plan, setPlan] = useState(plans.includes('yearly') ? 'yearly' : plans[0]);
 
   useEffect(() => {
@@ -67,6 +68,12 @@ function SubscribeModal({ onClose }) {
           {t('subscription.lead', 'La Rabia se sostiene gracias a sus lectoras y lectores. Con tu suscripción apoyas el periodismo independiente y la creación de la revista, y luces la insignia de suscriptor/a en tu perfil.')}
         </p>
 
+        {!enabled && (
+          <p className="subscribe-modal__preview" role="status">
+            {t('subscription.preview', 'Vista previa (solo super admins): los pagos se activarán cuando Stripe esté conectado en el servidor.')}
+          </p>
+        )}
+
         <div className="subscribe-plans" role="radiogroup" aria-label={t('subscription.choosePlan', 'Elige tu plan')}>
           {plans.map((p) => (
             <button
@@ -80,7 +87,7 @@ function SubscribeModal({ onClose }) {
               <span className="subscribe-plan__check" aria-hidden="true">{plan === p && <Check size={14} />}</span>
               <span className="subscribe-plan__title">{PLAN_TEXT[p].title}</span>
               <span className="subscribe-plan__price">
-                {money(prices[p])}<small>{PLAN_TEXT[p].per}</small>
+                {prices[p] ? money(prices[p]) : '—'}<small>{PLAN_TEXT[p].per}</small>
               </span>
               {p === 'yearly' && saving > 0 && (
                 <span className="subscribe-plan__saving">
@@ -95,7 +102,7 @@ function SubscribeModal({ onClose }) {
           type="button"
           className="subscribe-modal__cta"
           onClick={() => startCheckout(plan)}
-          disabled={!plan || busy}
+          disabled={!enabled || !plan || busy}
         >
           {busy ? t('subscription.redirecting', 'Abriendo el pago…') : t('subscription.continue', 'Continuar al pago')}
         </button>

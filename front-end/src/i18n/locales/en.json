@@ -550,5 +550,6 @@
   "subscription.error": "Could not start the payment",
   "subscription.portalError": "Could not open subscription management",
   "subscription.badge": "Subscriber",
-  "subscription.manage": "Manage subscription"
+  "subscription.manage": "Manage subscription",
+  "subscription.preview": "Preview (super admins only): payments will be enabled once Stripe is connected on the server."
 }

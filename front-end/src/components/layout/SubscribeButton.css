@@ -308,3 +308,14 @@
     font-size: 1.4rem;
   }
 }
+
+/* Preview notice (Stripe not configured yet — super admins only). */
+.subscribe-modal__preview {
+  margin: 0 0 1.25rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 6px;
+  background: #fff4e5;
+  color: #8a4b00;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
