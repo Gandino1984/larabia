@@ -11,6 +11,7 @@ import magazineThemeApiRouter from "./magazine_theme_api_router.js";
 import magazineNavApiRouter from "./magazine_nav_api_router.js";
 import magazineWorkshopApiRouter from "./magazine_workshop_api_router.js";
 import engagementApiRouter from "./engagement_api_router.js";
+import subscriptionApiRouter from "./subscription_api_router.js";
 
 const router = Router();
 
@@ -24,6 +25,7 @@ router.use("/magazine-theme", magazineThemeApiRouter);
 router.use("/magazine-nav", magazineNavApiRouter);
 router.use("/magazine-workshop", magazineWorkshopApiRouter);
 router.use("/engagement", engagementApiRouter);
+router.use("/subscription", subscriptionApiRouter);
 
 // Author profile routes are defined with their full prefix (/author-profile/*) inside the router
 router.use("/", authorProfileApiRouter);

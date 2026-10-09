@@ -15,6 +15,7 @@ import { PendingReviewProvider } from './app_context/PendingReviewContext.jsx';
 import { NotificationProvider } from './app_context/NotificationContext.jsx';
 import { WorkshopProvider } from './app_context/WorkshopContext.jsx';
 import { EngagementProvider } from './app_context/EngagementContext.jsx';
+import { SubscriptionProvider } from './app_context/SubscriptionContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -29,7 +30,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                     <WorkshopProvider>
                       <EngagementProvider>
                         <NotificationProvider>
-                          <App />
+                          <SubscriptionProvider>
+                            <App />
+                          </SubscriptionProvider>
                         </NotificationProvider>
                       </EngagementProvider>
                     </WorkshopProvider>

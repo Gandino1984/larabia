@@ -579,3 +579,36 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 .user-card-logout:hover { background: #c62828; color: #fff; }
+
+/* Paid-subscriber badge + "Gestionar suscripción" (Stripe customer portal). */
+.user-subscriber-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  background: #dc2626;
+  color: #ffffff;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.user-subscription-manage {
+  display: block;
+  margin-top: 0.6rem;
+  padding: 0.45rem 0.85rem;
+  border: none;
+  border-radius: 6px;
+  background: #e4e4e4;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.user-subscription-manage:hover:not(:disabled) {
+  background: #000000;
+  color: #ffffff;
+}

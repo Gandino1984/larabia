@@ -27,6 +27,8 @@ import articleLikeModel from './models/article_like_model.js';
 import articleFavoriteModel from './models/article_favorite_model.js';
 import articleCommentModel from './models/article_comment_model.js';
 import projectSubscriptionModel from './models/project_subscription_model.js';
+import readerSubscriptionModel from './models/reader_subscription_model.js';
+import subscriptionApiController from './controllers/subscription/subscription_api_controller.js';
 
 dotenv.config();
 
@@ -40,6 +42,10 @@ const EXTERNAL_PORT = config.app.port;
 // Serve uploaded magazine assets (article covers, block images, author profile pics, user profile pics, project covers)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/assets/images', express.static(path.join(__dirname, 'assets', 'images')));
+
+// Stripe webhook: needs the raw body (signature check), so it is registered
+// before express.json(). Server-to-server — no CORS involved.
+app.post('/subscription/webhook', express.raw({ type: 'application/json' }), subscriptionApiController.handleWebhook);
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -56,7 +62,8 @@ Promise.all([
     articleLikeModel.sync(),
     articleFavoriteModel.sync(),
     articleCommentModel.sync(),
-    projectSubscriptionModel.sync()
+    projectSubscriptionModel.sync(),
+    readerSubscriptionModel.sync()
 ])
     .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions)'))
     .catch((err) => console.error('Error syncing engagement tables:', err.message));

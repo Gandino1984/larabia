@@ -1,9 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useSpring, animated } from '@react-spring/web';
-import { X, User, Camera, Eye, Upload, Loader, LogOut } from 'lucide-react';
+import { X, User, Camera, Eye, Upload, Loader, LogOut, Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { UserInfoCardUtils } from './UserInfoCardUtils.jsx';
+import axiosInstance from '../../utils/axiosConfig';
+import { useSubscription } from '../../app_context/SubscriptionContext';
 import './UserInfoCard.css';
 
 const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
@@ -11,6 +13,20 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
   const [showActionsPopup, setShowActionsPopup] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Paid-subscriber badge: own card from the subscription context, anyone
+  // else's from the public status endpoint.
+  const subscription = useSubscription();
+  const [otherIsSubscriber, setOtherIsSubscriber] = useState(false);
+  useEffect(() => {
+    if (isOwner || !user?.id_user) return undefined;
+    let cancelled = false;
+    axiosInstance.get(`/subscription/status/${user.id_user}`)
+      .then((res) => { if (!cancelled) setOtherIsSubscriber(!!res.data?.data?.active); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [isOwner, user?.id_user]);
+  const isSubscriber = isOwner ? !!subscription?.isSubscriber : otherIsSubscriber;
 
   const {
     getImageUrl,
@@ -153,6 +169,22 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                     return 'Reader';
                   })()}
                 </p>
+                {isSubscriber && (
+                  <span className="user-subscriber-badge">
+                    <Heart size={13} fill="currentColor" />
+                    {t('subscription.badge', 'Suscriptor/a')}
+                  </span>
+                )}
+                {isOwner && subscription?.mine?.status && (
+                  <button
+                    type="button"
+                    className="user-subscription-manage"
+                    onClick={subscription.openPortal}
+                    disabled={subscription.busy}
+                  >
+                    {t('subscription.manage', 'Gestionar suscripción')}
+                  </button>
+                )}
               </div>
             </div>
 

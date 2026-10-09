@@ -9,6 +9,7 @@ import { usePreloader } from './hooks/usePreloader';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import FloatingEditorButton from './components/layout/FloatingEditorButton';
+import SubscribeButton from './components/layout/SubscribeButton';
 import AnimatedView from './components/layout/AnimatedView';
 import HomePage from './components/magazine/HomePage';
 import ArticleDetail from './components/magazine/ArticleDetail';
@@ -190,6 +191,7 @@ function App() {
       <div className={appClassName}>
         {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Header ready={appReady} />}
         {!isPreview && <FloatingEditorButton ready={appReady} />}
+        {!isPreview && <SubscribeButton ready={appReady} />}
         {!isPreview && <CardDisplay />}
         <main className="main-content">
           <AnimatedView key={viewKey}>

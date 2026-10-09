@@ -60,6 +60,11 @@ services:
       - SUPER_ADMIN_EMAILS=${SUPER_ADMIN_EMAILS}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      # Stripe (paid reader subscriptions) — empty = feature off
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - STRIPE_PRICE_MONTHLY=${STRIPE_PRICE_MONTHLY:-}
+      - STRIPE_PRICE_YEARLY=${STRIPE_PRICE_YEARLY:-}
       # nginx-proxy + Let's Encrypt companion read these labels to route traffic + mint a cert.
       - VIRTUAL_HOST=${API_VIRTUAL_HOST}
       - VIRTUAL_PORT=3000

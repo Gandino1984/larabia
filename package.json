@@ -19,6 +19,7 @@
     "nodemailer": "^6.9.7",
     "sequelize": "6.37.5",
     "sharp": "^0.33.5",
+    "stripe": "^17.7.0",
     "validate-image-type": "^3.0.0"
   },
   "devDependencies": {
