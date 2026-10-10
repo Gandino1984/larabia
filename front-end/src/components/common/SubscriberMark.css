@@ -19,26 +19,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 46%;
+  width: 56%;
   aspect-ratio: 1;
-  min-width: 15px;
-  max-width: 24px;
-  border: 2px solid #ffffff;
+  min-width: 18px;
+  max-width: 28px;
+  border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #f7e08a 0%, #d4af37 50%, #a8831c 100%);
-  color: #3d2c00;
+  background: linear-gradient(135deg, #e9c75a 0%, #c9a227 50%, #9c7614 100%);
+  color: #ffffff;
   box-sizing: border-box;
   pointer-events: none;
 }
 .subscriber-avatar__mark svg {
-  width: 64%;
-  height: 64%;
+  width: 70%;
+  height: 70%;
 }
 
 /* Large framed photo on the user card: badge inside the frame's corner. */
 .subscriber-avatar__mark--framed {
   right: 6px;
   bottom: 6px;
-  width: 28px;
+  width: 32px;
   max-width: none;
 }
