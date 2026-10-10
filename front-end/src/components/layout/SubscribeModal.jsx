@@ -5,7 +5,8 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { X, Heart, Lock, Check } from 'lucide-react';
+import { X, Lock, Check } from 'lucide-react';
+import MedalIcon from '../common/MedalIcon';
 import { useSubscription } from '../../app_context/SubscriptionContext';
 import './SubscribeButton.css';
 
@@ -62,7 +63,7 @@ function SubscribeModal({ onClose }) {
           <X size={22} />
         </button>
 
-        <span className="subscribe-modal__icon" aria-hidden="true"><Heart size={28} /></span>
+        <span className="subscribe-modal__icon" aria-hidden="true"><MedalIcon size={38} /></span>
         <h2 id="subscribe-modal-title">{t('subscription.title', 'Suscríbete a La Rabia')}</h2>
         {modalReason === 'workshops' && (
           <p className="subscribe-modal__reason">
