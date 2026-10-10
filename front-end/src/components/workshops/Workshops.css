@@ -181,12 +181,15 @@
 .workshop-card-title {
   color: #ffffff;
 }
-.workshop-meta {
+/* Only on the dark cards — the workshop page (white) keeps the dark text. */
+.workshop-card .workshop-meta {
   color: #cfcfcf;
+}
+.workshop-card .workshop-meta svg {
+  color: #9a9a9a;
 }
 .workshop-meta svg {
   flex-shrink: 0;
-  color: #9a9a9a;
 }
 .workshop-card-authors {
   color: #9a9a9a;
@@ -330,4 +333,22 @@
   .workshop-detail-cover img {
     max-height: 220px;
   }
+}
+
+/* Workshop page on white: darker text so it reads comfortably. */
+.workshop-detail .workshop-meta {
+  color: #2a2a2a;
+  font-weight: 600;
+}
+.workshop-detail .workshop-meta svg {
+  color: #1a1a1a;
+}
+.workshop-detail-label {
+  color: #1a1a1a;
+}
+.workshop-detail-description {
+  color: #1f1f1f;
+}
+.workshops-subtitle {
+  color: #3a3a3a;
 }
