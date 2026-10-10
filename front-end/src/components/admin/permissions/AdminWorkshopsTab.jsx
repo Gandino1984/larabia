@@ -4,6 +4,7 @@ import { useWorkshop } from '../../../app_context/WorkshopContext';
 import { useMagazine } from '../../../app_context/MagazineContext';
 import './AdminWorkshopsTab.css';
 import LocationPicker from '../../maps/LocationPicker';
+import { DEFAULT_CENTER } from '../../maps/mapPin';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 const resolveAvatar = (img) => {
@@ -21,7 +22,9 @@ const toLocalInput = (d) => {
   return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 };
 
-const EMPTY = { title_workshop: '', description_workshop: '', location_workshop: '', date_workshop: '', capacity_workshop: '', audience_workshop: 'general', lat_workshop: null, lng_workshop: null };
+// New workshops start placed on the default location (Matiko, Uribarri);
+// the creator moves the pin if it's elsewhere.
+const EMPTY = { title_workshop: '', description_workshop: '', location_workshop: '', date_workshop: '', capacity_workshop: '', audience_workshop: 'general', lat_workshop: DEFAULT_CENTER[0], lng_workshop: DEFAULT_CENTER[1] };
 
 function AdminWorkshopsTab() {
   const { workshops, fetchWorkshops, createWorkshop, updateWorkshop, deleteWorkshop, uploadWorkshopCover } = useWorkshop();
@@ -48,8 +51,9 @@ function AdminWorkshopsTab() {
       date_workshop: toLocalInput(w.date_workshop),
       capacity_workshop: w.capacity_workshop ?? '',
       audience_workshop: w.audience_workshop === 'infantil' ? 'infantil' : 'general',
-      lat_workshop: w.lat_workshop ?? null,
-      lng_workshop: w.lng_workshop ?? null
+      // Not placed yet → shown (and saved) on the default location.
+      lat_workshop: w.lat_workshop ?? DEFAULT_CENTER[0],
+      lng_workshop: w.lng_workshop ?? DEFAULT_CENTER[1]
     });
     setAuthors((w.authors || []).map(a => ({ id_user: a.id_user, name_user: a.name_user, image_user: a.image_user })));
     setCoverFile(null);

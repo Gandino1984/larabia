@@ -7,6 +7,7 @@ import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import AuthorChip from '../common/AuthorChip';
+import WorkshopMap from '../maps/WorkshopMap';
 // Grid / carousel toggle + carousel: the same pieces as the article lists.
 import '../magazine/ProjectDetail.css';
 import '../magazine/ArticlesCarousel.css';
@@ -92,7 +93,9 @@ function WorkshopsList() {
         <div className="workshop-card-body">
           <h3 className="workshop-card-title">{w.title_workshop}</h3>
           {dateStr && <p className="workshop-meta"><Calendar size={15} /> {dateStr}</p>}
-          {w.location_workshop && <p className="workshop-meta"><MapPin size={15} /> {w.location_workshop}</p>}
+          <p className="workshop-meta"><MapPin size={15} /> {w.location_workshop || t('workshops.map.defaultPlace', 'Matiko, Uribarri')}</p>
+          {/* Where: small map preview (the workshop's place or the default). */}
+          <WorkshopMap lat={w.lat_workshop} lng={w.lng_workshop} compact />
           <p className="workshop-meta">
             <Users size={15} />{' '}
             {w.capacity_workshop != null

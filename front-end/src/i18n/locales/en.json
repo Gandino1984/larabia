@@ -568,5 +568,6 @@
   "workshops.emptyKids": "No children's workshops are scheduled yet.",
   "subscription.reasonWorkshops": "Workshops are exclusive to subscribers. Subscribe to see the calendar and book your place.",
   "workshops.backToList": "Back to workshops",
-  "workshops.map.directions": "Get directions"
+  "workshops.map.directions": "Get directions",
+  "workshops.map.defaultPlace": "Matiko, Uribarri"
 }

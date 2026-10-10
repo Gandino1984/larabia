@@ -96,7 +96,7 @@ function WorkshopDetail() {
 
         <div className="workshop-detail-meta">
           {dateStr && <span className="workshop-meta"><Calendar size={16} /> {dateStr}</span>}
-          {w.location_workshop && <span className="workshop-meta"><MapPin size={16} /> {w.location_workshop}</span>}
+          <span className="workshop-meta"><MapPin size={16} /> {w.location_workshop || t('workshops.map.defaultPlace', 'Matiko, Uribarri')}</span>
           <span className="workshop-meta">
             <Users size={16} />{' '}
             {w.capacity_workshop != null

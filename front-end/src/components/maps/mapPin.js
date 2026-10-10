@@ -10,11 +10,19 @@ export const mapPinIcon = L.divIcon({
   iconAnchor: [15, 40]
 });
 
-// Default view when there's no position yet: Matiko (Uribarri, Bilbao).
+// Default workshop location (and the picker's starting view): Matiko
+// (Uribarri, Bilbao). A workshop whose creator didn't place it is shown here.
 export const DEFAULT_CENTER = [43.269, -2.9255];
 
 export const OSM_TILES = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 export const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+/** [lat, lng] of a workshop — its own position, or the default (Matiko). */
+export const workshopPosition = (lat, lng) => {
+  const la = toCoord(lat);
+  const ln = toCoord(lng);
+  return la !== null && ln !== null ? [la, ln] : DEFAULT_CENTER;
+};
 
 /** Number from a stored coordinate (MySQL DECIMAL arrives as a string). */
 export const toCoord = (v) => {
