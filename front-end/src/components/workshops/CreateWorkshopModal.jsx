@@ -1,8 +1,9 @@
 // magazine-front/src/components/workshops/CreateWorkshopModal.jsx
 //
-// "Crear taller" window on the workshops page (editors, admins, super
-// admins): the same WorkshopForm as Admin → Talleres. Closes with the X,
-// Escape or a click outside; closes itself after saving.
+// "Crear taller" / "Editar taller" window on the workshops pages: the same
+// WorkshopForm as Admin → Talleres. `workshop` = edit that one (null =
+// create). Closes with the X, Escape or a click outside; closes itself after
+// saving.
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +11,7 @@ import { X } from 'lucide-react';
 import WorkshopForm from './WorkshopForm';
 import './CreateWorkshopModal.css';
 
-function CreateWorkshopModal({ onClose, onSaved }) {
+function CreateWorkshopModal({ workshop = null, onClose, onSaved }) {
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -34,7 +35,9 @@ function CreateWorkshopModal({ onClose, onSaved }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="create-workshop-modal__header">
-          <h2 id="create-workshop-title">{t('workshops.create', 'Crear taller')}</h2>
+          <h2 id="create-workshop-title">
+            {workshop ? t('workshops.edit', 'Editar taller') : t('workshops.create', 'Crear taller')}
+          </h2>
           <button
             type="button"
             className="create-workshop-modal__close"
@@ -46,7 +49,7 @@ function CreateWorkshopModal({ onClose, onSaved }) {
           </button>
         </div>
         <div className="create-workshop-modal__body">
-          <WorkshopForm onSaved={(w) => { onSaved?.(w); onClose(); }} onCancel={onClose} />
+          <WorkshopForm workshop={workshop} onSaved={(w) => { onSaved?.(w); onClose(); }} onCancel={onClose} />
         </div>
       </div>
     </div>,

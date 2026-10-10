@@ -124,7 +124,10 @@ export const WorkshopProvider = ({ children }) => {
       showSuccess(res.data.success || 'Reserva confirmada');
       return { success: true, data: res.data.data };
     } catch (err) {
+      const code = err.response?.status === 403 ? err.response?.data?.code : null;
       const msg = err.response?.data?.error || 'Error al reservar';
+      // Not allowed to book: the caller guides the reader (login / subscribe).
+      if (code) return { error: msg, code };
       showError(msg);
       return { error: msg };
     }

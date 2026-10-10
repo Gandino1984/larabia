@@ -556,7 +556,7 @@
   "notifications.membership.title": "Subscription active",
   "notifications.membership.message": "Thank you for supporting La Rabia.",
   "notifications.membership.messageRenews": "Thank you for supporting La Rabia. Next renewal: {{date}}",
-  "workshops.gate.login": "Sign in to access the workshops",
+  "workshops.gate.login": "Sign in to book a place in the workshops",
   "workshops.gate.title": "Workshops for subscribers",
   "workshops.gate.loginText": "Sign in with your subscriber account to see the workshop calendar and book your place.",
   "workshops.gate.subscribeText": "La Rabia's workshops are exclusive to those who support the magazine with a subscription. Subscribe to see the calendar and book a place in the workshops and the children's workshops.",
@@ -566,9 +566,15 @@
   "workshops.tabGeneral": "Workshops",
   "workshops.tabKids": "Children's workshops",
   "workshops.emptyKids": "No children's workshops are scheduled yet.",
-  "subscription.reasonWorkshops": "Workshops are exclusive to subscribers. Subscribe to see the calendar and book your place.",
+  "subscription.reasonWorkshops": "Booking a place in the workshops is exclusive to subscribers. Subscribe to book your place.",
   "workshops.backToList": "Back to workshops",
   "workshops.map.directions": "Get directions",
   "workshops.map.defaultPlace": "Matiko, Uribarri",
-  "workshops.create": "Create workshop"
+  "workshops.create": "Create workshop",
+  "workshops.bookingNote.login": "To book a place, sign in with your subscriber account.",
+  "workshops.bookingNote.subscribe": "Bookings are exclusive to La Rabia subscribers.",
+  "workshops.edit": "Edit workshop",
+  "workshops.editShort": "Edit",
+  "workshops.deleteShort": "Delete",
+  "workshops.confirmDelete": "Delete this workshop? Its bookings will be deleted too. This cannot be undone."
 }

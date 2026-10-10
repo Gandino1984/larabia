@@ -1,9 +1,9 @@
 // magazine-front/src/app_context/useWorkshopAccess.js
 //
-// Workshops are for paying subscribers (the magazine team — editors, admins,
-// super admins — has access without subscribing). The back-end enforces it;
-// this mirrors the rule on the client to guide the reader before they land on
-// the page: sign in first, or subscribe (opens the plan picker with a note).
+// Anyone can browse workshops; BOOKING a place is for paying subscribers (the
+// magazine team — editors, admins, super admins — books without subscribing).
+// The back-end enforces it; this guides the reader when they try to book:
+// sign in first, or subscribe (opens the plan picker with a note).
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './AuthContext';
@@ -29,7 +29,7 @@ export function useWorkshopAccess() {
     const s = override || status;
     if (s === 'allowed') return true;
     if (s === 'login') {
-      showInfo(t('workshops.gate.login', 'Inicia sesión para acceder a los talleres'));
+      showInfo(t('workshops.gate.login', 'Inicia sesión para reservar plaza en los talleres'));
       navigateToLogin();
       return false;
     }

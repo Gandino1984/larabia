@@ -1,10 +1,9 @@
 // magazine-front/src/components/workshops/WorkshopsList.jsx
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Calendar, MapPin, Users, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
-import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
 import { useAuth } from '../../app_context/AuthContext';
 import CreateWorkshopModal from './CreateWorkshopModal';
 import { useDragScroll } from '../../hooks/useDragScroll';
@@ -38,8 +37,7 @@ const audienceOf = (w) => (w.audience_workshop === 'infantil' ? 'infantil' : 'ge
 function WorkshopsList() {
   const { t } = useTranslation();
   const { navigateToWorkshopDetail } = useUI();
-  const { workshops, loading, fetchWorkshops, setSelectedWorkshop, accessError } = useWorkshop();
-  const { status: accessStatus, guard } = useWorkshopAccess();
+  const { workshops, loading, fetchWorkshops, setSelectedWorkshop } = useWorkshop();
   const [audience, setAudience] = useState('general');
   // The magazine team (editors, admins, super admins) can create workshops
   // here too, not only in Admin → Talleres.
@@ -74,10 +72,6 @@ function WorkshopsList() {
     setSelectedWorkshop(w);
     navigateToWorkshopDetail();
   };
-
-  // No access (the server has the last word; the client check covers the
-  // moment before it answers): explain and offer to sign in / subscribe.
-  const blocked = accessError || (accessStatus !== 'allowed' ? (accessStatus === 'login' ? 'login_required' : 'subscription_required') : null);
 
   const counts = {
     general: workshops.filter(w => audienceOf(w) === 'general').length,
@@ -143,27 +137,7 @@ function WorkshopsList() {
           />
         )}
 
-        {blocked ? (
-          <div className="workshops-gate">
-            <Lock size={32} />
-            <h2>{t('workshops.gate.title', 'Talleres para personas suscriptoras')}</h2>
-            <p>
-              {blocked === 'login_required'
-                ? t('workshops.gate.loginText', 'Inicia sesión con tu cuenta de suscriptor/a para ver el calendario de talleres y reservar tu plaza.')
-                : t('workshops.gate.subscribeText', 'Los talleres de La Rabia son exclusivos para quienes apoyan la revista con su suscripción. Suscríbete para ver el calendario y reservar plaza en los talleres y en los talleres infantiles.')}
-            </p>
-            <button
-              type="button"
-              className="workshops-gate__cta"
-              onClick={() => guard(blocked === 'login_required' ? 'login' : 'subscribe')}
-            >
-              {blocked === 'login_required'
-                ? t('workshops.gate.loginCta', 'Iniciar sesión')
-                : t('workshops.gate.subscribeCta', 'Suscríbete')}
-            </button>
-          </div>
-        ) : (
-          <>
+        <>
             {/* Sections (general / children's) + grid/carousel toggle */}
             <div className="workshops-toolbar">
             <div className="workshops-tabs" role="tablist" aria-label={t('workshops.tabsLabel', 'Tipo de taller')}>
@@ -237,7 +211,6 @@ function WorkshopsList() {
           )
             )}
           </>
-        )}
       </div>
     </div>
   );

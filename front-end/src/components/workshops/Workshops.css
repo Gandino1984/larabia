@@ -352,3 +352,55 @@
 .workshops-subtitle {
   color: #3a3a3a;
 }
+
+/* Top of the workshop page: "Volver a talleres" (left) + Editar / Eliminar
+   for its creator, instructors and super admins (right). */
+.workshop-detail-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.workshop-detail-toolbar .workshop-back-btn {
+  margin: 0;
+}
+.workshop-detail-manage {
+  display: flex;
+  gap: 0.5rem;
+}
+.workshop-manage-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: #000000;
+  color: #ffffff;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.workshop-manage-btn:hover,
+.workshop-manage-btn:focus-visible {
+  background: #3a3a3a;
+}
+.workshop-manage-btn--danger {
+  background: #dc2626;
+}
+.workshop-manage-btn--danger:hover,
+.workshop-manage-btn--danger:focus-visible {
+  background: #b91c1c;
+}
+
+/* Under "Reservar plaza" when the reader can't book yet. */
+.workshop-booking-note {
+  margin: 0.75rem 0 0;
+  color: #2a2a2a;
+  font-size: 0.88rem;
+  font-weight: 600;
+}

@@ -39,28 +39,39 @@ async function requireWorkshopManager(req, res, workshopId) {
 }
 
 /**
- * Workshops are for paying subscribers. The magazine team (editors, admins,
- * super admins — they create and teach them) has access without subscribing.
- * Sends a 403 with a `code` the front-end uses ('login_required' |
- * 'subscription_required') — never a 401, which logs the reader out. Returns
- * the user when access is granted.
+ * Anyone can browse workshops; BOOKING is for paying subscribers (the
+ * magazine team — editors, admins, super admins — books without subscribing).
+ * Resolves the caller's standing: { user, code } where code is null (can book),
+ * 'login_required' or 'subscription_required'.
+ */
+async function workshopAccess(req) {
+    const user = await getRequestUser(req);
+    if (!user) return { user: null, code: 'login_required' };
+    if (roleSnapshot(user).canCreateContent) return { user, code: null };
+    const sub = await reader_subscription_model.findOne({ where: { user_id: user.id_user } });
+    if (sub && ACTIVE_STATUSES.includes(sub.status)) return { user, code: null };
+    return { user, code: 'subscription_required' };
+}
+
+/**
+ * Booking gate. Sends a 403 with the `code` the front-end uses — never a 401,
+ * which logs the reader out. Returns the user when they can book.
  */
 async function requireWorkshopAccess(req, res) {
-    const user = await getRequestUser(req);
-    if (!user) {
-        res.status(403).json({ error: 'Inicia sesión para acceder a los talleres', code: 'login_required' });
-        return null;
-    }
-    if (roleSnapshot(user).canCreateContent) return user;
-    const sub = await reader_subscription_model.findOne({ where: { user_id: user.id_user } });
-    if (sub && ACTIVE_STATUSES.includes(sub.status)) return user;
-    res.status(403).json({ error: 'Los talleres son exclusivos para personas suscriptoras de la revista', code: 'subscription_required' });
+    const { user, code } = await workshopAccess(req);
+    if (!code) return user;
+    res.status(403).json({
+        error: code === 'login_required'
+            ? 'Inicia sesión para reservar plaza en los talleres'
+            : 'Las reservas de talleres son exclusivas para personas suscriptoras de la revista',
+        code
+    });
     return null;
 }
 
+// Public: anyone can see the workshops.
 async function getAll(req, res) {
     try {
-        if (!(await requireWorkshopAccess(req, res))) return;
         const { error, data } = await magazineWorkshopController.getAll();
         res.json({ error, data });
     } catch (err) {
@@ -69,14 +80,25 @@ async function getAll(req, res) {
     }
 }
 
+// Public detail. The participants list (names + photos of who booked) is
+// only shown to those who can book; everyone sees the counts. Adds
+// `reserved_by_me` and `booking_code` (null | 'login_required' |
+// 'subscription_required') for the reserve button.
 async function getById(req, res) {
     try {
-        if (!(await requireWorkshopAccess(req, res))) return;
         const { id_workshop } = req.params;
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
         const { error, data } = await magazineWorkshopController.getById(id_workshop);
         if (error) return res.status(404).json({ error });
-        res.json({ error, data });
+        const { user, code } = await workshopAccess(req);
+        const participants = data.participants || [];
+        const out = {
+            ...data,
+            reserved_by_me: !!user && participants.some((p) => p.id_user === user.id_user),
+            booking_code: code
+        };
+        if (code) delete out.participants;
+        res.json({ error, data: out });
     } catch (err) {
         console.error("-> workshop api getById() - Error =", err);
         res.status(500).json({ error: "Error al obtener el taller", details: err.message });
