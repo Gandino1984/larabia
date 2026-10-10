@@ -48,10 +48,20 @@ function WorkshopDetail() {
     [w, currentUser]
   );
 
+  // Back to the workshops list (the header's arrow does the same, but this one
+  // is in plain sight).
+  const backButton = (
+    <button type="button" className="workshop-back-btn" onClick={navigateToTalleres}>
+      <ArrowLeft size={18} />
+      <span>{t('workshops.backToList', 'Volver a talleres')}</span>
+    </button>
+  );
+
   if (!w) {
     return (
       <div className="workshops-page">
         <div className="workshops-container">
+          {backButton}
           <p className="workshops-empty">{t('workshops.notFound')}</p>
         </div>
       </div>
@@ -74,6 +84,7 @@ function WorkshopDetail() {
   return (
     <div className="workshops-page">
       <div className="workshops-container workshop-detail">
+        {backButton}
         {cover && (
           <div className="workshop-detail-cover">
             <img src={cover} alt={w.title_workshop} onError={(e) => { e.target.style.display = 'none'; }} />

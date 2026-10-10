@@ -566,5 +566,6 @@
   "workshops.tabGeneral": "Workshops",
   "workshops.tabKids": "Children's workshops",
   "workshops.emptyKids": "No children's workshops are scheduled yet.",
-  "subscription.reasonWorkshops": "Workshops are exclusive to subscribers. Subscribe to see the calendar and book your place."
+  "subscription.reasonWorkshops": "Workshops are exclusive to subscribers. Subscribe to see the calendar and book your place.",
+  "workshops.backToList": "Back to workshops"
 }
