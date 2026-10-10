@@ -1,9 +1,9 @@
 // magazine-front/src/components/common/SubscriberMark.jsx
 //
-// Paid-subscriber mark on a profile photo, visible to everyone: a gold ring
-// around the round avatar and a full-colour medal (blue ribbon, gold medal)
-// in its bottom-right corner. Wraps the avatar element; renders it untouched when the
-// user isn't a subscriber.
+// Paid-subscriber mark on a profile photo, visible to everyone: the photo's
+// own border turns gold and a full-colour medal (blue ribbon, gold medal)
+// sits in its bottom-right corner. Wraps the avatar element; renders it
+// untouched when the user isn't a subscriber.
 import MedalIcon from './MedalIcon';
 import { useTranslation } from 'react-i18next';
 import { useSubscription } from '../../app_context/SubscriptionContext';

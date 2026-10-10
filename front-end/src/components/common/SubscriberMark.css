@@ -1,4 +1,4 @@
-/* Paid-subscriber mark (SubscriberMark): gold ring + medal badge on avatars. */
+/* Paid-subscriber mark (SubscriberMark): gold border + full-colour medal on avatars. */
 .subscriber-avatar {
   position: relative;
   display: inline-flex;
@@ -6,10 +6,11 @@
   line-height: 0;
   vertical-align: middle;
 }
-/* Gold ring around the round photo (follows its border-radius). */
+/* Subscribers' photos: their own border turns gold — a single border, no
+   extra ring. Photos without a border just carry the medal. !important so it
+   also wins over state colours (e.g. the header bar's hover / active). */
 .subscriber-avatar > :first-child {
-  outline: 2px solid #d4af37;
-  outline-offset: 1px;
+  border-color: #d4af37 !important;
 }
 .subscriber-avatar__mark {
   position: absolute;
