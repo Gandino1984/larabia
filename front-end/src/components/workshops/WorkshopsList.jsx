@@ -6,6 +6,7 @@ import { useUI } from '../../app_context/UIContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
 import { useDragScroll } from '../../hooks/useDragScroll';
+import AuthorChip from '../common/AuthorChip';
 // Grid / carousel toggle + carousel: the same pieces as the article lists.
 import '../magazine/ProjectDetail.css';
 import '../magazine/ArticlesCarousel.css';
@@ -98,8 +99,13 @@ function WorkshopsList() {
               ? t('workshops.spots', { left: w.spots_left, total: w.capacity_workshop })
               : t('workshops.participants', { count: w.reservation_count })}
           </p>
+          {/* Who teaches it: photo + name, opens the author's card. */}
           {w.authors?.length > 0 && (
-            <p className="workshop-card-authors">{t('workshops.by')} {w.authors.map(a => a.name_user).join(', ')}</p>
+            <div className="workshop-card-authors">
+              {w.authors.map(a => (
+                <AuthorChip key={a.id_user || a.name_user} author={a.id_user ? a : null} name={a.name_user} tone="dark" />
+              ))}
+            </div>
           )}
         </div>
       </article>

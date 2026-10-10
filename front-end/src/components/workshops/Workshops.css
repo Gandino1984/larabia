@@ -229,3 +229,34 @@
     max-width: none;
   }
 }
+
+/* ---- Instructors: AuthorChip (photo + name, opens the author's card) ---- */
+.workshop-card-authors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0.6rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid #2e2e2e;
+  color: #e0e0e0;
+  font-style: normal;
+}
+/* Compact on the cards (like the article cards' authors). */
+.workshop-card-authors .author-chip {
+  font-size: 0.85rem;
+}
+.workshop-card-authors .author-chip__avatar {
+  width: 30px;
+  height: 30px;
+}
+.workshop-detail-authors {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+.workshop-detail-authors-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  color: #1a1a1a;
+}

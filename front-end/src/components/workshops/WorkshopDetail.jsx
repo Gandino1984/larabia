@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, MapPin, Users, User } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
+import AuthorChip from '../common/AuthorChip';
 import './Workshops.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -95,14 +96,11 @@ function WorkshopDetail() {
         {w.authors?.length > 0 && (
           <div className="workshop-detail-authors">
             <span className="workshop-detail-label">{t('workshops.instructors')}:</span>
-            {w.authors.map(a => (
-              <span key={a.id_user} className="workshop-author-chip">
-                {resolveAvatar(a.image_user)
-                  ? <img src={resolveAvatar(a.image_user)} alt={a.name_user} className="workshop-author-avatar" />
-                  : <User size={14} />}
-                {a.name_user}
-              </span>
-            ))}
+            <div className="workshop-detail-authors-list">
+              {w.authors.map(a => (
+                <AuthorChip key={a.id_user} author={a} tone="light" />
+              ))}
+            </div>
           </div>
         )}
 
