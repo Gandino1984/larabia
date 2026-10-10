@@ -70,7 +70,7 @@ Promise.all([
     .catch((err) => console.error('Error syncing engagement tables:', err.message));
 
 // Columns added to tables that already exist in production (idempotent: each
-// is added only if missing). See migrations/012_add_workshop_audience.sql.
+// is added only if missing). See migrations 012 (audience) and 013 (map location).
 (async () => {
     try {
         const qi = sequelize.getQueryInterface();
@@ -82,6 +82,12 @@ Promise.all([
                 defaultValue: 'general'
             });
             console.log('>>> Added magazine_workshops.audience_workshop');
+        }
+        for (const col of ['lat_workshop', 'lng_workshop']) {
+            if (!workshops[col]) {
+                await qi.addColumn('magazine_workshops', col, { type: DataTypes.DECIMAL(9, 6), allowNull: true });
+                console.log(`>>> Added magazine_workshops.${col}`);
+            }
         }
     } catch (err) {
         console.error('Error ensuring added columns:', err.message);

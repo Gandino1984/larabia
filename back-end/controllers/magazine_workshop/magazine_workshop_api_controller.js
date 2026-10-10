@@ -54,7 +54,7 @@ async function create(req, res) {
         if (!admin) return; // 403 already sent
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
-            cover_image_workshop, capacity_workshop, audience_workshop, authors, author_name } = req.body;
+            cover_image_workshop, capacity_workshop, audience_workshop, lat_workshop, lng_workshop, authors, author_name } = req.body;
 
         const data = {
             title_workshop,
@@ -64,6 +64,8 @@ async function create(req, res) {
             cover_image_workshop: cover_image_workshop || null,
             capacity_workshop,
             audience_workshop,
+            lat_workshop,
+            lng_workshop,
             author_id: admin.id_user,
             author_name: author_name || admin.name_user,
             authors: Array.isArray(authors) ? authors : undefined
@@ -87,7 +89,7 @@ async function update(req, res) {
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
-            cover_image_workshop, capacity_workshop, audience_workshop, authors, author_name } = req.body;
+            cover_image_workshop, capacity_workshop, audience_workshop, lat_workshop, lng_workshop, authors, author_name } = req.body;
 
         const data = {};
         if (title_workshop !== undefined) data.title_workshop = title_workshop;
@@ -97,6 +99,8 @@ async function update(req, res) {
         if (cover_image_workshop !== undefined) data.cover_image_workshop = cover_image_workshop;
         if (capacity_workshop !== undefined) data.capacity_workshop = capacity_workshop;
         if (audience_workshop !== undefined) data.audience_workshop = audience_workshop;
+        if (lat_workshop !== undefined) data.lat_workshop = lat_workshop;
+        if (lng_workshop !== undefined) data.lng_workshop = lng_workshop;
         if (author_name !== undefined) data.author_name = author_name;
         if (authors !== undefined) data.authors = authors;
 

@@ -567,5 +567,6 @@
   "workshops.tabKids": "Haurrentzako tailerrak",
   "workshops.emptyKids": "Oraindik ez dago haurrentzako tailerrik programatuta.",
   "subscription.reasonWorkshops": "Tailerrak harpidedunentzat dira soilik. Harpidetu egutegia ikusteko eta zure plaza erreserbatzeko.",
-  "workshops.backToList": "Itzuli tailerretara"
+  "workshops.backToList": "Itzuli tailerretara",
+  "workshops.map.directions": "Nola iritsi"
 }

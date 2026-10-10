@@ -567,5 +567,6 @@
   "workshops.tabKids": "Talleres infantiles",
   "workshops.emptyKids": "Todavía no hay talleres infantiles programados.",
   "subscription.reasonWorkshops": "Los talleres son exclusivos para personas suscriptoras. Suscríbete para ver el calendario y reservar tu plaza.",
-  "workshops.backToList": "Volver a talleres"
+  "workshops.backToList": "Volver a talleres",
+  "workshops.map.directions": "Cómo llegar"
 }

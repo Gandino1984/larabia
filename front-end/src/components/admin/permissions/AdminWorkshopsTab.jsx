@@ -3,6 +3,7 @@ import { Trash2, Edit, Plus, X, User, Save } from 'lucide-react';
 import { useWorkshop } from '../../../app_context/WorkshopContext';
 import { useMagazine } from '../../../app_context/MagazineContext';
 import './AdminWorkshopsTab.css';
+import LocationPicker from '../../maps/LocationPicker';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 const resolveAvatar = (img) => {
@@ -20,7 +21,7 @@ const toLocalInput = (d) => {
   return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 };
 
-const EMPTY = { title_workshop: '', description_workshop: '', location_workshop: '', date_workshop: '', capacity_workshop: '', audience_workshop: 'general' };
+const EMPTY = { title_workshop: '', description_workshop: '', location_workshop: '', date_workshop: '', capacity_workshop: '', audience_workshop: 'general', lat_workshop: null, lng_workshop: null };
 
 function AdminWorkshopsTab() {
   const { workshops, fetchWorkshops, createWorkshop, updateWorkshop, deleteWorkshop, uploadWorkshopCover } = useWorkshop();
@@ -46,7 +47,9 @@ function AdminWorkshopsTab() {
       location_workshop: w.location_workshop || '',
       date_workshop: toLocalInput(w.date_workshop),
       capacity_workshop: w.capacity_workshop ?? '',
-      audience_workshop: w.audience_workshop === 'infantil' ? 'infantil' : 'general'
+      audience_workshop: w.audience_workshop === 'infantil' ? 'infantil' : 'general',
+      lat_workshop: w.lat_workshop ?? null,
+      lng_workshop: w.lng_workshop ?? null
     });
     setAuthors((w.authors || []).map(a => ({ id_user: a.id_user, name_user: a.name_user, image_user: a.image_user })));
     setCoverFile(null);
@@ -72,6 +75,8 @@ function AdminWorkshopsTab() {
         date_workshop: form.date_workshop ? new Date(form.date_workshop).toISOString() : null,
         capacity_workshop: form.capacity_workshop === '' ? null : Number(form.capacity_workshop),
         audience_workshop: form.audience_workshop,
+        lat_workshop: form.lat_workshop,
+        lng_workshop: form.lng_workshop,
         authors: authors.map((a, i) => ({ user_id: a.id_user, author_order: i }))
       };
       const result = editingId
@@ -134,6 +139,18 @@ function AdminWorkshopsTab() {
               <option value="infantil">Taller infantil</option>
             </select>
           </label>
+        </div>
+
+        {/* Where it takes place: search / click / drag on the map. */}
+        <div className="admin-workshops-location">
+          <span className="admin-workshops-label">Ubicación en el mapa</span>
+          <LocationPicker
+            key={editingId || 'new'}
+            lat={form.lat_workshop}
+            lng={form.lng_workshop}
+            initialQuery={form.location_workshop}
+            onChange={({ lat, lng }) => setForm(prev => ({ ...prev, lat_workshop: lat, lng_workshop: lng }))}
+          />
         </div>
 
         <div className="admin-workshops-authors">

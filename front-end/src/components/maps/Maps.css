@@ -1,0 +1,126 @@
+/* Maps (Leaflet + OpenStreetMap): workshop map + location picker. */
+
+/* Own stacking context: Leaflet's panes/controls use z-indexes up to 1000,
+   which would otherwise compete with the fixed header. */
+.map-frame {
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+.map-canvas {
+  width: 100%;
+  height: 300px;
+}
+
+/* Red pin marker (mapPin.js). */
+.map-pin {
+  background: none;
+  border: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+}
+
+.workshop-map {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 1rem 0 1.5rem;
+}
+.map-directions {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 6px;
+  background: lightgray;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.map-directions:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+/* ---- Picker ---- */
+.location-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.location-picker__search {
+  display: flex;
+  gap: 0.5rem;
+}
+.location-picker__search input {
+  flex: 1;
+  min-width: 0;
+}
+.location-picker__search button,
+.location-picker__clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.85rem;
+  border: none;
+  border-radius: 6px;
+  background: lightgray;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.location-picker__search button:hover:not(:disabled),
+.location-picker__clear:hover {
+  background: #000000;
+  color: #ffffff;
+}
+.location-picker__search button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.location-picker__msg {
+  margin: 0;
+  color: #b23c17;
+  font-size: 0.82rem;
+}
+.location-picker__results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.location-picker__results li + li {
+  border-top: 1px solid #eeeeee;
+}
+.location-picker__results button {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+}
+.location-picker__results button:hover {
+  background: #f2f2f2;
+}
+.location-picker__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: #666666;
+  font-size: 0.8rem;
+}

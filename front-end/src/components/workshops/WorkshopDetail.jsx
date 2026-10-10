@@ -6,6 +6,7 @@ import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import AuthorChip from '../common/AuthorChip';
+import WorkshopMap from '../maps/WorkshopMap';
 import './Workshops.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -118,6 +119,9 @@ function WorkshopDetail() {
         {w.description_workshop && (
           <p className="workshop-detail-description">{w.description_workshop}</p>
         )}
+
+        {/* Where it takes place (set by its creator on the map). */}
+        <WorkshopMap lat={w.lat_workshop} lng={w.lng_workshop} label={w.location_workshop || w.title_workshop} />
 
         {/* Reservation action */}
         <div className="workshop-reserve-box">

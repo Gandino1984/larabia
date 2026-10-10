@@ -8,6 +8,13 @@ import { deleteFile } from "../../utils/file_cleanup.js";
 // Who a workshop is for.
 export const AUDIENCES = ['general', 'infantil'];
 
+// A coordinate within range, or null (empty / invalid clears it).
+const coord = (value, max) => {
+    if (value === '' || value === null || value === undefined) return null;
+    const n = Number(value);
+    return Number.isFinite(n) && Math.abs(n) <= max ? Number(n.toFixed(6)) : null;
+};
+
 async function loadWorkshopAuthors(workshopId) {
     const rows = await workshop_author_model.findAll({
         where: { workshop_id: workshopId },
@@ -112,6 +119,8 @@ async function create(data) {
             author_id: data.author_id || null,
             author_name: data.author_name || null,
             audience_workshop: AUDIENCES.includes(data.audience_workshop) ? data.audience_workshop : 'general',
+            lat_workshop: coord(data.lat_workshop, 90),
+            lng_workshop: coord(data.lng_workshop, 180),
             active_workshop: true
         });
 
@@ -134,6 +143,8 @@ async function update(id_workshop, data) {
         for (const f of ['title_workshop', 'description_workshop', 'location_workshop', 'date_workshop', 'cover_image_workshop', 'author_id', 'author_name']) {
             if (data[f] !== undefined) fields[f] = data[f];
         }
+        if (data.lat_workshop !== undefined) fields.lat_workshop = coord(data.lat_workshop, 90);
+        if (data.lng_workshop !== undefined) fields.lng_workshop = coord(data.lng_workshop, 180);
         if (data.audience_workshop !== undefined) {
             fields.audience_workshop = AUDIENCES.includes(data.audience_workshop) ? data.audience_workshop : 'general';
         }

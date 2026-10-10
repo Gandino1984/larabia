@@ -44,6 +44,16 @@ const magazine_workshop_model = sequelize.define(
             type: DataTypes.STRING(100),
             allowNull: true
         },
+        // Where it takes place on the map (set by its creator with a Leaflet
+        // picker); location_workshop stays as the place's visible name.
+        lat_workshop: {
+            type: DataTypes.DECIMAL(9, 6),
+            allowNull: true
+        },
+        lng_workshop: {
+            type: DataTypes.DECIMAL(9, 6),
+            allowNull: true
+        },
         // Who it's for: 'general' (adults) | 'infantil' (children).
         audience_workshop: {
             type: DataTypes.STRING(20),
