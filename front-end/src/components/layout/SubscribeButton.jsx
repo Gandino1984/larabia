@@ -48,8 +48,11 @@ function SubscribeButton({ ready = true }) {
     return () => clearTimeout(timer);
   }, [ready, notice, markNoticeShown, showSuccess, showInfo, t]);
 
-  if (!subscription || subscription.isSubscriber) return null;
-  if (!subscription.enabled && !isSuperAdmin) return null;
+  // The plan picker can also be opened from elsewhere (e.g. the Talleres
+  // check), so it renders even while the button itself is hidden.
+  const modal = subscription?.showModal ? <SubscribeModal onClose={subscription.closeModal} /> : null;
+  if (!subscription || subscription.isSubscriber) return modal;
+  if (!subscription.enabled && !isSuperAdmin) return modal;
 
   const isHidden = showEditor || showArticleDetail;
   const label = t('subscription.button', 'Suscríbete');
@@ -75,7 +78,7 @@ function SubscribeButton({ ready = true }) {
         <Heart size={24} />
         <span className="subscribe-btn__text">{label}</span>
       </button>
-      {subscription.showModal && <SubscribeModal onClose={subscription.closeModal} />}
+      {modal}
     </>
   );
 }

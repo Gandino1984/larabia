@@ -1,9 +1,10 @@
 // magazine-front/src/components/workshops/WorkshopsList.jsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
+import { Calendar, MapPin, Users, Lock } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
+import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
 import './Workshops.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -22,10 +23,16 @@ const formatDate = (d) => {
   } catch { return null; }
 };
 
+// The two sections of the page.
+const AUDIENCE_TABS = ['general', 'infantil'];
+const audienceOf = (w) => (w.audience_workshop === 'infantil' ? 'infantil' : 'general');
+
 function WorkshopsList() {
   const { t } = useTranslation();
-  const { navigateToHome, navigateToWorkshopDetail } = useUI();
-  const { workshops, loading, fetchWorkshops, setSelectedWorkshop } = useWorkshop();
+  const { navigateToWorkshopDetail } = useUI();
+  const { workshops, loading, fetchWorkshops, setSelectedWorkshop, accessError } = useWorkshop();
+  const { status: accessStatus, guard } = useWorkshopAccess();
+  const [audience, setAudience] = useState('general');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -37,6 +44,16 @@ function WorkshopsList() {
     navigateToWorkshopDetail();
   };
 
+  // No access (the server has the last word; the client check covers the
+  // moment before it answers): explain and offer to sign in / subscribe.
+  const blocked = accessError || (accessStatus !== 'allowed' ? (accessStatus === 'login' ? 'login_required' : 'subscription_required') : null);
+
+  const counts = {
+    general: workshops.filter(w => audienceOf(w) === 'general').length,
+    infantil: workshops.filter(w => audienceOf(w) === 'infantil').length
+  };
+  const visible = workshops.filter(w => audienceOf(w) === audience);
+
   return (
     <div className="workshops-page">
       <div className="workshops-container">
@@ -47,15 +64,61 @@ function WorkshopsList() {
           </div>
         </header>
 
-        {loading && <div className="workshops-loading"><div className="workshops-spinner" /></div>}
+        {blocked ? (
+          <div className="workshops-gate">
+            <Lock size={32} />
+            <h2>{t('workshops.gate.title', 'Talleres para personas suscriptoras')}</h2>
+            <p>
+              {blocked === 'login_required'
+                ? t('workshops.gate.loginText', 'Inicia sesión con tu cuenta de suscriptor/a para ver el calendario de talleres y reservar tu plaza.')
+                : t('workshops.gate.subscribeText', 'Los talleres de La Rabia son exclusivos para quienes apoyan la revista con su suscripción. Suscríbete para ver el calendario y reservar plaza en los talleres y en los talleres infantiles.')}
+            </p>
+            <button
+              type="button"
+              className="workshops-gate__cta"
+              onClick={() => guard(blocked === 'login_required' ? 'login' : 'subscribe')}
+            >
+              {blocked === 'login_required'
+                ? t('workshops.gate.loginCta', 'Iniciar sesión')
+                : t('workshops.gate.subscribeCta', 'Suscríbete')}
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Sections: general workshops / children's workshops */}
+            <div className="workshops-tabs" role="tablist" aria-label={t('workshops.tabsLabel', 'Tipo de taller')}>
+              {AUDIENCE_TABS.map(key => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={audience === key}
+                  className={`workshops-tab ${audience === key ? 'is-active' : ''}`}
+                  onClick={() => setAudience(key)}
+                >
+                  {key === 'infantil'
+                    ? t('workshops.tabKids', 'Talleres infantiles')
+                    : t('workshops.tabGeneral', 'Talleres')}
+                  <span className="workshops-tab__count">{counts[key]}</span>
+                </button>
+              ))}
+            </div>
 
-        {!loading && workshops.length === 0 && (
-          <div className="workshops-empty"><p>{t('workshops.empty')}</p></div>
-        )}
+            {loading && <div className="workshops-loading"><div className="workshops-spinner" /></div>}
 
-        {!loading && workshops.length > 0 && (
+            {!loading && visible.length === 0 && (
+              <div className="workshops-empty">
+                <p>
+                  {audience === 'infantil'
+                    ? t('workshops.emptyKids', 'Todavía no hay talleres infantiles programados.')
+                    : t('workshops.empty')}
+                </p>
+              </div>
+            )}
+
+            {!loading && visible.length > 0 && (
           <div className="workshops-grid">
-            {workshops.map(w => {
+            {visible.map(w => {
               const cover = resolveImg(w.cover_image_workshop);
               const dateStr = formatDate(w.date_workshop);
               return (
@@ -84,6 +147,8 @@ function WorkshopsList() {
               );
             })}
           </div>
+            )}
+          </>
         )}
       </div>
     </div>

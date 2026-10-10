@@ -44,6 +44,12 @@ const magazine_workshop_model = sequelize.define(
             type: DataTypes.STRING(100),
             allowNull: true
         },
+        // Who it's for: 'general' (adults) | 'infantil' (children).
+        audience_workshop: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+            defaultValue: 'general'
+        },
         active_workshop: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

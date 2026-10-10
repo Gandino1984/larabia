@@ -29,8 +29,12 @@ export const SubscriptionProvider = ({ children }) => {
   const { showError } = useUI();
   const [config, setConfig] = useState({ enabled: false, prices: {} });
   const [mine, setMine] = useState(null);
+  // True once the signed-in reader's subscription has been fetched.
+  const [mineReady, setMineReady] = useState(false);
   const [subscriberIds, setSubscriberIds] = useState(() => new Set());
+  // The plan picker; `modalReason` adds context (e.g. 'workshops').
   const [showModal, setShowModal] = useState(false);
+  const [modalReason, setModalReason] = useState(null);
   const [busy, setBusy] = useState(false);
   // 'success' | 'cancel' after returning from Checkout. Its notice is shown by
   // SubscribeButton once the page has finished loading (then marked done).
@@ -70,9 +74,14 @@ export const SubscriptionProvider = ({ children }) => {
 
   // Load it whenever the signed-in user changes (and clear it on logout).
   useEffect(() => {
+    setMineReady(false);
     if (!userId) { setMine(null); return undefined; }
     let cancelled = false;
-    fetchMine(userId).then((data) => { if (!cancelled) setMine(data); });
+    fetchMine(userId).then((data) => {
+      if (cancelled) return;
+      setMine(data);
+      setMineReady(true);
+    });
     return () => { cancelled = true; };
   }, [userId, fetchMine]);
 
@@ -144,6 +153,7 @@ export const SubscriptionProvider = ({ children }) => {
     prices: config.prices || {},
     isSubscriber: !!mine?.active,
     mine,
+    mineReady,
     refresh,
     busy,
     startCheckout,
@@ -152,7 +162,11 @@ export const SubscriptionProvider = ({ children }) => {
     checkoutNotice: checkoutNoticeDone ? null : checkoutResult,
     markCheckoutNoticeShown: useCallback(() => setCheckoutNoticeDone(true), []),
     showModal,
-    openModal: useCallback(() => setShowModal(true), []),
+    modalReason,
+    openModal: useCallback((reason = null) => {
+      setModalReason(typeof reason === 'string' ? reason : null);
+      setShowModal(true);
+    }, []),
     closeModal: useCallback(() => setShowModal(false), [])
   };
   return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;

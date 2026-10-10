@@ -5,6 +5,9 @@ import workshop_reservation_model from "../../models/workshop_reservation_model.
 import user_model from "../../models/user_model.js";
 import { deleteFile } from "../../utils/file_cleanup.js";
 
+// Who a workshop is for.
+export const AUDIENCES = ['general', 'infantil'];
+
 async function loadWorkshopAuthors(workshopId) {
     const rows = await workshop_author_model.findAll({
         where: { workshop_id: workshopId },
@@ -108,6 +111,7 @@ async function create(data) {
             capacity_workshop: (data.capacity_workshop === '' || data.capacity_workshop === undefined) ? null : data.capacity_workshop,
             author_id: data.author_id || null,
             author_name: data.author_name || null,
+            audience_workshop: AUDIENCES.includes(data.audience_workshop) ? data.audience_workshop : 'general',
             active_workshop: true
         });
 
@@ -129,6 +133,9 @@ async function update(id_workshop, data) {
         const fields = {};
         for (const f of ['title_workshop', 'description_workshop', 'location_workshop', 'date_workshop', 'cover_image_workshop', 'author_id', 'author_name']) {
             if (data[f] !== undefined) fields[f] = data[f];
+        }
+        if (data.audience_workshop !== undefined) {
+            fields.audience_workshop = AUDIENCES.includes(data.audience_workshop) ? data.audience_workshop : 'general';
         }
         if (data.capacity_workshop !== undefined) {
             fields.capacity_workshop = (data.capacity_workshop === '' || data.capacity_workshop === null) ? null : data.capacity_workshop;

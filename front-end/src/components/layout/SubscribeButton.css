@@ -319,3 +319,15 @@
   font-size: 0.85rem;
   line-height: 1.5;
 }
+
+/* Why the picker opened (e.g. trying to enter Talleres). */
+.subscribe-modal__reason {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+}

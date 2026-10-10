@@ -555,5 +555,16 @@
   "subscription.markTitle": "Suscriptor/a de La Rabia",
   "notifications.membership.title": "Suscripción activa",
   "notifications.membership.message": "Gracias por apoyar La Rabia.",
-  "notifications.membership.messageRenews": "Gracias por apoyar La Rabia. Próxima renovación: {{date}}"
+  "notifications.membership.messageRenews": "Gracias por apoyar La Rabia. Próxima renovación: {{date}}",
+  "workshops.gate.login": "Inicia sesión para acceder a los talleres",
+  "workshops.gate.title": "Talleres para personas suscriptoras",
+  "workshops.gate.loginText": "Inicia sesión con tu cuenta de suscriptor/a para ver el calendario de talleres y reservar tu plaza.",
+  "workshops.gate.subscribeText": "Los talleres de La Rabia son exclusivos para quienes apoyan la revista con su suscripción. Suscríbete para ver el calendario y reservar plaza en los talleres y en los talleres infantiles.",
+  "workshops.gate.loginCta": "Iniciar sesión",
+  "workshops.gate.subscribeCta": "Suscríbete",
+  "workshops.tabsLabel": "Tipo de taller",
+  "workshops.tabGeneral": "Talleres",
+  "workshops.tabKids": "Talleres infantiles",
+  "workshops.emptyKids": "Todavía no hay talleres infantiles programados.",
+  "subscription.reasonWorkshops": "Los talleres son exclusivos para personas suscriptoras. Suscríbete para ver el calendario y reservar tu plaza."
 }

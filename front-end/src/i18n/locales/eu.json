@@ -555,5 +555,16 @@
   "subscription.markTitle": "La Rabiako harpideduna",
   "notifications.membership.title": "Harpidetza aktibo",
   "notifications.membership.message": "Eskerrik asko La Rabia babesteagatik.",
-  "notifications.membership.messageRenews": "Eskerrik asko La Rabia babesteagatik. Hurrengo berritzea: {{date}}"
+  "notifications.membership.messageRenews": "Eskerrik asko La Rabia babesteagatik. Hurrengo berritzea: {{date}}",
+  "workshops.gate.login": "Hasi saioa tailerretara sartzeko",
+  "workshops.gate.title": "Harpidedunentzako tailerrak",
+  "workshops.gate.loginText": "Hasi saioa zure harpidedun kontuarekin tailerren egutegia ikusteko eta zure plaza erreserbatzeko.",
+  "workshops.gate.subscribeText": "La Rabiaren tailerrak aldizkaria harpidetzarekin babesten dutenentzat dira soilik. Harpidetu egutegia ikusteko eta tailerretan eta haurrentzako tailerretan plaza erreserbatzeko.",
+  "workshops.gate.loginCta": "Hasi saioa",
+  "workshops.gate.subscribeCta": "Harpidetu",
+  "workshops.tabsLabel": "Tailer mota",
+  "workshops.tabGeneral": "Tailerrak",
+  "workshops.tabKids": "Haurrentzako tailerrak",
+  "workshops.emptyKids": "Oraindik ez dago haurrentzako tailerrik programatuta.",
+  "subscription.reasonWorkshops": "Tailerrak harpidedunentzat dira soilik. Harpidetu egutegia ikusteko eta zure plaza erreserbatzeko."
 }

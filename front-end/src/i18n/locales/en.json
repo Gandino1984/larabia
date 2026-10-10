@@ -555,5 +555,16 @@
   "subscription.markTitle": "La Rabia subscriber",
   "notifications.membership.title": "Subscription active",
   "notifications.membership.message": "Thank you for supporting La Rabia.",
-  "notifications.membership.messageRenews": "Thank you for supporting La Rabia. Next renewal: {{date}}"
+  "notifications.membership.messageRenews": "Thank you for supporting La Rabia. Next renewal: {{date}}",
+  "workshops.gate.login": "Sign in to access the workshops",
+  "workshops.gate.title": "Workshops for subscribers",
+  "workshops.gate.loginText": "Sign in with your subscriber account to see the workshop calendar and book your place.",
+  "workshops.gate.subscribeText": "La Rabia's workshops are exclusive to those who support the magazine with a subscription. Subscribe to see the calendar and book a place in the workshops and the children's workshops.",
+  "workshops.gate.loginCta": "Sign in",
+  "workshops.gate.subscribeCta": "Subscribe",
+  "workshops.tabsLabel": "Workshop type",
+  "workshops.tabGeneral": "Workshops",
+  "workshops.tabKids": "Children's workshops",
+  "workshops.emptyKids": "No children's workshops are scheduled yet.",
+  "subscription.reasonWorkshops": "Workshops are exclusive to subscribers. Subscribe to see the calendar and book your place."
 }

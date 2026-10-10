@@ -11,7 +11,7 @@ import './SubscribeButton.css';
 
 function SubscribeModal({ onClose }) {
   const { t, i18n } = useTranslation();
-  const { enabled, prices, startCheckout, busy } = useSubscription();
+  const { enabled, prices, startCheckout, busy, modalReason } = useSubscription();
   // Preview (Stripe not configured): both plans, without prices.
   const plans = enabled ? ['monthly', 'yearly'].filter((p) => prices[p]) : ['monthly', 'yearly'];
   const [plan, setPlan] = useState(plans.includes('yearly') ? 'yearly' : plans[0]);
@@ -64,6 +64,11 @@ function SubscribeModal({ onClose }) {
 
         <span className="subscribe-modal__icon" aria-hidden="true"><Heart size={28} /></span>
         <h2 id="subscribe-modal-title">{t('subscription.title', 'Suscríbete a La Rabia')}</h2>
+        {modalReason === 'workshops' && (
+          <p className="subscribe-modal__reason">
+            {t('subscription.reasonWorkshops', 'Los talleres son exclusivos para personas suscriptoras. Suscríbete para ver el calendario y reservar tu plaza.')}
+          </p>
+        )}
         <p className="subscribe-modal__lead">
           {t('subscription.lead', 'La Rabia se sostiene gracias a sus lectoras y lectores. Con tu suscripción apoyas el periodismo independiente y la creación de la revista, y luces la insignia de suscriptor/a en tu perfil.')}
         </p>

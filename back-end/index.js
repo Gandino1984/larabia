@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { DataTypes } from 'sequelize';
 import sequelize from './config/sequelize.js';
 import config, { logEnvironmentInfo } from './config/environment.js';
 import router from './routers/main_router.js';
@@ -67,6 +68,25 @@ Promise.all([
 ])
     .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions)'))
     .catch((err) => console.error('Error syncing engagement tables:', err.message));
+
+// Columns added to tables that already exist in production (idempotent: each
+// is added only if missing). See migrations/012_add_workshop_audience.sql.
+(async () => {
+    try {
+        const qi = sequelize.getQueryInterface();
+        const workshops = await qi.describeTable('magazine_workshops');
+        if (!workshops.audience_workshop) {
+            await qi.addColumn('magazine_workshops', 'audience_workshop', {
+                type: DataTypes.STRING(20),
+                allowNull: false,
+                defaultValue: 'general'
+            });
+            console.log('>>> Added magazine_workshops.audience_workshop');
+        }
+    } catch (err) {
+        console.error('Error ensuring added columns:', err.message);
+    }
+})();
 
 app.listen(INTERNAL_PORT, '0.0.0.0', () => {
     console.log('');

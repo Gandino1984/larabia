@@ -1,9 +1,31 @@
 // back-end/controllers/magazine_workshop/magazine_workshop_api_controller.js
 import magazineWorkshopController from "./magazine_workshop_controller.js";
 import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
+import reader_subscription_model, { ACTIVE_STATUSES } from "../../models/reader_subscription_model.js";
+
+/**
+ * Workshops are for paying subscribers. The magazine team (editors, admins,
+ * super admins — they create and teach them) has access without subscribing.
+ * Sends a 403 with a `code` the front-end uses ('login_required' |
+ * 'subscription_required') — never a 401, which logs the reader out. Returns
+ * the user when access is granted.
+ */
+async function requireWorkshopAccess(req, res) {
+    const user = await getRequestUser(req);
+    if (!user) {
+        res.status(403).json({ error: 'Inicia sesión para acceder a los talleres', code: 'login_required' });
+        return null;
+    }
+    if (roleSnapshot(user).canCreateContent) return user;
+    const sub = await reader_subscription_model.findOne({ where: { user_id: user.id_user } });
+    if (sub && ACTIVE_STATUSES.includes(sub.status)) return user;
+    res.status(403).json({ error: 'Los talleres son exclusivos para personas suscriptoras de la revista', code: 'subscription_required' });
+    return null;
+}
 
 async function getAll(req, res) {
     try {
+        if (!(await requireWorkshopAccess(req, res))) return;
         const { error, data } = await magazineWorkshopController.getAll();
         res.json({ error, data });
     } catch (err) {
@@ -14,6 +36,7 @@ async function getAll(req, res) {
 
 async function getById(req, res) {
     try {
+        if (!(await requireWorkshopAccess(req, res))) return;
         const { id_workshop } = req.params;
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
         const { error, data } = await magazineWorkshopController.getById(id_workshop);
@@ -31,7 +54,7 @@ async function create(req, res) {
         if (!admin) return; // 403 already sent
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
-            cover_image_workshop, capacity_workshop, authors, author_name } = req.body;
+            cover_image_workshop, capacity_workshop, audience_workshop, authors, author_name } = req.body;
 
         const data = {
             title_workshop,
@@ -40,6 +63,7 @@ async function create(req, res) {
             date_workshop: date_workshop || null,
             cover_image_workshop: cover_image_workshop || null,
             capacity_workshop,
+            audience_workshop,
             author_id: admin.id_user,
             author_name: author_name || admin.name_user,
             authors: Array.isArray(authors) ? authors : undefined
@@ -63,7 +87,7 @@ async function update(req, res) {
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
-            cover_image_workshop, capacity_workshop, authors, author_name } = req.body;
+            cover_image_workshop, capacity_workshop, audience_workshop, authors, author_name } = req.body;
 
         const data = {};
         if (title_workshop !== undefined) data.title_workshop = title_workshop;
@@ -72,6 +96,7 @@ async function update(req, res) {
         if (date_workshop !== undefined) data.date_workshop = date_workshop || null;
         if (cover_image_workshop !== undefined) data.cover_image_workshop = cover_image_workshop;
         if (capacity_workshop !== undefined) data.capacity_workshop = capacity_workshop;
+        if (audience_workshop !== undefined) data.audience_workshop = audience_workshop;
         if (author_name !== undefined) data.author_name = author_name;
         if (authors !== undefined) data.authors = authors;
 
@@ -123,8 +148,8 @@ async function uploadCoverImage(req, res) {
 
 async function reserve(req, res) {
     try {
-        const user = await getRequestUser(req);
-        if (!user) return res.status(401).json({ error: 'Autenticación requerida' });
+        const user = await requireWorkshopAccess(req, res);
+        if (!user) return;
         const { id_workshop } = req.params;
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
         const result = await magazineWorkshopController.reserve(id_workshop, user.id_user);

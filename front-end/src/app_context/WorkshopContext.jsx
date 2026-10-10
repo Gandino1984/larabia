@@ -1,7 +1,10 @@
 // magazine-front/src/app_context/WorkshopContext.jsx
 //
-// Workshops (talleres): super admins create/manage; any registered user can
-// reserve a capacity-limited spot.
+// Workshops (talleres): super admins create/manage; paying subscribers (and
+// the magazine team) see the calendar and reserve a capacity-limited spot —
+// general workshops and children's workshops (audience_workshop).
+// The server answers 403 + code 'login_required' | 'subscription_required'
+// when the reader can't access them; that is kept in `accessError`.
 import { createContext, useContext, useState, useCallback } from 'react';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
@@ -15,6 +18,7 @@ export const WorkshopProvider = ({ children }) => {
   const [workshops, setWorkshops] = useState([]);
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [accessError, setAccessError] = useState(null);
 
   const authHeader = useCallback(
     () => ({ headers: { 'x-user-id': currentUser?.id_user } }),
@@ -24,22 +28,25 @@ export const WorkshopProvider = ({ children }) => {
   const fetchWorkshops = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axiosInstance.get('/magazine-workshop');
+      const res = await axiosInstance.get('/magazine-workshop', authHeader());
+      setAccessError(null);
       setWorkshops(res.data?.data || []);
       return { success: true, data: res.data?.data || [] };
     } catch (err) {
-      console.error('fetchWorkshops error:', err);
       setWorkshops([]);
+      const code = err.response?.status === 403 ? err.response?.data?.code : null;
+      if (code) { setAccessError(code); return { error: err.response.data.error, code }; }
+      console.error('fetchWorkshops error:', err);
       return { error: 'Error al cargar talleres' };
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authHeader]);
 
   const fetchWorkshopById = useCallback(async (id) => {
     setLoading(true);
     try {
-      const res = await axiosInstance.get(`/magazine-workshop/by-id/${id}`);
+      const res = await axiosInstance.get(`/magazine-workshop/by-id/${id}`, authHeader());
       if (res.data?.error) { showError(res.data.error); return { error: res.data.error }; }
       setSelectedWorkshop(res.data.data);
       return { success: true, data: res.data.data };
@@ -50,7 +57,7 @@ export const WorkshopProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [showError]);
+  }, [authHeader, showError]);
 
   const createWorkshop = useCallback(async (data) => {
     try {
@@ -137,7 +144,7 @@ export const WorkshopProvider = ({ children }) => {
   }, [authHeader, showSuccess, showError]);
 
   const value = {
-    workshops, selectedWorkshop, setSelectedWorkshop, loading,
+    workshops, selectedWorkshop, setSelectedWorkshop, loading, accessError,
     fetchWorkshops, fetchWorkshopById,
     createWorkshop, updateWorkshop, deleteWorkshop, uploadWorkshopCover,
     reserveWorkshop, cancelWorkshopReservation

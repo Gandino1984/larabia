@@ -7,6 +7,7 @@
 import { useCallback } from 'react';
 import { useUI } from './UIContext';
 import { useMagazine } from './MagazineContext';
+import { useWorkshopAccess } from './useWorkshopAccess';
 
 const SECTION_NAV = {
   home: 'navigateToHome',
@@ -22,6 +23,8 @@ const SECTION_NAV = {
 export function useNavActions() {
   const ui = useUI();
   const { allArticles, projects, setSelectedArticle, setSelectedProject, setFilters } = useMagazine();
+  // Talleres are for subscribers: check before entering.
+  const { guard: guardWorkshops } = useWorkshopAccess();
 
   return useCallback((action) => {
     if (!action || typeof action !== 'object') return;
@@ -29,6 +32,7 @@ export function useNavActions() {
 
     switch (type) {
       case 'section': {
+        if (value === 'talleres' && !guardWorkshops()) break;
         const fnName = SECTION_NAV[value] || 'navigateToHome';
         ui[fnName]?.();
         break;
@@ -67,5 +71,5 @@ export function useNavActions() {
       default:
         break;
     }
-  }, [ui, allArticles, projects, setSelectedArticle, setSelectedProject, setFilters]);
+  }, [ui, allArticles, projects, setSelectedArticle, setSelectedProject, setFilters, guardWorkshops]);
 }
