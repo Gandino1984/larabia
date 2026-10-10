@@ -569,5 +569,6 @@
   "subscription.reasonWorkshops": "Los talleres son exclusivos para personas suscriptoras. Suscríbete para ver el calendario y reservar tu plaza.",
   "workshops.backToList": "Volver a talleres",
   "workshops.map.directions": "Cómo llegar",
-  "workshops.map.defaultPlace": "Matiko, Uribarri"
+  "workshops.map.defaultPlace": "Matiko, Uribarri",
+  "workshops.create": "Crear taller"
 }

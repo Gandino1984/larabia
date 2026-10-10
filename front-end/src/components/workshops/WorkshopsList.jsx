@@ -1,10 +1,12 @@
 // magazine-front/src/components/workshops/WorkshopsList.jsx
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
+import { useAuth } from '../../app_context/AuthContext';
+import CreateWorkshopModal from './CreateWorkshopModal';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import AuthorChip from '../common/AuthorChip';
 import WorkshopMap from '../maps/WorkshopMap';
@@ -39,6 +41,10 @@ function WorkshopsList() {
   const { workshops, loading, fetchWorkshops, setSelectedWorkshop, accessError } = useWorkshop();
   const { status: accessStatus, guard } = useWorkshopAccess();
   const [audience, setAudience] = useState('general');
+  // The magazine team (editors, admins, super admins) can create workshops
+  // here too, not only in Admin → Talleres.
+  const { canCreateContent } = useAuth();
+  const [showCreate, setShowCreate] = useState(false);
 
   // Grid vs horizontal carousel (desktop; mobile is always a vertical list),
   // remembered like the articles' view.
@@ -123,7 +129,19 @@ function WorkshopsList() {
             <h1>{t('workshops.title')}</h1>
             <p className="workshops-subtitle">{t('workshops.subtitle')}</p>
           </div>
+          {canCreateContent && (
+            <button type="button" className="workshops-create-btn" onClick={() => setShowCreate(true)}>
+              <Plus size={18} />
+              <span>{t('workshops.create', 'Crear taller')}</span>
+            </button>
+          )}
         </header>
+        {showCreate && (
+          <CreateWorkshopModal
+            onClose={() => setShowCreate(false)}
+            onSaved={(w) => setAudience(w?.audience_workshop === 'infantil' ? 'infantil' : 'general')}
+          />
+        )}
 
         {blocked ? (
           <div className="workshops-gate">

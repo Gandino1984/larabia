@@ -283,3 +283,51 @@
   background: #000000;
   color: #ffffff;
 }
+
+/* "Crear taller" (editors+), at the right of the page title. */
+.workshops-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.workshops-create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.15rem;
+  border: none;
+  border-radius: 6px;
+  background: #000000;
+  color: #ffffff;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.workshops-create-btn:hover,
+.workshops-create-btn:focus-visible {
+  background: #3a3a3a;
+}
+
+/* Workshop page cover: lower, keeping the image's proportion (scaled down
+   whole — no crop, no stretch), centered on a neutral band. */
+.workshop-detail-cover {
+  display: flex;
+  justify-content: center;
+  background: #f2f2f2;
+}
+.workshop-detail-cover img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 320px;
+  object-fit: contain;
+}
+@media (max-width: 600px) {
+  .workshop-detail-cover img {
+    max-height: 220px;
+  }
+}

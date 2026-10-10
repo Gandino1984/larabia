@@ -1,7 +1,42 @@
 // back-end/controllers/magazine_workshop/magazine_workshop_api_controller.js
 import magazineWorkshopController from "./magazine_workshop_controller.js";
-import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
+import { getRequestUser, roleSnapshot } from "../../utils/authHelper.js";
 import reader_subscription_model, { ACTIVE_STATUSES } from "../../models/reader_subscription_model.js";
+import magazine_workshop_model from "../../models/magazine_workshop_model.js";
+import workshop_author_model from "../../models/workshop_author_model.js";
+
+/**
+ * Creating workshops: the magazine team (editors, admins, super admins).
+ * Returns the user, or sends a 403.
+ */
+async function requireWorkshopCreator(req, res) {
+    const user = await getRequestUser(req);
+    if (!user || !roleSnapshot(user).canCreateContent) {
+        res.status(403).json({ error: 'Solo el equipo de la revista puede crear talleres' });
+        return null;
+    }
+    return user;
+}
+
+/**
+ * Editing / deleting a workshop (and its cover): super admins, or whoever
+ * created it or teaches it. Returns the user, or sends a 403 / 404.
+ */
+async function requireWorkshopManager(req, res, workshopId) {
+    const user = await requireWorkshopCreator(req, res);
+    if (!user) return null;
+    if (roleSnapshot(user).isSuperAdmin) return user;
+    const workshop = await magazine_workshop_model.findByPk(workshopId);
+    if (!workshop) {
+        res.status(404).json({ error: 'Taller no encontrado' });
+        return null;
+    }
+    if (workshop.author_id === user.id_user) return user;
+    const teaches = await workshop_author_model.findOne({ where: { workshop_id: workshopId, user_id: user.id_user } });
+    if (teaches) return user;
+    res.status(403).json({ error: 'Solo quien creó o imparte el taller (o el super-administrador) puede modificarlo' });
+    return null;
+}
 
 /**
  * Workshops are for paying subscribers. The magazine team (editors, admins,
@@ -50,7 +85,7 @@ async function getById(req, res) {
 
 async function create(req, res) {
     try {
-        const admin = await requireSuperAdmin(req, res);
+        const admin = await requireWorkshopCreator(req, res);
         if (!admin) return; // 403 already sent
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
@@ -82,11 +117,10 @@ async function create(req, res) {
 
 async function update(req, res) {
     try {
-        const admin = await requireSuperAdmin(req, res);
-        if (!admin) return;
-
         const { id_workshop } = req.params;
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
+        const admin = await requireWorkshopManager(req, res, id_workshop);
+        if (!admin) return;
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
             cover_image_workshop, capacity_workshop, audience_workshop, lat_workshop, lng_workshop, authors, author_name } = req.body;
@@ -115,10 +149,10 @@ async function update(req, res) {
 
 async function remove(req, res) {
     try {
-        const admin = await requireSuperAdmin(req, res);
-        if (!admin) return;
         const { id_workshop } = req.params;
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
+        const admin = await requireWorkshopManager(req, res, id_workshop);
+        if (!admin) return;
         const { error, data, message } = await magazineWorkshopController.removeById(id_workshop);
         if (error) return res.status(404).json({ error });
         res.json({ error: null, data, message });
@@ -130,10 +164,10 @@ async function remove(req, res) {
 
 async function uploadCoverImage(req, res) {
     try {
-        const admin = await requireSuperAdmin(req, res);
-        if (!admin) return;
         const workshopId = req.headers['x-workshop-id'];
         if (!workshopId) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
+        const admin = await requireWorkshopManager(req, res, workshopId);
+        if (!admin) return;
         if (!req.file) return res.status(400).json({ error: 'No se ha subido ningún archivo' });
 
         const filePath = req.file.path;
