@@ -34,7 +34,7 @@ const formatDate = (d) => {
 function WorkshopDetail() {
   const { t } = useTranslation();
   const { navigateToTalleres } = useUI();
-  const { currentUser, isSuperAdmin } = useAuth();
+  const { currentUser, isSuperAdmin, isAdmin } = useAuth();
   const { selectedWorkshop, fetchWorkshopById, reserveWorkshop, cancelWorkshopReservation, deleteWorkshop, loading } = useWorkshop();
   const [editing, setEditing] = useState(false);
 
@@ -61,12 +61,15 @@ function WorkshopDetail() {
     () => !!(w?.reserved_by_me || w?.participants?.some(p => p.id_user === currentUser?.id_user)),
     [w, currentUser]
   );
-  // Whoever created or teaches the workshop (and super admins) can edit /
-  // delete it here — like an article's author (the server checks the same).
+  // Edit / delete here — like an article's author: super admins (any
+  // workshop), or an admin who created or teaches it (the server checks the
+  // same).
   const canManage = !!currentUser && !!w && (
     isSuperAdmin
-    || w.author_id === currentUser.id_user
-    || (w.authors || []).some(a => a.id_user === currentUser.id_user)
+    || (isAdmin && (
+      w.author_id === currentUser.id_user
+      || (w.authors || []).some(a => a.id_user === currentUser.id_user)
+    ))
   );
 
   const bookingCode = !currentUser ? 'login_required' : (w?.booking_code || null);

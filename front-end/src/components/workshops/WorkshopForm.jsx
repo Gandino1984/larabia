@@ -3,7 +3,7 @@
 // Create / edit a workshop: title, description, date, place name, capacity,
 // type (taller / taller infantil), map location (LocationPicker), instructors
 // and cover. Used in Admin → Talleres and in the "Crear taller" window of the
-// workshops page (editors, admins, super admins).
+// workshops page (admins, super admins).
 //   workshop  — the workshop to edit (null = create a new one)
 //   onSaved   — called with the saved workshop
 //   onCancel  — optional; shows a "Cancelar" button

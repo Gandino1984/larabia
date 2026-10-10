@@ -44,9 +44,10 @@ function WorkshopsList() {
   const [audience, setAudience] = useState('general');
   // Search / when / month / instructor / spots / order (WorkshopFilters).
   const [filters, setFilters] = useState(EMPTY_WORKSHOP_FILTERS);
-  // The magazine team (editors, admins, super admins) can create workshops
-  // here too, not only in Admin → Talleres.
-  const { canCreateContent } = useAuth();
+  // Admins and super admins can create workshops here too, not only in
+  // Admin → Talleres.
+  const { isAdmin, isSuperAdmin } = useAuth();
+  const canCreateWorkshop = isAdmin || isSuperAdmin;
   const [showCreate, setShowCreate] = useState(false);
 
   // Grid vs horizontal carousel (desktop; mobile is always a vertical list),
@@ -142,7 +143,7 @@ function WorkshopsList() {
             <h1>{t('workshops.title')}</h1>
             <p className="workshops-subtitle">{t('workshops.subtitle')}</p>
           </div>
-          {canCreateContent && (
+          {canCreateWorkshop && (
             <button type="button" className="workshops-create-btn" onClick={() => setShowCreate(true)}>
               <Plus size={18} />
               <span>{t('workshops.create', 'Crear taller')}</span>

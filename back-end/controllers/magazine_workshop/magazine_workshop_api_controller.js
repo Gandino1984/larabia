@@ -6,21 +6,23 @@ import magazine_workshop_model from "../../models/magazine_workshop_model.js";
 import workshop_author_model from "../../models/workshop_author_model.js";
 
 /**
- * Creating workshops: the magazine team (editors, admins, super admins).
- * Returns the user, or sends a 403.
+ * Creating workshops: admins and super admins only. Returns the user, or
+ * sends a 403.
  */
 async function requireWorkshopCreator(req, res) {
     const user = await getRequestUser(req);
-    if (!user || !roleSnapshot(user).canCreateContent) {
-        res.status(403).json({ error: 'Solo el equipo de la revista puede crear talleres' });
+    const role = roleSnapshot(user);
+    if (!user || !(role.isAdmin || role.isSuperAdmin)) {
+        res.status(403).json({ error: 'Solo admins y super-admins pueden crear talleres' });
         return null;
     }
     return user;
 }
 
 /**
- * Editing / deleting a workshop (and its cover): super admins, or whoever
- * created it or teaches it. Returns the user, or sends a 403 / 404.
+ * Editing / deleting a workshop (and its cover): super admins (any workshop),
+ * or an admin who created it or teaches it. Returns the user, or sends a
+ * 403 / 404.
  */
 async function requireWorkshopManager(req, res, workshopId) {
     const user = await requireWorkshopCreator(req, res);
