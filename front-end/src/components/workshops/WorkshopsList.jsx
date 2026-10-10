@@ -1,10 +1,14 @@
 // magazine-front/src/components/workshops/WorkshopsList.jsx
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, MapPin, Users, Lock } from 'lucide-react';
+import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
+import { useDragScroll } from '../../hooks/useDragScroll';
+// Grid / carousel toggle + carousel: the same pieces as the article lists.
+import '../magazine/ProjectDetail.css';
+import '../magazine/ArticlesCarousel.css';
 import './Workshops.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -34,6 +38,25 @@ function WorkshopsList() {
   const { status: accessStatus, guard } = useWorkshopAccess();
   const [audience, setAudience] = useState('general');
 
+  // Grid vs horizontal carousel (desktop; mobile is always a vertical list),
+  // remembered like the articles' view.
+  const [viewMode, setViewMode] = useState(() => {
+    try { return localStorage.getItem('larabia_workshops_view') || 'grid'; } catch { return 'grid'; }
+  });
+  const changeViewMode = useCallback((mode) => {
+    setViewMode(mode);
+    try { localStorage.setItem('larabia_workshops_view', mode); } catch { /* ignore */ }
+  }, []);
+  const carouselRef = useRef(null);
+  const scrollCarousel = useCallback((dir) => {
+    const track = carouselRef.current;
+    if (!track) return;
+    const card = track.querySelector('.workshop-card');
+    const amount = card ? card.offsetWidth + 24 : track.clientWidth * 0.8;
+    track.scrollBy({ left: dir * amount, behavior: 'smooth' });
+  }, []);
+  useDragScroll(carouselRef, viewMode === 'carousel');
+
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchWorkshops();
@@ -53,6 +76,35 @@ function WorkshopsList() {
     infantil: workshops.filter(w => audienceOf(w) === 'infantil').length
   };
   const visible = workshops.filter(w => audienceOf(w) === audience);
+
+  const renderCard = (w) => {
+    const cover = resolveImg(w.cover_image_workshop);
+    const dateStr = formatDate(w.date_workshop);
+    return (
+      <article key={w.id_workshop} className="workshop-card" onClick={() => openWorkshop(w)}>
+        <div className="workshop-card-image">
+          {cover
+            ? <img src={cover} alt={w.title_workshop} onError={(e) => { e.target.style.display = 'none'; }} />
+            : <div className="workshop-card-image--placeholder"><Users size={32} /></div>}
+          {w.is_full && <span className="workshop-badge workshop-badge--full">{t('workshops.full')}</span>}
+        </div>
+        <div className="workshop-card-body">
+          <h3 className="workshop-card-title">{w.title_workshop}</h3>
+          {dateStr && <p className="workshop-meta"><Calendar size={15} /> {dateStr}</p>}
+          {w.location_workshop && <p className="workshop-meta"><MapPin size={15} /> {w.location_workshop}</p>}
+          <p className="workshop-meta">
+            <Users size={15} />{' '}
+            {w.capacity_workshop != null
+              ? t('workshops.spots', { left: w.spots_left, total: w.capacity_workshop })
+              : t('workshops.participants', { count: w.reservation_count })}
+          </p>
+          {w.authors?.length > 0 && (
+            <p className="workshop-card-authors">{t('workshops.by')} {w.authors.map(a => a.name_user).join(', ')}</p>
+          )}
+        </div>
+      </article>
+    );
+  };
 
   return (
     <div className="workshops-page">
@@ -85,7 +137,8 @@ function WorkshopsList() {
           </div>
         ) : (
           <>
-            {/* Sections: general workshops / children's workshops */}
+            {/* Sections (general / children's) + grid/carousel toggle */}
+            <div className="workshops-toolbar">
             <div className="workshops-tabs" role="tablist" aria-label={t('workshops.tabsLabel', 'Tipo de taller')}>
               {AUDIENCE_TABS.map(key => (
                 <button
@@ -103,6 +156,27 @@ function WorkshopsList() {
                 </button>
               ))}
             </div>
+            <div className="articles-view-toggle workshops-view-toggle" data-mode={viewMode} role="group" aria-label={t('article.list.viewMode')}>
+              <button
+                type="button"
+                className={`view-toggle-btn ${viewMode === 'grid' ? 'view-toggle-btn--active' : ''}`}
+                onClick={() => changeViewMode('grid')}
+                title={t('article.list.viewGrid')}
+                aria-pressed={viewMode === 'grid'}
+              >
+                <LayoutGrid size={18} />
+              </button>
+              <button
+                type="button"
+                className={`view-toggle-btn ${viewMode === 'carousel' ? 'view-toggle-btn--active' : ''}`}
+                onClick={() => changeViewMode('carousel')}
+                title={t('article.list.viewCarousel')}
+                aria-pressed={viewMode === 'carousel'}
+              >
+                <GalleryHorizontal size={18} />
+              </button>
+            </div>
+            </div>
 
             {loading && <div className="workshops-loading"><div className="workshops-spinner" /></div>}
 
@@ -117,36 +191,23 @@ function WorkshopsList() {
             )}
 
             {!loading && visible.length > 0 && (
+          viewMode === 'carousel' ? (
+            <div className="articles-carousel-wrap workshops-carousel-wrap">
+              <button type="button" className="carousel-arrow carousel-arrow--prev" onClick={() => scrollCarousel(-1)} aria-label={t('common.buttons.previous', 'Anterior')}>
+                <ChevronLeft size={44} />
+              </button>
+              <div className="articles-carousel workshops-carousel" ref={carouselRef}>
+                {visible.map(renderCard)}
+              </div>
+              <button type="button" className="carousel-arrow carousel-arrow--next" onClick={() => scrollCarousel(1)} aria-label={t('common.buttons.next', 'Siguiente')}>
+                <ChevronRight size={44} />
+              </button>
+            </div>
+          ) : (
           <div className="workshops-grid">
-            {visible.map(w => {
-              const cover = resolveImg(w.cover_image_workshop);
-              const dateStr = formatDate(w.date_workshop);
-              return (
-                <article key={w.id_workshop} className="workshop-card" onClick={() => openWorkshop(w)}>
-                  <div className="workshop-card-image">
-                    {cover
-                      ? <img src={cover} alt={w.title_workshop} onError={(e) => { e.target.style.display = 'none'; }} />
-                      : <div className="workshop-card-image--placeholder"><Users size={32} /></div>}
-                    {w.is_full && <span className="workshop-badge workshop-badge--full">{t('workshops.full')}</span>}
-                  </div>
-                  <div className="workshop-card-body">
-                    <h3 className="workshop-card-title">{w.title_workshop}</h3>
-                    {dateStr && <p className="workshop-meta"><Calendar size={15} /> {dateStr}</p>}
-                    {w.location_workshop && <p className="workshop-meta"><MapPin size={15} /> {w.location_workshop}</p>}
-                    <p className="workshop-meta">
-                      <Users size={15} />{' '}
-                      {w.capacity_workshop != null
-                        ? t('workshops.spots', { left: w.spots_left, total: w.capacity_workshop })
-                        : t('workshops.participants', { count: w.reservation_count })}
-                    </p>
-                    {w.authors?.length > 0 && (
-                      <p className="workshop-card-authors">{t('workshops.by')} {w.authors.map(a => a.name_user).join(', ')}</p>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+            {visible.map(renderCard)}
           </div>
+          )
             )}
           </>
         )}

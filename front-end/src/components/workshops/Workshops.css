@@ -161,3 +161,71 @@
 .workshops-gate__cta:hover {
   background: #b91c1c;
 }
+
+/* ---- Dark workshop cards (contrast on the white page, like the article
+   cards) ---- */
+.workshop-card {
+  background: #181818;
+  border: 1px solid #181818;
+  color: #e0e0e0;
+}
+.workshop-card:hover {
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+}
+.workshop-card-image {
+  background: #2a2a2a;
+}
+.workshop-card-image--placeholder {
+  color: #6a6a6a;
+}
+.workshop-card-title {
+  color: #ffffff;
+}
+.workshop-meta {
+  color: #cfcfcf;
+}
+.workshop-meta svg {
+  flex-shrink: 0;
+  color: #9a9a9a;
+}
+.workshop-card-authors {
+  color: #9a9a9a;
+}
+
+/* ---- Toolbar: sections (tabs) + grid / carousel toggle ---- */
+.workshops-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1.25rem;
+  margin: 0 auto 2rem;
+}
+.workshops-toolbar .workshops-tabs {
+  margin: 0;
+}
+
+/* ---- Carousel: one track of cards (same arrows / drag as the articles) ---- */
+.workshops-carousel .workshop-card {
+  flex: 0 0 320px;
+  max-width: 85vw;
+  scroll-snap-align: start;
+}
+@media (min-width: 1024px) {
+  /* Three cards per view. */
+  .workshops-carousel .workshop-card {
+    flex-basis: calc((100% - 3rem) / 3);
+  }
+}
+
+@media (max-width: 768px) {
+  /* Small screens: always the vertical list — no toggle. */
+  .workshops-view-toggle {
+    display: none;
+  }
+  .workshops-carousel .workshop-card {
+    flex: none;
+    width: 100%;
+    max-width: none;
+  }
+}
