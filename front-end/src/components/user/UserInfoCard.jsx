@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useSpring, animated } from '@react-spring/web';
-import { X, User, Camera, Eye, Upload, Loader, LogOut, Medal } from 'lucide-react';
+import { X, User, Camera, Eye, Upload, Loader, LogOut } from 'lucide-react';
+import MedalIcon from '../common/MedalIcon';
 import { useTranslation } from 'react-i18next';
 import { UserInfoCardUtils } from './UserInfoCardUtils.jsx';
 import axiosInstance from '../../utils/axiosConfig';
@@ -108,7 +109,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                   role="img"
                   aria-label={t('subscription.markTitle', 'Suscriptor/a de La Rabia')}
                 >
-                  <Medal strokeWidth={2.4} />
+                  <MedalIcon />
                 </span>
               )}
               {displayImageUrl ? (
@@ -181,7 +182,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                 </p>
                 {isSubscriber && (
                   <span className="user-subscriber-badge">
-                    <Medal size={14} strokeWidth={2.4} />
+                    <MedalIcon size={16} />
                     {t('subscription.badge', 'Suscriptor/a')}
                   </span>
                 )}
