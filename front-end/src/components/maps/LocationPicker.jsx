@@ -85,7 +85,7 @@ function LocationPicker({ lat, lng, onChange, initialQuery = '' }) {
       )}
 
       <div className="map-frame">
-        <MapContainer center={position || DEFAULT_CENTER} zoom={position ? 16 : 13} className="map-canvas">
+        <MapContainer center={position || DEFAULT_CENTER} zoom={position ? 16 : 15} className="map-canvas">
           <TileLayer url={OSM_TILES} attribution={OSM_ATTRIBUTION} />
           <ClickToPlace onPick={pick} />
           <FollowPosition position={position} />

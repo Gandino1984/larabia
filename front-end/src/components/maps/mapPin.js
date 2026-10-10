@@ -10,8 +10,8 @@ export const mapPinIcon = L.divIcon({
   iconAnchor: [15, 40]
 });
 
-// Default view when there's no position yet (Bilbao).
-export const DEFAULT_CENTER = [43.263, -2.935];
+// Default view when there's no position yet: Matiko (Uribarri, Bilbao).
+export const DEFAULT_CENTER = [43.269, -2.9255];
 
 export const OSM_TILES = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 export const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
