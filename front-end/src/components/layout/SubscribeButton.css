@@ -331,3 +331,34 @@
   font-weight: 600;
   line-height: 1.5;
 }
+
+/* Rocket "rabid" shake — same rhythm as the La Rabia logo (AnimatedLogo):
+   a ~0.5s burst of decaying jolts (sideways, up/down and tilting), then still
+   for the rest of the 3s loop. Scaled to the icon. Paused on hover so the
+   label reads calmly; off for reduced motion. */
+@keyframes subscribe-rocket-shake {
+  0%      { transform: translate(0, 0) rotate(0deg); }
+  2%      { transform: translate(-3px, -1.5px) rotate(-9deg); }
+  4%      { transform: translate(3px, 1.5px) rotate(9deg); }
+  6%      { transform: translate(-3px, 1.2px) rotate(-9deg); }
+  8%      { transform: translate(3px, -1.2px) rotate(9deg); }
+  10%     { transform: translate(-2px, -1px) rotate(-6deg); }
+  12%     { transform: translate(2px, 1px) rotate(6deg); }
+  14%     { transform: translate(-1px, -0.5px) rotate(-2deg); }
+  16%, 100% { transform: translate(0, 0) rotate(0deg); }
+}
+.subscribe-btn svg,
+.subscribe-modal__icon svg {
+  animation: subscribe-rocket-shake 3s linear infinite;
+  transform-origin: 50% 50%;
+}
+.subscribe-btn:hover svg,
+.subscribe-btn:focus-visible svg {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .subscribe-btn svg,
+  .subscribe-modal__icon svg {
+    animation: none;
+  }
+}
