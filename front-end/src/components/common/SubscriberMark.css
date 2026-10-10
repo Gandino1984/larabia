@@ -1,4 +1,4 @@
-/* Paid-subscriber mark (SubscriberMark): red ring + heart badge on avatars. */
+/* Paid-subscriber mark (SubscriberMark): gold ring + medal badge on avatars. */
 .subscriber-avatar {
   position: relative;
   display: inline-flex;
@@ -6,9 +6,9 @@
   line-height: 0;
   vertical-align: middle;
 }
-/* Red ring around the round photo (follows its border-radius). */
+/* Gold ring around the round photo (follows its border-radius). */
 .subscriber-avatar > :first-child {
-  outline: 2px solid #dc2626;
+  outline: 2px solid #d4af37;
   outline-offset: 1px;
 }
 .subscriber-avatar__mark {
@@ -19,26 +19,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44%;
+  width: 46%;
   aspect-ratio: 1;
-  min-width: 14px;
-  max-width: 22px;
+  min-width: 15px;
+  max-width: 24px;
   border: 2px solid #ffffff;
   border-radius: 50%;
-  background: #dc2626;
-  color: #ffffff;
+  background: linear-gradient(135deg, #f7e08a 0%, #d4af37 50%, #a8831c 100%);
+  color: #3d2c00;
   box-sizing: border-box;
   pointer-events: none;
 }
 .subscriber-avatar__mark svg {
-  width: 62%;
-  height: 62%;
+  width: 64%;
+  height: 64%;
 }
 
 /* Large framed photo on the user card: badge inside the frame's corner. */
 .subscriber-avatar__mark--framed {
   right: 6px;
   bottom: 6px;
-  width: 26px;
+  width: 28px;
   max-width: none;
 }

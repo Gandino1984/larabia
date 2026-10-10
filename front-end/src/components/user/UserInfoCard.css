@@ -580,7 +580,8 @@
 }
 .user-card-logout:hover { background: #c62828; color: #fff; }
 
-/* Paid-subscriber badge + "Gestionar suscripción" (Stripe customer portal). */
+/* Paid-subscriber badge (gold, with a medal) + "Gestionar suscripción"
+   (Stripe customer portal). */
 .user-subscriber-badge {
   display: inline-flex;
   align-items: center;
@@ -588,8 +589,8 @@
   margin-top: 0.4rem;
   padding: 0.25rem 0.6rem;
   border-radius: 4px;
-  background: #dc2626;
-  color: #ffffff;
+  background: linear-gradient(135deg, #f7e08a 0%, #d4af37 50%, #a8831c 100%);
+  color: #3d2c00;
   font-family: 'Source Code Pro', monospace;
   font-size: 0.75rem;
   font-weight: 700;
