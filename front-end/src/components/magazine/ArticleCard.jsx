@@ -6,6 +6,7 @@ import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import ArticleEngagementBar from './ArticleEngagementBar';
+import SubscriberMark from '../common/SubscriberMark';
 import './ArticleCard.css';
 
 // Resolve a user's avatar: Google users store a full URL, local uploads a filename.
@@ -19,10 +20,10 @@ const resolveAuthorImage = (img) => {
 function CardAuthorAvatar({ author }) {
   const [err, setErr] = useState(false);
   const url = resolveAuthorImage(author?.image_user);
-  if (!url || err) {
-    return <span className="card-author-avatar card-author-avatar--fallback">{author?.name_user?.charAt(0)?.toUpperCase() || '?'}</span>;
-  }
-  return <img src={url} alt={author.name_user} className="card-author-avatar" onError={() => setErr(true)} />;
+  const avatar = (!url || err)
+    ? <span className="card-author-avatar card-author-avatar--fallback">{author?.name_user?.charAt(0)?.toUpperCase() || '?'}</span>
+    : <img src={url} alt={author.name_user} className="card-author-avatar" onError={() => setErr(true)} />;
+  return <SubscriberMark userId={author?.id_user}>{avatar}</SubscriberMark>;
 }
 
 const CATEGORY_DISPLAY = {

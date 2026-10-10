@@ -9,6 +9,7 @@ const router = Router();
 router.get("/config", subscriptionApiController.getConfig);
 router.get("/me", subscriptionApiController.getMine);
 router.get("/status/:userId", subscriptionApiController.getStatus);
+router.get("/subscribers", subscriptionApiController.getSubscribers);
 router.post("/checkout", subscriptionApiController.createCheckout);
 router.post("/portal", subscriptionApiController.createPortal);
 

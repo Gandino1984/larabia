@@ -20,7 +20,7 @@ let slideInPlayed = false;
 function SubscribeButton({ ready = true }) {
   const { t } = useTranslation();
   const { currentUser, isSuperAdmin } = useAuth();
-  const { navigateToLogin, showInfo, showEditor, showArticleDetail } = useUI();
+  const { navigateToLogin, showInfo, showSuccess, showEditor, showArticleDetail } = useUI();
   const subscription = useSubscription();
   const [isIn, setIsIn] = useState(slideInPlayed);
   const timerRef = useRef(null);
@@ -33,6 +33,20 @@ function SubscribeButton({ ready = true }) {
     }, 950);
     return () => clearTimeout(timerRef.current);
   }, [ready]);
+
+  // Back from Stripe Checkout: the thank-you / cancelled notice, once the page
+  // has finished loading (so it isn't shown behind the loading screen).
+  const notice = subscription?.checkoutNotice;
+  const markNoticeShown = subscription?.markCheckoutNoticeShown;
+  useEffect(() => {
+    if (!ready || !notice) return undefined;
+    const timer = setTimeout(() => {
+      if (notice === 'success') showSuccess(t('subscription.thanks', '¡Gracias por suscribirte a La Rabia!'));
+      else if (notice === 'cancel') showInfo(t('subscription.cancelled', 'Pago cancelado. Puedes suscribirte cuando quieras.'));
+      markNoticeShown?.();
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [ready, notice, markNoticeShown, showSuccess, showInfo, t]);
 
   if (!subscription || subscription.isSubscriber) return null;
   if (!subscription.enabled && !isSuperAdmin) return null;

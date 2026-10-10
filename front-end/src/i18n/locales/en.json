@@ -551,5 +551,9 @@
   "subscription.portalError": "Could not open subscription management",
   "subscription.badge": "Subscriber",
   "subscription.manage": "Manage subscription",
-  "subscription.preview": "Preview (super admins only): payments will be enabled once Stripe is connected on the server."
+  "subscription.preview": "Preview (super admins only): payments will be enabled once Stripe is connected on the server.",
+  "subscription.markTitle": "La Rabia subscriber",
+  "notifications.membership.title": "Subscription active",
+  "notifications.membership.message": "Thank you for supporting La Rabia.",
+  "notifications.membership.messageRenews": "Thank you for supporting La Rabia. Next renewal: {{date}}"
 }

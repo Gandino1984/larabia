@@ -8,6 +8,7 @@ import { Calendar, User, ArrowLeft, ChevronLeft, ChevronRight, LayoutGrid, Galle
 import ArticleEngagementBar from './ArticleEngagementBar';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import ArticleFilters from '../common/ArticleFilters';
+import SubscriberMark from '../common/SubscriberMark';
 import { EMPTY_ARTICLE_FILTERS, applyArticleFilters, countActiveFilters } from '../../utils/articleFilters';
 import './ArticlesList.css';
 import './ArticlesCarousel.css';
@@ -39,14 +40,11 @@ function getAuthorImageUrl(author) {
 function AuthorAvatar({ author }) {
   const [imgError, setImgError] = useState(false);
   const url = getAuthorImageUrl(author);
-  if (!url || imgError) {
-    return (
-      <span className="list-author-avatar list-author-avatar--fallback">
-        {author.name_user?.charAt(0)?.toUpperCase() || '?'}
-      </span>
-    );
-  }
-  return (
+  const avatar = (!url || imgError) ? (
+    <span className="list-author-avatar list-author-avatar--fallback">
+      {author.name_user?.charAt(0)?.toUpperCase() || '?'}
+    </span>
+  ) : (
     <img
       src={url}
       alt={author.name_user}
@@ -54,6 +52,7 @@ function AuthorAvatar({ author }) {
       onError={() => setImgError(true)}
     />
   );
+  return <SubscriberMark userId={author.id_user}>{avatar}</SubscriberMark>;
 }
 
 function getPageNumbers(currentPage, totalPages) {

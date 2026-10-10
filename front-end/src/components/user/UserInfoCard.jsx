@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { UserInfoCardUtils } from './UserInfoCardUtils.jsx';
 import axiosInstance from '../../utils/axiosConfig';
 import { useSubscription } from '../../app_context/SubscriptionContext';
+import '../common/SubscriberMark.css';
 import './UserInfoCard.css';
 
 const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
@@ -101,6 +102,15 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                 </div>
               )}
 
+              {isSubscriber && (
+                <span
+                  className="subscriber-avatar__mark subscriber-avatar__mark--framed"
+                  role="img"
+                  aria-label={t('subscription.markTitle', 'Suscriptor/a de La Rabia')}
+                >
+                  <Heart fill="currentColor" strokeWidth={0} />
+                </span>
+              )}
               {displayImageUrl ? (
                 <img
                   src={displayImageUrl}

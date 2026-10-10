@@ -11,6 +11,7 @@ import { X, Trash2, Send, User } from 'lucide-react';
 import { useAuth } from '../../app_context/AuthContext';
 import { useEngagement } from '../../app_context/EngagementContext';
 import './CommentsModal.css';
+import SubscriberMark from '../common/SubscriberMark';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 const resolveAvatar = (img) => {
@@ -21,13 +22,13 @@ const resolveAvatar = (img) => {
 
 const DELETE_DELAY = 5; // seconds
 
-function CommentAvatar({ name, image }) {
+function CommentAvatar({ name, image, userId }) {
   const [err, setErr] = useState(false);
   const url = resolveAvatar(image);
-  if (!url || err) {
-    return <span className="comment-avatar comment-avatar--fallback">{name?.charAt(0)?.toUpperCase() || <User size={16} />}</span>;
-  }
-  return <img src={url} alt={name} className="comment-avatar" onError={() => setErr(true)} />;
+  const avatar = (!url || err)
+    ? <span className="comment-avatar comment-avatar--fallback">{name?.charAt(0)?.toUpperCase() || <User size={16} />}</span>
+    : <img src={url} alt={name} className="comment-avatar" onError={() => setErr(true)} />;
+  return <SubscriberMark userId={userId}>{avatar}</SubscriberMark>;
 }
 
 function CommentsModal({ articleId, articleTitle, onClose }) {
@@ -168,7 +169,7 @@ function CommentsModal({ articleId, articleTitle, onClose }) {
               const counting = pendingDelete[c.id_comment];
               return (
                 <div key={c.id_comment} className={`comment-item ${counting !== undefined ? 'comment-item--deleting' : ''}`}>
-                  <CommentAvatar name={c.author_name} image={c.author_image} />
+                  <CommentAvatar name={c.author_name} image={c.author_image} userId={c.user_id} />
                   <div className="comment-body">
                     <div className="comment-meta">
                       <span className="comment-author">{c.author_name}</span>

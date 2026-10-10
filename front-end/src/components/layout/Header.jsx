@@ -22,6 +22,7 @@ import AnimatedLogo from './AnimatedLogo';
 import ContactModal from '../contact/ContactModal';
 import NewsletterModal from '../newsletter/NewsletterModal';
 import RecommendationsModal from '../admin/RecommendationsModal';
+import SubscriberMark from '../common/SubscriberMark';
 import './Header.css';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -509,12 +510,14 @@ function Header({ ready = true }) {
             {currentUser ? (
               <button className="user-info-btn" onClick={handleUserClick} title={currentUser.name_user}>
                 {userImageUrl && !imageLoadError ? (
-                  <img
-                    src={userImageUrl}
-                    alt={currentUser.name_user}
-                    className="user-profile-image"
-                    onError={() => setImageLoadError(true)}
-                  />
+                  <SubscriberMark userId={currentUser.id_user}>
+                    <img
+                      src={userImageUrl}
+                      alt={currentUser.name_user}
+                      className="user-profile-image"
+                      onError={() => setImageLoadError(true)}
+                    />
+                  </SubscriberMark>
                 ) : (
                   <User size={20} />
                 )}

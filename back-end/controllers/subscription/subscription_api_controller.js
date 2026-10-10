@@ -53,7 +53,8 @@ const serialize = (row) => ({
     status: row?.status || null,
     plan: row?.plan || null,
     current_period_end: row?.current_period_end || null,
-    cancel_at_period_end: !!row?.cancel_at_period_end
+    cancel_at_period_end: !!row?.cancel_at_period_end,
+    since: row?.created_at || null
 });
 
 // Copy a Stripe subscription onto the user's row.
@@ -80,6 +81,7 @@ async function syncSubscription(sub, userIdHint) {
     };
     if (row) await row.update(values);
     else await reader_subscription_model.create({ user_id: userId, ...values });
+    subscribersCache = null;
 }
 
 // GET /subscription/config — is it on, and the plan prices.
@@ -107,6 +109,27 @@ async function getStatus(req, res) {
     if (!Number.isFinite(userId)) return res.status(400).json({ error: 'Usuario no válido' });
     const row = await reader_subscription_model.findOne({ where: { user_id: userId } });
     res.json({ error: null, data: { active: isActive(row) } });
+}
+
+// GET /subscription/subscribers — public: ids of the users with an active
+// subscription (to mark their profile photos). Briefly cached.
+let subscribersCache = null;
+let subscribersCachedAt = 0;
+async function getSubscribers(req, res) {
+    try {
+        if (!subscribersCache || Date.now() - subscribersCachedAt > 60 * 1000) {
+            const rows = await reader_subscription_model.findAll({
+                where: { status: ACTIVE_STATUSES },
+                attributes: ['user_id']
+            });
+            subscribersCache = rows.map((r) => r.user_id);
+            subscribersCachedAt = Date.now();
+        }
+        res.json({ error: null, data: subscribersCache });
+    } catch (err) {
+        console.error('[subscription] subscribers error:', err.message);
+        res.json({ error: null, data: [] });
+    }
 }
 
 // POST /subscription/checkout { plan } — start Stripe Checkout; returns its URL.
@@ -207,4 +230,4 @@ async function handleWebhook(req, res) {
     }
 }
 
-export default { getConfig, getMine, getStatus, createCheckout, createPortal, handleWebhook };
+export default { getConfig, getMine, getStatus, getSubscribers, createCheckout, createPortal, handleWebhook };

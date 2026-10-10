@@ -551,5 +551,9 @@
   "subscription.portalError": "No se pudo abrir la gestión de la suscripción",
   "subscription.badge": "Suscriptor/a",
   "subscription.manage": "Gestionar suscripción",
-  "subscription.preview": "Vista previa (solo super admins): los pagos se activarán cuando Stripe esté conectado en el servidor."
+  "subscription.preview": "Vista previa (solo super admins): los pagos se activarán cuando Stripe esté conectado en el servidor.",
+  "subscription.markTitle": "Suscriptor/a de La Rabia",
+  "notifications.membership.title": "Suscripción activa",
+  "notifications.membership.message": "Gracias por apoyar La Rabia.",
+  "notifications.membership.messageRenews": "Gracias por apoyar La Rabia. Próxima renovación: {{date}}"
 }

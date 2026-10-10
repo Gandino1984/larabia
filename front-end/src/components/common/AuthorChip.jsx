@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { useUI } from '../../app_context/UIContext';
 import './AuthorChip.css';
+import SubscriberMark from './SubscriberMark';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
@@ -45,18 +46,20 @@ function AuthorChip({ author, name, clickable = true, tone = 'light' }) {
       className={`author-chip author-chip--${tone} ${canOpen ? 'author-chip--clickable' : ''}`}
       {...interactive}
     >
-      {url && !imgError ? (
-        <img
-          src={url}
-          alt=""
-          className="author-chip__avatar"
-          onError={() => setImgError(true)}
-        />
-      ) : (
-        <span className="author-chip__avatar author-chip__avatar--fallback" aria-hidden="true">
-          {displayName.charAt(0).toUpperCase() || '?'}
-        </span>
-      )}
+      <SubscriberMark userId={author?.id_user}>
+        {url && !imgError ? (
+          <img
+            src={url}
+            alt=""
+            className="author-chip__avatar"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <span className="author-chip__avatar author-chip__avatar--fallback" aria-hidden="true">
+            {displayName.charAt(0).toUpperCase() || '?'}
+          </span>
+        )}
+      </SubscriberMark>
       <span className="author-chip__name">{displayName}</span>
     </span>
   );

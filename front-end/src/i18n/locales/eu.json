@@ -551,5 +551,9 @@
   "subscription.portalError": "Ezin izan da harpidetzaren kudeaketa ireki",
   "subscription.badge": "Harpideduna",
   "subscription.manage": "Kudeatu harpidetza",
-  "subscription.preview": "Aurrebista (super adminentzat soilik): ordainketak Stripe zerbitzarian konektatzean aktibatuko dira."
+  "subscription.preview": "Aurrebista (super adminentzat soilik): ordainketak Stripe zerbitzarian konektatzean aktibatuko dira.",
+  "subscription.markTitle": "La Rabiako harpideduna",
+  "notifications.membership.title": "Harpidetza aktibo",
+  "notifications.membership.message": "Eskerrik asko La Rabia babesteagatik.",
+  "notifications.membership.messageRenews": "Eskerrik asko La Rabia babesteagatik. Hurrengo berritzea: {{date}}"
 }

@@ -29,11 +29,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <PendingReviewProvider>
                     <WorkshopProvider>
                       <EngagementProvider>
-                        <NotificationProvider>
-                          <SubscriptionProvider>
+                        <SubscriptionProvider>
+                          <NotificationProvider>
                             <App />
-                          </SubscriptionProvider>
-                        </NotificationProvider>
+                          </NotificationProvider>
+                        </SubscriptionProvider>
                       </EngagementProvider>
                     </WorkshopProvider>
                   </PendingReviewProvider>

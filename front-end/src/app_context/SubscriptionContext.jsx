@@ -1,26 +1,42 @@
 // magazine-front/src/app_context/SubscriptionContext.jsx
 //
 // Paid reader subscriptions (Stripe). Knows whether the feature is on (the
-// back-end reports it once Stripe is configured), the plan prices, and the
-// signed-in reader's own subscription. Starts Stripe Checkout / the customer
-// portal (both are Stripe-hosted pages: card data never touches our site) and
-// handles the return from Checkout (?subscription=success|cancel).
+// back-end reports it once Stripe is configured), the plan prices, the
+// signed-in reader's own subscription, and which users subscribe (to mark
+// their profile photos). Starts Stripe Checkout / the customer portal (both
+// Stripe-hosted: card data never touches our site) and handles the return from
+// Checkout (?subscription=success|cancel).
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
 import { useUI } from './UIContext';
+import { useTranslation } from 'react-i18next';
 
 const SubscriptionContext = createContext(null);
+
+// Read once at load, before anything cleans the URL.
+const initialCheckoutResult = (() => {
+  try {
+    return new URLSearchParams(window.location.search).get('subscription');
+  } catch {
+    return null;
+  }
+})();
 
 export const SubscriptionProvider = ({ children }) => {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
-  const { showSuccess, showInfo, showError } = useUI();
+  const { showError } = useUI();
   const [config, setConfig] = useState({ enabled: false, prices: {} });
   const [mine, setMine] = useState(null);
+  const [subscriberIds, setSubscriberIds] = useState(() => new Set());
   const [showModal, setShowModal] = useState(false);
   const [busy, setBusy] = useState(false);
+  // 'success' | 'cancel' after returning from Checkout. Its notice is shown by
+  // SubscribeButton once the page has finished loading (then marked done).
+  const [checkoutResult] = useState(initialCheckoutResult);
+  const [checkoutNoticeDone, setCheckoutNoticeDone] = useState(false);
+  const userId = currentUser?.id_user || null;
 
   useEffect(() => {
     axiosInstance.get('/subscription/config')
@@ -28,42 +44,71 @@ export const SubscriptionProvider = ({ children }) => {
       .catch(() => setConfig({ enabled: false, prices: {} }));
   }, []);
 
-  const refresh = useCallback(async () => {
-    if (!currentUser?.id_user) { setMine(null); return; }
+  const loadSubscribers = useCallback(() => {
+    axiosInstance.get('/subscription/subscribers')
+      .then((res) => setSubscriberIds(new Set((res.data?.data || []).map(Number))))
+      .catch(() => {});
+  }, []);
+  useEffect(() => { loadSubscribers(); }, [loadSubscribers]);
+
+  // The signed-in reader's own subscription. Returns it (null when none).
+  const fetchMine = useCallback(async (uid) => {
+    if (!uid) return null;
     try {
-      const res = await axiosInstance.get('/subscription/me', { headers: { 'x-user-id': currentUser.id_user } });
-      setMine(res.data?.data || null);
+      const res = await axiosInstance.get('/subscription/me', { headers: { 'x-user-id': uid } });
+      return res.data?.data || null;
     } catch {
-      setMine(null);
+      return null;
     }
-  }, [currentUser?.id_user]);
+  }, []);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  const refresh = useCallback(async () => {
+    const data = await fetchMine(userId);
+    setMine(data);
+    return data;
+  }, [fetchMine, userId]);
 
-  // Back from Stripe Checkout.
+  // Load it whenever the signed-in user changes (and clear it on logout).
   useEffect(() => {
+    if (!userId) { setMine(null); return undefined; }
+    let cancelled = false;
+    fetchMine(userId).then((data) => { if (!cancelled) setMine(data); });
+    return () => { cancelled = true; };
+  }, [userId, fetchMine]);
+
+  // Back from a successful Checkout: Stripe's webhook may land a moment after
+  // the redirect, so check again a few times until the subscription is active.
+  useEffect(() => {
+    if (checkoutResult !== 'success' || !userId) return undefined;
+    let cancelled = false;
+    let attempt = 0;
+    const tick = async () => {
+      if (cancelled) return;
+      const data = await fetchMine(userId);
+      if (cancelled) return;
+      setMine(data);
+      if (data?.active) { loadSubscribers(); return; }
+      attempt += 1;
+      if (attempt < 10) setTimeout(tick, 2000);
+    };
+    tick();
+    return () => { cancelled = true; };
+  }, [checkoutResult, userId, fetchMine, loadSubscribers]);
+
+  // Clean ?subscription=… from the address bar.
+  useEffect(() => {
+    if (!initialCheckoutResult) return;
     const params = new URLSearchParams(window.location.search);
-    const result = params.get('subscription');
-    if (!result) return;
-    if (result === 'success') {
-      showSuccess(t('subscription.thanks', '¡Gracias por suscribirte a La Rabia!'));
-      // The webhook may land a moment after the redirect.
-      refresh();
-      setTimeout(refresh, 4000);
-    } else if (result === 'cancel') {
-      showInfo(t('subscription.cancelled', 'Pago cancelado. Puedes suscribirte cuando quieras.'));
-    }
     params.delete('subscription');
     const query = params.toString();
     window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startCheckout = useCallback(async (plan) => {
-    if (!currentUser?.id_user) return;
+    if (!userId) return;
     setBusy(true);
     try {
-      const res = await axiosInstance.post('/subscription/checkout', { plan }, { headers: { 'x-user-id': currentUser.id_user } });
+      const res = await axiosInstance.post('/subscription/checkout', { plan }, { headers: { 'x-user-id': userId } });
       const url = res.data?.data?.url;
       if (url) window.location.assign(url);
       else showError(res.data?.error || t('subscription.error', 'No se pudo iniciar el pago'));
@@ -72,13 +117,13 @@ export const SubscriptionProvider = ({ children }) => {
     } finally {
       setBusy(false);
     }
-  }, [currentUser?.id_user, showError, t]);
+  }, [userId, showError, t]);
 
   const openPortal = useCallback(async () => {
-    if (!currentUser?.id_user) return;
+    if (!userId) return;
     setBusy(true);
     try {
-      const res = await axiosInstance.post('/subscription/portal', {}, { headers: { 'x-user-id': currentUser.id_user } });
+      const res = await axiosInstance.post('/subscription/portal', {}, { headers: { 'x-user-id': userId } });
       const url = res.data?.data?.url;
       if (url) window.location.assign(url);
     } catch (err) {
@@ -86,7 +131,13 @@ export const SubscriptionProvider = ({ children }) => {
     } finally {
       setBusy(false);
     }
-  }, [currentUser?.id_user, showError, t]);
+  }, [userId, showError, t]);
+
+  // Is this user a paying subscriber? (profile-photo mark)
+  const isUserSubscriber = useCallback(
+    (id) => (id != null && subscriberIds.has(Number(id))) || (!!mine?.active && Number(id) === Number(userId)),
+    [subscriberIds, mine?.active, userId]
+  );
 
   const value = {
     enabled: !!config.enabled,
@@ -97,6 +148,9 @@ export const SubscriptionProvider = ({ children }) => {
     busy,
     startCheckout,
     openPortal,
+    isUserSubscriber,
+    checkoutNotice: checkoutNoticeDone ? null : checkoutResult,
+    markCheckoutNoticeShown: useCallback(() => setCheckoutNoticeDone(true), []),
     showModal,
     openModal: useCallback(() => setShowModal(true), []),
     closeModal: useCallback(() => setShowModal(false), [])

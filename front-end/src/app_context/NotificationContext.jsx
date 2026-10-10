@@ -9,6 +9,7 @@
 // Types implemented:
 //  - profile:  users who can create content but have no author profile yet.
 //  - article / project:  content published since the user last opened the bell.
+//  - membership:  the reader's paid subscription became active (until seen).
 //
 // "New content" notifications accumulate (persist as unread) until the user
 // opens the bell — the last-seen timestamp is stored per user in localStorage,
@@ -21,6 +22,7 @@ import { useAuthor } from './AuthorContext';
 import { useUI } from './UIContext';
 import { useMagazine } from './MagazineContext';
 import { useEngagement } from './EngagementContext';
+import { useSubscription } from './SubscriptionContext';
 
 const NotificationContext = createContext(null);
 const MAX_CONTENT_NOTIFS = 30;
@@ -32,6 +34,8 @@ export const NotificationProvider = ({ children }) => {
   const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail } = useUI();
   const { setSelectedArticle, setSelectedProject } = useMagazine();
   const { subscribedProjectIds } = useEngagement();
+  const subscription = useSubscription();
+  const membership = subscription?.mine;
 
   const [publishedArticles, setPublishedArticles] = useState([]);
   const [publishedProjects, setPublishedProjects] = useState([]);
@@ -39,6 +43,15 @@ export const NotificationProvider = ({ children }) => {
   const [lastSeen, setLastSeen] = useState(null);
 
   const seenKey = currentUser ? `larabia_notif_seen_${currentUser.id_user}` : null;
+  // The membership notice has its own "seen" mark (the subscription it was
+  // shown for), so every new subscriber sees it once — even if they opened the
+  // bell between paying and the notice appearing.
+  const membershipKey = currentUser ? `larabia_membership_seen_${currentUser.id_user}` : null;
+  const [membershipSeen, setMembershipSeen] = useState(null);
+  useEffect(() => {
+    if (!membershipKey) { setMembershipSeen(null); return; }
+    try { setMembershipSeen(localStorage.getItem(membershipKey)); } catch { setMembershipSeen(null); }
+  }, [membershipKey]);
 
   // Initialise the last-seen mark. First ever load for a user is set to "now"
   // so they aren't flooded with the whole publication history.
@@ -90,7 +103,12 @@ export const NotificationProvider = ({ children }) => {
     const now = Date.now();
     if (seenKey) { try { localStorage.setItem(seenKey, String(now)); } catch { /* ignore */ } }
     setLastSeen(now);
-  }, [seenKey]);
+    if (membershipKey && membership?.active && membership.since) {
+      const mark = String(membership.since);
+      try { localStorage.setItem(membershipKey, mark); } catch { /* ignore */ }
+      setMembershipSeen(mark);
+    }
+  }, [seenKey, membershipKey, membership?.active, membership?.since]);
 
   const notifications = useMemo(() => {
     const list = [];
@@ -177,6 +195,26 @@ export const NotificationProvider = ({ children }) => {
         }
       }
 
+      // Paid subscription activated (shown until the bell is opened).
+      if (membership?.active && membership.since) {
+        const ts = new Date(membership.since).getTime();
+        if (membershipSeen !== String(membership.since)) {
+          const renews = membership.current_period_end
+            ? new Date(membership.current_period_end).toLocaleDateString()
+            : null;
+          content.push({
+            id: `membership-${ts}`,
+            type: 'membership',
+            ts,
+            title: t('notifications.membership.title', 'Suscripción activa'),
+            message: renews
+              ? t('notifications.membership.messageRenews', { date: renews, defaultValue: 'Gracias por apoyar La Rabia. Próxima renovación: {{date}}' })
+              : t('notifications.membership.message', 'Gracias por apoyar La Rabia.'),
+            onClick: () => subscription?.openPortal?.()
+          });
+        }
+      }
+
       content.sort((x, y) => y.ts - x.ts);
       list.push(...content.slice(0, MAX_CONTENT_NOTIFS));
     }
@@ -184,7 +222,7 @@ export const NotificationProvider = ({ children }) => {
     return list;
   }, [
     profilesReady, currentUser, canCreateContent, authorProfiles, lastSeen,
-    publishedArticles, publishedProjects, subscribedProjectIds,
+    publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

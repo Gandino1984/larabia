@@ -9,21 +9,18 @@ import { ChevronLeft, ChevronRight, Calendar, Share2, FileText, Image as ImageIc
 import SectionPreviews from './SectionPreviews';
 import ScrollHint from '../common/ScrollHint';
 import RollText from '../common/RollText';
+import SubscriberMark from '../common/SubscriberMark';
 import './HomePage.css';
 
 function AuthorAvatar({ author, getUrl }) {
   const [imgError, setImgError] = useState(false);
   const url = getUrl(author);
 
-  if (!url || imgError) {
-    return (
-      <span className="hero-author-avatar hero-author-avatar--fallback">
-        {author.name_user?.charAt(0)?.toUpperCase() || '?'}
-      </span>
-    );
-  }
-
-  return (
+  const avatar = (!url || imgError) ? (
+    <span className="hero-author-avatar hero-author-avatar--fallback">
+      {author.name_user?.charAt(0)?.toUpperCase() || '?'}
+    </span>
+  ) : (
     <img
       src={url}
       alt={author.name_user}
@@ -31,6 +28,7 @@ function AuthorAvatar({ author, getUrl }) {
       onError={() => setImgError(true)}
     />
   );
+  return <SubscriberMark userId={author.id_user}>{avatar}</SubscriberMark>;
 }
 
 // Play the hero staggered entrance + the scroll-hint overlay only once per
