@@ -63,6 +63,9 @@ const config = {
             'x-article-id',
             'X-Project-ID',
             'x-project-id',
+            // Workshop cover upload (was missing: browsers blocked the upload)
+            'X-Workshop-ID',
+            'x-workshop-id',
             'Content-Disposition'
         ],
         exposedHeaders: ['Content-Disposition'],

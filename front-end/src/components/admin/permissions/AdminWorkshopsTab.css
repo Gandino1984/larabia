@@ -24,6 +24,8 @@
 .admin-workshops-chip {
   display: inline-flex; align-items: center; gap: 6px;
   background: #eee; border-radius: 999px; padding: 3px 8px 3px 4px; font-size: 0.82rem;
+  /* Dark text: the site's default text colour is light (dark theme). */
+  color: #1a1a1a; font-weight: 600;
 }
 .admin-workshops-chip img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
 .admin-workshops-chip button { background: none; border: none; cursor: pointer; display: inline-flex; color: #a00; padding: 0; }
