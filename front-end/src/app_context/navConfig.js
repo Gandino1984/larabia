@@ -15,9 +15,9 @@ export const DEFAULT_NAV = [
   // Reorderable + hideable + relabelable, but its behavior is fixed.
   { id: 'projects', kind: 'projects', visible: true, min_role: 'all',
     label: { es: 'Proyectos', en: 'Projects' } },
-  { id: 'authors', kind: 'link', visible: true, min_role: 'all',
-    label: { es: 'Autoras/es', en: 'Authors' },
-    action: { type: 'section', value: 'authors' } },
+  { id: 'talleres', kind: 'link', visible: true, min_role: 'all',
+    label: { es: 'Talleres', en: 'Workshops' },
+    action: { type: 'section', value: 'talleres' } },
   { id: 'more', kind: 'group', visible: true, min_role: 'all',
     label: { es: 'Más', en: 'More' },
     children: [
@@ -39,8 +39,8 @@ export const DEFAULT_NAV = [
         ] },
       { id: 'internacional', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Internacional', en: 'International' }, action: { type: 'category', value: 'internacional' } },
-      { id: 'talleres', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Talleres', en: 'Workshops' }, action: { type: 'section', value: 'talleres' } },
+      { id: 'authors', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Autoras/es', en: 'Authors' }, action: { type: 'section', value: 'authors' } },
       { id: 'contact', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Contacto', en: 'Contact' }, action: { type: 'modal', value: 'contact' } },
       { id: 'newsletter', kind: 'link', visible: true, min_role: 'all',
