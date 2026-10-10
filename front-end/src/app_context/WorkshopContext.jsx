@@ -51,6 +51,9 @@ export const WorkshopProvider = ({ children }) => {
       setSelectedWorkshop(res.data.data);
       return { success: true, data: res.data.data };
     } catch (err) {
+      // Not allowed to open it: the caller guides the reader (login / subscribe).
+      const code = err.response?.status === 403 ? err.response?.data?.code : null;
+      if (code) return { error: err.response.data.error, code };
       const msg = err.response?.data?.error || 'Error al cargar el taller';
       showError(msg);
       return { error: msg };

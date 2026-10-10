@@ -1,10 +1,11 @@
 // magazine-front/src/components/workshops/WorkshopsList.jsx
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, MapPin, Users, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useAuth } from '../../app_context/AuthContext';
+import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
 import CreateWorkshopModal from './CreateWorkshopModal';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import AuthorChip from '../common/AuthorChip';
@@ -68,7 +69,12 @@ function WorkshopsList() {
     fetchWorkshops();
   }, [fetchWorkshops]);
 
+  // Anyone sees the list; opening a workshop needs sign-in + subscription
+  // (or being on the magazine team).
+  const { guard, status: accessStatus } = useWorkshopAccess();
+  const locked = accessStatus !== 'allowed';
   const openWorkshop = (w) => {
+    if (!guard()) return;
     setSelectedWorkshop(w);
     navigateToWorkshopDetail();
   };
@@ -89,6 +95,11 @@ function WorkshopsList() {
             ? <img src={cover} alt={w.title_workshop} onError={(e) => { e.target.style.display = 'none'; }} />
             : <div className="workshop-card-image--placeholder"><Users size={32} /></div>}
           {w.is_full && <span className="workshop-badge workshop-badge--full">{t('workshops.full')}</span>}
+          {locked && (
+            <span className="workshop-badge workshop-badge--locked">
+              <Lock size={12} /> {t('workshops.lockedBadge', 'Para suscriptores')}
+            </span>
+          )}
         </div>
         <div className="workshop-card-body">
           <h3 className="workshop-card-title">{w.title_workshop}</h3>

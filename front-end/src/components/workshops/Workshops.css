@@ -404,3 +404,17 @@
   font-size: 0.88rem;
   font-weight: 600;
 }
+
+/* Cards for readers without access (not signed in / not subscribed). */
+.workshop-badge--locked {
+  top: auto;
+  right: auto;
+  bottom: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+}

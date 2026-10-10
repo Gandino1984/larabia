@@ -39,8 +39,9 @@ async function requireWorkshopManager(req, res, workshopId) {
 }
 
 /**
- * Anyone can browse workshops; BOOKING is for paying subscribers (the
- * magazine team — editors, admins, super admins — books without subscribing).
+ * Anyone can see the workshop LIST; opening a workshop and BOOKING it is for
+ * paying subscribers (the magazine team — editors, admins, super admins —
+ * has access without subscribing).
  * Resolves the caller's standing: { user, code } where code is null (can book),
  * 'login_required' or 'subscription_required'.
  */
@@ -54,16 +55,17 @@ async function workshopAccess(req) {
 }
 
 /**
- * Booking gate. Sends a 403 with the `code` the front-end uses — never a 401,
- * which logs the reader out. Returns the user when they can book.
+ * Workshop page + booking gate. Sends a 403 with the `code` the front-end
+ * uses — never a 401, which logs the reader out. Returns the user when
+ * they're allowed.
  */
 async function requireWorkshopAccess(req, res) {
     const { user, code } = await workshopAccess(req);
     if (!code) return user;
     res.status(403).json({
         error: code === 'login_required'
-            ? 'Inicia sesión para reservar plaza en los talleres'
-            : 'Las reservas de talleres son exclusivas para personas suscriptoras de la revista',
+            ? 'Inicia sesión para ver el taller y reservar plaza'
+            : 'Los talleres son exclusivos para personas suscriptoras de la revista',
         code
     });
     return null;
@@ -80,24 +82,23 @@ async function getAll(req, res) {
     }
 }
 
-// Public detail. The participants list (names + photos of who booked) is
-// only shown to those who can book; everyone sees the counts. Adds
-// `reserved_by_me` and `booking_code` (null | 'login_required' |
-// 'subscription_required') for the reserve button.
+// Workshop page: subscribers and the magazine team only (the list is public).
+// Adds `reserved_by_me` and `booking_code` (always null here — kept so the
+// front-end's reserve button logic stays uniform).
 async function getById(req, res) {
     try {
+        const user = await requireWorkshopAccess(req, res);
+        if (!user) return;
         const { id_workshop } = req.params;
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
         const { error, data } = await magazineWorkshopController.getById(id_workshop);
         if (error) return res.status(404).json({ error });
-        const { user, code } = await workshopAccess(req);
         const participants = data.participants || [];
         const out = {
             ...data,
-            reserved_by_me: !!user && participants.some((p) => p.id_user === user.id_user),
-            booking_code: code
+            reserved_by_me: participants.some((p) => p.id_user === user.id_user),
+            booking_code: null
         };
-        if (code) delete out.participants;
         res.json({ error, data: out });
     } catch (err) {
         console.error("-> workshop api getById() - Error =", err);

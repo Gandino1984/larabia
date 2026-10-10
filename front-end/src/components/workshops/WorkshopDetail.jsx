@@ -40,9 +40,19 @@ function WorkshopDetail() {
 
   const id = selectedWorkshop?.id_workshop;
 
+  // Booking / access is for subscribers (and the magazine team).
+  const { guard } = useWorkshopAccess();
+
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (id) fetchWorkshopById(id);
+    if (!id) return;
+    fetchWorkshopById(id).then((res) => {
+      // Not allowed to open it: back to the list and guide the reader.
+      if (res?.code) {
+        navigateToTalleres();
+        guard(res.code === 'login_required' ? 'login' : 'subscribe');
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -59,8 +69,6 @@ function WorkshopDetail() {
     || (w.authors || []).some(a => a.id_user === currentUser.id_user)
   );
 
-  // Booking is for subscribers (and the magazine team): sign in / subscribe.
-  const { guard } = useWorkshopAccess();
   const bookingCode = !currentUser ? 'login_required' : (w?.booking_code || null);
 
   // Back to the workshops list (the header's arrow does the same, but this one

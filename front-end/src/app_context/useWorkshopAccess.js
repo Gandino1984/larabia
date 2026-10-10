@@ -1,9 +1,9 @@
 // magazine-front/src/app_context/useWorkshopAccess.js
 //
-// Anyone can browse workshops; BOOKING a place is for paying subscribers (the
-// magazine team — editors, admins, super admins — books without subscribing).
-// The back-end enforces it; this guides the reader when they try to book:
-// sign in first, or subscribe (opens the plan picker with a note).
+// Anyone sees the workshop cards; OPENING a workshop and booking a place is
+// for paying subscribers (the magazine team — editors, admins, super admins —
+// has access without subscribing). The back-end enforces it; this guides the
+// reader: sign in first, or subscribe (opens the plan picker with a note).
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './AuthContext';

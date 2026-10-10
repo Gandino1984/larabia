@@ -556,7 +556,7 @@
   "notifications.membership.title": "Suscripción activa",
   "notifications.membership.message": "Gracias por apoyar La Rabia.",
   "notifications.membership.messageRenews": "Gracias por apoyar La Rabia. Próxima renovación: {{date}}",
-  "workshops.gate.login": "Inicia sesión para reservar plaza en los talleres",
+  "workshops.gate.login": "Inicia sesión para ver los talleres y reservar plaza",
   "workshops.gate.title": "Talleres para personas suscriptoras",
   "workshops.gate.loginText": "Inicia sesión con tu cuenta de suscriptor/a para ver el calendario de talleres y reservar tu plaza.",
   "workshops.gate.subscribeText": "Los talleres de La Rabia son exclusivos para quienes apoyan la revista con su suscripción. Suscríbete para ver el calendario y reservar plaza en los talleres y en los talleres infantiles.",
@@ -566,7 +566,7 @@
   "workshops.tabGeneral": "Talleres",
   "workshops.tabKids": "Talleres infantiles",
   "workshops.emptyKids": "Todavía no hay talleres infantiles programados.",
-  "subscription.reasonWorkshops": "Reservar plaza en los talleres es exclusivo para personas suscriptoras. Suscríbete para reservar tu plaza.",
+  "subscription.reasonWorkshops": "Los talleres son exclusivos para personas suscriptoras. Suscríbete para ver cada taller y reservar tu plaza.",
   "workshops.backToList": "Volver a talleres",
   "workshops.map.directions": "Cómo llegar",
   "workshops.map.defaultPlace": "Matiko, Uribarri",
@@ -576,5 +576,6 @@
   "workshops.edit": "Editar taller",
   "workshops.editShort": "Editar",
   "workshops.deleteShort": "Eliminar",
-  "workshops.confirmDelete": "¿Eliminar este taller? Se borrarán también sus reservas. Esta acción no se puede deshacer."
+  "workshops.confirmDelete": "¿Eliminar este taller? Se borrarán también sus reservas. Esta acción no se puede deshacer.",
+  "workshops.lockedBadge": "Para suscriptores"
 }
