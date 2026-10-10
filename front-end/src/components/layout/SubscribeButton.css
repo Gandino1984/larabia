@@ -332,11 +332,11 @@
   line-height: 1.5;
 }
 
-/* Rocket "rabid" shake — same rhythm as the La Rabia logo (AnimatedLogo):
+/* Flame "rabid" shake — same rhythm as the La Rabia logo (AnimatedLogo):
    a ~0.5s burst of decaying jolts (sideways, up/down and tilting), then still
    for the rest of the 3s loop. Scaled to the icon. Paused on hover so the
    label reads calmly; off for reduced motion. */
-@keyframes subscribe-rocket-shake {
+@keyframes subscribe-icon-shake {
   0%      { transform: translate(0, 0) rotate(0deg); }
   2%      { transform: translate(-3px, -1.5px) rotate(-9deg); }
   4%      { transform: translate(3px, 1.5px) rotate(9deg); }
@@ -349,7 +349,7 @@
 }
 .subscribe-btn svg,
 .subscribe-modal__icon svg {
-  animation: subscribe-rocket-shake 3s linear infinite;
+  animation: subscribe-icon-shake 3s linear infinite;
   transform-origin: 50% 50%;
 }
 .subscribe-btn:hover svg,

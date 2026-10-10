@@ -6,7 +6,7 @@
 // who already subscribe and wherever the header is hidden (editor, article
 // reader). While Stripe isn't configured only super admins see it (preview).
 import { useEffect, useRef, useState } from 'react';
-import { Rocket } from 'lucide-react';
+import { Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
@@ -75,7 +75,7 @@ function SubscribeButton({ ready = true }) {
         title={label}
         aria-label={label}
       >
-        <Rocket size={26} />
+        <Flame size={26} />
         <span className="subscribe-btn__text">{label}</span>
       </button>
       {modal}
