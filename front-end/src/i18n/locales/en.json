@@ -577,5 +577,20 @@
   "workshops.editShort": "Edit",
   "workshops.deleteShort": "Delete",
   "workshops.confirmDelete": "Delete this workshop? Its bookings will be deleted too. This cannot be undone.",
-  "workshops.lockedBadge": "For subscribers"
+  "workshops.lockedBadge": "For subscribers",
+  "workshops.filters.search": "Search",
+  "workshops.filters.searchPlaceholder": "Title, place, instructor…",
+  "workshops.filters.when": "When",
+  "workshops.filters.upcoming": "Upcoming",
+  "workshops.filters.past": "Past",
+  "workshops.filters.all": "All",
+  "workshops.filters.instructor": "Instructor",
+  "workshops.filters.spots": "Places",
+  "workshops.filters.anySpots": "All",
+  "workshops.filters.freeSpots": "With free places",
+  "workshops.filters.sortDate": "By date",
+  "workshops.filters.sortRecent": "Recently added",
+  "workshops.filters.noResults": "No workshop matches the filters.",
+  "workshops.emptyUpcoming": "No upcoming workshops.",
+  "workshops.emptyKidsUpcoming": "No upcoming children's workshops."
 }

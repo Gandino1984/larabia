@@ -7,6 +7,8 @@ import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
 import CreateWorkshopModal from './CreateWorkshopModal';
+import WorkshopFilters from './WorkshopFilters';
+import { EMPTY_WORKSHOP_FILTERS, applyWorkshopFilters, countActiveWorkshopFilters } from '../../utils/workshopFilters';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import AuthorChip from '../common/AuthorChip';
 import WorkshopMap from '../maps/WorkshopMap';
@@ -40,6 +42,8 @@ function WorkshopsList() {
   const { navigateToWorkshopDetail } = useUI();
   const { workshops, loading, fetchWorkshops, setSelectedWorkshop } = useWorkshop();
   const [audience, setAudience] = useState('general');
+  // Search / when / month / instructor / spots / order (WorkshopFilters).
+  const [filters, setFilters] = useState(EMPTY_WORKSHOP_FILTERS);
   // The magazine team (editors, admins, super admins) can create workshops
   // here too, not only in Admin → Talleres.
   const { canCreateContent } = useAuth();
@@ -79,11 +83,15 @@ function WorkshopsList() {
     navigateToWorkshopDetail();
   };
 
+  // Filters first; the tabs then split by audience (their counts follow the
+  // filters).
+  const filtered = applyWorkshopFilters(workshops, filters);
+  const filtersActive = countActiveWorkshopFilters(filters) > 0;
   const counts = {
-    general: workshops.filter(w => audienceOf(w) === 'general').length,
-    infantil: workshops.filter(w => audienceOf(w) === 'infantil').length
+    general: filtered.filter(w => audienceOf(w) === 'general').length,
+    infantil: filtered.filter(w => audienceOf(w) === 'infantil').length
   };
-  const visible = workshops.filter(w => audienceOf(w) === audience);
+  const visible = filtered.filter(w => audienceOf(w) === audience);
 
   const renderCard = (w) => {
     const cover = resolveImg(w.cover_image_workshop);
@@ -190,15 +198,32 @@ function WorkshopsList() {
             </div>
             </div>
 
+            <WorkshopFilters workshops={workshops} filters={filters} onChange={setFilters} />
+
             {loading && <div className="workshops-loading"><div className="workshops-spinner" /></div>}
 
             {!loading && visible.length === 0 && (
               <div className="workshops-empty">
                 <p>
-                  {audience === 'infantil'
+                  {filtersActive
+                    ? t('workshops.filters.noResults', 'Ningún taller coincide con los filtros.')
+                    : filters.when === 'upcoming'
+                    ? (audience === 'infantil'
+                      ? t('workshops.emptyKidsUpcoming', 'No hay talleres infantiles próximos.')
+                      : t('workshops.emptyUpcoming', 'No hay talleres próximos.'))
+                    : audience === 'infantil'
                     ? t('workshops.emptyKids', 'Todavía no hay talleres infantiles programados.')
                     : t('workshops.empty')}
                 </p>
+                {filtersActive && (
+                  <button
+                    type="button"
+                    className="workshop-back-btn"
+                    onClick={() => setFilters(prev => ({ ...EMPTY_WORKSHOP_FILTERS, sort: prev.sort }))}
+                  >
+                    {t('filters.clear', 'Limpiar filtros')}
+                  </button>
+                )}
               </div>
             )}
 

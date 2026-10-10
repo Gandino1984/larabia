@@ -577,5 +577,20 @@
   "workshops.editShort": "Editar",
   "workshops.deleteShort": "Eliminar",
   "workshops.confirmDelete": "¿Eliminar este taller? Se borrarán también sus reservas. Esta acción no se puede deshacer.",
-  "workshops.lockedBadge": "Para suscriptores"
+  "workshops.lockedBadge": "Para suscriptores",
+  "workshops.filters.search": "Buscar",
+  "workshops.filters.searchPlaceholder": "Título, lugar, tallerista…",
+  "workshops.filters.when": "Cuándo",
+  "workshops.filters.upcoming": "Próximos",
+  "workshops.filters.past": "Pasados",
+  "workshops.filters.all": "Todos",
+  "workshops.filters.instructor": "Tallerista",
+  "workshops.filters.spots": "Plazas",
+  "workshops.filters.anySpots": "Todas",
+  "workshops.filters.freeSpots": "Con plazas libres",
+  "workshops.filters.sortDate": "Por fecha",
+  "workshops.filters.sortRecent": "Recién añadidos",
+  "workshops.filters.noResults": "Ningún taller coincide con los filtros.",
+  "workshops.emptyUpcoming": "No hay talleres próximos.",
+  "workshops.emptyKidsUpcoming": "No hay talleres infantiles próximos."
 }

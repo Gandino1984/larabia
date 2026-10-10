@@ -577,5 +577,20 @@
   "workshops.editShort": "Editatu",
   "workshops.deleteShort": "Ezabatu",
   "workshops.confirmDelete": "Tailer hau ezabatu? Bere erreserbak ere ezabatuko dira. Ezin da desegin.",
-  "workshops.lockedBadge": "Harpidedunentzat"
+  "workshops.lockedBadge": "Harpidedunentzat",
+  "workshops.filters.search": "Bilatu",
+  "workshops.filters.searchPlaceholder": "Izenburua, lekua, tailerista…",
+  "workshops.filters.when": "Noiz",
+  "workshops.filters.upcoming": "Hurrengoak",
+  "workshops.filters.past": "Iraganak",
+  "workshops.filters.all": "Guztiak",
+  "workshops.filters.instructor": "Tailerista",
+  "workshops.filters.spots": "Plazak",
+  "workshops.filters.anySpots": "Guztiak",
+  "workshops.filters.freeSpots": "Plaza libreekin",
+  "workshops.filters.sortDate": "Dataren arabera",
+  "workshops.filters.sortRecent": "Berriki gehituak",
+  "workshops.filters.noResults": "Ez dago iragazkiekin bat datorren tailerrik.",
+  "workshops.emptyUpcoming": "Ez dago hurrengo tailerrik.",
+  "workshops.emptyKidsUpcoming": "Ez dago haurrentzako hurrengo tailerrik."
 }
