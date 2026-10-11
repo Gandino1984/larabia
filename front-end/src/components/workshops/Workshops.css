@@ -418,3 +418,200 @@
   background: rgba(0, 0, 0, 0.75);
   color: #ffffff;
 }
+
+/* Participants panel (WorkshopParticipantsPanel) — the workshop's managers
+   only. Mobile first: each person's buttons wrap under their name; from
+   600px they sit on the right. */
+.workshop-people {
+  margin-top: 1.5rem;
+  padding: 1.1rem 1rem 1.25rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  background: #fafafa;
+  color: #1a1a1a;
+}
+.workshop-people__header h3,
+.workshop-people__blocked h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 1.05rem;
+}
+.workshop-people__blocked h4 { font-size: 0.98rem; }
+.workshop-people__hint {
+  margin: 0.25rem 0 0;
+  color: #555555;
+  font-size: 0.82rem;
+}
+.workshop-people__empty,
+.workshop-people__note {
+  margin: 0.75rem 0 0;
+  color: #444444;
+  font-size: 0.88rem;
+}
+.workshop-people__list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.workshop-people__row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #ececec;
+}
+.workshop-people__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.workshop-person {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.workshop-person__avatar {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid #e2e2e2;
+  object-fit: cover;
+  display: block;
+}
+.workshop-person__avatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.workshop-person__name {
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+.workshop-person__you {
+  color: #666666;
+  font-weight: 400;
+}
+
+/* Small buttons in the site's style: black, red to block. */
+.workshop-people-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0.4rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: #000000;
+  color: #ffffff;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.workshop-people-btn:hover:not(:disabled),
+.workshop-people-btn:focus-visible {
+  background: #3a3a3a;
+}
+.workshop-people-btn--danger { background: #dc2626; }
+.workshop-people-btn--danger:hover:not(:disabled),
+.workshop-people-btn--danger:focus-visible { background: #b91c1c; }
+.workshop-people-btn:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+.workshop-people-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.workshop-people__tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  background: #e6f4ea;
+  color: #1e7e34;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.workshop-people__tag--blocked {
+  background: #fdecea;
+  color: #b91c1c;
+}
+
+.workshop-people__add {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e2e2;
+}
+.workshop-people__label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.workshop-people__search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid #cfcfcf;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #555555;
+}
+.workshop-people__search:focus-within {
+  border-color: #000000;
+  box-shadow: 0 0 0 1px #000000;
+}
+.workshop-people__search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+}
+
+.workshop-people__blocked {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e2e2;
+}
+
+@media (min-width: 600px) {
+  .workshop-people { padding: 1.25rem 1.4rem 1.4rem; }
+  .workshop-people__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .workshop-people__actions {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+}

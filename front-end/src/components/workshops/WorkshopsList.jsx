@@ -74,8 +74,8 @@ function WorkshopsList() {
     fetchWorkshops();
   }, [fetchWorkshops]);
 
-  // Anyone sees the list; opening a workshop needs sign-in + subscription
-  // (or being on the magazine team).
+  // Anyone sees the list; opening a workshop needs a signed-in account
+  // (booking it, a subscription — see WorkshopDetail).
   const { guard, status: accessStatus } = useWorkshopAccess();
   const locked = accessStatus !== 'allowed';
   const openWorkshop = (w) => {
@@ -106,7 +106,7 @@ function WorkshopsList() {
           {w.is_full && <span className="workshop-badge workshop-badge--full">{t('workshops.full')}</span>}
           {locked && (
             <span className="workshop-badge workshop-badge--locked">
-              <Lock size={12} /> {t('workshops.lockedBadge', 'Para suscriptores')}
+              <Lock size={12} /> {t('workshops.lockedBadgeLogin', 'Inicia sesión para entrar')}
             </span>
           )}
         </div>

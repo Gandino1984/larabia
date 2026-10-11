@@ -29,6 +29,7 @@ import articleFavoriteModel from './models/article_favorite_model.js';
 import articleCommentModel from './models/article_comment_model.js';
 import projectSubscriptionModel from './models/project_subscription_model.js';
 import readerSubscriptionModel from './models/reader_subscription_model.js';
+import workshopBlockModel from './models/workshop_block_model.js';
 import subscriptionApiController from './controllers/subscription/subscription_api_controller.js';
 
 dotenv.config();
@@ -64,9 +65,10 @@ Promise.all([
     articleFavoriteModel.sync(),
     articleCommentModel.sync(),
     projectSubscriptionModel.sync(),
-    readerSubscriptionModel.sync()
+    readerSubscriptionModel.sync(),
+    workshopBlockModel.sync()
 ])
-    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions)'))
+    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks)'))
     .catch((err) => console.error('Error syncing engagement tables:', err.message));
 
 // Columns added to tables that already exist in production (idempotent: each

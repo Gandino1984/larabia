@@ -1,10 +1,12 @@
 // magazine-front/src/app_context/WorkshopContext.jsx
 //
-// Workshops (talleres): super admins create/manage; paying subscribers (and
-// the magazine team) see the calendar and reserve a capacity-limited spot —
-// general workshops and children's workshops (audience_workshop).
+// Workshops (talleres): admins and super admins create them; anyone sees the
+// cards, signed-in readers open a workshop, and paying subscribers (and the
+// magazine team) reserve a capacity-limited spot — general workshops and
+// children's workshops (audience_workshop). A workshop's managers see its
+// participants and include / remove / block people.
 // The server answers 403 + code 'login_required' | 'subscription_required'
-// when the reader can't access them; that is kept in `accessError`.
+// when the reader can't go on; that is kept in `accessError`.
 import { createContext, useContext, useState, useCallback } from 'react';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
@@ -149,11 +151,58 @@ export const WorkshopProvider = ({ children }) => {
     }
   }, [authHeader, showSuccess, showError]);
 
+  // ── Participants (the workshop's managers) ──
+
+  // People to include / block, by name (2+ characters).
+  const searchWorkshopUsers = useCallback(async (id, q) => {
+    try {
+      const res = await axiosInstance.get(`/magazine-workshop/manage/${id}/users`, {
+        ...authHeader(),
+        params: { q }
+      });
+      return res.data?.data || [];
+    } catch {
+      return [];
+    }
+  }, [authHeader]);
+
+  // action: 'add' | 'remove' | 'block' | 'unblock'. The open workshop takes
+  // the updated participants, blocked users and places.
+  const manageWorkshopParticipant = useCallback(async (id, action, userId) => {
+    const base = `/magazine-workshop/manage/${id}`;
+    const requests = {
+      add: () => axiosInstance.post(`${base}/participants`, { user_id: userId }, authHeader()),
+      remove: () => axiosInstance.delete(`${base}/participants/${userId}`, authHeader()),
+      block: () => axiosInstance.post(`${base}/blocks`, { user_id: userId }, authHeader()),
+      unblock: () => axiosInstance.delete(`${base}/blocks/${userId}`, authHeader())
+    };
+    try {
+      const res = await requests[action]();
+      const data = res.data?.data;
+      if (data) {
+        setSelectedWorkshop((prev) => (prev && prev.id_workshop === data.id_workshop
+          ? {
+              ...prev,
+              ...data,
+              reserved_by_me: (data.participants || []).some(p => p.id_user === currentUser?.id_user)
+            }
+          : prev));
+      }
+      showSuccess(res.data?.success || 'Hecho');
+      return { success: true, data };
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Error al gestionar participantes';
+      showError(msg);
+      return { error: msg };
+    }
+  }, [authHeader, currentUser, showSuccess, showError]);
+
   const value = {
     workshops, selectedWorkshop, setSelectedWorkshop, loading, accessError,
     fetchWorkshops, fetchWorkshopById,
     createWorkshop, updateWorkshop, deleteWorkshop, uploadWorkshopCover,
-    reserveWorkshop, cancelWorkshopReservation
+    reserveWorkshop, cancelWorkshopReservation,
+    searchWorkshopUsers, manageWorkshopParticipant
   };
 
   return <WorkshopContext.Provider value={value}>{children}</WorkshopContext.Provider>;

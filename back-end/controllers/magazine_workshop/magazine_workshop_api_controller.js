@@ -20,54 +20,72 @@ async function requireWorkshopCreator(req, res) {
 }
 
 /**
- * Editing / deleting a workshop (and its cover): super admins (any workshop),
- * or an admin who created it or teaches it. Returns the user, or sends a
- * 403 / 404.
+ * Does this user manage the workshop? Super admins (any workshop), or an admin
+ * who created it or teaches it. `workshop` is a model instance or the plain
+ * object getById returns (its `authors` list saves a query).
+ */
+async function isWorkshopManager(user, workshop) {
+    if (!user || !workshop) return false;
+    const role = roleSnapshot(user);
+    if (role.isSuperAdmin) return true;
+    if (!role.isAdmin) return false;
+    if (workshop.author_id === user.id_user) return true;
+    if (Array.isArray(workshop.authors)) return workshop.authors.some((a) => a.id_user === user.id_user);
+    const teaches = await workshop_author_model.findOne({ where: { workshop_id: workshop.id_workshop, user_id: user.id_user } });
+    return !!teaches;
+}
+
+/**
+ * Editing / deleting a workshop (and its cover) and managing its
+ * participants: its managers (see isWorkshopManager). Returns the user, or
+ * sends a 403 / 404.
  */
 async function requireWorkshopManager(req, res, workshopId) {
-    const user = await requireWorkshopCreator(req, res);
-    if (!user) return null;
-    if (roleSnapshot(user).isSuperAdmin) return user;
+    const user = await getRequestUser(req);
     const workshop = await magazine_workshop_model.findByPk(workshopId);
     if (!workshop) {
         res.status(404).json({ error: 'Taller no encontrado' });
         return null;
     }
-    if (workshop.author_id === user.id_user) return user;
-    const teaches = await workshop_author_model.findOne({ where: { workshop_id: workshopId, user_id: user.id_user } });
-    if (teaches) return user;
-    res.status(403).json({ error: 'Solo quien creó o imparte el taller (o el super-administrador) puede modificarlo' });
+    if (await isWorkshopManager(user, workshop)) return user;
+    res.status(403).json({ error: 'Solo quien creó o imparte el taller (o el super-administrador) puede gestionarlo' });
     return null;
 }
 
 /**
- * Anyone can see the workshop LIST; opening a workshop and BOOKING it is for
- * paying subscribers (the magazine team — editors, admins, super admins —
- * has access without subscribing).
- * Resolves the caller's standing: { user, code } where code is null (can book),
+ * Who sees what:
+ *   - anyone: the workshop LIST (cards);
+ *   - signed-in readers: the workshop page;
+ *   - paying subscribers: booking a place (the magazine team — editors,
+ *     admins, super admins — books without subscribing);
+ *   - the workshop's managers: its participants (and managing them).
+ * Booking standing: { user, code } where code is null (can book),
  * 'login_required' or 'subscription_required'.
  */
+async function hasActiveSubscription(userId) {
+    const sub = await reader_subscription_model.findOne({ where: { user_id: userId } });
+    return !!(sub && ACTIVE_STATUSES.includes(sub.status));
+}
+
 async function workshopAccess(req) {
     const user = await getRequestUser(req);
     if (!user) return { user: null, code: 'login_required' };
     if (roleSnapshot(user).canCreateContent) return { user, code: null };
-    const sub = await reader_subscription_model.findOne({ where: { user_id: user.id_user } });
-    if (sub && ACTIVE_STATUSES.includes(sub.status)) return { user, code: null };
+    if (await hasActiveSubscription(user.id_user)) return { user, code: null };
     return { user, code: 'subscription_required' };
 }
 
 /**
- * Workshop page + booking gate. Sends a 403 with the `code` the front-end
- * uses — never a 401, which logs the reader out. Returns the user when
- * they're allowed.
+ * Booking gate. Sends a 403 with the `code` the front-end uses — never a 401,
+ * which logs the reader out. Returns the user when they're allowed.
  */
 async function requireWorkshopAccess(req, res) {
     const { user, code } = await workshopAccess(req);
     if (!code) return user;
     res.status(403).json({
         error: code === 'login_required'
-            ? 'Inicia sesión para ver el taller y reservar plaza'
-            : 'Los talleres son exclusivos para personas suscriptoras de la revista',
+            ? 'Inicia sesión para reservar plaza'
+            : 'Las reservas de los talleres son exclusivas para personas suscriptoras de la revista',
         code
     });
     return null;
@@ -84,23 +102,37 @@ async function getAll(req, res) {
     }
 }
 
-// Workshop page: subscribers and the magazine team only (the list is public).
-// Adds `reserved_by_me` and `booking_code` (always null here — kept so the
-// front-end's reserve button logic stays uniform).
+// Workshop page: signed-in readers (the list is public). Adds
+// `reserved_by_me`, `booking_code` (null = can book, 'subscription_required'
+// or 'blocked') and `can_manage`. The participants (and blocked users) are
+// only sent to the workshop's managers.
 async function getById(req, res) {
     try {
-        const user = await requireWorkshopAccess(req, res);
-        if (!user) return;
+        const user = await getRequestUser(req);
+        if (!user) {
+            return res.status(403).json({ error: 'Inicia sesión para ver el taller', code: 'login_required' });
+        }
         const { id_workshop } = req.params;
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
         const { error, data } = await magazineWorkshopController.getById(id_workshop);
         if (error) return res.status(404).json({ error });
+
+        const canManage = await isWorkshopManager(user, data);
         const participants = data.participants || [];
+        let bookingCode = null;
+        if (await magazineWorkshopController.isBlocked(id_workshop, user.id_user)) bookingCode = 'blocked';
+        else if (!roleSnapshot(user).canCreateContent && !(await hasActiveSubscription(user.id_user))) {
+            bookingCode = 'subscription_required';
+        }
+
         const out = {
             ...data,
             reserved_by_me: participants.some((p) => p.id_user === user.id_user),
-            booking_code: null
+            booking_code: bookingCode,
+            can_manage: canManage
         };
+        if (canManage) out.blocked_users = await magazineWorkshopController.loadWorkshopBlocked(id_workshop);
+        else delete out.participants;
         res.json({ error, data: out });
     } catch (err) {
         console.error("-> workshop api getById() - Error =", err);
@@ -239,6 +271,60 @@ async function cancelReservation(req, res) {
     }
 }
 
+// ── Participant management: the workshop's managers ──
+
+// The target user id, from the URL or the body.
+const targetUserId = (req) => {
+    const n = Number(req.params.id_user ?? req.body?.user_id);
+    return Number.isInteger(n) && n > 0 ? n : null;
+};
+
+// Run a management operation and answer with the updated lists.
+async function manage(req, res, run) {
+    try {
+        const { id_workshop } = req.params;
+        const manager = await requireWorkshopManager(req, res, id_workshop);
+        if (!manager) return;
+        const userId = targetUserId(req);
+        if (!userId) return res.status(400).json({ error: 'Falta el usuario' });
+        const result = await run(id_workshop, userId, manager);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error("-> workshop api manage() - Error =", err);
+        res.status(500).json({ error: "Error al gestionar participantes", details: err.message });
+    }
+}
+
+const addParticipant = (req, res) => manage(req, res,
+    (id, userId) => magazineWorkshopController.addParticipant(id, userId));
+
+const removeParticipant = (req, res) => manage(req, res,
+    (id, userId) => magazineWorkshopController.removeParticipant(id, userId));
+
+const blockUser = (req, res) => manage(req, res, async (id, userId, manager) => {
+    if (userId === manager.id_user) return { error: 'No puedes bloquearte a ti mismo/a' };
+    return magazineWorkshopController.blockUser(id, userId, manager.id_user);
+});
+
+const unblockUser = (req, res) => manage(req, res,
+    (id, userId) => magazineWorkshopController.unblockUser(id, userId));
+
+// People to include / block, by name (?q=, 2+ characters).
+async function searchUsers(req, res) {
+    try {
+        const { id_workshop } = req.params;
+        const manager = await requireWorkshopManager(req, res, id_workshop);
+        if (!manager) return;
+        const result = await magazineWorkshopController.searchUsers(id_workshop, req.query.q);
+        if (result.error) return res.status(400).json(result);
+        res.json({ error: null, data: result.data });
+    } catch (err) {
+        console.error("-> workshop api searchUsers() - Error =", err);
+        res.status(500).json({ error: "Error al buscar usuarios", details: err.message });
+    }
+}
+
 export default {
     getAll,
     getById,
@@ -247,5 +333,10 @@ export default {
     remove,
     uploadCoverImage,
     reserve,
-    cancelReservation
+    cancelReservation,
+    addParticipant,
+    removeParticipant,
+    blockUser,
+    unblockUser,
+    searchUsers
 };

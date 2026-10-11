@@ -1,7 +1,7 @@
 // magazine-front/src/components/workshops/WorkshopDetail.jsx
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Calendar, MapPin, Users, User, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Edit, Trash2 } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
@@ -9,6 +9,7 @@ import AuthorChip from '../common/AuthorChip';
 import WorkshopMap from '../maps/WorkshopMap';
 import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
 import CreateWorkshopModal from './CreateWorkshopModal';
+import WorkshopParticipantsPanel from './WorkshopParticipantsPanel';
 import './Workshops.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -16,11 +17,6 @@ const resolveImg = (img) => {
   if (!img) return null;
   if (img.startsWith('http://') || img.startsWith('https://')) return img;
   return `${apiUrl}/${img.startsWith('/') ? img.slice(1) : img}`;
-};
-const resolveAvatar = (img) => {
-  if (!img) return null;
-  if (img.startsWith('http://') || img.startsWith('https://')) return img;
-  return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
 };
 const formatDate = (d) => {
   if (!d) return null;
@@ -40,17 +36,18 @@ function WorkshopDetail() {
 
   const id = selectedWorkshop?.id_workshop;
 
-  // Booking / access is for subscribers (and the magazine team).
+  // Opening a workshop needs a signed-in account; booking, a subscription
+  // (the magazine team books without one).
   const { guard } = useWorkshopAccess();
 
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!id) return;
     fetchWorkshopById(id).then((res) => {
-      // Not allowed to open it: back to the list and guide the reader.
+      // Not allowed to open it (signed out): back to the list, to sign in.
       if (res?.code) {
         navigateToTalleres();
-        guard(res.code === 'login_required' ? 'login' : 'subscribe');
+        guard(res.code === 'subscription_required' ? 'subscribe' : 'login');
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -61,17 +58,20 @@ function WorkshopDetail() {
     () => !!(w?.reserved_by_me || w?.participants?.some(p => p.id_user === currentUser?.id_user)),
     [w, currentUser]
   );
-  // Edit / delete here — like an article's author: super admins (any
-  // workshop), or an admin who created or teaches it (the server checks the
-  // same).
+  // Edit / delete and the participants — like an article's author: super
+  // admins (any workshop), or an admin who created or teaches it. The server
+  // says so once the workshop loads (`can_manage`); until then, the same rule
+  // here.
   const canManage = !!currentUser && !!w && (
-    isSuperAdmin
-    || (isAdmin && (
-      w.author_id === currentUser.id_user
-      || (w.authors || []).some(a => a.id_user === currentUser.id_user)
-    ))
+    w.can_manage !== undefined
+      ? !!w.can_manage
+      : isSuperAdmin || (isAdmin && (
+          w.author_id === currentUser.id_user
+          || (w.authors || []).some(a => a.id_user === currentUser.id_user)
+        ))
   );
 
+  // null (can book) | 'login_required' | 'subscription_required' | 'blocked'
   const bookingCode = !currentUser ? 'login_required' : (w?.booking_code || null);
 
   // Back to the workshops list (the header's arrow does the same, but this one
@@ -186,6 +186,8 @@ function WorkshopDetail() {
                 {t('workshops.cancelReservation')}
               </button>
             </>
+          ) : bookingCode === 'blocked' ? (
+            <p className="workshop-full-note">{t('workshops.bookingNote.blocked', 'No puedes reservar plaza en este taller.')}</p>
           ) : w.is_full ? (
             <p className="workshop-full-note">{t('workshops.fullNote')}</p>
           ) : (
@@ -204,22 +206,8 @@ function WorkshopDetail() {
           )}
         </div>
 
-        {/* Participants */}
-        {w.participants?.length > 0 && (
-          <div className="workshop-participants">
-            <h3>{t('workshops.participantsTitle')} ({w.participants.length})</h3>
-            <div className="workshop-participants-list">
-              {w.participants.map(p => (
-                <span key={p.id_user} className="workshop-author-chip">
-                  {resolveAvatar(p.image_user)
-                    ? <img src={resolveAvatar(p.image_user)} alt={p.name_user} className="workshop-author-avatar" />
-                    : <User size={14} />}
-                  {p.name_user}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Participants: the workshop's managers only. */}
+        {canManage && w.participants && <WorkshopParticipantsPanel workshop={w} />}
       </div>
     </div>
   );

@@ -2,7 +2,9 @@
 import magazine_workshop_model from "../../models/magazine_workshop_model.js";
 import workshop_author_model from "../../models/workshop_author_model.js";
 import workshop_reservation_model from "../../models/workshop_reservation_model.js";
+import workshop_block_model from "../../models/workshop_block_model.js";
 import user_model from "../../models/user_model.js";
+import { Op } from "sequelize";
 import { deleteFile } from "../../utils/file_cleanup.js";
 
 // Who a workshop is for.
@@ -33,13 +35,43 @@ async function loadWorkshopParticipants(workshopId) {
     const rows = await workshop_reservation_model.findAll({
         where: { workshop_id: workshopId },
         include: [{ model: user_model, as: 'user', attributes: ['id_user', 'name_user', 'image_user'] }],
-        order: [['created_at', 'ASC']]
+        order: [['created_at', 'ASC'], ['id_reservation', 'ASC']]
     });
     return rows.filter(r => r.user).map(r => ({
         id_user: r.user.id_user,
         name_user: r.user.name_user,
         image_user: r.user.image_user
     }));
+}
+
+// Users blocked from the workshop (they can't book it). Managers only.
+async function loadWorkshopBlocked(workshopId) {
+    const rows = await workshop_block_model.findAll({
+        where: { workshop_id: workshopId },
+        include: [{ model: user_model, as: 'user', attributes: ['id_user', 'name_user', 'image_user'] }],
+        order: [['created_at', 'ASC'], ['id_block', 'ASC']]
+    });
+    return rows.filter(r => r.user).map(r => ({
+        id_user: r.user.id_user,
+        name_user: r.user.name_user,
+        image_user: r.user.image_user
+    }));
+}
+
+async function isBlocked(workshopId, userId) {
+    if (!userId) return false;
+    return !!(await workshop_block_model.findOne({ where: { workshop_id: workshopId, user_id: userId } }));
+}
+
+// Places taken / left, as the workshop page shows them.
+function spotsSummary(workshop, count) {
+    const capacity = workshop?.capacity_workshop;
+    return {
+        id_workshop: Number(workshop.id_workshop),
+        reservation_count: count,
+        spots_left: capacity != null ? Math.max(0, capacity - count) : null,
+        is_full: capacity != null ? count >= capacity : false
+    };
 }
 
 async function syncAuthors(workshopId, authors) {
@@ -197,6 +229,10 @@ async function reserve(id_workshop, userId) {
         const workshop = await magazine_workshop_model.findByPk(id_workshop);
         if (!workshop || !workshop.active_workshop) return { error: "Taller no encontrado" };
 
+        if (await isBlocked(id_workshop, userId)) {
+            return { error: "No puedes reservar plaza en este taller", code: 'blocked' };
+        }
+
         const existing = await workshop_reservation_model.findOne({ where: { workshop_id: id_workshop, user_id: userId } });
         if (existing) return { error: "Ya tienes una reserva en este taller" };
 
@@ -245,6 +281,121 @@ async function cancelReservation(id_workshop, userId) {
     }
 }
 
+// ── Participant management (workshop managers; the API checks who) ──
+
+// Participants, blocked users and places, after each change.
+async function managementState(id_workshop) {
+    const workshop = await magazine_workshop_model.findByPk(id_workshop);
+    const count = await workshop_reservation_model.count({ where: { workshop_id: id_workshop } });
+    return {
+        ...spotsSummary(workshop, count),
+        participants: await loadWorkshopParticipants(id_workshop),
+        blocked_users: await loadWorkshopBlocked(id_workshop)
+    };
+}
+
+// Include someone in the workshop (no subscription needed — the managers
+// decide). Respects the capacity and blocks.
+async function addParticipant(id_workshop, userId) {
+    try {
+        const workshop = await magazine_workshop_model.findByPk(id_workshop);
+        if (!workshop || !workshop.active_workshop) return { error: "Taller no encontrado" };
+        const user = await user_model.findByPk(userId, { attributes: ['id_user'] });
+        if (!user) return { error: "Usuario no encontrado" };
+        if (await isBlocked(id_workshop, userId)) {
+            return { error: "Esta persona está bloqueada en este taller. Desbloquéala antes de incluirla" };
+        }
+        const existing = await workshop_reservation_model.findOne({ where: { workshop_id: id_workshop, user_id: userId } });
+        if (existing) return { error: "Esta persona ya participa en el taller" };
+        const count = await workshop_reservation_model.count({ where: { workshop_id: id_workshop } });
+        if (workshop.capacity_workshop != null && count >= workshop.capacity_workshop) {
+            return { error: "El taller está completo. Amplía el aforo para incluir a más personas" };
+        }
+        await workshop_reservation_model.create({ workshop_id: id_workshop, user_id: userId });
+        return { success: "Participante incluido", data: await managementState(id_workshop) };
+    } catch (err) {
+        console.error("-> workshop addParticipant() - Error =", err);
+        return { error: "Error al incluir participante" };
+    }
+}
+
+async function removeParticipant(id_workshop, userId) {
+    try {
+        const deleted = await workshop_reservation_model.destroy({ where: { workshop_id: id_workshop, user_id: userId } });
+        if (!deleted) return { error: "Esta persona no participa en el taller" };
+        return { success: "Participante eliminado", data: await managementState(id_workshop) };
+    } catch (err) {
+        console.error("-> workshop removeParticipant() - Error =", err);
+        return { error: "Error al eliminar participante" };
+    }
+}
+
+// Block someone from the workshop: they lose their place (if they had one)
+// and can't book it again.
+async function blockUser(id_workshop, userId, blockedBy) {
+    try {
+        const workshop = await magazine_workshop_model.findByPk(id_workshop);
+        if (!workshop) return { error: "Taller no encontrado" };
+        const user = await user_model.findByPk(userId, { attributes: ['id_user'] });
+        if (!user) return { error: "Usuario no encontrado" };
+        await workshop_block_model.findOrCreate({
+            where: { workshop_id: id_workshop, user_id: userId },
+            defaults: { workshop_id: id_workshop, user_id: userId, blocked_by: blockedBy || null }
+        });
+        await workshop_reservation_model.destroy({ where: { workshop_id: id_workshop, user_id: userId } });
+        return { success: "Usuario bloqueado en este taller", data: await managementState(id_workshop) };
+    } catch (err) {
+        console.error("-> workshop blockUser() - Error =", err);
+        return { error: "Error al bloquear al usuario" };
+    }
+}
+
+async function unblockUser(id_workshop, userId) {
+    try {
+        const deleted = await workshop_block_model.destroy({ where: { workshop_id: id_workshop, user_id: userId } });
+        if (!deleted) return { error: "Esta persona no estaba bloqueada" };
+        return { success: "Usuario desbloqueado", data: await managementState(id_workshop) };
+    } catch (err) {
+        console.error("-> workshop unblockUser() - Error =", err);
+        return { error: "Error al desbloquear al usuario" };
+    }
+}
+
+// People to include / block, by name (id, name and photo only), marked
+// when they already take part or are blocked.
+async function searchUsers(id_workshop, query) {
+    try {
+        const q = String(query || '').trim();
+        if (q.length < 2) return { data: [] };
+        const escaped = q.replace(/[\\%_]/g, (c) => `\\${c}`);
+        const users = await user_model.findAll({
+            where: { name_user: { [Op.like]: `%${escaped}%` } },
+            attributes: ['id_user', 'name_user', 'image_user'],
+            order: [['name_user', 'ASC']],
+            limit: 10
+        });
+        const ids = users.map(u => u.id_user);
+        const [reserved, blocked] = await Promise.all([
+            workshop_reservation_model.findAll({ where: { workshop_id: id_workshop, user_id: ids }, attributes: ['user_id'] }),
+            workshop_block_model.findAll({ where: { workshop_id: id_workshop, user_id: ids }, attributes: ['user_id'] })
+        ]);
+        const reservedSet = new Set(reserved.map(r => r.user_id));
+        const blockedSet = new Set(blocked.map(b => b.user_id));
+        return {
+            data: users.map(u => ({
+                id_user: u.id_user,
+                name_user: u.name_user,
+                image_user: u.image_user,
+                is_participant: reservedSet.has(u.id_user),
+                is_blocked: blockedSet.has(u.id_user)
+            }))
+        };
+    } catch (err) {
+        console.error("-> workshop searchUsers() - Error =", err);
+        return { error: "Error al buscar usuarios" };
+    }
+}
+
 export default {
     getAll,
     getById,
@@ -253,5 +404,12 @@ export default {
     removeById,
     uploadCoverImage,
     reserve,
-    cancelReservation
+    cancelReservation,
+    isBlocked,
+    loadWorkshopBlocked,
+    addParticipant,
+    removeParticipant,
+    blockUser,
+    unblockUser,
+    searchUsers
 };
