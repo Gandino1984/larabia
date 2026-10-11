@@ -58,9 +58,30 @@ const serialize = (row) => ({
 });
 
 // Copy a Stripe subscription onto the user's row.
+// The customer's newest live subscription other than `exceptId`, or null.
+async function liveSubscriptionOf(customerId, exceptId) {
+    const list = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 20 });
+    return list.data
+        .filter((s) => s.id !== exceptId && ACTIVE_STATUSES.includes(s.status))
+        .sort((a, b) => b.created - a.created)[0] || null;
+}
+
+// A reader has one row but can have several Stripe subscriptions (the
+// customer is reused across checkouts — e.g. an abandoned first checkout
+// left `incomplete`, then a second one that was paid). When an event says a
+// subscription is no longer live, keep the reader's other live one if there
+// is one; otherwise the abandoned one expiring 23 h later would overwrite the
+// paid one.
 async function syncSubscription(sub, userIdHint) {
     const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id;
     const userId = Number(sub.metadata?.user_id || userIdHint) || null;
+    if (!ACTIVE_STATUSES.includes(sub.status) && customerId) {
+        const live = await liveSubscriptionOf(customerId, sub.id);
+        if (live) {
+            console.log(`[subscription] ${sub.id} is ${sub.status}; keeping live ${live.id} (${live.status})`);
+            sub = live;
+        }
+    }
     let row = userId
         ? await reader_subscription_model.findOne({ where: { user_id: userId } })
         : null;
@@ -206,6 +227,8 @@ async function handleWebhook(req, res) {
     }
 
     try {
+        const obj = event.data?.object || {};
+        console.log(`[subscription] webhook ${event.type} ${obj.id || ''} ${obj.status || ''}`.trim());
         switch (event.type) {
             case 'checkout.session.completed': {
                 const session = event.data.object;
