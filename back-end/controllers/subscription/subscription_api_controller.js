@@ -57,38 +57,51 @@ const serialize = (row) => ({
     since: row?.created_at || null
 });
 
-// Copy a Stripe subscription onto the user's row.
-// The customer's newest live subscription other than `exceptId`, or null.
-async function liveSubscriptionOf(customerId, exceptId) {
-    const list = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 20 });
-    return list.data
-        .filter((s) => s.id !== exceptId && ACTIVE_STATUSES.includes(s.status))
-        .sort((a, b) => b.created - a.created)[0] || null;
+// ── Keeping `reader_subscriptions` in step with Stripe ──
+//
+// A reader has one row but can have several Stripe subscriptions (the
+// customer is reused across checkouts — e.g. an abandoned first checkout left
+// `incomplete`, then a second one that was paid). And Stripe's events arrive
+// — and finish — in any order: a checkout sends `created` (incomplete) and
+// `updated` (active) almost together. So the payload of an event is never
+// written as is: for every event we read the customer's subscriptions as
+// Stripe has them NOW and store the best one (the newest live one, else the
+// one the event is about), one event at a time per customer.
+
+// The subscription to store: the newest live one, else `preferredId`, else
+// the newest.
+function pickSubscription(subs, preferredId) {
+    const newestFirst = [...subs].sort((a, b) => b.created - a.created);
+    return newestFirst.find((s) => ACTIVE_STATUSES.includes(s.status))
+        || newestFirst.find((s) => s.id === preferredId)
+        || newestFirst[0]
+        || null;
 }
 
-// A reader has one row but can have several Stripe subscriptions (the
-// customer is reused across checkouts — e.g. an abandoned first checkout
-// left `incomplete`, then a second one that was paid). When an event says a
-// subscription is no longer live, keep the reader's other live one if there
-// is one; otherwise the abandoned one expiring 23 h later would overwrite the
-// paid one.
-async function syncSubscription(sub, userIdHint) {
-    const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id;
+// Events for the same customer are handled one after another.
+const customerQueues = new Map();
+function inCustomerQueue(customerId, task) {
+    const previous = customerQueues.get(customerId) || Promise.resolve();
+    const next = previous.catch(() => {}).then(task);
+    customerQueues.set(customerId, next);
+    next.finally(() => { if (customerQueues.get(customerId) === next) customerQueues.delete(customerId); }).catch(() => {});
+    return next;
+}
+
+// Copy the customer's current subscription (as Stripe has it now) onto the
+// reader's row. `userIdHint` / `preferredId` come from the event.
+async function syncCustomer(customerId, userIdHint, preferredId) {
+    const list = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 20 });
+    const sub = pickSubscription(list.data, preferredId);
+    if (!sub) return null;
     const userId = Number(sub.metadata?.user_id || userIdHint) || null;
-    if (!ACTIVE_STATUSES.includes(sub.status) && customerId) {
-        const live = await liveSubscriptionOf(customerId, sub.id);
-        if (live) {
-            console.log(`[subscription] ${sub.id} is ${sub.status}; keeping live ${live.id} (${live.status})`);
-            sub = live;
-        }
-    }
     let row = userId
         ? await reader_subscription_model.findOne({ where: { user_id: userId } })
         : null;
-    if (!row && customerId) row = await reader_subscription_model.findOne({ where: { stripe_customer_id: customerId } });
+    if (!row) row = await reader_subscription_model.findOne({ where: { stripe_customer_id: customerId } });
     if (!row && !userId) {
-        console.warn('[subscription] webhook for an unknown customer:', customerId);
-        return;
+        console.warn('[subscription] event for an unknown customer:', customerId);
+        return null;
     }
     const item = sub.items?.data?.[0];
     const periodEnd = sub.current_period_end ?? item?.current_period_end ?? null;
@@ -101,8 +114,18 @@ async function syncSubscription(sub, userIdHint) {
         cancel_at_period_end: !!sub.cancel_at_period_end
     };
     if (row) await row.update(values);
-    else await reader_subscription_model.create({ user_id: userId, ...values });
+    else row = await reader_subscription_model.create({ user_id: userId, ...values });
     subscribersCache = null;
+    console.log(`[subscription] customer ${customerId} → ${sub.id} ${sub.status} (user ${row.user_id})`);
+    return row;
+}
+
+// An event about `sub` (only its id, customer and metadata are used).
+function syncSubscription(sub, userIdHint) {
+    const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id;
+    if (!customerId) return Promise.resolve(null);
+    const userId = Number(sub.metadata?.user_id || userIdHint) || null;
+    return inCustomerQueue(customerId, () => syncCustomer(customerId, userId, sub.id));
 }
 
 // GET /subscription/config — is it on, and the plan prices.
@@ -116,11 +139,25 @@ async function getConfig(req, res) {
     }
 }
 
-// GET /subscription/me — the caller's subscription.
+// GET /subscription/me — the caller's subscription. When it isn't live but
+// the reader has been through Checkout, ask Stripe again (at most every 15 s
+// per reader): a missed or late event can't leave a paying reader without
+// their subscription.
+const lastSelfCheck = new Map();
 async function getMine(req, res) {
     const user = await getRequestUser(req);
     if (!user) return res.status(401).json({ error: 'Autenticación requerida' });
-    const row = await reader_subscription_model.findOne({ where: { user_id: user.id_user } });
+    let row = await reader_subscription_model.findOne({ where: { user_id: user.id_user } });
+    if (stripe && row?.stripe_customer_id && !isActive(row)
+        && Date.now() - (lastSelfCheck.get(user.id_user) || 0) > 15 * 1000) {
+        lastSelfCheck.set(user.id_user, Date.now());
+        try {
+            const customerId = row.stripe_customer_id;
+            row = (await inCustomerQueue(customerId, () => syncCustomer(customerId, user.id_user, row.stripe_subscription_id))) || row;
+        } catch (err) {
+            console.warn('[subscription] self-check failed:', err.message);
+        }
+    }
     res.json({ error: null, data: serialize(row) });
 }
 
@@ -232,9 +269,11 @@ async function handleWebhook(req, res) {
         switch (event.type) {
             case 'checkout.session.completed': {
                 const session = event.data.object;
-                if (session.mode === 'subscription' && session.subscription) {
-                    const sub = await stripe.subscriptions.retrieve(session.subscription);
-                    await syncSubscription(sub, session.client_reference_id);
+                if (session.mode === 'subscription' && session.subscription && session.customer) {
+                    await syncSubscription(
+                        { id: session.subscription, customer: session.customer, metadata: {} },
+                        session.client_reference_id
+                    );
                 }
                 break;
             }
