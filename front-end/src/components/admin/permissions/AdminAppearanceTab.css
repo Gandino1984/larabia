@@ -34,6 +34,8 @@
 }
 
 .admin-appearance__preset {
+  /* Holds text, not a button label: no site-wide button caps. */
+  text-transform: none;
   display: flex;
   align-items: center;
   gap: 0.75rem;

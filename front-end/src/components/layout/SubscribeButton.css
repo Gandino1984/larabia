@@ -203,6 +203,8 @@
   margin-bottom: 1.5rem;
 }
 .subscribe-plan {
+  /* Holds text, not a button label: no site-wide button caps. */
+  text-transform: none;
   position: relative;
   display: flex;
   flex-direction: column;

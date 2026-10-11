@@ -1693,6 +1693,8 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .pub-choice {
+  /* Holds text, not a button label: no site-wide button caps. */
+  text-transform: none;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
