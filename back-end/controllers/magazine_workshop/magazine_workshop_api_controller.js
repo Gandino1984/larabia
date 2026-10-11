@@ -58,7 +58,8 @@ async function requireWorkshopManager(req, res, workshopId) {
  *   - signed-in readers: the workshop page;
  *   - paying subscribers: booking a place (the magazine team — editors,
  *     admins, super admins — books without subscribing);
- *   - the workshop's managers: its participants (and managing them).
+ *   - the workshop's managers: its participants and invitations (and
+ *     managing them: invite, remove, block).
  * Booking standing: { user, code } where code is null (can book),
  * 'login_required' or 'subscription_required'.
  */
@@ -104,8 +105,9 @@ async function getAll(req, res) {
 
 // Workshop page: signed-in readers (the list is public). Adds
 // `reserved_by_me`, `booking_code` (null = can book, 'subscription_required'
-// or 'blocked') and `can_manage`. The participants (and blocked users) are
-// only sent to the workshop's managers.
+// or 'blocked'), `my_invitation` (a pending invitation for the reader) and
+// `can_manage`. The participants, invitations and blocked users are only
+// sent to the workshop's managers.
 async function getById(req, res) {
     try {
         const user = await getRequestUser(req);
@@ -129,10 +131,15 @@ async function getById(req, res) {
             ...data,
             reserved_by_me: participants.some((p) => p.id_user === user.id_user),
             booking_code: bookingCode,
+            my_invitation: await magazineWorkshopController.myPendingInvitation(id_workshop, user.id_user),
             can_manage: canManage
         };
-        if (canManage) out.blocked_users = await magazineWorkshopController.loadWorkshopBlocked(id_workshop);
-        else delete out.participants;
+        if (canManage) {
+            out.invitations = await magazineWorkshopController.loadWorkshopInvitations(id_workshop);
+            out.blocked_users = await magazineWorkshopController.loadWorkshopBlocked(id_workshop);
+        } else {
+            delete out.participants;
+        }
         res.json({ error, data: out });
     } catch (err) {
         console.error("-> workshop api getById() - Error =", err);
@@ -296,8 +303,15 @@ async function manage(req, res, run) {
     }
 }
 
-const addParticipant = (req, res) => manage(req, res,
-    (id, userId) => magazineWorkshopController.addParticipant(id, userId));
+// Invite someone (subscribers and the magazine team). Managers book their
+// own place with "Reservar plaza".
+const inviteParticipant = (req, res) => manage(req, res, (id, userId, manager) => {
+    if (userId === manager.id_user) return { error: 'Para apuntarte tú, usa «Reservar plaza»' };
+    return magazineWorkshopController.inviteUser(id, userId, manager.id_user);
+});
+
+const withdrawInvitation = (req, res) => manage(req, res,
+    (id, userId) => magazineWorkshopController.withdrawInvitation(id, userId));
 
 const removeParticipant = (req, res) => manage(req, res,
     (id, userId) => magazineWorkshopController.removeParticipant(id, userId));
@@ -310,7 +324,7 @@ const blockUser = (req, res) => manage(req, res, async (id, userId, manager) => 
 const unblockUser = (req, res) => manage(req, res,
     (id, userId) => magazineWorkshopController.unblockUser(id, userId));
 
-// People to include / block, by name (?q=, 2+ characters).
+// People to invite / block, by name (?q=, 2+ characters).
 async function searchUsers(req, res) {
     try {
         const { id_workshop } = req.params;
@@ -325,6 +339,61 @@ async function searchUsers(req, res) {
     }
 }
 
+// ── Invitations: the invited reader and the inviter ──
+
+// The signed-in reader's workshop notifications (invitations to answer and
+// answers to the invitations they sent). Signed out: empty (never a 401,
+// which logs the reader out).
+async function invitationFeed(req, res) {
+    try {
+        const user = await getRequestUser(req);
+        if (!user) return res.json({ error: null, data: { invitations: [], responses: [] } });
+        const result = await magazineWorkshopController.invitationFeed(user.id_user);
+        if (result.error) return res.status(500).json(result);
+        res.json({ error: null, data: result.data });
+    } catch (err) {
+        console.error("-> workshop api invitationFeed() - Error =", err);
+        res.status(500).json({ error: "Error al cargar las invitaciones", details: err.message });
+    }
+}
+
+// Accept ({ response: 'accept' } — books the held place; needs the right to
+// book) or decline ({ response: 'decline' }).
+async function respondInvitation(req, res) {
+    try {
+        const response = req.body?.response;
+        if (!['accept', 'decline'].includes(response)) return res.status(400).json({ error: 'Respuesta no válida' });
+        const user = response === 'accept'
+            ? await requireWorkshopAccess(req, res)
+            : await getRequestUser(req);
+        if (!user) {
+            if (!res.headersSent) res.status(403).json({ error: 'Inicia sesión para responder', code: 'login_required' });
+            return;
+        }
+        const id = Number(req.params.id_invitation);
+        if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invitación no válida' });
+        const result = await magazineWorkshopController.respondInvitation(id, user.id_user, response);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error("-> workshop api respondInvitation() - Error =", err);
+        res.status(500).json({ error: "Error al responder a la invitación", details: err.message });
+    }
+}
+
+// The inviter has seen these answers ({ ids: [...] }).
+async function markResponsesSeen(req, res) {
+    try {
+        const user = await getRequestUser(req);
+        if (!user) return res.status(403).json({ error: 'Inicia sesión', code: 'login_required' });
+        const result = await magazineWorkshopController.markResponsesSeen(user.id_user, req.body?.ids);
+        res.json({ error: null, data: result.data });
+    } catch (err) {
+        console.error("-> workshop api markResponsesSeen() - Error =", err);
+        res.status(500).json({ error: "Error al actualizar las notificaciones", details: err.message });
+    }
+}
+
 export default {
     getAll,
     getById,
@@ -334,7 +403,11 @@ export default {
     uploadCoverImage,
     reserve,
     cancelReservation,
-    addParticipant,
+    inviteParticipant,
+    withdrawInvitation,
+    invitationFeed,
+    respondInvitation,
+    markResponsesSeen,
     removeParticipant,
     blockUser,
     unblockUser,

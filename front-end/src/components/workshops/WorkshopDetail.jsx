@@ -31,7 +31,10 @@ function WorkshopDetail() {
   const { t } = useTranslation();
   const { navigateToTalleres } = useUI();
   const { currentUser, isSuperAdmin, isAdmin } = useAuth();
-  const { selectedWorkshop, fetchWorkshopById, reserveWorkshop, cancelWorkshopReservation, deleteWorkshop, loading } = useWorkshop();
+  const {
+    selectedWorkshop, fetchWorkshopById, reserveWorkshop, cancelWorkshopReservation, deleteWorkshop, loading,
+    respondToWorkshopInvitation
+  } = useWorkshop();
   const [editing, setEditing] = useState(false);
 
   const id = selectedWorkshop?.id_workshop;
@@ -110,6 +113,15 @@ function WorkshopDetail() {
     if (!res?.error) navigateToTalleres();
   };
 
+  // Someone invited the reader: their place is held until they answer.
+  const invitation = !isReserved ? w.my_invitation : null;
+  const handleInvitation = async (response) => {
+    if (response === 'decline'
+      && !confirm(t('workshops.invitation.confirmDecline', '¿Rechazar la invitación? La plaza quedará libre para otra persona.'))) return;
+    const res = await respondToWorkshopInvitation(invitation, response);
+    if (res.code) guard(res.code === 'login_required' ? 'login' : 'subscribe');
+  };
+
   const handleCancel = async () => {
     const res = await cancelWorkshopReservation(id);
     if (res.success) fetchWorkshopById(id);
@@ -179,7 +191,24 @@ function WorkshopDetail() {
 
         {/* Reservation action */}
         <div className="workshop-reserve-box">
-          {isReserved ? (
+          {invitation ? (
+            <>
+              <p className="workshop-invitation-note">
+                {t('workshops.invitation.note', {
+                  name: invitation.inviter?.name_user || '',
+                  defaultValue: '{{name}} te ha invitado a este taller. Tu plaza está guardada hasta que respondas.'
+                })}
+              </p>
+              <div className="workshop-invitation-actions">
+                <button className="workshop-btn workshop-btn--reserve" onClick={() => handleInvitation('accept')} disabled={loading}>
+                  {t('workshops.invitation.accept', 'Aceptar y reservar plaza')}
+                </button>
+                <button className="workshop-btn workshop-btn--decline" onClick={() => handleInvitation('decline')} disabled={loading}>
+                  {t('workshops.invitation.decline', 'Rechazar')}
+                </button>
+              </div>
+            </>
+          ) : isReserved ? (
             <>
               <p className="workshop-reserved-note">{t('workshops.reservedNote')}</p>
               <button className="workshop-btn workshop-btn--cancel" onClick={handleCancel} disabled={loading}>

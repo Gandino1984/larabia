@@ -1694,6 +1694,35 @@
 .notif-item:hover { background: #f7f7f7; }
 .notif-item-title { font-weight: 600; font-size: 0.86rem; color: #1a1a1a; }
 .notif-item-message { font-size: 0.8rem; color: #666; }
+.notif-list { max-height: min(70vh, 520px); overflow-y: auto; }
+
+/* Notifications you answer from the bell (workshop invitations). */
+.notif-entry--actions { background: #fffaf0; border-bottom: 1px solid #f2f2f2; }
+.notif-entry--actions .notif-item { border-bottom: none; padding-bottom: 6px; }
+.notif-item-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 14px 12px;
+}
+.notif-action {
+  flex: 1;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.notif-action--primary { background: #1e7e34; color: #ffffff; }
+.notif-action--primary:hover,
+.notif-action--primary:focus-visible { background: #196b2c; }
+.notif-action--secondary { background: #e4e4e4; color: #1a1a1a; }
+.notif-action--secondary:hover,
+.notif-action--secondary:focus-visible { background: #000000; color: #ffffff; }
+.notif-action:focus-visible { outline: 2px solid #000000; outline-offset: 2px; }
 
 /* ---- Search results + projects dropdown thumbnails ---- */
 /* Result rows with a small cover thumbnail on the right. */

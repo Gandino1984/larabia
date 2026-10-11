@@ -446,7 +446,7 @@ function Header({ ready = true }) {
         ) : (
           <ul className="notif-list">
             {notifications.map((n) => (
-              <li key={n.id}>
+              <li key={n.id} className={n.actions ? 'notif-entry notif-entry--actions' : 'notif-entry'}>
                 <button
                   className="notif-item"
                   onClick={() => { markAllSeen(); setShowNotifications(false); n.onClick?.(); }}
@@ -454,6 +454,21 @@ function Header({ ready = true }) {
                   <span className="notif-item-title">{n.title}</span>
                   <span className="notif-item-message">{n.message}</span>
                 </button>
+                {/* Answer right here (e.g. a workshop invitation). */}
+                {n.actions && (
+                  <div className="notif-item-actions">
+                    {n.actions.map((a) => (
+                      <button
+                        key={a.key}
+                        type="button"
+                        className={`notif-action notif-action--${a.variant || 'secondary'}`}
+                        onClick={a.onClick}
+                      >
+                        {a.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </li>
             ))}
           </ul>

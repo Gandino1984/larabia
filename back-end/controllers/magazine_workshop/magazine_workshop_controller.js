@@ -3,6 +3,8 @@ import magazine_workshop_model from "../../models/magazine_workshop_model.js";
 import workshop_author_model from "../../models/workshop_author_model.js";
 import workshop_reservation_model from "../../models/workshop_reservation_model.js";
 import workshop_block_model from "../../models/workshop_block_model.js";
+import workshop_invitation_model from "../../models/workshop_invitation_model.js";
+import reader_subscription_model, { ACTIVE_STATUSES } from "../../models/reader_subscription_model.js";
 import user_model from "../../models/user_model.js";
 import { Op } from "sequelize";
 import { deleteFile } from "../../utils/file_cleanup.js";
@@ -63,15 +65,79 @@ async function isBlocked(workshopId, userId) {
     return !!(await workshop_block_model.findOne({ where: { workshop_id: workshopId, user_id: userId } }));
 }
 
-// Places taken / left, as the workshop page shows them.
-function spotsSummary(workshop, count) {
+// Pending invitations hold a place until the invited reader answers.
+async function countPendingInvitations(workshopId, exceptUserId = null) {
+    const where = { workshop_id: workshopId, status: 'pending' };
+    if (exceptUserId) where.invitee_user_id = { [Op.ne]: exceptUserId };
+    return workshop_invitation_model.count({ where });
+}
+
+// Places taken (bookings + places held by pending invitations) / left, as
+// the workshop page shows them.
+function spotsSummary(workshop, count, pending = 0) {
     const capacity = workshop?.capacity_workshop;
+    const taken = count + pending;
     return {
         id_workshop: Number(workshop.id_workshop),
         reservation_count: count,
-        spots_left: capacity != null ? Math.max(0, capacity - count) : null,
-        is_full: capacity != null ? count >= capacity : false
+        pending_invitations: pending,
+        spots_left: capacity != null ? Math.max(0, capacity - taken) : null,
+        is_full: capacity != null ? taken >= capacity : false
     };
+}
+
+// Who of these users can book workshops: the magazine team (editors, admins,
+// super admins) and readers with an active subscription. `users` carry
+// id_user and the role flags.
+async function bookableUserIds(users) {
+    const truthy = (v) => v === true || v === 1;
+    const ids = new Set(users
+        .filter(u => truthy(u.is_editor) || truthy(u.is_admin) || truthy(u.is_super_admin))
+        .map(u => u.id_user));
+    const rest = users.map(u => u.id_user).filter(id => !ids.has(id));
+    if (rest.length > 0) {
+        const subs = await reader_subscription_model.findAll({
+            where: { user_id: rest, status: ACTIVE_STATUSES },
+            attributes: ['user_id']
+        });
+        subs.forEach(sub => ids.add(sub.user_id));
+    }
+    return ids;
+}
+
+// Invitations a workshop's managers see: pending and declined (accepted ones
+// are among the participants).
+async function loadWorkshopInvitations(workshopId) {
+    const rows = await workshop_invitation_model.findAll({
+        where: { workshop_id: workshopId, status: ['pending', 'declined'] },
+        include: [
+            { model: user_model, as: 'invitee', attributes: ['id_user', 'name_user', 'image_user'] },
+            { model: user_model, as: 'inviter', attributes: ['id_user', 'name_user'] }
+        ],
+        order: [['updated_at', 'ASC'], ['id_invitation', 'ASC']]
+    });
+    return rows.filter(r => r.invitee).map(r => ({
+        id_invitation: r.id_invitation,
+        status: r.status,
+        responded_at: r.responded_at,
+        id_user: r.invitee.id_user,
+        name_user: r.invitee.name_user,
+        image_user: r.invitee.image_user,
+        inviter_name: r.inviter?.name_user || null
+    }));
+}
+
+// The reader's own pending invitation to this workshop, or null.
+async function myPendingInvitation(workshopId, userId) {
+    if (!userId) return null;
+    const inv = await workshop_invitation_model.findOne({
+        where: { workshop_id: workshopId, invitee_user_id: userId, status: 'pending' },
+        include: [{ model: user_model, as: 'inviter', attributes: ['id_user', 'name_user'] }]
+    });
+    return inv ? {
+        id_invitation: inv.id_invitation,
+        inviter: inv.inviter ? { id_user: inv.inviter.id_user, name_user: inv.inviter.name_user } : null
+    } : null;
 }
 
 async function syncAuthors(workshopId, authors) {
@@ -98,13 +164,11 @@ function validate(data) {
 async function decorate(workshop) {
     const authors = await loadWorkshopAuthors(workshop.id_workshop);
     const reservation_count = await workshop_reservation_model.count({ where: { workshop_id: workshop.id_workshop } });
-    const capacity = workshop.capacity_workshop;
+    const pending = await countPendingInvitations(workshop.id_workshop);
     return {
         ...workshop.toJSON(),
         authors,
-        reservation_count,
-        spots_left: (capacity === null || capacity === undefined) ? null : Math.max(0, capacity - reservation_count),
-        is_full: (capacity === null || capacity === undefined) ? false : reservation_count >= capacity
+        ...spotsSummary(workshop, reservation_count, pending)
     };
 }
 
@@ -236,21 +300,23 @@ async function reserve(id_workshop, userId) {
         const existing = await workshop_reservation_model.findOne({ where: { workshop_id: id_workshop, user_id: userId } });
         if (existing) return { error: "Ya tienes una reserva en este taller" };
 
+        // Places held for other people's invitations count as taken; the
+        // reader's own invitation (if any) holds this place for them.
         const count = await workshop_reservation_model.count({ where: { workshop_id: id_workshop } });
-        if (workshop.capacity_workshop != null && count >= workshop.capacity_workshop) {
+        const pendingOthers = await countPendingInvitations(id_workshop, userId);
+        if (workshop.capacity_workshop != null && count + pendingOthers >= workshop.capacity_workshop) {
             return { error: "El taller está completo" };
         }
 
         await workshop_reservation_model.create({ workshop_id: id_workshop, user_id: userId });
-        const newCount = count + 1;
+        // Booking with a pending invitation answers it (the inviter is told).
+        await workshop_invitation_model.update(
+            { status: 'accepted', responded_at: new Date(), inviter_seen: false },
+            { where: { workshop_id: id_workshop, invitee_user_id: userId, status: 'pending' } }
+        );
         return {
             success: "Reserva confirmada",
-            data: {
-                id_workshop: Number(id_workshop),
-                reservation_count: newCount,
-                spots_left: workshop.capacity_workshop != null ? Math.max(0, workshop.capacity_workshop - newCount) : null,
-                is_full: workshop.capacity_workshop != null ? newCount >= workshop.capacity_workshop : false
-            }
+            data: spotsSummary(workshop, count + 1, pendingOthers)
         };
     } catch (err) {
         console.error("-> workshop reserve() - Error =", err);
@@ -265,15 +331,10 @@ async function cancelReservation(id_workshop, userId) {
         if (!deleted) return { error: "No tenías una reserva en este taller" };
         const workshop = await magazine_workshop_model.findByPk(id_workshop);
         const count = await workshop_reservation_model.count({ where: { workshop_id: id_workshop } });
-        const capacity = workshop?.capacity_workshop;
+        const pending = await countPendingInvitations(id_workshop);
         return {
             success: "Reserva cancelada",
-            data: {
-                id_workshop: Number(id_workshop),
-                reservation_count: count,
-                spots_left: capacity != null ? Math.max(0, capacity - count) : null,
-                is_full: capacity != null ? count >= capacity : false
-            }
+            data: spotsSummary(workshop, count, pending)
         };
     } catch (err) {
         console.error("-> workshop cancelReservation() - Error =", err);
@@ -283,40 +344,152 @@ async function cancelReservation(id_workshop, userId) {
 
 // ── Participant management (workshop managers; the API checks who) ──
 
-// Participants, blocked users and places, after each change.
+// Participants, invitations, blocked users and places, after each change.
 async function managementState(id_workshop) {
     const workshop = await magazine_workshop_model.findByPk(id_workshop);
     const count = await workshop_reservation_model.count({ where: { workshop_id: id_workshop } });
+    const pending = await countPendingInvitations(id_workshop);
     return {
-        ...spotsSummary(workshop, count),
+        ...spotsSummary(workshop, count, pending),
         participants: await loadWorkshopParticipants(id_workshop),
+        invitations: await loadWorkshopInvitations(id_workshop),
         blocked_users: await loadWorkshopBlocked(id_workshop)
     };
 }
 
-// Include someone in the workshop (no subscription needed — the managers
-// decide). Respects the capacity and blocks.
-async function addParticipant(id_workshop, userId) {
+// Invite someone (subscribers and the magazine team only). The invitation
+// holds a place until they accept (→ booking) or decline. Inviting again
+// after a "no" sends a new invitation.
+async function inviteUser(id_workshop, inviteeId, inviterId) {
     try {
         const workshop = await magazine_workshop_model.findByPk(id_workshop);
         if (!workshop || !workshop.active_workshop) return { error: "Taller no encontrado" };
-        const user = await user_model.findByPk(userId, { attributes: ['id_user'] });
+        const user = await user_model.findByPk(inviteeId, { attributes: ['id_user', 'is_editor', 'is_admin', 'is_super_admin'] });
         if (!user) return { error: "Usuario no encontrado" };
-        if (await isBlocked(id_workshop, userId)) {
-            return { error: "Esta persona está bloqueada en este taller. Desbloquéala antes de incluirla" };
+        if (await isBlocked(id_workshop, inviteeId)) {
+            return { error: "Esta persona está bloqueada en este taller. Desbloquéala antes de invitarla" };
         }
-        const existing = await workshop_reservation_model.findOne({ where: { workshop_id: id_workshop, user_id: userId } });
-        if (existing) return { error: "Esta persona ya participa en el taller" };
+        const participant = await workshop_reservation_model.findOne({ where: { workshop_id: id_workshop, user_id: inviteeId } });
+        if (participant) return { error: "Esta persona ya participa en el taller" };
+        const existing = await workshop_invitation_model.findOne({ where: { workshop_id: id_workshop, invitee_user_id: inviteeId } });
+        if (existing?.status === 'pending') return { error: "Esta persona ya tiene una invitación pendiente" };
+        if (!(await bookableUserIds([user])).has(user.id_user)) {
+            return { error: "Solo se puede invitar a personas suscritas a la revista", code: 'not_subscriber' };
+        }
         const count = await workshop_reservation_model.count({ where: { workshop_id: id_workshop } });
-        if (workshop.capacity_workshop != null && count >= workshop.capacity_workshop) {
-            return { error: "El taller está completo. Amplía el aforo para incluir a más personas" };
+        const pending = await countPendingInvitations(id_workshop);
+        if (workshop.capacity_workshop != null && count + pending >= workshop.capacity_workshop) {
+            return { error: "El taller está completo. Amplía el aforo para invitar a más personas" };
         }
-        await workshop_reservation_model.create({ workshop_id: id_workshop, user_id: userId });
-        return { success: "Participante incluido", data: await managementState(id_workshop) };
+        const values = { inviter_user_id: inviterId, status: 'pending', responded_at: null, inviter_seen: false };
+        if (existing) await existing.update(values);
+        else await workshop_invitation_model.create({ workshop_id: id_workshop, invitee_user_id: inviteeId, ...values });
+        return { success: "Invitación enviada", data: await managementState(id_workshop) };
     } catch (err) {
-        console.error("-> workshop addParticipant() - Error =", err);
-        return { error: "Error al incluir participante" };
+        console.error("-> workshop inviteUser() - Error =", err);
+        return { error: "Error al enviar la invitación" };
     }
+}
+
+// Withdraw a pending invitation: its place is free again.
+async function withdrawInvitation(id_workshop, inviteeId) {
+    try {
+        const deleted = await workshop_invitation_model.destroy({
+            where: { workshop_id: id_workshop, invitee_user_id: inviteeId, status: 'pending' }
+        });
+        if (!deleted) return { error: "Esta persona no tiene ninguna invitación pendiente" };
+        return { success: "Invitación retirada", data: await managementState(id_workshop) };
+    } catch (err) {
+        console.error("-> workshop withdrawInvitation() - Error =", err);
+        return { error: "Error al retirar la invitación" };
+    }
+}
+
+// The invited reader answers: 'accept' books the held place, 'decline'
+// frees it. Either way the inviter gets notified.
+async function respondInvitation(id_invitation, userId, response) {
+    try {
+        const inv = await workshop_invitation_model.findByPk(id_invitation);
+        if (!inv || inv.invitee_user_id !== userId) return { error: "Invitación no encontrada" };
+        if (inv.status !== 'pending') return { error: "Ya respondiste a esta invitación" };
+        const workshop = await magazine_workshop_model.findByPk(inv.workshop_id);
+        if (!workshop || !workshop.active_workshop) return { error: "Taller no encontrado" };
+        const accept = response === 'accept';
+        if (accept) {
+            if (await isBlocked(inv.workshop_id, userId)) return { error: "No puedes reservar plaza en este taller", code: 'blocked' };
+            await workshop_reservation_model.findOrCreate({
+                where: { workshop_id: inv.workshop_id, user_id: userId },
+                defaults: { workshop_id: inv.workshop_id, user_id: userId }
+            });
+        }
+        await inv.update({ status: accept ? 'accepted' : 'declined', responded_at: new Date(), inviter_seen: false });
+        return {
+            success: accept ? "Invitación aceptada: tienes plaza en el taller" : "Invitación rechazada. La plaza queda libre",
+            data: { id_invitation: inv.id_invitation, id_workshop: inv.workshop_id, status: inv.status }
+        };
+    } catch (err) {
+        console.error("-> workshop respondInvitation() - Error =", err);
+        return { error: "Error al responder a la invitación" };
+    }
+}
+
+// The reader's workshop notifications: invitations waiting for an answer
+// (upcoming workshops) and answers to the invitations they sent, until seen.
+async function invitationFeed(userId) {
+    try {
+        const workshopAttrs = ['id_workshop', 'title_workshop', 'date_workshop', 'audience_workshop', 'cover_image_workshop'];
+        const pending = await workshop_invitation_model.findAll({
+            where: { invitee_user_id: userId, status: 'pending' },
+            include: [
+                {
+                    model: magazine_workshop_model, as: 'workshop', attributes: workshopAttrs,
+                    where: { active_workshop: true, [Op.or]: [{ date_workshop: null }, { date_workshop: { [Op.gte]: new Date() } }] }
+                },
+                { model: user_model, as: 'inviter', attributes: ['id_user', 'name_user'] }
+            ],
+            order: [['updated_at', 'DESC']]
+        });
+        const answers = await workshop_invitation_model.findAll({
+            where: { inviter_user_id: userId, status: ['accepted', 'declined'], inviter_seen: false },
+            include: [
+                { model: magazine_workshop_model, as: 'workshop', attributes: workshopAttrs },
+                { model: user_model, as: 'invitee', attributes: ['id_user', 'name_user'] }
+            ],
+            order: [['responded_at', 'DESC']],
+            limit: 30
+        });
+        return {
+            data: {
+                invitations: pending.map(i => ({
+                    id_invitation: i.id_invitation,
+                    created_at: i.updated_at,
+                    workshop: i.workshop.toJSON(),
+                    inviter: i.inviter ? { id_user: i.inviter.id_user, name_user: i.inviter.name_user } : null
+                })),
+                responses: answers.filter(a => a.workshop && a.invitee).map(a => ({
+                    id_invitation: a.id_invitation,
+                    status: a.status,
+                    responded_at: a.responded_at,
+                    workshop: a.workshop.toJSON(),
+                    invitee: { id_user: a.invitee.id_user, name_user: a.invitee.name_user }
+                }))
+            }
+        };
+    } catch (err) {
+        console.error("-> workshop invitationFeed() - Error =", err);
+        return { error: "Error al cargar las invitaciones" };
+    }
+}
+
+// The inviter has seen these answers (they leave the notifications).
+async function markResponsesSeen(userId, ids) {
+    const list = (Array.isArray(ids) ? ids : []).map(Number).filter(n => Number.isInteger(n) && n > 0);
+    if (list.length === 0) return { data: { updated: 0 } };
+    const [updated] = await workshop_invitation_model.update(
+        { inviter_seen: true },
+        { where: { inviter_user_id: userId, id_invitation: list } }
+    );
+    return { data: { updated } };
 }
 
 async function removeParticipant(id_workshop, userId) {
@@ -343,6 +516,7 @@ async function blockUser(id_workshop, userId, blockedBy) {
             defaults: { workshop_id: id_workshop, user_id: userId, blocked_by: blockedBy || null }
         });
         await workshop_reservation_model.destroy({ where: { workshop_id: id_workshop, user_id: userId } });
+        await workshop_invitation_model.destroy({ where: { workshop_id: id_workshop, invitee_user_id: userId } });
         return { success: "Usuario bloqueado en este taller", data: await managementState(id_workshop) };
     } catch (err) {
         console.error("-> workshop blockUser() - Error =", err);
@@ -361,7 +535,7 @@ async function unblockUser(id_workshop, userId) {
     }
 }
 
-// People to include / block, by name (id, name and photo only), marked
+// People to invite / block, by name (id, name and photo only), marked
 // when they already take part or are blocked.
 async function searchUsers(id_workshop, query) {
     try {
@@ -370,24 +544,29 @@ async function searchUsers(id_workshop, query) {
         const escaped = q.replace(/[\\%_]/g, (c) => `\\${c}`);
         const users = await user_model.findAll({
             where: { name_user: { [Op.like]: `%${escaped}%` } },
-            attributes: ['id_user', 'name_user', 'image_user'],
+            attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin'],
             order: [['name_user', 'ASC']],
             limit: 10
         });
         const ids = users.map(u => u.id_user);
-        const [reserved, blocked] = await Promise.all([
+        const [reserved, blocked, invitations, bookable] = await Promise.all([
             workshop_reservation_model.findAll({ where: { workshop_id: id_workshop, user_id: ids }, attributes: ['user_id'] }),
-            workshop_block_model.findAll({ where: { workshop_id: id_workshop, user_id: ids }, attributes: ['user_id'] })
+            workshop_block_model.findAll({ where: { workshop_id: id_workshop, user_id: ids }, attributes: ['user_id'] }),
+            workshop_invitation_model.findAll({ where: { workshop_id: id_workshop, invitee_user_id: ids }, attributes: ['invitee_user_id', 'status'] }),
+            bookableUserIds(users)
         ]);
         const reservedSet = new Set(reserved.map(r => r.user_id));
         const blockedSet = new Set(blocked.map(b => b.user_id));
+        const invitationStatus = new Map(invitations.map(i => [i.invitee_user_id, i.status]));
         return {
             data: users.map(u => ({
                 id_user: u.id_user,
                 name_user: u.name_user,
                 image_user: u.image_user,
                 is_participant: reservedSet.has(u.id_user),
-                is_blocked: blockedSet.has(u.id_user)
+                is_blocked: blockedSet.has(u.id_user),
+                can_book: bookable.has(u.id_user),
+                invitation_status: invitationStatus.get(u.id_user) || null
             }))
         };
     } catch (err) {
@@ -407,7 +586,13 @@ export default {
     cancelReservation,
     isBlocked,
     loadWorkshopBlocked,
-    addParticipant,
+    loadWorkshopInvitations,
+    myPendingInvitation,
+    inviteUser,
+    withdrawInvitation,
+    respondInvitation,
+    invitationFeed,
+    markResponsesSeen,
     removeParticipant,
     blockUser,
     unblockUser,

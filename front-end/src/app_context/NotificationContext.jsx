@@ -3,13 +3,18 @@
 // Foundation for the magazine's in-app notification/reminder system.
 //
 // Notifications are computed from app state into a list of
-// { id, type, title, message, onClick } objects that the header bell + dropdown
-// render generically, so new types can be added without touching consumers.
+// { id, type, title, message, onClick, actions? } objects that the header
+// bell + dropdown render generically, so new types can be added without
+// touching consumers. `actions` = [{ key, label, variant, onClick }] buttons.
 //
 // Types implemented:
 //  - profile:  users who can create content but have no author profile yet.
 //  - article / project:  content published since the user last opened the bell.
 //  - membership:  the reader's paid subscription became active (until seen).
+//  - workshop-invite:  someone invited the reader to a workshop — with
+//    Aceptar / Rechazar (`actions`); stays until answered.
+//  - workshop-invite-response:  a reader answered an invitation this user
+//    sent (until the bell is opened).
 //
 // "New content" notifications accumulate (persist as unread) until the user
 // opens the bell — the last-seen timestamp is stored per user in localStorage,
@@ -23,6 +28,7 @@ import { useUI } from './UIContext';
 import { useMagazine } from './MagazineContext';
 import { useEngagement } from './EngagementContext';
 import { useSubscription } from './SubscriptionContext';
+import { useWorkshop } from './WorkshopContext';
 
 const NotificationContext = createContext(null);
 const MAX_CONTENT_NOTIFS = 30;
@@ -31,7 +37,10 @@ export const NotificationProvider = ({ children }) => {
   const { t } = useTranslation();
   const { currentUser, canCreateContent } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
-  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail } = useUI();
+  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail } = useUI();
+  const {
+    invitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen, setSelectedWorkshop
+  } = useWorkshop();
   const { setSelectedArticle, setSelectedProject } = useMagazine();
   const { subscribedProjectIds } = useEngagement();
   const subscription = useSubscription();
@@ -96,9 +105,28 @@ export const NotificationProvider = ({ children }) => {
     return () => { active = false; };
   }, [currentUser?.id_user, canCreateContent, fetchAllProfiles]);
 
+  // Workshop invitations: open the workshop, or answer from the bell.
+  const openWorkshop = useCallback((workshop) => {
+    setSelectedWorkshop(workshop);
+    navigateToWorkshopDetail();
+  }, [setSelectedWorkshop, navigateToWorkshopDetail]);
+  const answerInvitation = useCallback(async (invitation, response) => {
+    if (response === 'decline'
+      && !window.confirm(t('workshops.invitation.confirmDecline', '¿Rechazar la invitación? La plaza quedará libre para otra persona.'))) return;
+    const res = await respondToWorkshopInvitation(invitation, response);
+    // Accepting books a place: subscribers only (and the magazine team).
+    if (res?.code === 'subscription_required') subscription?.openModal?.('workshops');
+  }, [respondToWorkshopInvitation, subscription, t]);
+  const shortDate = (d) => {
+    if (!d) return null;
+    const dt = new Date(d);
+    return isNaN(dt) ? null : dt.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  };
+
   // Mark every current notification as seen (called when the user opens/closes
-  // the bell). Only affects the time-based content notifications; the profile
-  // reminder persists until the profile is actually created.
+  // the bell). Only affects the time-based content notifications and the
+  // answers to the user's workshop invitations; the profile reminder and
+  // pending invitations persist until acted on.
   const markAllSeen = useCallback(() => {
     const now = Date.now();
     if (seenKey) { try { localStorage.setItem(seenKey, String(now)); } catch { /* ignore */ } }
@@ -108,7 +136,9 @@ export const NotificationProvider = ({ children }) => {
       try { localStorage.setItem(membershipKey, mark); } catch { /* ignore */ }
       setMembershipSeen(mark);
     }
-  }, [seenKey, membershipKey, membership?.active, membership?.since]);
+    const answered = (invitationFeed?.responses || []).map(r => r.id_invitation);
+    if (answered.length > 0) markInvitationResponsesSeen(answered);
+  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, markInvitationResponsesSeen]);
 
   const notifications = useMemo(() => {
     const list = [];
@@ -123,6 +153,29 @@ export const NotificationProvider = ({ children }) => {
           title: t('notifications.completeProfile.title'),
           message: t('notifications.completeProfile.message'),
           onClick: () => navigateToAuthorEditor()
+        });
+      }
+    }
+
+    // Invitations to a workshop, waiting for an answer.
+    if (currentUser) {
+      for (const inv of invitationFeed?.invitations || []) {
+        const when = shortDate(inv.workshop?.date_workshop);
+        const message = t('notifications.workshopInvite.message', {
+          name: inv.inviter?.name_user || '',
+          title: inv.workshop?.title_workshop || '',
+          defaultValue: '{{name}} te invita a «{{title}}»'
+        });
+        list.push({
+          id: `workshop-invite-${inv.id_invitation}`,
+          type: 'workshop-invite',
+          title: t('notifications.workshopInvite.title', 'Invitación a un taller'),
+          message: when ? `${message} · ${when}` : message,
+          onClick: () => openWorkshop(inv.workshop),
+          actions: [
+            { key: 'accept', variant: 'primary', label: t('notifications.workshopInvite.accept', 'Aceptar'), onClick: () => answerInvitation(inv, 'accept') },
+            { key: 'decline', variant: 'secondary', label: t('notifications.workshopInvite.decline', 'Rechazar'), onClick: () => answerInvitation(inv, 'decline') }
+          ]
         });
       }
     }
@@ -215,6 +268,24 @@ export const NotificationProvider = ({ children }) => {
         }
       }
 
+      // Answers to the workshop invitations this user sent.
+      for (const r of invitationFeed?.responses || []) {
+        const accepted = r.status === 'accepted';
+        const vars = { name: r.invitee?.name_user || '', title: r.workshop?.title_workshop || '' };
+        content.push({
+          id: `workshop-invite-response-${r.id_invitation}`,
+          type: 'workshop-invite-response',
+          ts: r.responded_at ? new Date(r.responded_at).getTime() : Date.now(),
+          title: accepted
+            ? t('notifications.workshopInviteAccepted.title', 'Invitación aceptada')
+            : t('notifications.workshopInviteDeclined.title', 'Invitación rechazada'),
+          message: accepted
+            ? t('notifications.workshopInviteAccepted.message', { ...vars, defaultValue: '{{name}} ha aceptado tu invitación a «{{title}}» y tiene plaza.' })
+            : t('notifications.workshopInviteDeclined.message', { ...vars, defaultValue: '{{name}} ha rechazado tu invitación a «{{title}}». Su plaza vuelve a estar libre.' }),
+          onClick: () => openWorkshop(r.workshop)
+        });
+      }
+
       content.sort((x, y) => y.ts - x.ts);
       list.push(...content.slice(0, MAX_CONTENT_NOTIFS));
     }
@@ -223,6 +294,7 @@ export const NotificationProvider = ({ children }) => {
   }, [
     profilesReady, currentUser, canCreateContent, authorProfiles, lastSeen,
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
+    invitationFeed, openWorkshop, answerInvitation,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

@@ -55,6 +55,10 @@
 .workshop-btn--reserve:hover { background: #196b2c; }
 .workshop-btn--cancel { background: #fff; color: #c62828; border: 1px solid #c62828; }
 .workshop-reserved-note { margin: 0 0 0.75rem; color: #1e7e34; font-weight: 600; }
+.workshop-invitation-note { margin: 0 0 0.75rem; color: #1a1a1a; font-weight: 600; }
+.workshop-invitation-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.workshop-btn--decline { background: #e4e4e4; color: #1a1a1a; }
+.workshop-btn--decline:hover { background: #000000; color: #ffffff; }
 .workshop-full-note { margin: 0; color: #c62828; font-weight: 600; }
 
 .workshop-participants { margin-top: 1.5rem; }
@@ -510,6 +514,12 @@
   color: #666666;
   font-weight: 400;
 }
+.workshop-person__sub {
+  display: block;
+  color: #666666;
+  font-size: 0.78rem;
+  font-weight: 400;
+}
 
 /* Small buttons in the site's style: black, red to block. */
 .workshop-people-btn {
@@ -559,6 +569,14 @@
   background: #fdecea;
   color: #b91c1c;
 }
+.workshop-people__tag--pending {
+  background: #fff4dc;
+  color: #8a5a00;
+}
+.workshop-people__tag--muted {
+  background: #ececec;
+  color: #555555;
+}
 
 .workshop-people__add {
   margin-top: 1.25rem;
@@ -597,6 +615,18 @@
   font-size: 0.95rem;
 }
 
+.workshop-people__hint--add {
+  margin: -0.15rem 0 0.5rem;
+}
+.workshop-people__section h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 0.98rem;
+}
+.workshop-people__section,
 .workshop-people__blocked {
   margin-top: 1.25rem;
   padding-top: 1rem;

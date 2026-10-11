@@ -4,15 +4,19 @@
 // cards, signed-in readers open a workshop, and paying subscribers (and the
 // magazine team) reserve a capacity-limited spot — general workshops and
 // children's workshops (audience_workshop). A workshop's managers see its
-// participants and include / remove / block people.
+// participants and invite / remove / block people.
+// Invitations: the invited reader answers (accept → booked, decline → the
+// held place is free) and the inviter is told; both show in the header bell
+// (`invitationFeed`, refreshed every minute and when the tab gets focus).
 // The server answers 403 + code 'login_required' | 'subscription_required'
 // when the reader can't go on; that is kept in `accessError`.
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
 import { useUI } from './UIContext';
 
 const WorkshopContext = createContext(null);
+const EMPTY_FEED = { invitations: [], responses: [] };
 
 export const WorkshopProvider = ({ children }) => {
   const { currentUser } = useAuth();
@@ -21,6 +25,7 @@ export const WorkshopProvider = ({ children }) => {
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [loading, setLoading] = useState(false);
   const [accessError, setAccessError] = useState(null);
+  const [invitationFeed, setInvitationFeed] = useState(EMPTY_FEED);
 
   const authHeader = useCallback(
     () => ({ headers: { 'x-user-id': currentUser?.id_user } }),
@@ -151,6 +156,68 @@ export const WorkshopProvider = ({ children }) => {
     }
   }, [authHeader, showSuccess, showError]);
 
+  // ── Invitations (the invited reader and the inviter) ──
+
+  const userId = currentUser?.id_user || null;
+  const refreshInvitationFeed = useCallback(async () => {
+    if (!userId) { setInvitationFeed(EMPTY_FEED); return; }
+    try {
+      const res = await axiosInstance.get('/magazine-workshop/invitations/feed', { headers: { 'x-user-id': userId } });
+      setInvitationFeed(res.data?.data || EMPTY_FEED);
+    } catch {
+      // Keep what we had; the next refresh will try again.
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    refreshInvitationFeed();
+    if (!userId) return undefined;
+    const timer = setInterval(refreshInvitationFeed, 60 * 1000);
+    window.addEventListener('focus', refreshInvitationFeed);
+    return () => { clearInterval(timer); window.removeEventListener('focus', refreshInvitationFeed); };
+  }, [userId, refreshInvitationFeed]);
+
+  // The open workshop, to refresh it when the reader answers from the bell.
+  const selectedIdRef = useRef(null);
+  selectedIdRef.current = selectedWorkshop?.id_workshop || null;
+
+  // response: 'accept' | 'decline'. Returns { success } or { error, code }
+  // (code 'subscription_required' / 'login_required': the caller guides the
+  // reader).
+  const respondToWorkshopInvitation = useCallback(async (invitation, response) => {
+    try {
+      const res = await axiosInstance.post(
+        `/magazine-workshop/invitations/${invitation.id_invitation}/respond`,
+        { response },
+        authHeader()
+      );
+      showSuccess(res.data?.success || 'Hecho');
+      setInvitationFeed(prev => ({ ...prev, invitations: prev.invitations.filter(i => i.id_invitation !== invitation.id_invitation) }));
+      const workshopId = res.data?.data?.id_workshop;
+      if (workshopId && workshopId === selectedIdRef.current) fetchWorkshopById(workshopId);
+      fetchWorkshops();
+      return { success: true };
+    } catch (err) {
+      const code = err.response?.status === 403 ? err.response?.data?.code : null;
+      const msg = err.response?.data?.error || 'Error al responder a la invitación';
+      if (code) return { error: msg, code };
+      showError(msg);
+      refreshInvitationFeed();
+      return { error: msg };
+    }
+  }, [authHeader, showSuccess, showError, fetchWorkshopById, fetchWorkshops, refreshInvitationFeed]);
+
+  // The inviter has seen these answers: they leave the bell.
+  const markInvitationResponsesSeen = useCallback(async (ids) => {
+    if (!userId || !ids?.length) return;
+    setInvitationFeed(prev => ({ ...prev, responses: prev.responses.filter(r => !ids.includes(r.id_invitation)) }));
+    try {
+      await axiosInstance.post('/magazine-workshop/invitations/responses/seen', { ids }, { headers: { 'x-user-id': userId } });
+    } catch {
+      // They'll show again on the next refresh.
+    }
+  }, [userId]);
+
   // ── Participants (the workshop's managers) ──
 
   // People to include / block, by name (2+ characters).
@@ -166,15 +233,17 @@ export const WorkshopProvider = ({ children }) => {
     }
   }, [authHeader]);
 
-  // action: 'add' | 'remove' | 'block' | 'unblock'. The open workshop takes
-  // the updated participants, blocked users and places.
-  const manageWorkshopParticipant = useCallback(async (id, action, userId) => {
+  // action: 'invite' | 'withdraw' | 'remove' | 'block' | 'unblock'. The open
+  // workshop takes the updated participants, invitations, blocked users and
+  // places.
+  const manageWorkshopParticipant = useCallback(async (id, action, targetId) => {
     const base = `/magazine-workshop/manage/${id}`;
     const requests = {
-      add: () => axiosInstance.post(`${base}/participants`, { user_id: userId }, authHeader()),
-      remove: () => axiosInstance.delete(`${base}/participants/${userId}`, authHeader()),
-      block: () => axiosInstance.post(`${base}/blocks`, { user_id: userId }, authHeader()),
-      unblock: () => axiosInstance.delete(`${base}/blocks/${userId}`, authHeader())
+      invite: () => axiosInstance.post(`${base}/invitations`, { user_id: targetId }, authHeader()),
+      withdraw: () => axiosInstance.delete(`${base}/invitations/${targetId}`, authHeader()),
+      remove: () => axiosInstance.delete(`${base}/participants/${targetId}`, authHeader()),
+      block: () => axiosInstance.post(`${base}/blocks`, { user_id: targetId }, authHeader()),
+      unblock: () => axiosInstance.delete(`${base}/blocks/${targetId}`, authHeader())
     };
     try {
       const res = await requests[action]();
@@ -202,7 +271,8 @@ export const WorkshopProvider = ({ children }) => {
     fetchWorkshops, fetchWorkshopById,
     createWorkshop, updateWorkshop, deleteWorkshop, uploadWorkshopCover,
     reserveWorkshop, cancelWorkshopReservation,
-    searchWorkshopUsers, manageWorkshopParticipant
+    searchWorkshopUsers, manageWorkshopParticipant,
+    invitationFeed, refreshInvitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen
   };
 
   return <WorkshopContext.Provider value={value}>{children}</WorkshopContext.Provider>;
