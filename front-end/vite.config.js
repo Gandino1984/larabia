@@ -33,6 +33,13 @@ export default defineConfig(({ mode }) => {
       host: true,
       port: 5174,
       proxy
+    },
+    // Unit tests (vitest): the paisaje-sonoro engine brings its own suite
+    // (src/paisaje — see its README). Pure logic runs in node; the player
+    // test opts into jsdom per file.
+    test: {
+      environment: 'node',
+      include: ['src/**/*.test.{ts,tsx,js,jsx}']
     }
   };
 });
