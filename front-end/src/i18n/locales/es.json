@@ -398,7 +398,6 @@
   "editor.microperfil.audioLabel": "Audio (opcional)",
   "editor.microperfil.addAudio": "Añadir audio",
   "editor.microperfil.audioInvalid": "Formato de audio no válido (MP3, AAC, OGG, MP4)",
-  "editor.microperfil.audioTooLarge": "El audio es demasiado grande. Máximo 20MB.",
   "editor.microperfil.needImage": "Añade una imagen al micro-perfil.",
   "editor.microperfil.needCaption": "El pie de foto es obligatorio.",
   "editor.microperfil.captionTooLong": "El pie de foto es demasiado largo ({{count}}/700).",
@@ -665,7 +664,6 @@
   "paisaje.editor.drawing.noReference": "No se generó la imagen de referencia; vuelve a cargar la imagen.",
   "paisaje.editor.audio.upload": "Subir audio",
   "paisaje.editor.audio.replace": "Cambiar audio",
-  "paisaje.editor.audio.formats": "mp3, wav, ogg, m4a, flac o aac · sin límite de tamaño · se guarda en AAC con el volumen normalizado",
   "paisaje.editor.audio.badFormat": "Formato no admitido. Usa {{formats}}.",
   "paisaje.editor.audio.uploading": "Subiendo audio… {{pct}} %",
   "paisaje.editor.audio.processing": "Ajustando el volumen del audio… puede tardar un poco.",
@@ -698,5 +696,8 @@
   "paisaje.styles.posterizado": "Posterizado 4 capas",
   "paisaje.styles.posterizadoDesc": "La imagen en 4 colores; cada color responde a un tono del sonido, de los graves a los agudos.",
   "paisaje.styles.azimuthal": "Azimutal",
-  "paisaje.styles.azimuthalDesc": "Los bordes de la imagen en líneas negras que giran como un mapa del mundo; el sonido mueve la órbita."
+  "paisaje.styles.azimuthalDesc": "Los bordes de la imagen en líneas negras que giran como un mapa del mundo; el sonido mueve la órbita.",
+  "audio.upload.hint": "WAV recomendado (máxima calidad) · también mp3, flac, m4a, ogg… · sin límite de tamaño · se guarda en AAC con el volumen normalizado",
+  "audio.upload.processing": "Convirtiendo a AAC y normalizando…",
+  "audio.upload.badFormat": "Formato de audio no admitido: {{name}}. Usa WAV, FLAC, MP3, M4A, OGG…"
 }

@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, ArrowLeft, ArrowRight, Upload, MousePointer, Link as LinkIcon, Volume2, X, Code2, AudioWaveform, Edit } from 'lucide-react';
 import { isPieceComplete, parseSoundscape } from '../../paisaje/integration/soundscape';
+import { AUDIO_ACCEPT, isAcceptedAudio } from '../../utils/audioUpload';
 import './HScrollEditor.css';
 
 // Paisaje sonoro panels (engine by Cristian Vergara): editor loaded on demand.
@@ -268,18 +269,10 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
       fileSize: file.size
     });
 
-    // Accepted: MP3, AAC (incl. .aac ADTS and .m4a container), OGG, WEBM, MP4. WAV removed.
-    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/webm', 'audio/aac', 'audio/x-aac', 'audio/aacp', 'audio/vnd.dlna.adts', 'audio/mp4', 'audio/x-m4a', 'video/mp4'];
-    if (!validTypes.includes(file.type)) {
-      console.error('❌ Invalid audio file type:', file.type);
-      alert(`Por favor selecciona un archivo de audio válido (MP3, AAC, OGG, MP4). Tipo detectado: ${file.type}`);
-      return;
-    }
-
-    // Validate file size (max 20MB)
-    const maxSize = 20 * 1024 * 1024;
-    if (file.size > maxSize) {
-      alert('El archivo de audio es demasiado grande. Máximo 20MB');
+    // Any size and format (WAV recommended): the server stores it as AAC with
+    // normalised volume and discards the original.
+    if (!isAcceptedAudio(file)) {
+      alert(t('audio.upload.badFormat', { name: file.name, defaultValue: 'Formato de audio no admitido: {{name}}. Usa WAV, FLAC, MP3, M4A, OGG…' }));
       return;
     }
 
@@ -294,8 +287,8 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
         mode: audioMode
       });
     } catch (error) {
+      // MagazineContext already shows the reason.
       console.error('❌ Error uploading audio:', error);
-      alert('Error al subir el audio');
     } finally {
       setUploadingAudio(false);
       setAudioProgress(0);
@@ -654,7 +647,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                   <label className="audio-upload-btn">
                     <input
                       type="file"
-                      accept=".mp3,.aac,.m4a,.ogg,.mp4,audio/mpeg,audio/aac,audio/aacp,audio/vnd.dlna.adts,audio/mp4,audio/x-m4a,audio/ogg,video/mp4"
+                      accept={AUDIO_ACCEPT}
                       onChange={(e) => handleAudioUpload(e.target.files[0])}
                       style={{ display: 'none' }}
                       disabled={uploadingAudio}
@@ -666,11 +659,11 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                     <div className="audio-upload-progress" role="progressbar" aria-valuenow={audioProgress} aria-valuemin={0} aria-valuemax={100}>
                       <div className="audio-upload-progress__bar" style={{ width: `${audioProgress}%` }} />
                       <span className="audio-upload-progress__pct">
-                        {audioProgress < 100 ? `${audioProgress}%` : 'Procesando…'}
+                        {audioProgress < 100 ? `${audioProgress}%` : t('audio.upload.processing', 'Convirtiendo a AAC y normalizando…')}
                       </span>
                     </div>
                   )}
-                  <p className="audio-hint">MP3, AAC, OGG, MP4 (máx. 20MB)</p>
+                  <p className="audio-hint">{t('audio.upload.hint', 'WAV recomendado (máxima calidad) · también mp3, flac, m4a, ogg… · sin límite de tamaño · se guarda en AAC con el volumen normalizado')}</p>
 
                   {/* Audio Configuration Options */}
                   <div className="audio-config-section">

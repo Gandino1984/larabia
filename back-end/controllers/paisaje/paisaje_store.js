@@ -41,7 +41,9 @@ export const TMP_DIR = path.join(PAISAJE_DIR, "tmp");
 /** Public URL prefix of the files (see index.js). */
 export const FILES_PREFIX = "/paisaje-files";
 
-export const AUDIO_FORMATS = ["mp3", "wav", "ogg", "m4a", "flac", "aac"];
+// Any format ffmpeg reads (WAV recommended: best quality). Shared by every
+// audio upload of the magazine (paisajes, comic audio panels, micro-perfiles).
+export const AUDIO_FORMATS = ["wav", "flac", "aiff", "aif", "mp3", "m4a", "aac", "ogg", "opus", "webm", "mp4"];
 
 /** Unreferenced uploads older than this are deleted (abandoned editors). */
 const ORPHAN_AGE_MS = 48 * 60 * 60 * 1000;
@@ -121,6 +123,9 @@ async function applyLoudness(input, output, m) {
             `measured_LRA=${fmt(m.measuredLRA, "1")}:` +
             `measured_thresh=${fmt(m.measuredThresh, "-70")}:` +
             `offset=${m.offset.toFixed(2)}:linear=true:print_format=json`,
+        // loudnorm works at 192 kHz internally: without -ar the AAC came out
+        // at 96 kHz (bits spent on inaudible bands; some devices choke).
+        "-ar", "48000",
         "-c:a", "aac", "-b:a", "192k",
         "-movflags", "+faststart",
         output
@@ -301,17 +306,26 @@ export function sanitizeSoundscape(raw) {
  */
 export async function cleanupOrphans(maxAgeMs = ORPHAN_AGE_MS) {
     const rows = await article_block_model.findAll({
-        where: { soundscape_data: { [Op.ne]: null } },
-        attributes: ["soundscape_data"]
+        where: {
+            [Op.or]: [
+                { soundscape_data: { [Op.ne]: null } },
+                { interaction_data: { [Op.like]: "%/paisaje-files/audio/%" } } // comic / micro-perfil audio
+            ]
+        },
+        attributes: ["soundscape_data", "interaction_data"]
     });
     const usedImages = new Set();
     const usedAudio = new Set();
     for (const r of rows) {
-        try {
-            const s = JSON.parse(r.soundscape_data);
-            if (s.imageId) usedImages.add(s.imageId);
-            if (s.audioId) usedAudio.add(s.audioId);
-        } catch { /* unreadable: ignore */ }
+        if (r.soundscape_data) {
+            try {
+                const s = JSON.parse(r.soundscape_data);
+                if (s.imageId) usedImages.add(s.imageId);
+                if (s.audioId) usedAudio.add(s.audioId);
+            } catch { /* unreadable: ignore */ }
+        }
+        const m = /\/paisaje-files\/audio\/([A-Za-z0-9_-]+)\.m4a/.exec(r.interaction_data || "");
+        if (m) usedAudio.add(m[1]);
     }
     const now = Date.now();
     let removed = 0;

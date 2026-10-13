@@ -21,7 +21,8 @@ import PaisajePlayer from '../player/PaisajePlayer';
 import { STYLES, DEFAULT_STYLE_ID, getStyle } from '../styles/registry';
 import { useAuth } from '../../app_context/AuthContext';
 import { apiFile, parseSoundscape, pieceAudioUrl, playerLabels } from './soundscape';
-import { AUDIO_EXTENSIONS, uploadAudio, uploadDrawing, waitForAudio } from './paisajeApi';
+import { AUDIO_ACCEPT, uploadAudio, uploadDrawing, waitForAudio } from './paisajeApi';
+import { isAcceptedAudio, AUDIO_EXTENSIONS } from '../../utils/audioUpload';
 import '../converter/converter.css';
 import './PaisajePiece.css';
 import './PaisajeEditor.css';
@@ -120,8 +121,7 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    const ext = (file.name.split('.').pop() || '').toLowerCase();
-    if (!AUDIO_EXTENSIONS.includes(ext)) {
+    if (!isAcceptedAudio(file)) {
       setAudioPhase('error');
       setAudioError(t('paisaje.editor.audio.badFormat', { formats: AUDIO_EXTENSIONS.join(', '), defaultValue: 'Formato no admitido. Usa {{formats}}.' }));
       return;
@@ -322,7 +322,7 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
               ref={audioInputRef}
               type="file"
               className="lpe-file-input"
-              accept={`${AUDIO_EXTENSIONS.map((e) => `.${e}`).join(',')},audio/*`}
+              accept={AUDIO_ACCEPT}
               onChange={handleAudioFile}
               disabled={audioBusy}
               tabIndex={-1}
@@ -337,7 +337,7 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
               <Upload size={16} />
               {audio ? t('paisaje.editor.audio.replace', 'Cambiar audio') : t('paisaje.editor.audio.upload', 'Subir audio')}
             </button>
-            <p className="lpe-muted">{t('paisaje.editor.audio.formats', 'mp3, wav, ogg, m4a, flac o aac · sin límite de tamaño · se guarda en AAC con el volumen normalizado')}</p>
+            <p className="lpe-muted">{t('audio.upload.hint', 'WAV recomendado (máxima calidad) · también mp3, flac, m4a, ogg… · sin límite de tamaño · se guarda en AAC con el volumen normalizado')}</p>
           </div>
 
           {audioBusy && (

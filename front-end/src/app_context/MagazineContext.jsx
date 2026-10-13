@@ -1,6 +1,7 @@
 // magazine-front/src/app_context/MagazineContext.jsx
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import axiosInstance from '../utils/axiosConfig';
+import { uploadAndProcessAudio } from '../utils/audioUpload';
 import { useUI } from './UIContext';
 import { useAuth } from './AuthContext';
 
@@ -447,33 +448,19 @@ export const MagazineProvider = ({ children }) => {
     }
   }, [showError, showSuccess]);
 
-  // Upload panel audio. `onProgress` (optional) receives 0-100 upload percent.
+  // Upload audio for comic panels and micro-perfiles through the shared
+  // pipeline (any size; stored as AAC with normalised volume, original
+  // discarded). `onProgress` receives the 0–100 upload percent; the promise
+  // resolves once the server has finished converting (→ the AAC's path).
   const uploadPanelAudio = useCallback(async (audioFile, onProgress) => {
     try {
-      const formData = new FormData();
-      formData.append('audio', audioFile);
-
-      const response = await axiosInstance.post('/article-blocks/upload-audio', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        onUploadProgress: (e) => {
-          if (onProgress && e.total) onProgress(Math.round((e.loaded / e.total) * 100));
-        }
-      });
-
-      if (!response.data.error) {
-        return response.data.data.audio_url;
-      } else {
-        showError(response.data.error);
-        throw new Error(response.data.error);
-      }
+      return await uploadAndProcessAudio(audioFile, currentUser?.id_user, onProgress);
     } catch (err) {
       console.error('Error uploading panel audio:', err);
-      showError('Error al subir audio del panel');
+      showError(err.message || 'Error al subir audio del panel');
       throw err;
     }
-  }, [showError]);
+  }, [currentUser, showError]);
 
   // Invite a co-author to an article
   const inviteCoAuthor = useCallback(async (article_id, invitee_user_id) => {

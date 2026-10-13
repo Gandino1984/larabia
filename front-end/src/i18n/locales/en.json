@@ -398,7 +398,6 @@
   "editor.microperfil.audioLabel": "Audio (optional)",
   "editor.microperfil.addAudio": "Add audio",
   "editor.microperfil.audioInvalid": "Invalid audio format (MP3, AAC, OGG, MP4)",
-  "editor.microperfil.audioTooLarge": "The audio is too large. 20MB max.",
   "editor.microperfil.needImage": "Add an image to the micro-profile.",
   "editor.microperfil.needCaption": "The caption is required.",
   "editor.microperfil.captionTooLong": "The caption is too long ({{count}}/700).",
@@ -665,7 +664,6 @@
   "paisaje.editor.drawing.noReference": "The reference image wasn’t generated; load the image again.",
   "paisaje.editor.audio.upload": "Upload audio",
   "paisaje.editor.audio.replace": "Change audio",
-  "paisaje.editor.audio.formats": "mp3, wav, ogg, m4a, flac or aac · no size limit · stored as AAC with normalised volume",
   "paisaje.editor.audio.badFormat": "Format not supported. Use {{formats}}.",
   "paisaje.editor.audio.uploading": "Uploading audio… {{pct}} %",
   "paisaje.editor.audio.processing": "Adjusting the audio volume… this may take a moment.",
@@ -698,5 +696,8 @@
   "paisaje.styles.posterizado": "4-layer posterized",
   "paisaje.styles.posterizadoDesc": "The image in 4 colours; each colour responds to a range of the sound, from low to high.",
   "paisaje.styles.azimuthal": "Azimuthal",
-  "paisaje.styles.azimuthalDesc": "The image’s edges as black lines turning like a world map; the sound moves the orbit."
+  "paisaje.styles.azimuthalDesc": "The image’s edges as black lines turning like a world map; the sound moves the orbit.",
+  "audio.upload.hint": "WAV recommended (best quality) · also mp3, flac, m4a, ogg… · no size limit · stored as AAC with normalised volume",
+  "audio.upload.processing": "Converting to AAC and normalising…",
+  "audio.upload.badFormat": "Audio format not supported: {{name}}. Use WAV, FLAC, MP3, M4A, OGG…"
 }

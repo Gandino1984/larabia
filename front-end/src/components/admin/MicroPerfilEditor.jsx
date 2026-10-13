@@ -7,11 +7,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, X, Music } from 'lucide-react';
+import { AUDIO_ACCEPT, isAcceptedAudio } from '../../utils/audioUpload';
 import './MicroPerfilEditor.css';
 
 const CAPTION_MAX = 700;
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
-const AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/webm', 'audio/aac', 'audio/x-aac', 'audio/aacp', 'audio/vnd.dlna.adts', 'audio/mp4', 'audio/x-m4a', 'video/mp4'];
 
 const resolveUrl = (u) => {
   if (!u) return '';
@@ -55,13 +55,10 @@ function MicroPerfilEditor({ block, onChange, onUploadImage, onUploadAudio }) {
   const handleAudio = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!AUDIO_TYPES.includes(file.type)) {
-      alert(`${t('editor.microperfil.audioInvalid')} (${file.type || 'desconocido'})`);
-      e.target.value = '';
-      return;
-    }
-    if (file.size > 20 * 1024 * 1024) {
-      alert(t('editor.microperfil.audioTooLarge'));
+    // Any size and format (WAV recommended): stored as AAC with normalised
+    // volume, original discarded.
+    if (!isAcceptedAudio(file)) {
+      alert(t('audio.upload.badFormat', { name: file.name, defaultValue: 'Formato de audio no admitido: {{name}}. Usa WAV, FLAC, MP3, M4A, OGG…' }));
       e.target.value = '';
       return;
     }
@@ -140,13 +137,15 @@ function MicroPerfilEditor({ block, onChange, onUploadImage, onUploadAudio }) {
             <input
               type="file"
               id="mp-audio"
-              accept=".mp3,.aac,.m4a,.ogg,.mp4,audio/mpeg,audio/aac,audio/aacp,audio/vnd.dlna.adts,audio/mp4,audio/x-m4a,audio/ogg,video/mp4"
+              accept={AUDIO_ACCEPT}
               onChange={handleAudio}
               className="cover-image-input"
             />
             <label htmlFor="mp-audio" className="cover-image-label mp-audio-label">
               <Music size={20} />
-              <span>{uploadingAudio ? `${t('common.states.uploading')}… ${audioProgress}%` : t('editor.microperfil.addAudio')}</span>
+              <span>{uploadingAudio
+                ? (audioProgress < 100 ? `${t('common.states.uploading')}… ${audioProgress}%` : t('audio.upload.processing', 'Convirtiendo a AAC y normalizando…'))
+                : t('editor.microperfil.addAudio')}</span>
             </label>
             {uploadingAudio && (
               <div className="mp-audio-progress">

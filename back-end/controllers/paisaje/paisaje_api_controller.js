@@ -119,6 +119,7 @@ async function uploadAudio(req, res) {
 // GET /paisaje/audio/:id — { status: processing | ready | error, … }
 async function getAudioStatus(req, res) {
     try {
+        res.set("Cache-Control", "no-store"); // polled: never a cached "processing"
         const s = audioStatus(req.params.id);
         if (!s) return res.status(404).json({ error: "Audio no encontrado" });
         res.json({

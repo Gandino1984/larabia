@@ -6,9 +6,8 @@
 import axiosInstance from '../../utils/axiosConfig';
 import { buildPaisajeJson } from '../wizard/buildPaisajeJson';
 
-// No size limit: the server converts the audio to AAC, normalises it and
-// discards the original.
-export const AUDIO_EXTENSIONS = ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'];
+// Audio: the magazine's shared pipeline (any size → AAC normalised).
+export { AUDIO_EXTENSIONS, AUDIO_ACCEPT, uploadAudio, getAudioStatus, waitForAudio } from '../../utils/audioUpload';
 
 const errorOf = (err, fallback) => err?.response?.data?.error || fallback;
 
@@ -26,41 +25,5 @@ export async function uploadDrawing(doc, userId) {
     return res.data.data;
   } catch (err) {
     throw new Error(errorOf(err, 'No se pudo subir el dibujo'));
-  }
-}
-
-/** Upload an audio file (real progress). → audioId */
-export async function uploadAudio(file, userId, onProgress) {
-  const form = new FormData();
-  form.append('file', file);
-  try {
-    const res = await axiosInstance.post('/paisaje/audio', form, {
-      headers: { 'Content-Type': 'multipart/form-data', 'x-user-id': userId },
-      timeout: 4 * 60 * 60 * 1000, // big files on slow connections
-      onUploadProgress: (e) => { if (onProgress && e.total) onProgress(Math.round((e.loaded / e.total) * 100)); }
-    });
-    return res.data.data.audioId;
-  } catch (err) {
-    throw new Error(errorOf(err, 'No se pudo subir el audio'));
-  }
-}
-
-export async function getAudioStatus(audioId, userId) {
-  const res = await axiosInstance.get(`/paisaje/audio/${audioId}`, { headers: { 'x-user-id': userId } });
-  return res.data.data;
-}
-
-/** Poll until the audio is ready or failed. `isCancelled()` stops it. */
-export async function waitForAudio(audioId, userId, isCancelled = () => false) {
-  for (;;) {
-    if (isCancelled()) return null;
-    let s;
-    try {
-      s = await getAudioStatus(audioId, userId);
-    } catch (err) {
-      throw new Error(errorOf(err, 'No se pudo consultar el audio'));
-    }
-    if (s.status !== 'processing') return s;
-    await new Promise((r) => setTimeout(r, 1500));
   }
 }

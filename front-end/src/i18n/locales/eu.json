@@ -398,7 +398,6 @@
   "editor.microperfil.audioLabel": "Audioa (aukerakoa)",
   "editor.microperfil.addAudio": "Gehitu audioa",
   "editor.microperfil.audioInvalid": "Audio-formatu baliogabea (MP3, AAC, OGG, MP4)",
-  "editor.microperfil.audioTooLarge": "Audioa handiegia da. Gehienez 20MB.",
   "editor.microperfil.needImage": "Gehitu irudi bat mikro-profilari.",
   "editor.microperfil.needCaption": "Oin-testua beharrezkoa da.",
   "editor.microperfil.captionTooLong": "Oin-testua luzeegia da ({{count}}/700).",
@@ -665,7 +664,6 @@
   "paisaje.editor.drawing.noReference": "Ez da erreferentziako irudia sortu; kargatu irudia berriro.",
   "paisaje.editor.audio.upload": "Audioa igo",
   "paisaje.editor.audio.replace": "Audioa aldatu",
-  "paisaje.editor.audio.formats": "mp3, wav, ogg, m4a, flac edo aac · tamaino mugarik gabe · AAC formatuan gordetzen da, bolumena normalizatuta",
   "paisaje.editor.audio.badFormat": "Formatua ez da onartzen. Erabili {{formats}}.",
   "paisaje.editor.audio.uploading": "Audioa igotzen… % {{pct}}",
   "paisaje.editor.audio.processing": "Audioaren bolumena doitzen… pixka bat iraun dezake.",
@@ -698,5 +696,8 @@
   "paisaje.styles.posterizado": "Posterizatua, 4 geruza",
   "paisaje.styles.posterizadoDesc": "Irudia 4 koloretan; kolore bakoitzak soinuaren tarte bati erantzuten dio, baxuetatik altuetara.",
   "paisaje.styles.azimuthal": "Azimutala",
-  "paisaje.styles.azimuthalDesc": "Irudiaren ertzak marra beltzetan, mundu-mapa bat bezala biraka; soinuak orbita mugitzen du."
+  "paisaje.styles.azimuthalDesc": "Irudiaren ertzak marra beltzetan, mundu-mapa bat bezala biraka; soinuak orbita mugitzen du.",
+  "audio.upload.hint": "WAV gomendatua (kalitate onena) · baita mp3, flac, m4a, ogg… ere · tamaino mugarik gabe · AAC formatuan gordetzen da, bolumena normalizatuta",
+  "audio.upload.processing": "AAC-ra bihurtzen eta normalizatzen…",
+  "audio.upload.badFormat": "Audio formatua ez da onartzen: {{name}}. Erabili WAV, FLAC, MP3, M4A, OGG…"
 }
