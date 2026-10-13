@@ -18,7 +18,7 @@ const __dirname = dirname(__filename);
 // Note: charset is set per-connection via SET NAMES to ensure UTF-8
 const pool = mysql.createPool({
     host: process.env.MYSQL_HOST,
-    port: 3306,
+    port: parseInt(process.env.MYSQL_PORT || '3306', 10), // same as config/sequelize.js
     user: process.env.MYSQL_USER,
     password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_DATABASE,

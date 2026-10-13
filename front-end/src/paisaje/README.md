@@ -22,6 +22,14 @@ Copiado del original **sin cambios en la lógica**, con su misma estructura
 | `styles/registry.ts` | Catálogo de estilos |
 | `wizard/` | Máquinas de estado del asistente (`wizardState`, `audioUploadState`) y `buildPaisajeJson` |
 
+**Código de la revista** (no es del original): `integration/` —
+`PaisajeEditor` (sustituye al asistente de la demo; se usa como formato de
+artículo y en el modal «Panel paisaje sonoro» del creador de cómics),
+`PaisajePiece` (lo que ve el lector: círculo en el artículo, panel completo en
+el cómic; un solo audio a la vez), la API de subidas (`paisajeApi.js`) y las
+utilidades de la pieza guardada en el bloque (`soundscape.js`). El servidor
+está en `back-end/controllers/paisaje/`.
+
 No se trajeron: el asistente y la vista publicada de la demo (`src/demo/Wizard.tsx`,
 `App`, `PublishedView`: usan react-router; la revista tiene su propio editor y
 lector), su CSS de demo, los stubs vacíos y el servidor de demo (`server/`: la
@@ -31,6 +39,15 @@ revista lo reimplementa en su back-end con sus permisos, MySQL y rutas).
 
 - `wizard/buildPaisajeJson.ts`: extraída de `src/demo/Wizard.tsx` tal cual
   (el test importa ahora de este módulo).
+- `player/PaisajePlayer.tsx` (cambios marcados con `[La Rabia]`, aditivos: con
+  las props por defecto se comporta igual que el original):
+  - `crossOrigin="anonymous"` en el `<audio>`: la revista sirve el audio desde
+    otro origen (la API) y, sin CORS, Web Audio entrega silencio.
+  - variante `'panel'` (paneles de cómic): la pieza ocupa todo el panel, sin
+    círculo ni título, con el botón play/pausa de `'minimal'`.
+  - prop `labels` (`PlayerLabels`): textos que ve el lector, para traducirlos;
+    por defecto los originales en castellano. La raíz lleva además la clase
+    `paisaje-player--{variant}`.
 
 Cualquier otro cambio en estos archivos debe anotarse aquí.
 

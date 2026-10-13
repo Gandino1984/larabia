@@ -1,5 +1,5 @@
 // magazine-front/src/components/admin/ArticleEditorBlocks.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../app_context/AuthContext';
@@ -7,13 +7,16 @@ import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
 import {
   Plus, Save, ArrowLeft, Edit, Trash2, FileText, Image as ImageIcon, Video, FolderPlus, FolderOpen,
-  X, User, Eye, Check, ChevronLeft, ChevronRight, Send, Undo2, Layers, Library, AlertCircle
+  X, User, Eye, Check, ChevronLeft, ChevronRight, Send, Undo2, Layers, Library, AlertCircle, AudioWaveform
 } from 'lucide-react';
 import TextBlock from './blocks/TextBlock';
 import ImageBlock from './blocks/ImageBlock';
 import IframeBlock from './blocks/IframeBlock';
 import HScrollEditor from './HScrollEditor';
 import MicroPerfilEditor from './MicroPerfilEditor';
+import { isPieceComplete, pieceForSave } from '../../paisaje/integration/soundscape';
+// Paisaje sonoro editor (engine + 4 converters + d3-geo): loaded on demand.
+const PaisajeEditor = lazy(() => import('../../paisaje/integration/PaisajeEditor'));
 import ArticleFilters from '../common/ArticleFilters';
 import { CATEGORIES, EMPTY_ARTICLE_FILTERS, applyArticleFilters } from '../../utils/articleFilters';
 import axios from 'axios';
@@ -23,6 +26,7 @@ import './ArticleEditorBlocks.css';
 // category-driven micro-perfil format, otherwise the regular block editor.
 const detectContentType = (blocks, category) => {
   if (blocks?.some(b => b.block_type === 'comic_panel')) return 'cómic';
+  if (blocks?.some(b => b.block_type === 'paisaje')) return 'paisaje';
   if ((category || '').toLowerCase() === 'micro-perfiles') return 'microperfil';
   return 'regular';
 };
@@ -33,8 +37,10 @@ const isBlockComplete = (block) => {
   if (block.block_type === 'text') return !!(block.content && block.content.trim() !== '');
   if (block.block_type === 'image') return !!(block.image_url && block.image_url.trim() !== '');
   if (block.block_type === 'iframe') return !!(block.iframe_url && block.iframe_url.trim() !== '');
+  if (block.block_type === 'paisaje') return isPieceComplete(block.soundscape_data);
   if (block.block_type === 'comic_panel') {
     if (block.interaction_type === 'iframe') return !!(block.interaction_data && block.interaction_data.trim() !== '');
+    if (block.soundscape_data) return isPieceComplete(block.soundscape_data);
     return !!(block.image_url && block.image_url.trim() !== '');
   }
   return false;
@@ -748,6 +754,8 @@ function ArticleEditorBlocks() {
         ? t('editor.validation.addComicPanel')
         : articleContentType === 'microperfil'
         ? t('editor.microperfil.needImage')
+        : articleContentType === 'paisaje'
+        ? t('paisaje.editor.needPiece', 'Completa el dibujo y el sonido del paisaje sonoro.')
         : t('editor.validation.addContentBlock');
     }
     if (articleContentType === 'microperfil') {
@@ -1035,10 +1043,14 @@ function ArticleEditorBlocks() {
       if (block.block_type === 'iframe') {
         return block.iframe_url && block.iframe_url.trim() !== '';
       }
+      if (block.block_type === 'paisaje') {
+        return isPieceComplete(block.soundscape_data);
+      }
       if (block.block_type === 'comic_panel') {
         if (block.interaction_type === 'iframe') {
           return block.interaction_data && block.interaction_data.trim() !== '';
         }
+        if (block.soundscape_data) return isPieceComplete(block.soundscape_data);
         return block.image_url && block.image_url.trim() !== '';
       }
       return false;
@@ -1072,7 +1084,14 @@ function ArticleEditorBlocks() {
         interaction_data: block.interaction_data || null,
         // Audio configuration fields
         audio_stop_panel: block.audio_stop_panel || null,
-        audio_mode: block.audio_mode || null
+        audio_mode: block.audio_mode || null,
+        // Paisaje sonoro (article format / comic panel): the server checks
+        // and normalises it (and sets image_url to its reference image).
+        ...(block.soundscape_data && {
+          soundscape_data: typeof block.soundscape_data === 'string'
+            ? block.soundscape_data
+            : JSON.stringify(pieceForSave(block.soundscape_data))
+        })
       };
 
       const blockResult = block.id_block
@@ -1212,7 +1231,8 @@ function ArticleEditorBlocks() {
   const CONTENT_TYPES = [
     { key: 'regular', Icon: FileText, title: t('editor.contentType.regular'), desc: t('editor.wizard.type.regularDesc', 'Texto, imágenes y vídeos organizados en bloques.') },
     { key: 'cómic', Icon: Layers, title: t('editor.contentType.comic'), desc: t('editor.wizard.type.comicDesc', 'Viñetas que se leen en horizontal, con audio y paneles interactivos.') },
-    { key: 'microperfil', Icon: User, title: t('editor.contentType.microperfil'), desc: t('editor.wizard.type.microperfilDesc', 'Una imagen con su texto y audio opcional. Se publica en Micro-perfiles.') }
+    { key: 'microperfil', Icon: User, title: t('editor.contentType.microperfil'), desc: t('editor.wizard.type.microperfilDesc', 'Una imagen con su texto y audio opcional. Se publica en Micro-perfiles.') },
+    { key: 'paisaje', Icon: AudioWaveform, title: t('editor.contentType.paisaje', 'Paisaje sonoro'), desc: t('editor.wizard.type.paisajeDesc', 'Una imagen convertida en dibujo que se mueve con un audio. Herramienta de Cristian Vergara.') }
   ];
 
   const status = editingArticle?.status_article || 'draft';
@@ -1622,6 +1642,20 @@ function ArticleEditorBlocks() {
             }}
             onUploadAudio={uploadPanelAudio}
           />
+        ) : articleContentType === 'paisaje' ? (
+          // Paisaje sonoro: one 'paisaje' block holding the piece.
+          <Suspense fallback={<p className="pub-step-hint">{t('paisaje.editor.loadingEditor', 'Cargando editor…')}</p>}>
+            <PaisajeEditor
+              value={blocks[0]?.soundscape_data}
+              title={formData.title_article}
+              onChange={(draft) => setBlocks(prev => {
+                const keep = prev[0]?.id_block ? { id_block: prev[0].id_block } : { tempId: prev[0]?.tempId || `ps_${Date.now()}` };
+                return draft
+                  ? [{ ...keep, block_type: 'paisaje', soundscape_data: draft, image_url: draft.imageUrl || prev[0]?.image_url || '' }]
+                  : [];
+              })}
+            />
+          </Suspense>
         ) : articleContentType === 'microperfil' ? (
           // Dedicated micro-perfil UI (single image + caption + optional audio)
           <MicroPerfilEditor
@@ -1684,6 +1718,8 @@ function ArticleEditorBlocks() {
     ? t('editor.wizard.review.panels', { count: completeBlocks, defaultValue: 'Viñetas: {{count}}' })
     : articleContentType === 'microperfil'
     ? (completeBlocks ? t('editor.wizard.review.microperfil', 'Imagen con texto') : '—')
+    : articleContentType === 'paisaje'
+    ? (completeBlocks ? t('editor.wizard.review.paisaje', 'Paisaje sonoro listo') : '—')
     : t('editor.wizard.review.blocks', { count: completeBlocks, defaultValue: 'Bloques: {{count}}' });
   const publishLabel = canPublishDirectly
     ? t('editor.wizard.publish', 'Publicar')

@@ -23,6 +23,38 @@ import "./player.css";
  */
 
 export type ReducedMotionFallback = "static" | "fade";
+
+/**
+ * [La Rabia] Textos que ve el lector (traducibles). Por defecto, los del
+ * original en castellano.
+ */
+export interface PlayerLabels {
+  loading: string;
+  enableAudio: string;
+  play: string;
+  pause: string;
+  playPiece: string;
+  progress: string;
+  mute: string;
+  unmute: string;
+  volume: string;
+  svgLabel: string;
+  audioError: string;
+}
+
+export const DEFAULT_PLAYER_LABELS: PlayerLabels = {
+  loading: "Cargando puntos…",
+  enableAudio: "🔇 Pulsa play para habilitar el audio",
+  play: "Reproducir",
+  pause: "Pausar",
+  playPiece: "Reproducir paisaje sonoro",
+  progress: "Progreso",
+  mute: "Silenciar",
+  unmute: "Activar sonido",
+  volume: "Volumen",
+  svgLabel: "Visualización puntillista del audio",
+  audioError: "No se pudo cargar el audio.",
+};
 export type PeakMode = "amplitude" | "spectrum";
 
 interface PaisajePlayerBaseProps {
@@ -109,8 +141,12 @@ interface PaisajePlayerBaseProps {
    *   barra de progreso, tiempo ni volumen; el volumen queda al dispositivo
    *   del lector.
    * La animación (analyser) es idéntica en ambas.
+   * - [La Rabia] 'panel': panel de cómic — la pieza ocupa todo el panel
+   *   (sin círculo ni título), con el mismo botón play/pausa de 'minimal'.
    */
-  variant?: "full" | "minimal";
+  variant?: "full" | "minimal" | "panel";
+  /** [La Rabia] Textos que ve el lector (traducción); default castellano. */
+  labels?: Partial<PlayerLabels>;
   onReady?: () => void;
   onPeak?: (peak: number) => void;
   onError?: (e: Error) => void;
@@ -378,10 +414,13 @@ export default function PaisajePlayer({
   reducedMotionFallback = "fade",
   locked = false,
   variant = "full",
+  labels: labelsProp,
   onReady,
   onPeak,
   onError,
 }: PaisajePlayerProps) {
+  const L: PlayerLabels = { ...DEFAULT_PLAYER_LABELS, ...labelsProp };
+
   // ---------------------------------------------------------------
   // Carga del documento JSON (validado con el type-guard del conversor)
   // ---------------------------------------------------------------
@@ -1031,7 +1070,7 @@ export default function PaisajePlayer({
   const content = offsetTransform ? <g transform={offsetTransform}>{svgContent}</g> : svgContent;
 
   return (
-    <div className="paisaje-player">
+    <div className={`paisaje-player paisaje-player--${variant}`}>
       {variant === "full" && (title || description) && (
         <header className="paisaje-player-header">
           {title && <h2 className="paisaje-player-title">{title}</h2>}
@@ -1045,7 +1084,7 @@ export default function PaisajePlayer({
             {loadError}
           </div>
         )}
-        {loading && <p className="paisaje-player-hint">Cargando puntos…</p>}
+        {loading && <p className="paisaje-player-hint">{L.loading}</p>}
 
         {doc && !loadError && (
           <svg
@@ -1053,7 +1092,7 @@ export default function PaisajePlayer({
             viewBox={`0 0 ${vbW} ${vbH}`}
             {...(width !== undefined ? { width } : {})}
             role="img"
-            aria-label={title ?? "Visualización puntillista del audio"}
+            aria-label={title ?? L.svgLabel}
           >
             {isMinimal && (
               // Disco de fondo + recorte circular (F1): el disco va DETRÁS
@@ -1078,7 +1117,7 @@ export default function PaisajePlayer({
 
         {suspended && mode !== "static" && (
           <button type="button" className="paisaje-suspended" onClick={ensureGraph}>
-            🔇 Pulsa play para habilitar el audio
+            {L.enableAudio}
           </button>
         )}
 
@@ -1095,14 +1134,14 @@ export default function PaisajePlayer({
         m:ss debajo (duración en pausa, cuenta regresiva sonando). Accesible:
         <button> real, focable, estado anunciado; el tiempo es role="timer"
         con aria-live off (un anuncio por segundo sería ruido para SR). ------ */}
-        {variant === "minimal" && (
+        {(variant === "minimal" || variant === "panel") && (
           <div className="paisaje-minimal-chrome">
             <button
               type="button"
               className="paisaje-play-minimal"
               onClick={togglePlay}
               disabled={locked}
-              aria-label={playing ? "Pausar" : "Reproducir paisaje sonoro"}
+              aria-label={playing ? L.pause : L.playPiece}
               aria-pressed={playing}
               aria-disabled={locked}
             >
@@ -1144,7 +1183,7 @@ export default function PaisajePlayer({
             className="paisaje-btn paisaje-play"
             onClick={togglePlay}
             disabled={locked}
-            aria-label={playing ? "Pausar" : "Reproducir"}
+            aria-label={playing ? L.pause : L.play}
             aria-disabled={locked}
           >
             {playing ? "⏸" : "▶"}
@@ -1155,7 +1194,7 @@ export default function PaisajePlayer({
           <input
             type="range"
             className="paisaje-progress"
-            aria-label="Progreso"
+            aria-label={L.progress}
             disabled={locked}
             aria-disabled={locked}
             min={0}
@@ -1172,7 +1211,7 @@ export default function PaisajePlayer({
             className="paisaje-btn"
             onClick={toggleMute}
             disabled={locked}
-            aria-label={muted ? "Activar sonido" : "Silenciar"}
+            aria-label={muted ? L.unmute : L.mute}
             aria-disabled={locked}
           >
             {muted || volume === 0 ? "🔇" : "🔊"}
@@ -1181,7 +1220,7 @@ export default function PaisajePlayer({
           <input
             type="range"
             className="paisaje-volume"
-            aria-label="Volumen"
+            aria-label={L.volume}
             disabled={locked}
             aria-disabled={locked}
             min={0}
@@ -1200,6 +1239,9 @@ export default function PaisajePlayer({
       <audio
         ref={audioRef}
         src={audioUrl}
+        // [La Rabia] El audio se sirve desde otro origen (la API): sin CORS,
+        // Web Audio entrega silencio y la pieza no reacciona.
+        crossOrigin="anonymous"
         preload="metadata"
         className="paisaje-audio-element"
         onLoadedMetadata={(e) => {
@@ -1211,7 +1253,7 @@ export default function PaisajePlayer({
         onPause={() => setPlaying(false)}
         onEnded={() => setPlaying(false)}
         onError={() => {
-          const err = new Error("No se pudo cargar el audio.");
+          const err = new Error(L.audioError);
           onError?.(err);
           setLoadError(err.message);
         }}

@@ -1,12 +1,18 @@
 // magazine-front/src/components/magazine/HScrollViewer.jsx
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowLeft, ArrowRight, Play, Pause, X, Volume2, Link as LinkIcon, Bookmark, RotateCcw, Smartphone, Maximize } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext.jsx';
 import { useAuth } from '../../app_context/AuthContext.jsx';
 import OptionsReveal from './OptionsReveal';
+import { parseSoundscape } from '../../paisaje/integration/soundscape';
+import { announceAudioStart, onOtherAudioStart } from '../../paisaje/integration/exclusiveAudio';
 import './HScrollViewer.css';
+
+// Paisaje sonoro panels (engine by Cristian Vergara): loaded on demand.
+const PaisajePiece = lazy(() => import('../../paisaje/integration/PaisajePiece'));
+const COMIC_AUDIO_SOURCE = 'comic-panel-audio';
 
 // optionsActions: the reader's ⋯ actions (engagement, share, edit/delete),
 // repeated at the right of the bottom bar when provided.
@@ -498,6 +504,8 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
     const handleKeyDown = (e) => {
       // Don't trigger if user is typing in input/textarea
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      // A paisaje sonoro panel's own controls (Space = play/pause there).
+      if (e.target.closest?.('.larabia-paisaje')) return;
 
       switch(e.key) {
         case 'ArrowLeft':
@@ -535,6 +543,14 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // One sound at a time: a paisaje sonoro starting pauses the comic's audio.
+  useEffect(() => onOtherAudioStart(COMIC_AUDIO_SOURCE, () => {
+    if (audioRef.current && !audioRef.current.paused) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  }), []);
 
   // Cleanup audio when component unmounts
   useEffect(() => {
@@ -770,6 +786,9 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
           // Set loop based on mode
           audio.loop = (mode === 'loop');
 
+          // …and the comic's audio starting pauses any paisaje sonoro.
+          audio.addEventListener('play', () => announceAudioStart(COMIC_AUDIO_SOURCE));
+
           // Set up event listeners
           audio.addEventListener('loadedmetadata', () => {
             setDuration(audio.duration);
@@ -959,7 +978,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
               {sortedPanels.map((panel, index) => (
                 <div
                   key={panel.id_block}
-                  className={`hscroll-viewer-panel ${panel.is_interactive ? 'interactive-panel' : ''} ${panel.interaction_type === 'iframe' ? 'iframe-panel' : ''}`}
+                  className={`hscroll-viewer-panel ${panel.is_interactive ? 'interactive-panel' : ''} ${panel.interaction_type === 'iframe' ? 'iframe-panel' : ''} ${panel.soundscape_data ? 'paisaje-panel' : ''}`}
                   data-interaction-type={panel.interaction_type}
                   data-panel-number={index + 1}
                   data-panel-id={panel.id_block}
@@ -970,12 +989,25 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                       aspectRatio: parseAspectRatio(panel.image_caption),
                       width: 'auto',
                     }),
+                    ...(panel.soundscape_data && (() => {
+                      const piece = parseSoundscape(panel.soundscape_data);
+                      return piece?.width && piece?.height
+                        ? { aspectRatio: `${piece.width} / ${piece.height}`, width: 'auto' }
+                        : {};
+                    })()),
                   }}
                   role={panel.is_interactive ? 'button' : undefined}
                   aria-label={panel.is_interactive ? t('hscroll.interactivePanel', { number: index + 1 }) : undefined}
                   tabIndex={panel.is_interactive ? 0 : undefined}
                 >
-                  {panel.interaction_type === 'iframe' ? (
+                  {panel.soundscape_data ? (
+                    // Paisaje sonoro panel: the piece fills the panel.
+                    <Suspense fallback={
+                      <img src={getImageUrl(panel.image_url)} alt="" className="viewer-panel-image" loading="lazy" />
+                    }>
+                      <PaisajePiece soundscape={panel.soundscape_data} variant="panel" />
+                    </Suspense>
+                  ) : panel.interaction_type === 'iframe' ? (
                     <iframe
                       src={getIframeSrc(panel.interaction_data)}
                       className="viewer-panel-iframe"

@@ -29,9 +29,10 @@ axiosInstance.interceptors.request.use(
 
     // Multipart uploads (block images, audio, covers, logos, theme background)
     // include server-side sharp processing and can exceed the global 10s timeout
-    // on the VPS. Detect FormData and grant the upload 60s automatically.
+    // on the VPS. Detect FormData and grant the upload 60s automatically
+    // (or more, if the request asked for more — e.g. paisaje audio).
     if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
-      config.timeout = 60000;
+      config.timeout = Math.max(config.timeout || 0, 60000);
     }
 
     return config;

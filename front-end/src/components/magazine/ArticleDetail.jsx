@@ -1,5 +1,5 @@
 // magazine-front/src/components/magazine/ArticleDetail.jsx
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
@@ -12,6 +12,8 @@ import CommentsModal from './CommentsModal';
 import OptionsReveal from './OptionsReveal';
 import AuthorChip from '../common/AuthorChip';
 import './ArticleDetail.css';
+// Paisaje sonoro article format (engine by Cristian Vergara): loaded on demand.
+const PaisajePiece = lazy(() => import('../../paisaje/integration/PaisajePiece'));
 
 const CATEGORY_DISPLAY = {
   'terrenito en pluton': 'Terrenito en Plut\u00F3n',
@@ -376,6 +378,11 @@ function ArticleDetail({ previewMode = false }) {
                             />
                           )}
                         </div>
+                      )}
+                      {block.block_type === 'paisaje' && (
+                        <Suspense fallback={null}>
+                          <PaisajePiece soundscape={block.soundscape_data} title={selectedArticle.title_article} variant="minimal" />
+                        </Suspense>
                       )}
                       {block.block_type === 'iframe' && (
                         <div className="iframe-content">

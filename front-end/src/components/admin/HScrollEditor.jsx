@@ -1,11 +1,19 @@
 // magazine-front/src/components/admin/HScrollEditor.jsx
-import { useState, useRef } from 'react';
+import { useState, useRef, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, ArrowLeft, ArrowRight, Upload, MousePointer, Link as LinkIcon, Volume2, X, Code2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Plus, Trash2, ArrowLeft, ArrowRight, Upload, MousePointer, Link as LinkIcon, Volume2, X, Code2, AudioWaveform, Edit } from 'lucide-react';
+import { isPieceComplete, parseSoundscape } from '../../paisaje/integration/soundscape';
 import './HScrollEditor.css';
 
+// Paisaje sonoro panels (engine by Cristian Vergara): editor loaded on demand.
+const PaisajeEditor = lazy(() => import('../../paisaje/integration/PaisajeEditor'));
+
 function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio }) {
+  const { t } = useTranslation();
   const [draggingIndex, setDraggingIndex] = useState(null);
+  // Paisaje sonoro panel being created (index null) or edited.
+  const [paisajeModal, setPaisajeModal] = useState(null); // { index, draft } | null
   const scrollContainerRef = useRef(null);
   const [showPanelTypeModal, setShowPanelTypeModal] = useState(false);
   const [showInteractiveModal, setShowInteractiveModal] = useState(false);
@@ -112,6 +120,37 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
     onPanelsChange(newPanels);
     setPendingPanelIndex(newPanels.length - 1);
     setShowInteractiveModal(true);
+  };
+
+  // ---- Paisaje sonoro panels: the piece fills the panel ----
+  const addPaisajePanel = () => {
+    setShowPanelTypeModal(false);
+    setPaisajeModal({ index: null, draft: null });
+  };
+
+  const editPaisajePanel = (index) => {
+    setPaisajeModal({ index, draft: parseSoundscape(panels[index].soundscape_data) });
+  };
+
+  const savePaisajePanel = () => {
+    const { index, draft } = paisajeModal;
+    if (!isPieceComplete(draft)) return;
+    if (index === null) {
+      onPanelsChange([...panels, {
+        tempId: `temp-${Date.now()}`,
+        block_type: 'comic_panel',
+        image_url: draft.imageUrl || '',
+        image_alt: '',
+        panel_order: panels.length,
+        is_interactive: false,
+        soundscape_data: draft
+      }]);
+    } else {
+      const updated = [...panels];
+      updated[index] = { ...updated[index], image_url: draft.imageUrl || updated[index].image_url, soundscape_data: draft };
+      onPanelsChange(updated);
+    }
+    setPaisajeModal(null);
   };
 
   const removePanel = (index) => {
@@ -287,6 +326,11 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
             {panels.map((panel, index) => (
               <div key={panel.id_block || panel.tempId} className={`hscroll-panel ${panel.is_interactive ? 'interactive' : ''}`}>
                 <div className="panel-number">{index + 1}</div>
+                {panel.soundscape_data && (
+                  <div className="panel-badge panel-badge--paisaje" title={t('paisaje.comic.panelBadge', 'Panel paisaje sonoro')}>
+                    <AudioWaveform size={16} />
+                  </div>
+                )}
                 {(panel.is_interactive || panel.interaction_type === 'iframe') && (
                   <div className="panel-badge">
                     {panel.interaction_type === 'link' ? <LinkIcon size={16} /> : panel.interaction_type === 'audio' ? <Volume2 size={16} /> : panel.interaction_type === 'iframe' ? <Code2 size={16} /> : <MousePointer size={16} />}
@@ -356,6 +400,17 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                     </button>
                   )}
 
+                  {panel.soundscape_data && (
+                    <button
+                      type="button"
+                      className="btn-panel-action btn-configure"
+                      onClick={() => editPaisajePanel(index)}
+                      title={t('paisaje.comic.edit', 'Editar paisaje sonoro')}
+                    >
+                      <Edit size={16} />
+                    </button>
+                  )}
+
                   {panel.interaction_type === 'iframe' && (
                     <button
                       type="button"
@@ -376,7 +431,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                     <Trash2 size={16} />
                   </button>
 
-                  {panel.image_url && panel.interaction_type !== 'iframe' && (
+                  {panel.image_url && panel.interaction_type !== 'iframe' && !panel.soundscape_data && (
                     <label className="btn-panel-action btn-replace" title="Reemplazar imagen">
                       <input
                         type="file"
@@ -449,6 +504,52 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                   <Code2 size={48} />
                   <h4>Panel Iframe</h4>
                   <p>Embed de video u otro contenido externo</p>
+                </button>
+                <button
+                  type="button"
+                  className="panel-type-option"
+                  onClick={addPaisajePanel}
+                >
+                  <AudioWaveform size={48} />
+                  <h4>{t('paisaje.comic.option', 'Panel paisaje sonoro')}</h4>
+                  <p>{t('paisaje.comic.optionDesc', 'Un dibujo que se mueve con un audio')}</p>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Paisaje sonoro panel: the editor (drawing + sound) in a modal */}
+      {paisajeModal && createPortal(
+        <div className="modal-overlay" onClick={() => setPaisajeModal(null)}>
+          <div className="modal-content paisaje-panel-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3><AudioWaveform size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />{t('paisaje.comic.modalTitle', 'Panel paisaje sonoro')}</h3>
+              <button className="modal-close" onClick={() => setPaisajeModal(null)} aria-label={t('paisaje.comic.close', 'Cerrar')}>
+                <X size={24} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <Suspense fallback={<p>{t('paisaje.editor.loadingEditor', 'Cargando editor…')}</p>}>
+                <PaisajeEditor
+                  variant="panel"
+                  value={paisajeModal.draft}
+                  onChange={(draft) => setPaisajeModal((m) => (m ? { ...m, draft } : m))}
+                />
+              </Suspense>
+              <div className="paisaje-panel-modal__footer">
+                <button type="button" className="paisaje-modal-btn" onClick={() => setPaisajeModal(null)}>
+                  {t('paisaje.comic.cancel', 'Cancelar')}
+                </button>
+                <button
+                  type="button"
+                  className="paisaje-modal-btn paisaje-modal-btn--primary"
+                  disabled={!isPieceComplete(paisajeModal.draft)}
+                  onClick={savePaisajePanel}
+                >
+                  {paisajeModal.index === null ? t('paisaje.comic.add', 'Añadir panel') : t('paisaje.comic.save', 'Guardar panel')}
                 </button>
               </div>
             </div>

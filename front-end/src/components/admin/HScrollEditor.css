@@ -749,3 +749,64 @@
   font-weight: 700;
   color: #1a1a1a;
 }
+
+/* Paisaje sonoro panels (engine by Cristian Vergara). The editor is a light
+   work surface (the engine's converters are designed for it), so this modal
+   is white, unlike the other dark modals. */
+.panel-badge--paisaje {
+  background: #000000;
+}
+.modal-content.paisaje-panel-modal {
+  max-width: 980px;
+  background: #ffffff;
+  color: #1a1a1a;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+.paisaje-panel-modal .modal-header {
+  border-bottom: 1px solid #e2e2e2;
+  background: #ffffff;
+}
+.paisaje-panel-modal .modal-header h3 {
+  color: #1a1a1a;
+}
+.paisaje-panel-modal .modal-close {
+  color: #1a1a1a;
+}
+.paisaje-panel-modal .modal-body {
+  padding: 1.25rem;
+}
+.paisaje-panel-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e2e2;
+}
+.paisaje-modal-btn {
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: #e4e4e4;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.paisaje-modal-btn:hover:not(:disabled) {
+  background: #000000;
+  color: #ffffff;
+}
+.paisaje-modal-btn--primary {
+  background: #000000;
+  color: #ffffff;
+}
+.paisaje-modal-btn--primary:hover:not(:disabled) {
+  background: #3a3a3a;
+}
+.paisaje-modal-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

@@ -1,0 +1,98 @@
+/* Paisaje sonoro in La Rabia (reader + editor previews). The engine's
+   player.css stays as is; here: the magazine's type and the sizes of each
+   place it appears. */
+.larabia-paisaje {
+  --paisaje-font: inherit;
+  --paisaje-text: #1a1a1a;
+  --paisaje-ink: #1a1a1a;
+  --paisaje-surface: #ffffff;
+  --paisaje-border: #e2e2e2;
+  --paisaje-accent: #dc2626;
+  /* A faint disc shows where the piece is before it plays (it appears
+     with the sound) on the magazine's white pages. */
+  --paisaje-disc: #f3f3f3;
+  --paisaje-radius: 10px;
+  color: #1a1a1a;
+}
+/* Buttons that hold text keep its case (site rule: caps only on real buttons). */
+.larabia-paisaje .paisaje-suspended {
+  text-transform: none;
+}
+
+/* Article format: the piece in its circle, as large as the screen allows. */
+.larabia-paisaje--minimal {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.larabia-paisaje--minimal .paisaje-player-stage {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+.larabia-paisaje--minimal .paisaje-svg {
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+}
+.larabia-paisaje--minimal .paisaje-minimal-title {
+  font-family: inherit;
+  font-size: clamp(0.95rem, 2.4vw, 1.25rem);
+}
+
+/* Comic panel: fills the panel (height set by the comic viewer). */
+.larabia-paisaje--panel {
+  height: 100%;
+  background: #ffffff;
+}
+.larabia-paisaje--panel .paisaje-player,
+.larabia-paisaje--panel .paisaje-player-stage {
+  height: 100%;
+}
+.larabia-paisaje--panel .paisaje-player-stage {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: #ffffff;
+}
+.larabia-paisaje--panel .paisaje-svg {
+  width: 100%;
+  height: 100% !important;
+  max-height: none;
+  border-radius: 0;
+}
+/* Bottom-LEFT: a panel can be wider than the screen and readers reach its
+   left side first. */
+.larabia-paisaje--panel .paisaje-minimal-chrome {
+  left: 12px;
+  right: auto;
+  bottom: 12px;
+}
+.larabia-paisaje--panel .paisaje-play-minimal {
+  width: 46px;
+  height: 46px;
+}
+
+/* Narrow screens: title and play go BELOW the circle (over it they'd cover
+   the drawing). */
+@media (max-width: 600px) {
+  .larabia-paisaje--minimal .paisaje-minimal-title {
+    position: static;
+    max-width: none;
+    margin: 0.75rem 0 0.5rem;
+    text-align: center;
+  }
+  .larabia-paisaje--minimal .paisaje-minimal-chrome {
+    position: static;
+    margin: 0 auto;
+  }
+}
+
+/* The timer sits over the drawing in a panel: a soft backing keeps it legible. */
+.larabia-paisaje--panel .paisaje-minimal-time {
+  padding: 0 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.85);
+}
