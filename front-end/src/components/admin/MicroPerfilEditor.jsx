@@ -152,6 +152,7 @@ function MicroPerfilEditor({ block, onChange, onUploadImage, onUploadAudio }) {
                 <div className="mp-audio-progress__bar" style={{ width: `${audioProgress}%` }} />
               </div>
             )}
+            <p className="mp-audio-hint">{t('audio.upload.hint')}</p>
           </>
         )}
       </div>

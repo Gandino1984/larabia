@@ -203,12 +203,20 @@
   from { left: -35%; }
   to { left: 100%; }
 }
+/* minmax(0, …): a long option text must not widen the column (phones). */
 .lpe-config {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.9rem;
 }
 .lpe-field { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.88rem; font-weight: 700; }
+.lpe-field select,
+.lpe-field input[type="range"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
 .lpe-field select {
   min-height: 40px;
   padding: 0.4rem 0.6rem;
@@ -219,15 +227,45 @@
   font-weight: 400;
 }
 .lpe-field input[type="range"] { accent-color: #000000; }
+.lpe-field small { font-weight: 400; }
 .lpe-preview { display: flex; flex-direction: column; gap: 0.5rem; }
 .lpe-preview .paisaje-svg { height: auto; max-height: 60vh; width: 100%; }
+.lpe-preview .paisaje-controls { flex-wrap: wrap; }
+.lpe-preview .paisaje-progress { min-width: 0; }
 
 /* Framing */
 .lpe-pan { cursor: grab; touch-action: none; user-select: none; }
 .lpe-pan:active { cursor: grabbing; }
 
+/* Engine's posterized toggles (checkbox · name · explanation): checkbox
+   and name on one line, the explanation underneath — at any width (inside the
+   wizard the checkbox was stretched onto its own line). */
+.lpe-style-editor .wz-bw-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.5rem;
+  row-gap: 0.2rem;
+}
+.lpe-style-editor .wz-bw-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+.lpe-style-editor .wz-bw-toggle .paisaje-help {
+  grid-column: 1 / -1;
+  margin-left: 0 !important;
+  font-weight: 400;
+}
+
+/* Phones */
+@media (max-width: 600px) {
+  /* The phone's own buttons set the volume: the slider only crowds the row. */
+  .lpe-preview .paisaje-volume { display: none; }
+}
+
 @media (min-width: 700px) {
   .lpe-styles { grid-template-columns: repeat(2, 1fr); }
-  .lpe-config { grid-template-columns: 1fr 1fr; }
+  .lpe-config { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .lpe-current { flex-direction: row; }
 }

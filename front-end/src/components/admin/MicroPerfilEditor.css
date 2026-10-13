@@ -95,3 +95,11 @@
   background: #1a1a1a;
   transition: width 0.15s ease;
 }
+
+/* Accepted audio (any size, WAV recommended; stored as AAC). */
+.mp-audio-hint {
+  margin: 0.5rem 0 0;
+  color: #666666;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
