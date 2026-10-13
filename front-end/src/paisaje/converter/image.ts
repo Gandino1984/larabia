@@ -1,15 +1,15 @@
 /**
  * Utilidades de carga/preparación de imagen (DISENO.md §2.1 y §2.4).
- * Límites: bloqueo > 4096×4096 y > 15 MB; advertencia 2049–4096
- * (se redimensiona a 2048 en el lado mayor, manteniendo aspecto).
+ * [La Rabia] SIN límite de peso ni de tamaño: la imagen se decodifica ya
+ * reducida a 900 px de alto (createImageBitmap con resizeHeight), así una
+ * foto de móvil de 8000 px no se materializa entera en un canvas. Nunca se
+ * sube ni se guarda el original: solo el dibujo y su referencia (900 px).
+ * (El original bloqueaba > 15 MB y > 4096×4096.)
  */
 
-export const MAX_INPUT_BYTES = 15 * 1024 * 1024;
 /** Todas las imágenes se normalizan a 900 px de alto (ancho proporcional). */
 export const TARGET_HEIGHT = 900;
-export const HARD_MAX_DIM = 4096;
 
-const fmtMB = (bytes: number) => `${(bytes / 1048576).toFixed(1)} MB`;
 
 export interface DimensionCheck {
   /** Mensaje de bloqueo (null si la imagen es aceptable). */
@@ -18,34 +18,33 @@ export interface DimensionCheck {
   warning: string | null;
 }
 
-export function checkDimensions(width: number, height: number): DimensionCheck {
-  if (width > HARD_MAX_DIM || height > HARD_MAX_DIM) {
-    return {
-      blocked: `Imagen de ${width}×${height} px: supera el máximo de ${HARD_MAX_DIM}×${HARD_MAX_DIM} (DISENO.md §2.4). Redúcela antes de cargarla.`,
-      warning: null,
-    };
-  }
-  const warning =
-    width > TARGET_HEIGHT * 2 || height > TARGET_HEIGHT * 2
-      ? `Imagen de ${width}×${height} px: se normalizará a ${TARGET_HEIGHT} px de alto (ancho proporcional); el resultado tendrá menos detalle.`
-      : null;
-  return { blocked: null, warning };
+/**
+ * [La Rabia] Ya no bloquea ni avisa: cualquier tamaño se acepta y se reduce
+ * a TARGET_HEIGHT al decodificar (decodeImageFile). Se conserva la firma
+ * para no tocar a los conversores.
+ */
+export function checkDimensions(_width: number, _height: number): DimensionCheck {
+  return { blocked: null, warning: null };
 }
 
-/** Decodifica y valida el peso de un archivo de imagen. */
+/**
+ * Decodifica un archivo de imagen. [La Rabia] Sin límite de peso: se pide al
+ * navegador la imagen ya reducida a TARGET_HEIGHT de alto (ancho
+ * proporcional); si no admite la opción, se decodifica entera y
+ * normalizeHeight la reduce después (como en el original).
+ */
 export async function decodeImageFile(file: File): Promise<ImageBitmap> {
   if (!file.type.startsWith("image/")) {
     throw new Error("El archivo no es una imagen.");
   }
-  if (file.size > MAX_INPUT_BYTES) {
-    throw new Error(
-      `La imagen pesa ${fmtMB(file.size)} y supera el límite de ${fmtMB(MAX_INPUT_BYTES)}.`
-    );
-  }
   try {
-    return await createImageBitmap(file);
+    return await createImageBitmap(file, { resizeHeight: TARGET_HEIGHT, resizeQuality: "high" });
   } catch {
-    throw new Error("No se pudo decodificar la imagen (formato no soportado por el navegador).");
+    try {
+      return await createImageBitmap(file);
+    } catch {
+      throw new Error("No se pudo decodificar la imagen (formato no soportado por el navegador).");
+    }
   }
 }
 

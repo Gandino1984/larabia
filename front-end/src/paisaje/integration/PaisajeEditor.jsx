@@ -21,7 +21,7 @@ import PaisajePlayer from '../player/PaisajePlayer';
 import { STYLES, DEFAULT_STYLE_ID, getStyle } from '../styles/registry';
 import { useAuth } from '../../app_context/AuthContext';
 import { apiFile, parseSoundscape, pieceAudioUrl, playerLabels } from './soundscape';
-import { AUDIO_EXTENSIONS, AUDIO_MAX_BYTES, uploadAudio, uploadDrawing, waitForAudio } from './paisajeApi';
+import { AUDIO_EXTENSIONS, uploadAudio, uploadDrawing, waitForAudio } from './paisajeApi';
 import '../converter/converter.css';
 import './PaisajePiece.css';
 import './PaisajeEditor.css';
@@ -124,11 +124,6 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
     if (!AUDIO_EXTENSIONS.includes(ext)) {
       setAudioPhase('error');
       setAudioError(t('paisaje.editor.audio.badFormat', { formats: AUDIO_EXTENSIONS.join(', '), defaultValue: 'Formato no admitido. Usa {{formats}}.' }));
-      return;
-    }
-    if (file.size > AUDIO_MAX_BYTES) {
-      setAudioPhase('error');
-      setAudioError(t('paisaje.editor.audio.tooBig', 'El archivo supera los 20 MB. Prueba con un MP3 o M4A.'));
       return;
     }
     setAudioError(null);
@@ -342,7 +337,7 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
               <Upload size={16} />
               {audio ? t('paisaje.editor.audio.replace', 'Cambiar audio') : t('paisaje.editor.audio.upload', 'Subir audio')}
             </button>
-            <p className="lpe-muted">{t('paisaje.editor.audio.formats', 'mp3, wav, ogg, m4a, flac o aac · máx. 20 MB · el volumen se ajusta automáticamente')}</p>
+            <p className="lpe-muted">{t('paisaje.editor.audio.formats', 'mp3, wav, ogg, m4a, flac o aac · sin límite de tamaño · se guarda en AAC con el volumen normalizado')}</p>
           </div>
 
           {audioBusy && (
@@ -368,10 +363,9 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
               <p className="lpe-ok">
                 <Check size={16} />
                 {t('paisaje.editor.audio.ready', {
-                  format: audio.originalFormat || '—',
                   before: fmtLufs(audio.loudnessBefore),
                   after: fmtLufs(audio.loudnessAfter),
-                  defaultValue: 'Audio listo ({{format}}) · volumen ajustado de {{before}} a {{after}}'
+                  defaultValue: 'Audio listo · AAC 192 kbps · volumen normalizado de {{before}} a {{after}}'
                 })}
               </p>
               <div className="lpe-config">

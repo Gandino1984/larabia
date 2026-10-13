@@ -26,8 +26,13 @@ const imageUpload = multer({ dest: TMP_DIR, limits: { fileSize: 50 * 1024 * 1024
     { name: "webp", maxCount: 1 },
     { name: "posterized", maxCount: 1 }
 ]);
-const AUDIO_MAX_MB = Number(process.env.PAISAJE_AUDIO_MAX_MB) || 100;
-const audioUpload = multer({ dest: TMP_DIR, limits: { fileSize: AUDIO_MAX_MB * 1024 * 1024 } }).single("file");
+// No size limit by default: the audio is converted to AAC, normalised and
+// the original deleted (PAISAJE_AUDIO_MAX_MB sets a cap if ever needed).
+const AUDIO_MAX_MB = Number(process.env.PAISAJE_AUDIO_MAX_MB) || 0;
+const audioUpload = multer({
+    dest: TMP_DIR,
+    ...(AUDIO_MAX_MB ? { limits: { fileSize: AUDIO_MAX_MB * 1024 * 1024 } } : {})
+}).single("file");
 
 /** Wrap multer so its errors (size limit…) answer as JSON. */
 const withUpload = (mw) => (req, res, next) =>

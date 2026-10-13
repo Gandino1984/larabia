@@ -269,7 +269,7 @@ export default function LineArtConverter({ onDocument }: LineArtConverterProps) 
           </label>
         </p>
         <p className="paisaje-hint">
-          Máximo 15 MB y 4096×4096 px · se normaliza a 900 px de alto · png, jpg, webp…
+          Cualquier tamaño · se reduce a 900 px de alto · png, jpg, webp…
         </p>
         {busy && <p className="paisaje-hint">Procesando…</p>}
       </div>

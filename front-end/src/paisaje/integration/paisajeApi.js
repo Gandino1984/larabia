@@ -6,8 +6,8 @@
 import axiosInstance from '../../utils/axiosConfig';
 import { buildPaisajeJson } from '../wizard/buildPaisajeJson';
 
-/** The proxy in front of the API accepts up to 20 MB per request. */
-export const AUDIO_MAX_BYTES = 20 * 1024 * 1024;
+// No size limit: the server converts the audio to AAC, normalises it and
+// discards the original.
 export const AUDIO_EXTENSIONS = ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'];
 
 const errorOf = (err, fallback) => err?.response?.data?.error || fallback;
@@ -36,7 +36,7 @@ export async function uploadAudio(file, userId, onProgress) {
   try {
     const res = await axiosInstance.post('/paisaje/audio', form, {
       headers: { 'Content-Type': 'multipart/form-data', 'x-user-id': userId },
-      timeout: 10 * 60 * 1000,
+      timeout: 4 * 60 * 60 * 1000, // big files on slow connections
       onUploadProgress: (e) => { if (onProgress && e.total) onProgress(Math.round((e.loaded / e.total) * 100)); }
     });
     return res.data.data.audioId;

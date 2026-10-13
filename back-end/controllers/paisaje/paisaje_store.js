@@ -46,7 +46,7 @@ export const AUDIO_FORMATS = ["mp3", "wav", "ogg", "m4a", "flac", "aac"];
 /** Unreferenced uploads older than this are deleted (abandoned editors). */
 const ORPHAN_AGE_MS = 48 * 60 * 60 * 1000;
 /** A job "processing" for longer than this was cut (restart): error. */
-const STALE_JOB_MS = 30 * 60 * 1000;
+const STALE_JOB_MS = 3 * 60 * 60 * 1000;
 
 export function ensureDirs() {
     for (const dir of [IMAGES_DIR, AUDIO_DIR, TMP_DIR]) fs.mkdirSync(dir, { recursive: true });
@@ -98,7 +98,7 @@ async function measureLoudness(input) {
         "-nostdin", "-hide_banner", "-i", input,
         "-af", "loudnorm=I=-16:TP=-2:LRA=11:print_format=json",
         "-f", "null", "-"
-    ], { maxBuffer: 16 * 1024 * 1024, timeout: 10 * 60 * 1000 });
+    ], { maxBuffer: 16 * 1024 * 1024, timeout: 60 * 60 * 1000 }); // long recordings
     const j = extractLoudnormJson(stderr);
     return {
         measuredI: num(j.input_i),
@@ -124,7 +124,7 @@ async function applyLoudness(input, output, m) {
         "-c:a", "aac", "-b:a", "192k",
         "-movflags", "+faststart",
         output
-    ], { maxBuffer: 16 * 1024 * 1024, timeout: 15 * 60 * 1000 });
+    ], { maxBuffer: 16 * 1024 * 1024, timeout: 60 * 60 * 1000 });
     try {
         return { loudnessAfter: num(extractLoudnormJson(stderr).output_i) };
     } catch {

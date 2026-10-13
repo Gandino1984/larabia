@@ -49,6 +49,15 @@ revista lo reimplementa en su back-end con sus permisos, MySQL y rutas).
     por defecto los originales en castellano. La raíz lleva además la clase
     `paisaje-player--{variant}`.
 
+- `converter/image.ts` (`[La Rabia]`): **sin límite de peso ni de tamaño** de
+  imagen (el original bloqueaba > 15 MB y > 4096×4096). `decodeImageFile` pide
+  la imagen ya reducida a 900 px de alto (`createImageBitmap` con
+  `resizeHeight`; si el navegador no lo admite, `normalizeHeight` reduce
+  después) y `checkDimensions` ya no bloquea. Los textos de ayuda de los 4
+  conversores lo dicen; el test del pipeline que comprobaba el bloqueo ahora
+  comprueba que se acepta. El original nunca se sube: solo el dibujo y su
+  referencia de 900 px.
+
 Cualquier otro cambio en estos archivos debe anotarse aquí.
 
 ## Tests
