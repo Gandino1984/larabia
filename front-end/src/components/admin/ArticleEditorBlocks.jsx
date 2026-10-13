@@ -7,7 +7,7 @@ import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
 import {
   Plus, Save, ArrowLeft, Edit, Trash2, FileText, Image as ImageIcon, Video, FolderPlus, FolderOpen,
-  X, User, Eye, Check, ChevronLeft, ChevronRight, Send, Undo2, Layers, Library, AlertCircle, AudioWaveform
+  X, User, Eye, Check, ChevronLeft, ChevronRight, Send, Undo2, Layers, Library, AlertCircle, AudioWaveform, ExternalLink
 } from 'lucide-react';
 import TextBlock from './blocks/TextBlock';
 import ImageBlock from './blocks/ImageBlock';
@@ -83,10 +83,11 @@ function ArticleEditorBlocks() {
     uploadBlockImage,
     uploadPanelAudio,
     submitForApproval,
-    revertToDraft
+    revertToDraft,
+    fetchArticleById
   } = useMagazine();
   const {
-    showSuccess, showError, navigateToHome, navigateToArticlesList, showEditor,
+    showSuccess, showError, navigateToHome, navigateToArticlesList, navigateToArticle, showEditor,
     openEditorToEdit, setOpenEditorToEdit, editorInitialView, editorReturnTo
   } = useUI();
   const { t } = useTranslation();
@@ -1156,6 +1157,17 @@ function ArticleEditorBlocks() {
     window.open(`${window.location.origin}/?article=${editingArticle.id_article}&preview=1`, '_blank', 'noopener,noreferrer');
   };
 
+  // A published publication: go to it as readers see it (not the preview).
+  // From the review step it opens in a new tab (the editor stays as it is);
+  // from "Mis publicaciones" it navigates there.
+  const openPublishedInNewTab = (id_article) => {
+    window.open(`${window.location.origin}/?article=${id_article}`, '_blank', 'noopener,noreferrer');
+  };
+  const goToPublishedArticle = async (article) => {
+    const result = await fetchArticleById(article.id_article);
+    if (result?.success) navigateToArticle();
+  };
+
   const resetForm = () => {
     setEditingArticle(null);
     setFormData({
@@ -1787,7 +1799,12 @@ function ArticleEditorBlocks() {
       )}
 
       <div className="pub-review__actions">
-        {editingArticle?.id_article ? (
+        {editingArticle?.id_article && status === 'published' ? (
+          <button type="button" className="pub-btn pub-btn--ghost" onClick={() => openPublishedInNewTab(editingArticle.id_article)} title={t('editor.viewArticleHint', 'Abre el artículo publicado, tal como lo ven los lectores')}>
+            <ExternalLink size={18} />
+            <span>{t('editor.viewArticle', 'Ver artículo')}</span>
+          </button>
+        ) : editingArticle?.id_article ? (
           <button type="button" className="pub-btn pub-btn--ghost" onClick={handlePreviewDraft} title={t('editor.previewDraftHint')}>
             <Eye size={18} />
             <span>{t('editor.previewDraft')}</span>
@@ -2061,6 +2078,17 @@ function ArticleEditorBlocks() {
                       )}
                     </div>
                     <div className="article-item-actions">
+                      {article.status_article === 'published' && (
+                        <button
+                          type="button"
+                          className="btn-view-article"
+                          onClick={() => goToPublishedArticle(article)}
+                          title={t('editor.viewArticleHint', 'Abre el artículo publicado, tal como lo ven los lectores')}
+                        >
+                          <ExternalLink size={16} />
+                          <span>{t('editor.viewArticle', 'Ver artículo')}</span>
+                        </button>
+                      )}
                       <button className="btn-edit" onClick={() => openPublicationForEdit(article)} title={t('common.buttons.edit')}>
                         <Edit size={18} />
                       </button>

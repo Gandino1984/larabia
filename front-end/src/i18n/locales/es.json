@@ -699,5 +699,7 @@
   "paisaje.styles.azimuthalDesc": "Los bordes de la imagen en líneas negras que giran como un mapa del mundo; el sonido mueve la órbita.",
   "audio.upload.hint": "WAV recomendado (máxima calidad) · también mp3, flac, m4a, ogg… · sin límite de tamaño · se guarda en AAC con el volumen normalizado",
   "audio.upload.processing": "Convirtiendo a AAC y normalizando…",
-  "audio.upload.badFormat": "Formato de audio no admitido: {{name}}. Usa WAV, FLAC, MP3, M4A, OGG…"
+  "audio.upload.badFormat": "Formato de audio no admitido: {{name}}. Usa WAV, FLAC, MP3, M4A, OGG…",
+  "editor.viewArticle": "Ver artículo",
+  "editor.viewArticleHint": "Abre el artículo publicado, tal como lo ven los lectores"
 }
