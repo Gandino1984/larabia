@@ -17,7 +17,7 @@ const article_block_model = sequelize.define(
             comment: 'Foreign key to magazine_articles'
         },
         block_type: {
-            type: DataTypes.ENUM('text', 'image', 'iframe', 'comic_panel'),
+            type: DataTypes.ENUM('text', 'image', 'iframe', 'comic_panel', 'paisaje'),
             allowNull: false,
             comment: 'Type of content block'
         },
@@ -94,6 +94,14 @@ const article_block_model = sequelize.define(
             allowNull: true,
             defaultValue: 'once',
             comment: 'Audio playback mode: loop (infinite) or once (play once and close)'
+        },
+        // Paisaje sonoro (block_type 'paisaje', or a comic_panel in that
+        // format): JSON written by paisaje_store.sanitizeSoundscape —
+        // { imageId, audioId, style, width, height, mode, veil, offsetX, offsetY, … }
+        soundscape_data: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            comment: 'Soundscape piece (JSON) for paisaje blocks / comic panels'
         }
     },
     {

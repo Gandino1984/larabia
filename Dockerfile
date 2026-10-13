@@ -5,6 +5,12 @@ FROM node:24.3.0
 
 WORKDIR /app
 
+# ffmpeg: normalises the audio of the "paisajes sonoros" (EBU R128 loudnorm,
+# run as a subprocess — never linked).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY package*.json ./
 RUN npm install
 
@@ -17,6 +23,9 @@ RUN mkdir -p /app/back-end/uploads/magazine \
             /app/back-end/uploads/author-profiles \
             /app/back-end/uploads/user-profiles \
             /app/back-end/uploads/magazine-metadata \
+            /app/back-end/uploads/paisaje/images \
+            /app/back-end/uploads/paisaje/audio \
+            /app/back-end/uploads/paisaje/tmp \
             /app/back-end/assets/images/magazine/projects && \
     find /app/back-end/uploads -type d -exec chmod 755 {} + && \
     find /app/back-end/assets -type d -exec chmod 755 {} + && \

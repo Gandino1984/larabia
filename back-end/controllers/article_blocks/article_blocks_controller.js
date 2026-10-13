@@ -2,6 +2,7 @@
 import article_block_model from "../../models/article_block_model.js";
 import magazine_article_model from "../../models/magazine_article_model.js";
 import { Op } from "sequelize";
+import { sanitizeSoundscape } from "../paisaje/paisaje_store.js";
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -19,8 +20,12 @@ function validateBlockData(blockData) {
 
     if (!blockData.block_type) {
         errors.push("El tipo de bloque es obligatorio");
-    } else if (!['text', 'image', 'iframe', 'comic_panel'].includes(blockData.block_type)) {
-        errors.push("Tipo de bloque inválido. Debe ser 'text', 'image', 'iframe' o 'comic_panel'");
+    } else if (!['text', 'image', 'iframe', 'comic_panel', 'paisaje'].includes(blockData.block_type)) {
+        errors.push("Tipo de bloque inválido. Debe ser 'text', 'image', 'iframe', 'comic_panel' o 'paisaje'");
+    }
+
+    if (blockData.block_type === 'paisaje' && !blockData.soundscape_data) {
+        errors.push("El paisaje sonoro está incompleto");
     }
 
     // Validate based on block type
@@ -47,6 +52,25 @@ function validateBlockData(blockData) {
         isValid: errors.length === 0,
         errors
     };
+}
+
+/**
+ * Paisaje sonoro on a block (article format or comic panel): check the piece
+ * and store its normalised JSON; the block's image_url becomes the piece's
+ * reference image (previews, comic preload, cover fallback). Mutates
+ * blockData; returns an error message or null.
+ */
+function applySoundscape(blockData) {
+    if (blockData.soundscape_data === undefined) return null;
+    if (blockData.soundscape_data === null || blockData.soundscape_data === '') {
+        blockData.soundscape_data = null;
+        return null;
+    }
+    const { value, imageUrl, error } = sanitizeSoundscape(blockData.soundscape_data);
+    if (error) return error;
+    blockData.soundscape_data = value;
+    blockData.image_url = imageUrl;
+    return null;
 }
 
 // Get all blocks for a specific article, ordered by block_order
@@ -93,6 +117,9 @@ async function create(blockData) {
             return { error: "Artículo no encontrado" };
         }
 
+        const soundscapeError = applySoundscape(blockData);
+        if (soundscapeError) return { error: soundscapeError };
+
         // Validate block data
         const validation = validateBlockData(blockData);
         if (!validation.isValid) {
@@ -127,8 +154,11 @@ async function update(id_block, blockData) {
             return { error: "Bloque no encontrado" };
         }
 
+        const soundscapeError = applySoundscape(blockData);
+        if (soundscapeError) return { error: soundscapeError };
+
         // Validate if provided
-        if (blockData.block_type || blockData.content || blockData.image_url || blockData.iframe_url) {
+        if (blockData.block_type || blockData.content || blockData.image_url || blockData.iframe_url || blockData.soundscape_data) {
             const dataToValidate = { ...block.toJSON(), ...blockData };
             const validation = validateBlockData(dataToValidate);
             if (!validation.isValid) {

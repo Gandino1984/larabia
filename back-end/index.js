@@ -32,6 +32,7 @@ import readerSubscriptionModel from './models/reader_subscription_model.js';
 import workshopBlockModel from './models/workshop_block_model.js';
 import workshopInvitationModel from './models/workshop_invitation_model.js';
 import subscriptionApiController from './controllers/subscription/subscription_api_controller.js';
+import { PAISAJE_DIR, ensureDirs as ensurePaisajeDirs, cleanupOrphans as cleanupPaisajeOrphans } from './controllers/paisaje/paisaje_store.js';
 
 dotenv.config();
 
@@ -39,7 +40,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const INTERNAL_PORT = 3000;
+// 3000 in the container; BACKEND_LISTEN_PORT only for running it locally
+// next to other services.
+const INTERNAL_PORT = Number(process.env.BACKEND_LISTEN_PORT) || 3000;
 const EXTERNAL_PORT = config.app.port;
 
 // Serve uploaded magazine assets (article covers, block images, author profile pics, user profile pics, project covers)
@@ -55,6 +58,16 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 app.use(cors(config.cors));
 app.options('*', cors(config.cors));
+
+// Paisajes sonoros: drawings + normalised audio, WITH CORS (the player
+// analyses the audio with Web Audio, which needs CORS across origins —
+// /uploads above is served before cors). Range requests work (seek).
+// Only the public files: drawings, reference images and audio (not the
+// internal .meta/.status bookkeeping nor the multer tmp dir).
+const PAISAJE_PUBLIC = /^\/(images\/[A-Za-z0-9_-]+\.(json|webp|jpg|jpeg)|audio\/[A-Za-z0-9_-]+\.m4a)$/;
+app.use('/paisaje-files', cors(config.cors), (req, res, next) =>
+    PAISAJE_PUBLIC.test(req.path) ? next() : res.status(404).json({ error: 'Not found' }),
+    express.static(PAISAJE_DIR, { fallthrough: false, maxAge: '7d', index: false }));
 
 app.use("/", router);
 
@@ -93,10 +106,31 @@ Promise.all([
                 console.log(`>>> Added magazine_workshops.${col}`);
             }
         }
+        // Paisajes sonoros (migration 016): block type 'paisaje' + the piece JSON.
+        const blocks = await qi.describeTable('article_blocks');
+        if (!String(blocks.block_type?.type || '').includes("'paisaje'")) {
+            await qi.changeColumn('article_blocks', 'block_type', {
+                type: DataTypes.ENUM('text', 'image', 'iframe', 'comic_panel', 'paisaje'),
+                allowNull: false
+            });
+            console.log(">>> Added 'paisaje' to article_blocks.block_type");
+        }
+        if (!blocks.soundscape_data) {
+            await qi.addColumn('article_blocks', 'soundscape_data', { type: DataTypes.TEXT, allowNull: true });
+            console.log('>>> Added article_blocks.soundscape_data');
+        }
     } catch (err) {
         console.error('Error ensuring added columns:', err.message);
     }
 })();
+
+// Paisajes sonoros: working dirs + daily clean-up of abandoned uploads
+// (first run a minute after boot, once the columns above exist).
+ensurePaisajeDirs();
+const runPaisajeCleanup = () =>
+    cleanupPaisajeOrphans().catch((err) => console.error('[paisaje] cleanup failed:', err.message));
+setTimeout(runPaisajeCleanup, 60 * 1000).unref();
+setInterval(runPaisajeCleanup, 24 * 60 * 60 * 1000).unref();
 
 app.listen(INTERNAL_PORT, '0.0.0.0', () => {
     console.log('');
