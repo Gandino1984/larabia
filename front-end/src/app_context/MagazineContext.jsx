@@ -208,7 +208,12 @@ export const MagazineProvider = ({ children }) => {
   // Create article
   const createArticle = useCallback(async (articleData) => {
     try {
-      const response = await axiosInstance.post('/magazine-article/create', articleData);
+      // The server decides from the caller's role whether it may be
+      // published directly (super admins); without the header it was always
+      // saved as a draft.
+      const response = await axiosInstance.post('/magazine-article/create', articleData, {
+        headers: { 'x-user-id': currentUser?.id_user }
+      });
 
       if (!response.data.error) {
         showSuccess(response.data.success || 'Artículo creado exitosamente');
@@ -223,7 +228,7 @@ export const MagazineProvider = ({ children }) => {
       showError('Error al crear el artículo');
       return { error: 'Error al crear el artículo' };
     }
-  }, [fetchArticles, fetchEditorArticles, fetchAllArticles, showSuccess, showError]);
+  }, [currentUser, fetchArticles, fetchEditorArticles, fetchAllArticles, showSuccess, showError]);
 
   // Update article
   const updateArticle = useCallback(async (id_article, articleData) => {
