@@ -23,6 +23,7 @@ import { useAuth } from '../../app_context/AuthContext';
 import { apiFile, parseSoundscape, pieceAudioUrl, playerLabels } from './soundscape';
 import { AUDIO_ACCEPT, uploadAudio, uploadDrawing, waitForAudio } from './paisajeApi';
 import { isAcceptedAudio, AUDIO_EXTENSIONS } from '../../utils/audioUpload';
+import LoadFailBoundary from '../../components/common/LoadFailBoundary';
 import '../converter/converter.css';
 import './PaisajePiece.css';
 import './PaisajeEditor.css';
@@ -292,9 +293,11 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
               </div>
               {StyleEditor && (
                 <div className="lpe-style-editor">
-                  <Suspense fallback={<p className="lpe-hint">{t('paisaje.editor.loadingEditor', 'Cargando editor…')}</p>}>
-                    <StyleEditor key={styleId} onDocument={setPendingDoc} />
-                  </Suspense>
+                  <LoadFailBoundary key={styleId}>
+                    <Suspense fallback={<p className="lpe-hint">{t('paisaje.editor.loadingEditor', 'Cargando editor…')}</p>}>
+                      <StyleEditor onDocument={setPendingDoc} />
+                    </Suspense>
+                  </LoadFailBoundary>
                 </div>
               )}
               {drawingError && <p className="lpe-error" role="alert">{drawingError}</p>}

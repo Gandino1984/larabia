@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, ArrowLeft, ArrowRight, Upload, MousePointer, Link as LinkIcon, Volume2, X, Code2, AudioWaveform, Edit } from 'lucide-react';
 import { isPieceComplete, parseSoundscape } from '../../paisaje/integration/soundscape';
 import { AUDIO_ACCEPT, isAcceptedAudio } from '../../utils/audioUpload';
+import LoadFailBoundary from '../common/LoadFailBoundary';
 import './HScrollEditor.css';
 
 // Paisaje sonoro panels (engine by Cristian Vergara): editor loaded on demand.
@@ -525,13 +526,15 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
               </button>
             </div>
             <div className="modal-body">
-              <Suspense fallback={<p>{t('paisaje.editor.loadingEditor', 'Cargando editor…')}</p>}>
-                <PaisajeEditor
-                  variant="panel"
-                  value={paisajeModal.draft}
-                  onChange={(draft) => setPaisajeModal((m) => (m ? { ...m, draft } : m))}
-                />
-              </Suspense>
+              <LoadFailBoundary hint={t('loadFail.saveFirst', 'Si tienes cambios sin guardar, cierra esta ventana y guárdalos antes de recargar.')}>
+                <Suspense fallback={<p>{t('paisaje.editor.loadingEditor', 'Cargando editor…')}</p>}>
+                  <PaisajeEditor
+                    variant="panel"
+                    value={paisajeModal.draft}
+                    onChange={(draft) => setPaisajeModal((m) => (m ? { ...m, draft } : m))}
+                  />
+                </Suspense>
+              </LoadFailBoundary>
               <div className="paisaje-panel-modal__footer">
                 <button type="button" className="paisaje-modal-btn" onClick={() => setPaisajeModal(null)}>
                   {t('paisaje.comic.cancel', 'Cancelar')}

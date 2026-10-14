@@ -100,11 +100,15 @@ services:
       - VIRTUAL_HOST=${FRONT_VIRTUAL_HOST}
       - LETSENCRYPT_HOST=${FRONT_VIRTUAL_HOST}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    volumes:
+      # JS/CSS of previous builds, kept 30 days (front-end/nginx/keep-assets.sh)
+      - larabia_front_assets:/usr/share/nginx/asset-store
     networks:
       - proxy
 
 volumes:
   larabia_mysql_data:
+  larabia_front_assets:
 
 networks:
   larabia_internal:

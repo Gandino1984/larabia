@@ -8,6 +8,7 @@ import { useAuth } from '../../app_context/AuthContext.jsx';
 import OptionsReveal from './OptionsReveal';
 import { parseSoundscape } from '../../paisaje/integration/soundscape';
 import { announceAudioStart, onOtherAudioStart } from '../../paisaje/integration/exclusiveAudio';
+import LoadFailBoundary from '../common/LoadFailBoundary';
 import './HScrollViewer.css';
 
 // Paisaje sonoro panels (engine by Cristian Vergara): loaded on demand.
@@ -1002,11 +1003,15 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                 >
                   {panel.soundscape_data ? (
                     // Paisaje sonoro panel: the piece fills the panel.
-                    <Suspense fallback={
+                    <LoadFailBoundary compact fallback={
                       <img src={getImageUrl(panel.image_url)} alt="" className="viewer-panel-image" loading="lazy" />
                     }>
-                      <PaisajePiece soundscape={panel.soundscape_data} variant="panel" />
-                    </Suspense>
+                      <Suspense fallback={
+                        <img src={getImageUrl(panel.image_url)} alt="" className="viewer-panel-image" loading="lazy" />
+                      }>
+                        <PaisajePiece soundscape={panel.soundscape_data} variant="panel" />
+                      </Suspense>
+                    </LoadFailBoundary>
                   ) : panel.interaction_type === 'iframe' ? (
                     <iframe
                       src={getIframeSrc(panel.interaction_data)}

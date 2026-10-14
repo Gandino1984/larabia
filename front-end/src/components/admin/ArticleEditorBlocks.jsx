@@ -17,6 +17,7 @@ import MicroPerfilEditor from './MicroPerfilEditor';
 import { isPieceComplete, pieceForSave } from '../../paisaje/integration/soundscape';
 // Paisaje sonoro editor (engine + 4 converters + d3-geo): loaded on demand.
 const PaisajeEditor = lazy(() => import('../../paisaje/integration/PaisajeEditor'));
+import LoadFailBoundary from '../common/LoadFailBoundary';
 import ArticleFilters from '../common/ArticleFilters';
 import { CATEGORIES, EMPTY_ARTICLE_FILTERS, applyArticleFilters } from '../../utils/articleFilters';
 import axios from 'axios';
@@ -1656,18 +1657,20 @@ function ArticleEditorBlocks() {
           />
         ) : articleContentType === 'paisaje' ? (
           // Paisaje sonoro: one 'paisaje' block holding the piece.
-          <Suspense fallback={<p className="pub-step-hint">{t('paisaje.editor.loadingEditor', 'Cargando editor…')}</p>}>
-            <PaisajeEditor
-              value={blocks[0]?.soundscape_data}
-              title={formData.title_article}
-              onChange={(draft) => setBlocks(prev => {
-                const keep = prev[0]?.id_block ? { id_block: prev[0].id_block } : { tempId: prev[0]?.tempId || `ps_${Date.now()}` };
-                return draft
-                  ? [{ ...keep, block_type: 'paisaje', soundscape_data: draft, image_url: draft.imageUrl || prev[0]?.image_url || '' }]
-                  : [];
-              })}
-            />
-          </Suspense>
+          <LoadFailBoundary hint={t('loadFail.saveFirstWizard', 'Si tienes cambios sin guardar, pulsa «Guardar» antes de recargar.')}>
+            <Suspense fallback={<p className="pub-step-hint">{t('paisaje.editor.loadingEditor', 'Cargando editor…')}</p>}>
+              <PaisajeEditor
+                value={blocks[0]?.soundscape_data}
+                title={formData.title_article}
+                onChange={(draft) => setBlocks(prev => {
+                  const keep = prev[0]?.id_block ? { id_block: prev[0].id_block } : { tempId: prev[0]?.tempId || `ps_${Date.now()}` };
+                  return draft
+                    ? [{ ...keep, block_type: 'paisaje', soundscape_data: draft, image_url: draft.imageUrl || prev[0]?.image_url || '' }]
+                    : [];
+                })}
+              />
+            </Suspense>
+          </LoadFailBoundary>
         ) : articleContentType === 'microperfil' ? (
           // Dedicated micro-perfil UI (single image + caption + optional audio)
           <MicroPerfilEditor

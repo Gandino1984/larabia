@@ -1,0 +1,65 @@
+/* magazine-front/src/components/common/LoadFailBoundary.css */
+
+.load-fail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  max-width: 34rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #f0c36d;
+  border-radius: 8px;
+  background: #fff7e6;
+  color: #3d2b00;
+}
+
+/* p.… so the article's own paragraph styles don't win. */
+.load-fail p.load-fail__title,
+.load-fail p.load-fail__text {
+  margin: 0;
+  color: inherit;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+.load-fail p.load-fail__title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* A real button: caps are fine here. */
+.load-fail__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0.5rem 0.95rem;
+  border: none;
+  border-radius: 6px;
+  background: #000000;
+  color: #ffffff;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.load-fail__btn:hover,
+.load-fail__btn:focus-visible { background: #3a3a3a; }
+
+/* Inside a comic panel: the static drawing stays, the button sits on top. */
+.load-fail--compact {
+  position: relative;
+  display: block;
+  max-width: none;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+.load-fail--compact .load-fail__btn {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+}

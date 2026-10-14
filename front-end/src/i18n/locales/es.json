@@ -701,5 +701,11 @@
   "audio.upload.processing": "Convirtiendo a AAC y normalizando…",
   "audio.upload.badFormat": "Formato de audio no admitido: {{name}}. Usa WAV, FLAC, MP3, M4A, OGG…",
   "editor.viewArticle": "Ver artículo",
-  "editor.viewArticleHint": "Abre el artículo publicado, tal como lo ven los lectores"
+  "editor.viewArticleHint": "Abre el artículo publicado, tal como lo ven los lectores",
+  "loadFail.title": "No se pudo cargar esta parte",
+  "loadFail.updated": "La revista se ha actualizado mientras tenías la página abierta. Recárgala para continuar.",
+  "loadFail.generic": "Algo ha fallado al mostrarla. Recarga la página para intentarlo de nuevo.",
+  "loadFail.saveFirst": "Si tienes cambios sin guardar, cierra esta ventana y guárdalos antes de recargar.",
+  "loadFail.saveFirstWizard": "Si tienes cambios sin guardar, pulsa «Guardar» antes de recargar.",
+  "loadFail.reload": "Recargar página"
 }

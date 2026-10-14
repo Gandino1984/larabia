@@ -11,6 +11,7 @@ import HScrollViewer from './HScrollViewer';
 import CommentsModal from './CommentsModal';
 import OptionsReveal from './OptionsReveal';
 import AuthorChip from '../common/AuthorChip';
+import LoadFailBoundary from '../common/LoadFailBoundary';
 import './ArticleDetail.css';
 // Paisaje sonoro article format (engine by Cristian Vergara): loaded on demand.
 const PaisajePiece = lazy(() => import('../../paisaje/integration/PaisajePiece'));
@@ -380,9 +381,11 @@ function ArticleDetail({ previewMode = false }) {
                         </div>
                       )}
                       {block.block_type === 'paisaje' && (
-                        <Suspense fallback={null}>
-                          <PaisajePiece soundscape={block.soundscape_data} title={selectedArticle.title_article} variant="minimal" />
-                        </Suspense>
+                        <LoadFailBoundary>
+                          <Suspense fallback={null}>
+                            <PaisajePiece soundscape={block.soundscape_data} title={selectedArticle.title_article} variant="minimal" />
+                          </Suspense>
+                        </LoadFailBoundary>
                       )}
                       {block.block_type === 'iframe' && (
                         <div className="iframe-content">

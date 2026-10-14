@@ -701,5 +701,11 @@
   "audio.upload.processing": "AAC-ra bihurtzen eta normalizatzen…",
   "audio.upload.badFormat": "Audio formatua ez da onartzen: {{name}}. Erabili WAV, FLAC, MP3, M4A, OGG…",
   "editor.viewArticle": "Artikulua ikusi",
-  "editor.viewArticleHint": "Argitaratutako artikulua irekitzen du, irakurleek ikusten duten bezala"
+  "editor.viewArticleHint": "Argitaratutako artikulua irekitzen du, irakurleek ikusten duten bezala",
+  "loadFail.title": "Ezin izan da zati hau kargatu",
+  "loadFail.updated": "Aldizkaria eguneratu egin da orria irekita zenuen bitartean. Kargatu berriro jarraitzeko.",
+  "loadFail.generic": "Zerbaitek huts egin du erakustean. Kargatu orria berriro saiatzeko.",
+  "loadFail.saveFirst": "Gorde gabeko aldaketak badituzu, itxi leiho hau eta gorde itzazu berriro kargatu aurretik.",
+  "loadFail.saveFirstWizard": "Gorde gabeko aldaketak badituzu, sakatu «Gorde» berriro kargatu aurretik.",
+  "loadFail.reload": "Kargatu orria berriro"
 }
