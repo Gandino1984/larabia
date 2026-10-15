@@ -707,5 +707,8 @@
   "loadFail.generic": "Algo ha fallado al mostrarla. Recarga la página para intentarlo de nuevo.",
   "loadFail.saveFirst": "Si tienes cambios sin guardar, cierra esta ventana y guárdalos antes de recargar.",
   "loadFail.saveFirstWizard": "Si tienes cambios sin guardar, pulsa «Guardar» antes de recargar.",
-  "loadFail.reload": "Recargar página"
+  "loadFail.reload": "Recargar página",
+  "workshops.share": "Compartir el taller",
+  "workshops.shareCopy": "Copia el enlace del taller:",
+  "workshops.delete": "Eliminar taller"
 }

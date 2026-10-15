@@ -1,15 +1,17 @@
 // magazine-front/src/components/workshops/WorkshopDetail.jsx
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Calendar, MapPin, Users, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import AuthorChip from '../common/AuthorChip';
 import WorkshopMap from '../maps/WorkshopMap';
-import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
-import CreateWorkshopModal from './CreateWorkshopModal';
+import { useWorkshopAccess, canManageWorkshop } from '../../app_context/useWorkshopAccess';
+import WorkshopOptions from './WorkshopOptions';
 import WorkshopParticipantsPanel from './WorkshopParticipantsPanel';
+import '../magazine/ArticleCard.css';
+import '../magazine/ProjectDetail.css';
 import './Workshops.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -32,10 +34,9 @@ function WorkshopDetail() {
   const { navigateToTalleres } = useUI();
   const { currentUser, isSuperAdmin, isAdmin } = useAuth();
   const {
-    selectedWorkshop, fetchWorkshopById, reserveWorkshop, cancelWorkshopReservation, deleteWorkshop, loading,
+    selectedWorkshop, fetchWorkshopById, reserveWorkshop, cancelWorkshopReservation, loading,
     respondToWorkshopInvitation
   } = useWorkshop();
-  const [editing, setEditing] = useState(false);
 
   const id = selectedWorkshop?.id_workshop;
 
@@ -61,18 +62,10 @@ function WorkshopDetail() {
     () => !!(w?.reserved_by_me || w?.participants?.some(p => p.id_user === currentUser?.id_user)),
     [w, currentUser]
   );
-  // Edit / delete and the participants — like an article's author: super
-  // admins (any workshop), or an admin who created or teaches it. The server
-  // says so once the workshop loads (`can_manage`); until then, the same rule
-  // here.
-  const canManage = !!currentUser && !!w && (
-    w.can_manage !== undefined
-      ? !!w.can_manage
-      : isSuperAdmin || (isAdmin && (
-          w.author_id === currentUser.id_user
-          || (w.authors || []).some(a => a.id_user === currentUser.id_user)
-        ))
-  );
+  // The participants — like an article's author: super admins (any
+  // workshop), or an admin who created or teaches it (edit / delete: the ⋯
+  // options, same rule).
+  const canManage = canManageWorkshop(w, currentUser, { isSuperAdmin, isAdmin });
 
   // null (can book) | 'login_required' | 'subscription_required' | 'blocked'
   const bookingCode = !currentUser ? 'login_required' : (w?.booking_code || null);
@@ -107,11 +100,6 @@ function WorkshopDetail() {
     if (res.success) fetchWorkshopById(id);
     else if (res.code) guard(res.code === 'login_required' ? 'login' : 'subscribe');
   };
-  const handleDelete = async () => {
-    if (!confirm(t('workshops.confirmDelete', '¿Eliminar este taller? Se borrarán también sus reservas. Esta acción no se puede deshacer.'))) return;
-    const res = await deleteWorkshop(id);
-    if (!res?.error) navigateToTalleres();
-  };
 
   // Someone invited the reader: their place is held until they answer.
   const invitation = !isReserved ? w.my_invitation : null;
@@ -132,26 +120,16 @@ function WorkshopDetail() {
       <div className="workshops-container workshop-detail">
         <div className="workshop-detail-toolbar">
           {backButton}
-          {canManage && (
-            <div className="workshop-detail-manage">
-              <button type="button" className="workshop-manage-btn" onClick={() => setEditing(true)}>
-                <Edit size={16} />
-                <span>{t('workshops.editShort', 'Editar')}</span>
-              </button>
-              <button type="button" className="workshop-manage-btn workshop-manage-btn--danger" onClick={handleDelete}>
-                <Trash2 size={16} />
-                <span>{t('workshops.deleteShort', 'Eliminar')}</span>
-              </button>
-            </div>
-          )}
-        </div>
-        {editing && (
-          <CreateWorkshopModal
+          {/* ⋯ options, like an article's: share (everyone), edit / delete
+              (its managers). project-options: the project header's look. */}
+          <WorkshopOptions
             workshop={w}
-            onClose={() => setEditing(false)}
+            align="end"
+            className="project-options"
             onSaved={() => fetchWorkshopById(id)}
+            onDeleted={navigateToTalleres}
           />
-        )}
+        </div>
         {cover && (
           <div className="workshop-detail-cover">
             <img src={cover} alt={w.title_workshop} onError={(e) => { e.target.style.display = 'none'; }} />

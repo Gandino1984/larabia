@@ -13,7 +13,7 @@ let slideInPlayed = false;
 function FloatingEditorButton({ ready = true }) {
   const { t } = useTranslation();
   const { canCreateContent } = useAuth();
-  const { navigateToEditor, showEditor, showArticleDetail } = useUI();
+  const { navigateToEditor, showEditor, showArticleDetail, showWorkshopDetail } = useUI();
   // Slide the button in from the right, shortly after the header has appeared.
   const [isIn, setIsIn] = useState(slideInPlayed);
   const timerRef = useRef(null);
@@ -32,8 +32,9 @@ function FloatingEditorButton({ ready = true }) {
     return null;
   }
 
-  // Apply hidden class if in editor or viewing an article
-  const isHidden = showEditor || showArticleDetail;
+  // Hidden in the editor and on the pages with their own top-right options
+  // (an article, a workshop) — it would sit on top of them.
+  const isHidden = showEditor || showArticleDetail || showWorkshopDetail;
 
   return (
     <button

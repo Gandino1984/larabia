@@ -1,10 +1,12 @@
 // magazine-front/src/App.jsx
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Eye, X } from 'lucide-react';
 import { useUI } from './app_context/UIContext';
 import { useMagazine } from './app_context/MagazineContext';
 import { useAuth } from './app_context/AuthContext';
+import { useWorkshop } from './app_context/WorkshopContext';
+import { useWorkshopAccess } from './app_context/useWorkshopAccess';
 import { usePreloader } from './hooks/usePreloader';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -35,10 +37,12 @@ import { useAuthor } from './app_context/AuthorContext';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showAbout, showAdmin, isFullscreen, navigateToArticle, authorCardUser, closeAuthorCard } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, authorCardUser, closeAuthorCard } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
-  const { loading: authLoading } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
+  const { fetchWorkshopById } = useWorkshop();
+  const { guard: workshopGuard } = useWorkshopAccess();
   const { isLoading, progress } = usePreloader();
   const { t } = useTranslation();
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
@@ -65,6 +69,34 @@ function App() {
     });
     setPendingArticleId(null);
   }, [pendingArticleId, authLoading, fetchArticleById, navigateToArticle]);
+
+  // A shared workshop link (?workshop=<id>, WorkshopOptions). Opening a
+  // workshop needs an account: signed out, the reader is sent to sign in
+  // (once) and the workshop opens as soon as they have.
+  const [pendingWorkshopId, setPendingWorkshopId] = useState(() => {
+    const id = new URLSearchParams(window.location.search).get('workshop');
+    return id ? parseInt(id, 10) : null;
+  });
+  const askedLoginForWorkshop = useRef(false);
+  useEffect(() => {
+    if (pendingWorkshopId == null || authLoading) return;
+    if (new URLSearchParams(window.location.search).has('workshop')) {
+      window.history.replaceState({}, '', '/');
+    }
+    if (!currentUser) {
+      if (!askedLoginForWorkshop.current) {
+        askedLoginForWorkshop.current = true;
+        workshopGuard('login');
+      }
+      return;
+    }
+    setPendingWorkshopId(null);
+    fetchWorkshopById(pendingWorkshopId).then((res) => {
+      if (res?.success) navigateToWorkshopDetail();
+      else navigateToTalleres();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingWorkshopId, authLoading, currentUser]);
 
   // Start showing content as soon as preloader finishes (while LoadingScreen is still fading out)
   useEffect(() => {

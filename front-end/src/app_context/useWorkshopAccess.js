@@ -11,6 +11,19 @@ import { useAuth } from './AuthContext';
 import { useUI } from './UIContext';
 import { useSubscription } from './SubscriptionContext';
 
+// Who manages a workshop (edit, delete, participants) — the server's rule
+// (isWorkshopManager): super admins any workshop; an admin the ones they
+// created or teach. The workshop page gets it from the server (`can_manage`);
+// the list doesn't carry it.
+export function canManageWorkshop(workshop, user, { isSuperAdmin, isAdmin }) {
+  if (!user || !workshop) return false;
+  if (workshop.can_manage !== undefined) return !!workshop.can_manage;
+  return isSuperAdmin || (isAdmin && (
+    workshop.author_id === user.id_user
+    || (workshop.authors || []).some(a => a.id_user === user.id_user)
+  ));
+}
+
 export function useWorkshopAccess() {
   const { t } = useTranslation();
   const { currentUser, canCreateContent } = useAuth();

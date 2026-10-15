@@ -707,5 +707,8 @@
   "loadFail.generic": "Something went wrong while showing it. Reload the page to try again.",
   "loadFail.saveFirst": "If you have unsaved changes, close this window and save them before reloading.",
   "loadFail.saveFirstWizard": "If you have unsaved changes, press “Save” before reloading.",
-  "loadFail.reload": "Reload page"
+  "loadFail.reload": "Reload page",
+  "workshops.share": "Share the workshop",
+  "workshops.shareCopy": "Copy the workshop link:",
+  "workshops.delete": "Delete workshop"
 }

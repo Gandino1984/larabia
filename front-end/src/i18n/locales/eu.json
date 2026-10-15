@@ -707,5 +707,8 @@
   "loadFail.generic": "Zerbaitek huts egin du erakustean. Kargatu orria berriro saiatzeko.",
   "loadFail.saveFirst": "Gorde gabeko aldaketak badituzu, itxi leiho hau eta gorde itzazu berriro kargatu aurretik.",
   "loadFail.saveFirstWizard": "Gorde gabeko aldaketak badituzu, sakatu «Gorde» berriro kargatu aurretik.",
-  "loadFail.reload": "Kargatu orria berriro"
+  "loadFail.reload": "Kargatu orria berriro",
+  "workshops.share": "Partekatu tailerra",
+  "workshops.shareCopy": "Kopiatu tailerraren esteka:",
+  "workshops.delete": "Ezabatu tailerra"
 }

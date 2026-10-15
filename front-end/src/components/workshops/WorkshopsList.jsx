@@ -7,12 +7,15 @@ import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
 import CreateWorkshopModal from './CreateWorkshopModal';
+import WorkshopOptions from './WorkshopOptions';
 import WorkshopFilters from './WorkshopFilters';
 import { EMPTY_WORKSHOP_FILTERS, applyWorkshopFilters, countActiveWorkshopFilters } from '../../utils/workshopFilters';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import AuthorChip from '../common/AuthorChip';
 import WorkshopMap from '../maps/WorkshopMap';
-// Grid / carousel toggle + carousel: the same pieces as the article lists.
+// Grid / carousel toggle + carousel: the same pieces as the article lists;
+// the cards' options bar, the article cards' one.
+import '../magazine/ArticleCard.css';
 import '../magazine/ProjectDetail.css';
 import '../magazine/ArticlesCarousel.css';
 import './Workshops.css';
@@ -130,6 +133,10 @@ function WorkshopsList() {
               ))}
             </div>
           )}
+        </div>
+        {/* ⋯ options: share (everyone), edit / delete (its managers). */}
+        <div className="article-engagement-bar workshop-card-bar">
+          <WorkshopOptions workshop={w} />
         </div>
       </article>
     );
