@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import './CardDisplay.css';
 import ErrorCard from './ErrorCard.jsx';
@@ -137,63 +137,18 @@ const AnimatedCard = ({ card, onClose }) => {
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isDismissing, setIsDismissing] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const dragStartX = useRef(0);
   const cardRef = useRef(null);
-  const timerRef = useRef(null);
-  const remainingTimeRef = useRef(AUTO_DISMISS_DELAY);
-  const startTimeRef = useRef(null);
-  const isPausedRef = useRef(false);
 
   const DISMISS_THRESHOLD = 100;
 
-  // Keep isPausedRef in sync with isPaused state
+  // Closes by itself after a few seconds; the ✕ (or a swipe) closes it
+  // sooner.
   useEffect(() => {
-    isPausedRef.current = isPaused;
-  }, [isPaused]);
-
-  const startTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    startTimeRef.current = Date.now();
-    timerRef.current = setTimeout(() => {
-      // Only dismiss if not paused
-      if (!isPausedRef.current) {
-        setIsDismissing(true);
-      }
-    }, remainingTimeRef.current);
-  }, []);
-
-  const pauseTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-      const elapsed = Date.now() - startTimeRef.current;
-      remainingTimeRef.current = Math.max(0, remainingTimeRef.current - elapsed);
-    }
-  }, []);
-
-  const handleTogglePause = useCallback((e) => {
-    e.stopPropagation();
-    if (isPaused) {
-      setIsDismissing(true);
-    } else {
-      pauseTimer();
-      setIsPaused(true);
-    }
-  }, [isPaused, pauseTimer]);
-
-  useEffect(() => {
-    if (card.isVisible && !isPaused && !isDismissing) {
-      startTimer();
-    }
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [card.isVisible, isPaused, isDismissing, startTimer]);
+    if (!card.isVisible || isDismissing) return undefined;
+    const timer = setTimeout(() => setIsDismissing(true), AUTO_DISMISS_DELAY);
+    return () => clearTimeout(timer);
+  }, [card.isVisible, isDismissing]);
 
   const slideAnimation = useSpring({
     from: {
@@ -254,18 +209,15 @@ const AnimatedCard = ({ card, onClose }) => {
   };
 
   const getCardComponent = () => {
-    const pauseProps = {
-      isPaused,
-      onTogglePause: handleTogglePause
-    };
+    const close = () => setIsDismissing(true);
 
     switch(card.type) {
       case 'error':
-        return <ErrorCard {...pauseProps} />;
+        return <ErrorCard onClose={close} />;
       case 'success':
-        return <SuccessCard {...pauseProps} />;
+        return <SuccessCard onClose={close} />;
       case 'info':
-        return <InfoCard {...pauseProps} />;
+        return <InfoCard onClose={close} />;
       default:
         return null;
     }

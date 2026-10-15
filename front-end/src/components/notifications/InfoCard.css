@@ -43,40 +43,6 @@
   flex-shrink: 0;
 }
 
-.info-pause-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border-radius: 50%;
-  border: none;
-  background-color: var(--on-light, #1a1a1a);
-  color: var(--surface-light, #ffffff);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.info-pause-button:hover {
-  background-color: #333;
-  transform: scale(1.1);
-}
-
-.info-pause-button:active {
-  transform: scale(0.95);
-}
-
-.info-pause-button.paused {
-  background-color: var(--on-light, #1a1a1a);
-  color: var(--surface-light, #ffffff);
-}
-
-.info-pause-button.paused:hover {
-  background-color: #444;
-}
-
 /* Small phones (360px - 480px) */
 @media (min-width: 360px) {
   .info-card-container {

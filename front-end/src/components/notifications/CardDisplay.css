@@ -75,3 +75,29 @@
     margin-bottom: 1rem;
   }
 }
+
+/* The ✕ of every card (CardCloseButton), on its right. */
+.card-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin-left: auto;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.08);
+  color: var(--on-light, #1a1a1a);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.card-close-button:hover,
+.card-close-button:focus-visible {
+  background-color: var(--on-light, #1a1a1a);
+  color: var(--surface-light, #ffffff);
+}
+.card-close-button:active {
+  transform: scale(0.92);
+}

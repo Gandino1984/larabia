@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useUI } from '../../app_context/UIContext.jsx';
 import './ErrorCard.css';
-import { Pause, Play } from 'lucide-react';
+import CardCloseButton from './CardCloseButton.jsx';
 
-const ErrorCard = ({ isPaused = false, onTogglePause }) => {
+const ErrorCard = ({ onClose }) => {
   const [latestError, setLatestError] = useState('');
 
   const { error } = useUI();
@@ -42,20 +42,12 @@ const ErrorCard = ({ isPaused = false, onTogglePause }) => {
   return (
     latestError && (
       <div className="error-card-container">
-        <button
-          className={`error-pause-button ${isPaused ? 'paused' : ''}`}
-          onClick={onTogglePause}
-          onPointerDown={(e) => e.stopPropagation()}
-          title={isPaused ? 'Reanudar y cerrar' : 'Pausar'}
-          type="button"
-        >
-          {isPaused ? <Play size={28} /> : <Pause size={28} />}
-        </button>
         <div className="error-list">
           <div className="error-item">
             {latestError}
           </div>
         </div>
+        <CardCloseButton onClose={onClose} />
       </div>
     )
   );

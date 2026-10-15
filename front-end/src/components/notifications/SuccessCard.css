@@ -28,40 +28,6 @@
   word-wrap: break-word;
 }
 
-.success-pause-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border-radius: 50%;
-  border: none;
-  background-color: rgba(0, 0, 0, 0.1);
-  color: var(--on-light, #1a1a1a);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.success-pause-button:hover {
-  background-color: rgba(0, 0, 0, 0.2);
-  transform: scale(1.1);
-}
-
-.success-pause-button:active {
-  transform: scale(0.95);
-}
-
-.success-pause-button.paused {
-  background-color: var(--on-light, #1a1a1a);
-  color: var(--surface-light, #ffffff);
-}
-
-.success-pause-button.paused:hover {
-  background-color: #333;
-}
-
 /* Small phones (360px - 480px) */
 @media (min-width: 360px) {
   .success-card-container {

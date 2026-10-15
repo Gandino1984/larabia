@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useUI } from '../../app_context/UIContext.jsx';
 import './SuccessCard.css';
-import { Pause, Play } from 'lucide-react';
+import CardCloseButton from './CardCloseButton.jsx';
 
-const SuccessCard = ({ isPaused = false, onTogglePause }) => {
+const SuccessCard = ({ onClose }) => {
   const [latestSuccess, setLatestSuccess] = useState('');
 
   const { success } = useUI();
@@ -23,20 +23,12 @@ const SuccessCard = ({ isPaused = false, onTogglePause }) => {
   return (
     latestSuccess && (
       <div className="success-card-container">
-        <button
-          className={`success-pause-button ${isPaused ? 'paused' : ''}`}
-          onClick={onTogglePause}
-          onPointerDown={(e) => e.stopPropagation()}
-          title={isPaused ? 'Reanudar y cerrar' : 'Pausar'}
-          type="button"
-        >
-          {isPaused ? <Play size={28} /> : <Pause size={28} />}
-        </button>
         <div className="success-list">
           <div className="success-item">
             {latestSuccess}
           </div>
         </div>
+        <CardCloseButton onClose={onClose} />
       </div>
     )
   );

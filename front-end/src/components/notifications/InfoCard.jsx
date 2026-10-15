@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useUI } from '../../app_context/UIContext.jsx';
 import './InfoCard.css';
-import { Pause, Play, Volume2, Link as LinkIcon } from 'lucide-react';
+import { Volume2, Link as LinkIcon } from 'lucide-react';
+import CardCloseButton from './CardCloseButton.jsx';
 
-const InfoCard = ({ isPaused = false, onTogglePause }) => {
+const InfoCard = ({ onClose }) => {
   const [latestInfo, setLatestInfo] = useState('');
 
   const { info, infoIconType } = useUI();
@@ -20,44 +21,25 @@ const InfoCard = ({ isPaused = false, onTogglePause }) => {
     }
   }, [info]);
 
-  // Determine which icon to display
-  const renderIcon = () => {
-    if (infoIconType === 'audio') {
-      return <Volume2 size={20} />;
-    } else if (infoIconType === 'link') {
-      return <LinkIcon size={20} />;
-    } else {
-      // Default to pause/play for non-interactive notifications
-      return isPaused ? <Play size={28} /> : <Pause size={28} />;
-    }
-  };
-
-  // For interactive panel notifications, show static icon; otherwise show pause/play button
-  const isInteractiveNotification = infoIconType === 'audio' || infoIconType === 'link';
+  // Interactive panel notifications show what the panel does (audio / link).
+  const typeIcon = infoIconType === 'audio' ? <Volume2 size={20} />
+    : infoIconType === 'link' ? <LinkIcon size={20} />
+    : null;
 
   return (
     latestInfo && (
       <div className="info-card-container">
-        {isInteractiveNotification ? (
+        {typeIcon && (
           <div className="info-icon-display">
-            {renderIcon()}
+            {typeIcon}
           </div>
-        ) : (
-          <button
-            className={`info-pause-button ${isPaused ? 'paused' : ''}`}
-            onClick={onTogglePause}
-            onPointerDown={(e) => e.stopPropagation()}
-            title={isPaused ? 'Reanudar y cerrar' : 'Pausar'}
-            type="button"
-          >
-            {renderIcon()}
-          </button>
         )}
         <div className="info-list">
           <div className="info-item">
             {latestInfo}
           </div>
         </div>
+        <CardCloseButton onClose={onClose} />
       </div>
     )
   );
