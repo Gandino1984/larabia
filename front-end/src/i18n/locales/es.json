@@ -710,5 +710,7 @@
   "loadFail.reload": "Recargar página",
   "workshops.share": "Compartir el taller",
   "workshops.shareCopy": "Copia el enlace del taller:",
-  "workshops.delete": "Eliminar taller"
+  "workshops.delete": "Eliminar taller",
+  "hscroll.audioPanel.paisaje": "Esta viñeta tiene sonido: pulsa play para escucharlo.",
+  "hscroll.audioPanel.interactive": "Esta viñeta tiene sonido: púlsala para escucharlo."
 }

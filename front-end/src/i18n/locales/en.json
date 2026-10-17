@@ -710,5 +710,7 @@
   "loadFail.reload": "Reload page",
   "workshops.share": "Share the workshop",
   "workshops.shareCopy": "Copy the workshop link:",
-  "workshops.delete": "Delete workshop"
+  "workshops.delete": "Delete workshop",
+  "hscroll.audioPanel.paisaje": "This panel has sound: press play to listen.",
+  "hscroll.audioPanel.interactive": "This panel has sound: click or tap it to listen."
 }

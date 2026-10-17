@@ -1,5 +1,5 @@
 // magazine-front/src/components/magazine/HScrollViewer.jsx
-import { useRef, useState, useEffect, Suspense, lazy } from 'react';
+import { useRef, useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowLeft, ArrowRight, Play, Pause, X, Volume2, Link as LinkIcon, Bookmark, RotateCcw, Smartphone, Maximize } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { useAuth } from '../../app_context/AuthContext.jsx';
 import OptionsReveal from './OptionsReveal';
 import { parseSoundscape } from '../../paisaje/integration/soundscape';
 import { announceAudioStart, onOtherAudioStart } from '../../paisaje/integration/exclusiveAudio';
+import { isMostlyVisible, VISIBILITY_THRESHOLDS } from '../../utils/visibility';
 import LoadFailBoundary from '../common/LoadFailBoundary';
 import './HScrollViewer.css';
 
@@ -206,8 +207,9 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
 
           console.log('Tutorial check:', { tutorialKey, hasSeenTutorial });
 
-          // If first time for this article, show info card
-          if (!hasSeenTutorial) {
+          // If first time for this article, show info card (audio panels
+          // have their own — see announceAudioPanel).
+          if (!hasSeenTutorial && interactionType !== 'audio') {
             const infoMessage = t('hscroll.tutorial.interactivePanels');
 
             console.log('Calling showInfo with message:', infoMessage, 'iconType:', interactionType);
@@ -230,6 +232,33 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
       });
     };
   }, [panels, articleId, showInfo, isLoading]);
+
+  // Panels with sound: the first time in this visit the reader reaches each
+  // one, a card says so. Paisaje panels report it from PaisajePiece
+  // (onEnter); interactive audio panels from the observer below.
+  const announcedAudioPanels = useRef(new Set());
+  const announceAudioPanel = useCallback((panelId, kind) => {
+    if (announcedAudioPanels.current.has(String(panelId))) return;
+    announcedAudioPanels.current.add(String(panelId));
+    showInfo(kind === 'paisaje'
+      ? t('hscroll.audioPanel.paisaje', 'Esta viñeta tiene sonido: pulsa play para escucharlo.')
+      : t('hscroll.audioPanel.interactive', 'Esta viñeta tiene sonido: púlsala para escucharlo.'), 'audio');
+  }, [showInfo, t]);
+
+  useEffect(() => {
+    if (!scrollContainerRef.current || isLoading) return undefined;
+    // Implicit root: the screen, clipped by the viewer — a comic further
+    // down the page isn't "reached" yet.
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (isMostlyVisible(entry)) announceAudioPanel(entry.target.dataset.panelId, 'interactive');
+      });
+    }, { threshold: VISIBILITY_THRESHOLDS });
+    scrollContainerRef.current
+      .querySelectorAll('.interactive-panel[data-interaction-type="audio"]')
+      .forEach((panel) => io.observe(panel));
+    return () => io.disconnect();
+  }, [panels, isLoading, announceAudioPanel]);
 
   // Monitor current visible panel and stop audio at stop panel
   useEffect(() => {
@@ -1009,7 +1038,11 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                       <Suspense fallback={
                         <img src={getImageUrl(panel.image_url)} alt="" className="viewer-panel-image" loading="lazy" />
                       }>
-                        <PaisajePiece soundscape={panel.soundscape_data} variant="panel" />
+                        <PaisajePiece
+                          soundscape={panel.soundscape_data}
+                          variant="panel"
+                          onEnter={() => announceAudioPanel(panel.id_block, 'paisaje')}
+                        />
                       </Suspense>
                     </LoadFailBoundary>
                   ) : panel.interaction_type === 'iframe' ? (
