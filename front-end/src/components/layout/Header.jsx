@@ -2,6 +2,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSpring, animated, to } from '@react-spring/web';
 import { useTranslation } from 'react-i18next';
+import { articleTitle, articleExcerpt, projectTitle } from '../../utils/contentLang';
+import { categoryLabel } from '../../utils/articleFilters';
+import { projectFormatLabel } from '../../utils/projectKinds';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
@@ -52,7 +55,9 @@ function AuthorResultAvatar({ profile }) {
 }
 
 function Header({ ready = true }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Titles in the language chosen here (or the original — utils/contentLang.js).
+  const lang = i18n.language;
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { totalPending } = usePendingReview();
   const { notifications, count: notifCount, markAllSeen } = useNotifications();
@@ -336,6 +341,9 @@ function Header({ ready = true }) {
     return (
       article.title_article?.toLowerCase().includes(searchLower) ||
       article.excerpt_article?.toLowerCase().includes(searchLower) ||
+      // …and its version in the language being read
+      articleTitle(article, lang)?.toLowerCase().includes(searchLower) ||
+      articleExcerpt(article, lang)?.toLowerCase().includes(searchLower) ||
       article.content_article?.toLowerCase().includes(searchLower) ||
       article.category_article?.toLowerCase().includes(searchLower) ||
       article.author_name?.toLowerCase().includes(searchLower) ||
@@ -364,6 +372,7 @@ function Header({ ready = true }) {
     return (
       project.title_project?.toLowerCase().includes(searchLower) ||
       project.description_project?.toLowerCase().includes(searchLower) ||
+      projectTitle(project, lang)?.toLowerCase().includes(searchLower) ||
       project.type_project?.toLowerCase().includes(searchLower) ||
       project.format_project?.toLowerCase().includes(searchLower)
     );
@@ -592,9 +601,9 @@ function Header({ ready = true }) {
                             onClick={() => handleProjectResultClick(project)}
                           >
                             <div className="search-result-content">
-                              <h4 className="search-result-title">{project.title_project}</h4>
+                              <h4 className="search-result-title">{projectTitle(project, lang)}</h4>
                               {project.format_project && (
-                                <span className="search-result-category">{project.format_project}</span>
+                                <span className="search-result-category">{projectFormatLabel(project.format_project, t)}</span>
                               )}
                             </div>
                             {project.cover_image_project && (
@@ -644,19 +653,19 @@ function Header({ ready = true }) {
                             onClick={() => handleArticleResultClick(article)}
                           >
                             <div className="search-result-content">
-                              <h4 className="search-result-title">{article.title_article}</h4>
+                              <h4 className="search-result-title">{articleTitle(article, lang)}</h4>
                               {article.category_article && article.category_article.toLowerCase() !== 'general' && (
-                                <span className="search-result-category">{article.category_article}</span>
+                                <span className="search-result-category">{categoryLabel(article.category_article, t)}</span>
                               )}
                               {article.excerpt_article && (
                                 <p className="search-result-excerpt">
-                                  {article.excerpt_article.substring(0, 100)}
-                                  {article.excerpt_article.length > 100 ? '...' : ''}
+                                  {articleExcerpt(article, lang).substring(0, 100)}
+                                  {articleExcerpt(article, lang).length > 100 ? '...' : ''}
                                 </p>
                               )}
                               {(article.authors?.length > 0 || article.author_name) && (
                                 <span className="search-result-author">
-                                  Por {article.authors?.length > 0
+                                  {t('article.detail.by')} {article.authors?.length > 0
                                     ? article.authors.map(a => a.name_user).join(', ')
                                     : article.author_name}
                                 </span>
@@ -694,7 +703,7 @@ function Header({ ready = true }) {
                           className="projects-dropdown-item"
                           onClick={() => handleProjectSelect(project)}
                         >
-                          <span className="projects-dropdown-title">{project.title_project}</span>
+                          <span className="projects-dropdown-title">{projectTitle(project, lang)}</span>
                           {project.cover_image_project && (
                             <img className="projects-dropdown-thumb" src={resolveMediaUrl(project.cover_image_project)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                           )}
@@ -818,9 +827,9 @@ function Header({ ready = true }) {
                                   onClick={() => handleProjectResultClick(project)}
                                 >
                                   <div className="mobile-search-result-text">
-                                    <h4 className="mobile-search-result-title">{project.title_project}</h4>
+                                    <h4 className="mobile-search-result-title">{projectTitle(project, lang)}</h4>
                                     {project.format_project && (
-                                      <span className="mobile-search-result-category">{project.format_project}</span>
+                                      <span className="mobile-search-result-category">{projectFormatLabel(project.format_project, t)}</span>
                                     )}
                                   </div>
                                   {project.cover_image_project && (
@@ -846,13 +855,13 @@ function Header({ ready = true }) {
                                   onClick={() => handleArticleResultClick(article)}
                                 >
                                   <div className="mobile-search-result-text">
-                                    <h4 className="mobile-search-result-title">{article.title_article}</h4>
+                                    <h4 className="mobile-search-result-title">{articleTitle(article, lang)}</h4>
                                     {article.category_article && article.category_article.toLowerCase() !== 'general' && (
-                                      <span className="mobile-search-result-category">{article.category_article}</span>
+                                      <span className="mobile-search-result-category">{categoryLabel(article.category_article, t)}</span>
                                     )}
                                     {(article.authors?.length > 0 || article.author_name) && (
                                       <span className="mobile-search-result-author">
-                                        Por {article.authors?.length > 0
+                                        {t('article.detail.by')} {article.authors?.length > 0
                                           ? article.authors.map(a => a.name_user).join(', ')
                                           : article.author_name}
                                       </span>
@@ -891,7 +900,7 @@ function Header({ ready = true }) {
                               className="mobile-project-item"
                               onClick={() => handleProjectSelect(project)}
                             >
-                              <span className="projects-dropdown-title">{project.title_project}</span>
+                              <span className="projects-dropdown-title">{projectTitle(project, lang)}</span>
                               {project.cover_image_project && (
                                 <img className="projects-dropdown-thumb" src={resolveMediaUrl(project.cover_image_project)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                               )}

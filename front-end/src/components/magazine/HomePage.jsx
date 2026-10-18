@@ -10,7 +10,8 @@ import SectionPreviews from './SectionPreviews';
 import ScrollHint from '../common/ScrollHint';
 import RollText from '../common/RollText';
 import SubscriberMark from '../common/SubscriberMark';
-import { categoryLabelKey } from '../../utils/articleFilters';
+import { categoryLabel } from '../../utils/articleFilters';
+import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
 import './HomePage.css';
 
 function AuthorAvatar({ author, getUrl }) {
@@ -38,7 +39,7 @@ let heroEntrancePlayed = false;
 let scrollOverlayShown = false;
 
 function HomePage({ ready = true }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { featuredArticles, setSelectedArticle, fetchArticleById, projects, fetchProjects } = useMagazine();
   const { navigateToArticle, openAuthorCard, showSuccess } = useUI();
 
@@ -333,12 +334,12 @@ function HomePage({ ready = true }) {
   const currentArticle = featuredArticles?.[currentSlide];
   // The story's category, translated when it's one of the known ones
   // ("general" isn't shown).
-  const heroCategory = (() => {
-    const value = currentArticle?.category_article;
-    if (!value || value.toLowerCase() === 'general') return null;
-    const key = categoryLabelKey(value) || categoryLabelKey(value.toLowerCase());
-    return key ? t(key) : value;
-  })();
+  const heroCategory = currentArticle?.category_article && currentArticle.category_article.toLowerCase() !== 'general'
+    ? categoryLabel(currentArticle.category_article, t)
+    : null;
+  // Title, excerpt and project in the language chosen in the header (or the
+  // original when there's no version in it — utils/contentLang.js).
+  const lang = i18n.language;
 
   return (
     <div className="home-page">
@@ -378,9 +379,11 @@ function HomePage({ ready = true }) {
               <div className={`hero-content hero-anim ${heroIn ? 'hero-in' : ''}`}>
                 <div className={`hero-headline ${titleLeaving ? 'is-leaving' : ''}`}>
                   {currentArticle.project_title && (
-                    <span className="hero-project-label">Proyecto: {currentArticle.project_title}</span>
+                    <span className="hero-project-label">
+                      {t('article.projectLabel', { title: articleProjectTitle(currentArticle, lang), defaultValue: 'Proyecto: {{title}}' })}
+                    </span>
                   )}
-                  <h1 className="hero-title">{currentArticle.title_article}</h1>
+                  <h1 className="hero-title">{articleTitle(currentArticle, lang)}</h1>
                 </div>
                 {currentArticle.date_published && (
                   <span className="hero-date">
@@ -404,7 +407,7 @@ function HomePage({ ready = true }) {
                 )}
                 <div className="hero-desc-row">
                   {currentArticle.excerpt_article && (
-                    <p className="hero-excerpt">{currentArticle.excerpt_article}</p>
+                    <p className="hero-excerpt">{articleExcerpt(currentArticle, lang)}</p>
                   )}
                   <div className="hero-media">
                     {/* The story's image, with its category on top (like the
@@ -414,7 +417,7 @@ function HomePage({ ready = true }) {
                         className="hero-desc-image"
                         style={{ backgroundImage: `url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})` }}
                         role="img"
-                        aria-label={currentArticle.title_article}
+                        aria-label={articleTitle(currentArticle, lang)}
                       />
                       {heroCategory && <span className="hero-category">{heroCategory}</span>}
                     </div>

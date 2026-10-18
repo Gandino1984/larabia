@@ -36,6 +36,20 @@ const CATEGORY_KEYS = Object.fromEntries([['general', 'editor.category.general']
 /** i18n key for a category value (undefined for unknown values). */
 export const categoryLabelKey = (value) => CATEGORY_KEYS[value];
 
+const plainCategory = (s) => String(s ?? '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const KEYS_BY_PLAIN = Object.fromEntries(Object.entries(CATEGORY_KEYS).map(([v, k]) => [plainCategory(v), k]));
+// Older spellings of current categories.
+const CATEGORY_ALIASES = { 'micro abierto': 'editor.category.microAbierto', noficcion: 'editor.category.noficcion' };
+
+/** A category's label in the reader's language (unknown values as they are). */
+export function categoryLabel(value, t) {
+  if (!value) return '';
+  const p = plainCategory(value);
+  const key = CATEGORY_KEYS[value] || KEYS_BY_PLAIN[p] || CATEGORY_ALIASES[p]
+    || (p.includes('terrenito') ? 'editor.category.microAbierto' : null);
+  return key ? t(key) : value;
+}
+
 /** Value used for "articles without a project" in the project filter. */
 export const NO_PROJECT = 'none';
 

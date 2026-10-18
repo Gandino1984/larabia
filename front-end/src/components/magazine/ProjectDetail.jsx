@@ -13,11 +13,15 @@ import OptionsReveal from './OptionsReveal';
 import AuthorChip from '../common/AuthorChip';
 import ImageLightbox from '../common/ImageLightbox';
 import { useDragScroll } from '../../hooks/useDragScroll';
+import { projectTitle, projectDescription } from '../../utils/contentLang';
+import { projectTypeLabel, projectFormatLabel } from '../../utils/projectKinds';
 import './ProjectDetail.css';
 import './ArticlesCarousel.css';
 
 function ProjectDetail() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Title and description in the header's language (or the original).
+  const lang = i18n.language;
   const { navigateBackFromProject } = useUI();
   const { selectedProject } = useMagazine();
   const { currentUser, canCreateContent } = useAuth();
@@ -166,19 +170,19 @@ function ProjectDetail() {
               {(selectedProject.type_project || selectedProject.format_project) && (
                 <div className="project-detail-tags">
                   {selectedProject.type_project && (
-                    <span className="project-detail-type">{selectedProject.type_project}</span>
+                    <span className="project-detail-type">{projectTypeLabel(selectedProject.type_project, t)}</span>
                   )}
                   {selectedProject.format_project && (
-                    <span className="project-detail-format">{selectedProject.format_project}</span>
+                    <span className="project-detail-format">{projectFormatLabel(selectedProject.format_project, t)}</span>
                   )}
                 </div>
               )}
             </div>
           )}
-          <h1 className="project-detail-title">{selectedProject.title_project}</h1>
+          <h1 className="project-detail-title">{projectTitle(selectedProject, lang)}</h1>
 
-          {selectedProject.description_project && (
-            <p className="project-detail-description">{selectedProject.description_project}</p>
+          {projectDescription(selectedProject, lang) && (
+            <p className="project-detail-description">{projectDescription(selectedProject, lang)}</p>
           )}
 
           <div className="project-detail-meta-row">
@@ -201,8 +205,8 @@ function ProjectDetail() {
       {showCoverViewer && coverUrl && (
         <ImageLightbox
           src={coverUrl}
-          alt={selectedProject.title_project}
-          caption={selectedProject.title_project}
+          alt={projectTitle(selectedProject, lang)}
+          caption={projectTitle(selectedProject, lang)}
           onClose={closeCoverViewer}
         />
       )}

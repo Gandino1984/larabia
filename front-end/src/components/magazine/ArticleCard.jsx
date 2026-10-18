@@ -7,6 +7,9 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import ArticleEngagementBar from './ArticleEngagementBar';
 import SubscriberMark from '../common/SubscriberMark';
+import { categoryLabel } from '../../utils/articleFilters';
+import { projectTypeLabel } from '../../utils/projectKinds';
+import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
 import './ArticleCard.css';
 
 // Resolve a user's avatar: Google users store a full URL, local uploads a filename.
@@ -26,35 +29,12 @@ function CardAuthorAvatar({ author }) {
   return <SubscriberMark userId={author?.id_user}>{avatar}</SubscriberMark>;
 }
 
-const CATEGORY_DISPLAY = {
-  'terrenito en pluton': 'Terrenito en Plut\u00F3n',
-  'micro abierto': 'Terrenito en Plut\u00F3n',
-};
 const normalize = (s) => s?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') ?? '';
-const getCategoryDisplay = (cat) => {
-  if (!cat) return cat;
-  const n = normalize(cat);
-  if (CATEGORY_DISPLAY[n]) return CATEGORY_DISPLAY[n];
-  if (n.includes('terrenito')) return 'Terrenito en Plut\u00F3n';
-  return cat;
-};
-
-// Pretty labels for a project's type, shown as the card badge inside a project.
-const TYPE_DISPLAY = {
-  'no-ficcion': 'No-ficción',
-  'noficcion': 'No-ficción',
-  'ficcion': 'Ficción',
-  'periodistico': 'Periodístico',
-};
-const getTypeDisplay = (type) => {
-  if (!type) return null;
-  const n = normalize(type);
-  if (TYPE_DISPLAY[n]) return TYPE_DISPLAY[n];
-  return type.charAt(0).toUpperCase() + type.slice(1);
-};
 
 function ArticleCard({ article, typeBadge, featuredBadge }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Title, excerpt and project in the header's language (or the original).
+  const lang = i18n.language;
   const { setSelectedArticle, deleteArticle } = useMagazine();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { navigateToArticle, showSuccess, showError, openAuthorCard } = useUI();
@@ -112,9 +92,9 @@ function ArticleCard({ article, typeBadge, featuredBadge }) {
           // Prefer an explicit type badge (e.g. the project's type); otherwise
           // fall back to the article's category (hidden when it's "general").
           const typeLabel = typeBadge
-            ? getTypeDisplay(typeBadge)
+            ? projectTypeLabel(typeBadge, t)
             : (article.category_article && normalize(article.category_article) !== 'general'
-                ? getCategoryDisplay(article.category_article)
+                ? categoryLabel(article.category_article, t)
                 : null);
           const isFeatured = featuredBadge || article.featured_article;
           if (!typeLabel && !isFeatured) return null;
@@ -139,12 +119,14 @@ function ArticleCard({ article, typeBadge, featuredBadge }) {
           </span>
         )}
         {article.project_title && (
-          <span className="article-project-label">Proyecto: {article.project_title}</span>
+          <span className="article-project-label">
+            {t('article.projectLabel', { title: articleProjectTitle(article, lang), defaultValue: 'Proyecto: {{title}}' })}
+          </span>
         )}
-        <h3 className="article-card-title">{article.title_article}</h3>
+        <h3 className="article-card-title">{articleTitle(article, lang)}</h3>
 
-        {article.excerpt_article && (
-          <p className="article-card-excerpt">{article.excerpt_article}</p>
+        {articleExcerpt(article, lang) && (
+          <p className="article-card-excerpt">{articleExcerpt(article, lang)}</p>
         )}
 
         <div className="article-card-meta">

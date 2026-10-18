@@ -12,6 +12,9 @@ import {
 import TextBlock from './blocks/TextBlock';
 import ImageBlock from './blocks/ImageBlock';
 import IframeBlock from './blocks/IframeBlock';
+import LangSwitch from '../common/LangSwitch';
+import { PROJECT_TYPES, PROJECT_FORMATS } from '../../utils/projectKinds';
+import { CONTENT_LANGS, LANG_NAMES, parseTranslations, hasText, hasLang, withTranslation } from '../../utils/contentLang';
 import HScrollEditor from './HScrollEditor';
 import MicroPerfilEditor from './MicroPerfilEditor';
 import { isPieceComplete, pieceForSave } from '../../paisaje/integration/soundscape';
@@ -50,20 +53,10 @@ const isBlockComplete = (block) => {
   return false;
 };
 
-// Project classification options (new-project step + edit-project modal).
-const PROJECT_TYPES = [
-  ['ficción', 'Ficción'], ['no-ficción', 'No-ficción'], ['ensayo', 'Ensayo'], ['académico', 'Académico'],
-  ['científico', 'Científico'], ['periodístico', 'Periodístico'], ['poético', 'Poético'], ['narrativo', 'Narrativo'],
-  ['experimental', 'Experimental'], ['documental', 'Documental'], ['autobiográfico', 'Autobiográfico']
-];
-const PROJECT_FORMATS = [
-  ['cómic', 'Cómic'], ['crónica', 'Crónica'], ['ensayo', 'Ensayo'], ['cuento', 'Cuento'], ['multimedia', 'Multimedia'],
-  ['podcast', 'Podcast'], ['video', 'Video'], ['fotografía', 'Fotografía'], ['ilustración', 'Ilustración'],
-  ['performance', 'Performance'], ['instalación', 'Instalación'], ['novela', 'Novela'], ['artículo', 'Artículo'],
-  ['reportaje', 'Reportaje'], ['entrevista', 'Entrevista'], ['poesía', 'Poesía']
-];
+// Project classification options (new-project step + edit-project modal):
+// utils/projectKinds.js.
 
-const EMPTY_WIZARD_PROJECT = { title_project: '', description_project: '', type_project: '', format_project: '', sections: [] };
+const EMPTY_WIZARD_PROJECT = { title_project: '', description_project: '', type_project: '', format_project: '', sections: [], translations_project: {} };
 const TOTAL_STEPS = 6;
 
 function ArticleEditorBlocks() {
@@ -163,7 +156,9 @@ function ArticleEditorBlocks() {
     project_id: '',
     status_article: 'draft',
     featured_article: false,
-    sections: []
+    sections: [],
+    // Title / excerpt in other languages (utils/contentLang.js).
+    translations_article: {}
   });
   const [selectedAuthorToAdd, setSelectedAuthorToAdd] = useState('');
   const [coverImageFile, setCoverImageFile] = useState(null);
@@ -193,9 +188,14 @@ function ArticleEditorBlocks() {
     type_project: '',
     format_project: '',
     status_project: 'published',
-    sections: []
+    sections: [],
+    translations_project: {}
   });
   const [newProjectAuthors, setNewProjectAuthors] = useState([]);
+  // The language being written: the original (es) or a version in another
+  // language — in the creator's steps, and in the project modal.
+  const [editLang, setEditLang] = useState('es');
+  const [projectEditLang, setProjectEditLang] = useState('es');
   const [selectedProjectAuthorToAdd, setSelectedProjectAuthorToAdd] = useState('');
 
   // Fetch available projects on mount
@@ -260,8 +260,10 @@ function ArticleEditorBlocks() {
         project_id: selectedArticle.project_id || '',
         status_article: selectedArticle.status_article,
         featured_article: selectedArticle.featured_article,
-        sections: startingSections(selectedArticle)
+        sections: startingSections(selectedArticle),
+        translations_article: parseTranslations(selectedArticle.translations_article)
       });
+      setEditLang('es');
 
       // Detect content type from blocks + category (micro-perfil is category-driven).
       setArticleContentType(detectContentType(selectedArticle.blocks, selectedArticle.category_article));
@@ -390,6 +392,7 @@ function ArticleEditorBlocks() {
       type_project: newProjectData.type_project,
       format_project: newProjectData.format_project,
       sections: newProjectData.sections,
+      translations_project: newProjectData.translations_project || null,
       author_id: primaryAuthor.id_user,
       author_name: primaryAuthor.name_user,
       authors: newProjectAuthors.map((a, index) => ({ user_id: a.id_user, author_order: index }))
@@ -446,8 +449,10 @@ function ArticleEditorBlocks() {
       type_project: '',
       format_project: '',
       status_project: 'draft',
-      sections: []
+      sections: [],
+      translations_project: {}
     });
+    setProjectEditLang('es');
     setProjectCoverFile(null);
     setProjectCoverPreview(null);
   };
@@ -461,8 +466,10 @@ function ArticleEditorBlocks() {
       type_project: project.type_project || '',
       format_project: project.format_project || '',
       status_project: project.status_project || 'draft',
-      sections: startingSections(project)
+      sections: startingSections(project),
+      translations_project: parseTranslations(project.translations_project)
     });
+    setProjectEditLang('es');
     const authors = (project.authors && project.authors.length > 0)
       ? project.authors.map(a => ({ id_user: a.id_user, name_user: a.name_user, image_user: a.image_user }))
       : (currentUser ? [{ id_user: currentUser.id_user, name_user: currentUser.name_user, image_user: currentUser.image_user }] : []);
@@ -793,6 +800,7 @@ function ArticleEditorBlocks() {
   // Mark the field at fault in red (with its message under it), show the error
   // card, go to its step and put the cursor on it.
   const flagProblem = (field, message, n) => {
+    setEditLang('es'); // required fields are the original's
     setFieldErrors({ [field]: message });
     showError(message);
     setStep(n);
@@ -898,6 +906,7 @@ function ArticleEditorBlocks() {
       type_project: wizardProject.type_project,
       format_project: wizardProject.format_project,
       sections: wizardProject.sections,
+      translations_project: wizardProject.translations_project || null,
       status_project: status,
       author_id: authorIds[0],
       author_name: primary?.name_user || currentUser.name_user,
@@ -1153,6 +1162,8 @@ function ArticleEditorBlocks() {
         // Audio configuration fields
         audio_stop_panel: block.audio_stop_panel || null,
         audio_mode: block.audio_mode || null,
+        // Text / caption / alt in other languages.
+        translations_block: block.translations_block || null,
         // Paisaje sonoro (article format / comic panel): the server checks
         // and normalises it (and sets image_url to its reference image).
         ...(block.soundscape_data && {
@@ -1198,8 +1209,10 @@ function ArticleEditorBlocks() {
       project_id: article.project_id || '',
       status_article: article.status_article,
       featured_article: article.featured_article,
-      sections: startingSections(article)
+      sections: startingSections(article),
+      translations_article: parseTranslations(article.translations_article)
     });
+    setEditLang('es');
     // Load the existing cover into the preview so it shows AND isn't wiped on
     // save (save clears the cover when there's no preview and no new file).
     setCoverImageFile(null);
@@ -1246,8 +1259,10 @@ function ArticleEditorBlocks() {
       project_id: '',
       status_article: 'draft',
       featured_article: false,
-      sections: []
+      sections: [],
+      translations_article: {}
     });
+    setEditLang('es');
     setFieldErrors({});
     setBlocks([]);
     setCoverImageFile(null);
@@ -1369,6 +1384,43 @@ function ArticleEditorBlocks() {
   const saveIntent = status === 'draft' ? 'draft' : 'update';
 
   // ---- Step 1: project ---------------------------------------------------
+  // ---- Content in other languages (utils/contentLang.js) -----------------
+  // The original is written in Spanish; with the switch on EN / EU the same
+  // fields hold that language's version (empty = readers get the original).
+  const translating = editLang !== 'es';
+  const trOf = (translations, lang, field) => parseTranslations(translations)[lang]?.[field] || '';
+  const setArticleTr = (field, text) => setFormData(prev => ({
+    ...prev, translations_article: withTranslation(prev.translations_article, editLang, field, text)
+  }));
+  const setWizardProjectTr = (field, text) => setWizardProject(prev => ({
+    ...prev, translations_project: withTranslation(prev.translations_project, editLang, field, text)
+  }));
+  const setModalProjectTr = (field, text) => setNewProjectData(prev => ({
+    ...prev, translations_project: withTranslation(prev.translations_project, projectEditLang, field, text)
+  }));
+  const articleLangsFilled = CONTENT_LANGS.filter((l) => (l === 'es'
+    ? hasText(formData.title_article)
+    : hasLang(formData.translations_article, l) || blocks.some((b) => hasLang(b.translations_block, l))));
+  const projectLangsFilled = (project) => CONTENT_LANGS.filter((l) => (l === 'es'
+    ? hasText(project.title_project)
+    : hasLang(project.translations_project, l)));
+  const langBar = (filled, value = editLang, onChange = setEditLang) => (
+    <div className="pub-lang-bar">
+      <span className="pub-lang-bar__label">{t('contentLang.writing', 'Idioma en el que escribes')}</span>
+      <LangSwitch value={value} onChange={onChange} filled={filled} label={t('contentLang.writing', 'Idioma en el que escribes')} />
+      <p className="pub-lang-bar__hint">
+        {value === 'es'
+          ? t('contentLang.originalHint', 'El original, en castellano. Si quieres, añade la versión en inglés o en euskera: lo que dejes vacío se leerá en castellano.')
+          : t('contentLang.translatingHint', { lang: LANG_NAMES[value], defaultValue: 'Escribes la versión en {{lang}}. Lo que dejes vacío se leerá en el original.' })}
+      </p>
+    </div>
+  );
+  // The original, under a field being translated.
+  const originalNote = (text) => (hasText(text)
+    ? <span className="pub-original">{t('contentLang.original', 'Original')}: {String(text).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}</span>
+    : null);
+  const langSuffix = (lang) => (lang === 'es' ? '' : ` (${LANG_NAMES[lang]})`);
+
   const stepProject = (
     <>
       <p className="pub-step-hint">
@@ -1455,28 +1507,38 @@ function ArticleEditorBlocks() {
 
       {projectMode === 'new' && (
         <div className="pub-new-project">
+          {langBar(projectLangsFilled(wizardProject))}
           <div className="form-group">
-            <label htmlFor="pub-project-title">{t('editor.project.titleLabel')}</label>
+            <label htmlFor="pub-project-title">{t('editor.project.titleLabel')}{langSuffix(editLang)}</label>
             <input
               type="text"
               id="pub-project-title"
-              value={wizardProject.title_project}
-              onChange={(e) => { setWizardProject(prev => ({ ...prev, title_project: e.target.value })); clearFieldError('project_title'); }}
-              placeholder={t('editor.project.titlePlaceholder')}
+              lang={editLang}
+              value={translating ? trOf(wizardProject.translations_project, editLang, 'title') : wizardProject.title_project}
+              onChange={(e) => {
+                if (translating) { setWizardProjectTr('title', e.target.value); return; }
+                setWizardProject(prev => ({ ...prev, title_project: e.target.value })); clearFieldError('project_title');
+              }}
+              placeholder={translating ? wizardProject.title_project : t('editor.project.titlePlaceholder')}
               className={fieldErrors.project_title ? 'input-error' : ''}
               aria-invalid={!!fieldErrors.project_title}
             />
+            {translating && originalNote(wizardProject.title_project)}
             {fieldErrors.project_title && <span className="field-error-msg" role="alert">{fieldErrors.project_title}</span>}
           </div>
           <div className="form-group">
-            <label htmlFor="pub-project-description">{t('editor.project.descriptionLabel')}</label>
+            <label htmlFor="pub-project-description">{t('editor.project.descriptionLabel')}{langSuffix(editLang)}</label>
             <textarea
               id="pub-project-description"
               rows="3"
-              value={wizardProject.description_project}
-              onChange={(e) => setWizardProject(prev => ({ ...prev, description_project: e.target.value }))}
-              placeholder={t('editor.project.descriptionPlaceholder')}
+              lang={editLang}
+              value={translating ? trOf(wizardProject.translations_project, editLang, 'description') : wizardProject.description_project}
+              onChange={(e) => (translating
+                ? setWizardProjectTr('description', e.target.value)
+                : setWizardProject(prev => ({ ...prev, description_project: e.target.value })))}
+              placeholder={translating ? wizardProject.description_project : t('editor.project.descriptionPlaceholder')}
             />
+            {translating && originalNote(wizardProject.description_project)}
           </div>
           <div className="form-group cover-image-group">
             <label>{t('editor.project.coverLabel')}</label>
@@ -1535,7 +1597,7 @@ function ArticleEditorBlocks() {
                 aria-invalid={!!fieldErrors.project_type}
               >
                 <option value="">{t('editor.project.selectType')}</option>
-                {PROJECT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                {PROJECT_TYPES.map(([value, key]) => <option key={value} value={value}>{t(key)}</option>)}
               </select>
               {fieldErrors.project_type && <span className="field-error-msg" role="alert">{fieldErrors.project_type}</span>}
             </div>
@@ -1553,7 +1615,7 @@ function ArticleEditorBlocks() {
                 className={!wizardProject.format_project ? 'select-placeholder' : ''}
               >
                 <option value="">{t('editor.project.selectFormat')}</option>
-                {PROJECT_FORMATS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                {PROJECT_FORMATS.map(([value, key]) => <option key={value} value={value}>{t(key)}</option>)}
               </select>
             </div>
           </div>
@@ -1724,33 +1786,41 @@ function ArticleEditorBlocks() {
         </div>
       </div>
 
+      {langBar(articleLangsFilled)}
+
       <div className="form-group full-width">
-        <label htmlFor="title">{t('editor.wizard.titleLabel', 'Título *')}</label>
+        <label htmlFor="title">
+          {translating ? `${t('editor.wizard.titleLabel', 'Título *').replace(' *', '')}${langSuffix(editLang)}` : t('editor.wizard.titleLabel', 'Título *')}
+        </label>
         <input
           type="text"
           id="title"
           name="title_article"
-          value={formData.title_article}
-          onChange={handleInputChange}
-          placeholder={t('editor.title.placeholder')}
+          lang={editLang}
+          value={translating ? trOf(formData.translations_article, editLang, 'title') : formData.title_article}
+          onChange={translating ? (e) => setArticleTr('title', e.target.value) : handleInputChange}
+          placeholder={translating ? formData.title_article : t('editor.title.placeholder')}
           className={fieldErrors.title_article ? 'input-error' : ''}
           aria-invalid={!!fieldErrors.title_article}
         />
+        {translating && originalNote(formData.title_article)}
         {fieldErrors.title_article && <span className="field-error-msg" role="alert">{fieldErrors.title_article}</span>}
       </div>
 
       <div className="form-group full-width">
-        <label htmlFor="excerpt">{t('editor.wizard.excerptLabel', 'Extracto')}</label>
+        <label htmlFor="excerpt">{t('editor.wizard.excerptLabel', 'Extracto')}{langSuffix(editLang)}</label>
         <textarea
           id="excerpt"
           name="excerpt_article"
-          value={formData.excerpt_article}
-          onChange={handleInputChange}
+          lang={editLang}
+          value={translating ? trOf(formData.translations_article, editLang, 'excerpt') : formData.excerpt_article}
+          onChange={translating ? (e) => setArticleTr('excerpt', e.target.value) : handleInputChange}
           rows="3"
-          placeholder={t('editor.excerpt.placeholder')}
+          placeholder={translating ? formData.excerpt_article : t('editor.excerpt.placeholder')}
           className={fieldErrors.excerpt_article ? 'input-error' : ''}
           aria-invalid={!!fieldErrors.excerpt_article}
         />
+        {translating && originalNote(formData.excerpt_article)}
         {fieldErrors.excerpt_article && <span className="field-error-msg" role="alert">{fieldErrors.excerpt_article}</span>}
       </div>
     </>
@@ -1830,11 +1900,12 @@ function ArticleEditorBlocks() {
         ) : (
           // Regular Block Editor for non-comic articles
           <>
+            {langBar(articleLangsFilled)}
             <div className="blocks-container">
               {blocks.map((block) => (
                 <div key={block.id_block || block.tempId} className="block-wrapper">
                   {block.block_type === 'text' && (
-                    <TextBlock block={block} onUpdate={handleBlockUpdate} onDelete={handleBlockDelete} isEditing={true} />
+                    <TextBlock block={block} onUpdate={handleBlockUpdate} onDelete={handleBlockDelete} isEditing={true} lang={editLang} />
                   )}
                   {block.block_type === 'image' && (
                     <ImageBlock
@@ -1843,6 +1914,7 @@ function ArticleEditorBlocks() {
                       onDelete={handleBlockDelete}
                       onUploadImage={uploadBlockImage}
                       isEditing={true}
+                      lang={editLang}
                     />
                   )}
                   {block.block_type === 'iframe' && (
@@ -1911,6 +1983,11 @@ function ArticleEditorBlocks() {
         </dd>
         <dt>{t('editor.authors.label')}</dt>
         <dd>{formData.authors.map(id => getAuthorDetails(id)?.name_user).filter(Boolean).join(', ') || '—'}</dd>
+        <dt>{t('contentLang.reviewLabel', 'Idiomas')}</dt>
+        <dd>
+          {articleLangsFilled.map((l) => LANG_NAMES[l]).join(', ') || LANG_NAMES.es}
+          <button type="button" className="pub-link" onClick={() => setStep(3)}>{t('editor.wizard.review.change', 'Cambiar')}</button>
+        </dd>
         <dt>{t('editor.wizard.titleLabel', 'Título *').replace(' *', '')}</dt>
         <dd>
           {formData.title_article || '—'}
@@ -2302,29 +2379,34 @@ function ArticleEditorBlocks() {
                   </span>
                 </div>
               )}
+              {langBar(projectLangsFilled(newProjectData), projectEditLang, setProjectEditLang)}
               <div className="form-group">
-                <label htmlFor="project_title">{t('editor.project.titleLabel')}</label>
+                <label htmlFor="project_title">{t('editor.project.titleLabel')}{langSuffix(projectEditLang)}</label>
                 <input
                   type="text"
                   id="project_title"
                   name="title_project"
-                  value={newProjectData.title_project}
-                  onChange={handleProjectInputChange}
-                  placeholder={t('editor.project.titlePlaceholder')}
-                  required
+                  lang={projectEditLang}
+                  value={projectEditLang !== 'es' ? trOf(newProjectData.translations_project, projectEditLang, 'title') : newProjectData.title_project}
+                  onChange={projectEditLang !== 'es' ? (e) => setModalProjectTr('title', e.target.value) : handleProjectInputChange}
+                  placeholder={projectEditLang !== 'es' ? newProjectData.title_project : t('editor.project.titlePlaceholder')}
+                  required={projectEditLang === 'es'}
                 />
+                {projectEditLang !== 'es' && originalNote(newProjectData.title_project)}
               </div>
 
               <div className="form-group">
-                <label htmlFor="project_description">{t('editor.project.descriptionLabel')}</label>
+                <label htmlFor="project_description">{t('editor.project.descriptionLabel')}{langSuffix(projectEditLang)}</label>
                 <textarea
                   id="project_description"
                   name="description_project"
-                  value={newProjectData.description_project}
-                  onChange={handleProjectInputChange}
+                  lang={projectEditLang}
+                  value={projectEditLang !== 'es' ? trOf(newProjectData.translations_project, projectEditLang, 'description') : newProjectData.description_project}
+                  onChange={projectEditLang !== 'es' ? (e) => setModalProjectTr('description', e.target.value) : handleProjectInputChange}
                   rows="3"
-                  placeholder={t('editor.project.descriptionPlaceholder')}
+                  placeholder={projectEditLang !== 'es' ? newProjectData.description_project : t('editor.project.descriptionPlaceholder')}
                 />
+                {projectEditLang !== 'es' && originalNote(newProjectData.description_project)}
               </div>
 
               <div className="form-group cover-image-group">
@@ -2370,7 +2452,7 @@ function ArticleEditorBlocks() {
                     className={!newProjectData.type_project ? 'select-placeholder' : ''}
                   >
                     <option value="">{t('editor.project.selectType')}</option>
-                    {PROJECT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                    {PROJECT_TYPES.map(([value, key]) => <option key={value} value={value}>{t(key)}</option>)}
                   </select>
                 </div>
 
@@ -2384,7 +2466,7 @@ function ArticleEditorBlocks() {
                     className={!newProjectData.format_project ? 'select-placeholder' : ''}
                   >
                     <option value="">{t('editor.project.selectFormat')}</option>
-                    {PROJECT_FORMATS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                    {PROJECT_FORMATS.map(([value, key]) => <option key={value} value={value}>{t(key)}</option>)}
                   </select>
                 </div>
               </div>

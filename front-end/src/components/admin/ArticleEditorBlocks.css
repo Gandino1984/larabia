@@ -2304,3 +2304,40 @@
   font-size: 0.95rem;
   font-family: 'Source Code Pro', monospace;
 }
+
+/* ---- Content in other languages (utils/contentLang.js) ---- */
+.pub-lang-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.pub-lang-bar__label {
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.pub-lang-bar__hint {
+  flex-basis: 100%;
+  margin: 0;
+  color: #555555;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* The original, under a field being translated. */
+.pub-original {
+  display: block;
+  margin-top: 0.35rem;
+  color: #666666;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}

@@ -3,6 +3,7 @@ import article_block_model from "../../models/article_block_model.js";
 import magazine_article_model from "../../models/magazine_article_model.js";
 import { Op } from "sequelize";
 import { sanitizeSoundscape } from "../paisaje/paisaje_store.js";
+import { normalizeTranslations } from "../../utils/translations.js";
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -119,6 +120,10 @@ async function create(blockData) {
 
         const soundscapeError = applySoundscape(blockData);
         if (soundscapeError) return { error: soundscapeError };
+        // Text / caption / alt in other languages.
+        if (blockData.translations_block !== undefined) {
+            blockData.translations_block = normalizeTranslations('block', blockData.translations_block);
+        }
 
         // Validate block data
         const validation = validateBlockData(blockData);
@@ -156,6 +161,9 @@ async function update(id_block, blockData) {
 
         const soundscapeError = applySoundscape(blockData);
         if (soundscapeError) return { error: soundscapeError };
+        if (blockData.translations_block !== undefined) {
+            blockData.translations_block = normalizeTranslations('block', blockData.translations_block);
+        }
 
         // Validate if provided
         if (blockData.block_type || blockData.content || blockData.image_url || blockData.iframe_url || blockData.soundscape_data) {

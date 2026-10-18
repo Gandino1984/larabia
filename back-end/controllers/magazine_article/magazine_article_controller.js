@@ -235,10 +235,10 @@ async function getAll(filters = {}, roleCtx = EMPTY_ROLE_CTX) {
         if (projectIds.length > 0) {
             const projects = await magazine_project_model.findAll({
                 where: { id_project: projectIds },
-                attributes: ['id_project', 'title_project']
+                attributes: ['id_project', 'title_project', 'translations_project']
             });
             for (const p of projects) {
-                projectMap[p.id_project] = p.title_project;
+                projectMap[p.id_project] = p;
             }
         }
 
@@ -252,7 +252,8 @@ async function getAll(filters = {}, roleCtx = EMPTY_ROLE_CTX) {
                 : null;
             return {
                 ...article.toJSON(),
-                project_title: article.project_id ? (projectMap[article.project_id] || null) : null,
+                project_title: projectMap[article.project_id]?.title_project || null,
+                project_translations: projectMap[article.project_id]?.translations_project || null,
                 authors,
                 author: authors.length > 0 ? authors[0] : (legacyUser ? {
                     id_user: legacyUser.id_user,
@@ -305,16 +306,19 @@ async function getById(id_article, roleCtx = EMPTY_ROLE_CTX) {
         }
 
         let projectTitle = null;
+        let projectTranslations = null;
         if (article.project_id) {
             const project = await magazine_project_model.findByPk(article.project_id, {
-                attributes: ['id_project', 'title_project']
+                attributes: ['id_project', 'title_project', 'translations_project']
             });
             projectTitle = project ? project.title_project : null;
+            projectTranslations = project ? project.translations_project : null;
         }
 
         const articleWithDetails = {
             ...article.toJSON(),
             project_title: projectTitle,
+            project_translations: projectTranslations,
             authors: authors.length > 0 ? authors : [],
             author: authors.length > 0 ? authors[0] : (author ? {
                 id_user: author.id_user,
@@ -356,10 +360,10 @@ async function getByCategory(category, roleCtx = EMPTY_ROLE_CTX) {
         if (categoryProjectIds.length > 0) {
             const projects = await magazine_project_model.findAll({
                 where: { id_project: categoryProjectIds },
-                attributes: ['id_project', 'title_project']
+                attributes: ['id_project', 'title_project', 'translations_project']
             });
             for (const p of projects) {
-                categoryProjectMap[p.id_project] = p.title_project;
+                categoryProjectMap[p.id_project] = p;
             }
         }
 
@@ -373,7 +377,8 @@ async function getByCategory(category, roleCtx = EMPTY_ROLE_CTX) {
                 : null;
             return {
                 ...article.toJSON(),
-                project_title: article.project_id ? (categoryProjectMap[article.project_id] || null) : null,
+                project_title: categoryProjectMap[article.project_id]?.title_project || null,
+                project_translations: categoryProjectMap[article.project_id]?.translations_project || null,
                 authors,
                 author: authors.length > 0 ? authors[0] : (legacyUser ? {
                     id_user: legacyUser.id_user,
@@ -433,10 +438,10 @@ async function getFeatured(roleCtx = EMPTY_ROLE_CTX) {
         if (featuredProjectIds.length > 0) {
             const projects = await magazine_project_model.findAll({
                 where: { id_project: featuredProjectIds },
-                attributes: ['id_project', 'title_project', 'format_project']
+                attributes: ['id_project', 'title_project', 'format_project', 'translations_project']
             });
             for (const p of projects) {
-                featuredProjectMap[p.id_project] = p.title_project;
+                featuredProjectMap[p.id_project] = p;
                 featuredProjectFormatMap[p.id_project] = p.format_project || null;
             }
         }
@@ -467,7 +472,8 @@ async function getFeatured(roleCtx = EMPTY_ROLE_CTX) {
                 : null;
             return {
                 ...article.toJSON(),
-                project_title: article.project_id ? (featuredProjectMap[article.project_id] || null) : null,
+                project_title: featuredProjectMap[article.project_id]?.title_project || null,
+                project_translations: featuredProjectMap[article.project_id]?.translations_project || null,
                 project_format: article.project_id ? (featuredProjectFormatMap[article.project_id] || null) : null,
                 media: mediaFlags.get(article.id_article) || { has_text: false, has_images: false, has_audio: false, has_video: false },
                 authors,
@@ -632,16 +638,19 @@ async function update(id_article, articleData, roleCtx = EMPTY_ROLE_CTX) {
         const authors = await loadArticleAuthors(updatedArticle);
 
         let updatedProjectTitle = null;
+        let updatedProjectTranslations = null;
         if (updatedArticle.project_id) {
             const project = await magazine_project_model.findByPk(updatedArticle.project_id, {
-                attributes: ['id_project', 'title_project']
+                attributes: ['id_project', 'title_project', 'translations_project']
             });
             updatedProjectTitle = project ? project.title_project : null;
+            updatedProjectTranslations = project ? project.translations_project : null;
         }
 
         const articleWithAuthors = {
             ...updatedArticle.toJSON(),
             project_title: updatedProjectTitle,
+            project_translations: updatedProjectTranslations,
             authors: authors.length > 0 ? authors : [],
             author: authors.length > 0 ? authors[0] : null,
             author_name: authors.length > 0 ? authors[0].name_user : updatedArticle.author_name

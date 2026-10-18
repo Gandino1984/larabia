@@ -12,31 +12,37 @@ import CommentsModal from './CommentsModal';
 import OptionsReveal from './OptionsReveal';
 import AuthorChip from '../common/AuthorChip';
 import LoadFailBoundary from '../common/LoadFailBoundary';
+import LangSwitch from '../common/LangSwitch';
+import { categoryLabel } from '../../utils/articleFilters';
+import {
+  articleLangs, articleTitle, articleExcerpt, articleProjectTitle,
+  blockText, blockCaption, blockAlt, baseLang
+} from '../../utils/contentLang';
 import './ArticleDetail.css';
 // Paisaje sonoro article format (engine by Cristian Vergara): loaded on demand.
 const PaisajePiece = lazy(() => import('../../paisaje/integration/PaisajePiece'));
 
-const CATEGORY_DISPLAY = {
-  'terrenito en pluton': 'Terrenito en Plut\u00F3n',
-  'micro abierto': 'Terrenito en Plut\u00F3n',
-};
 const normalize = (s) => s?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') ?? '';
-const getCategoryDisplay = (cat) => {
-  if (!cat) return cat;
-  const n = normalize(cat);
-  if (CATEGORY_DISPLAY[n]) return CATEGORY_DISPLAY[n];
-  if (n.includes('terrenito')) return 'Terrenito en Plut\u00F3n';
-  return cat;
-};
 
 function ArticleDetail({ previewMode = false }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { selectedArticle, setSelectedArticle, deleteArticle, fetchBlocksByArticleId, trackArticleView } = useMagazine();
   const { navigateBack, showSuccess, showError, navigateToHome, navigateToEditorForEdit, isFullscreen, setIsFullscreen, getCurrentLocale, navigateToAuthorProfile } = useUI();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { isLiked, isFavorited, toggleLike, toggleFavorite } = useEngagement();
   const [showComments, setShowComments] = useState(false);
+
+  // The language the article is read in (utils/contentLang.js): the one chosen
+  // in the header when the article has a version in it, else the original. The
+  // reader's own ES · EN · EU switch changes only the article.
+  const uiLang = baseLang(i18n.language);
+  const readLangs = articleLangs(selectedArticle);
+  const readLangsKey = readLangs.join(',');
+  const [readLang, setReadLang] = useState(uiLang);
+  useEffect(() => {
+    setReadLang(readLangsKey.split(',').includes(uiLang) ? uiLang : 'es');
+  }, [selectedArticle?.id_article, uiLang, readLangsKey]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -267,7 +273,7 @@ function ArticleDetail({ previewMode = false }) {
           <div className="article-detail-cover">
             <img
               src={getCoverImageUrl()}
-              alt={selectedArticle.title_article}
+              alt={articleTitle(selectedArticle, readLang)}
               onError={(e) => {
                 e.target.style.display = 'none';
               }}
@@ -285,17 +291,34 @@ function ArticleDetail({ previewMode = false }) {
 
           {selectedArticle.category_article && normalize(selectedArticle.category_article) !== 'general' && (
             <span className="article-detail-category">
-              {getCategoryDisplay(selectedArticle.category_article)}
+              {categoryLabel(selectedArticle.category_article, t)}
             </span>
           )}
 
-          {selectedArticle.project_title && (
-            <span className="article-project-label">Proyecto: {selectedArticle.project_title}</span>
-          )}
-          <h1 className="article-detail-title">{selectedArticle.title_article}</h1>
+          <div className="article-detail-heading" lang={readLang}>
+            {selectedArticle.project_title && (
+              <span className="article-project-label">
+                {t('article.projectLabel', { title: articleProjectTitle(selectedArticle, readLang), defaultValue: 'Proyecto: {{title}}' })}
+              </span>
+            )}
+            <h1 className="article-detail-title">{articleTitle(selectedArticle, readLang)}</h1>
 
-          {selectedArticle.excerpt_article && (
-            <p className="article-detail-excerpt">{selectedArticle.excerpt_article}</p>
+            {articleExcerpt(selectedArticle, readLang) && (
+              <p className="article-detail-excerpt">{articleExcerpt(selectedArticle, readLang)}</p>
+            )}
+          </div>
+
+          {/* Versions in other languages: read it in… */}
+          {readLangs.length > 1 && (
+            <div className="article-detail-langs">
+              <span className="article-detail-langs__label">{t('contentLang.readIn', 'Leer en')}</span>
+              <LangSwitch
+                value={readLang}
+                onChange={setReadLang}
+                available={readLangs}
+                label={t('contentLang.readIn', 'Leer en')}
+              />
+            </div>
           )}
 
           <div className="article-detail-meta">
@@ -354,7 +377,8 @@ function ArticleDetail({ previewMode = false }) {
                       {block.block_type === 'text' && (
                         <div
                           className="text-content"
-                          dangerouslySetInnerHTML={{ __html: block.content }}
+                          lang={readLang}
+                          dangerouslySetInnerHTML={{ __html: blockText(block, readLang) }}
                         />
                       )}
                       {block.block_type === 'image' && (
@@ -363,11 +387,11 @@ function ArticleDetail({ previewMode = false }) {
                             src={block.image_url.startsWith('http')
                               ? block.image_url
                               : `${apiUrl}/${block.image_url.startsWith('/') ? block.image_url.substring(1) : block.image_url}`}
-                            alt={block.image_alt || ''}
+                            alt={blockAlt(block, readLang) || ''}
                             className="article-image"
                           />
-                          {block.image_caption && (
-                            <p className="image-caption">{block.image_caption}</p>
+                          {blockCaption(block, readLang) && (
+                            <p className="image-caption" lang={readLang}>{blockCaption(block, readLang)}</p>
                           )}
                           {block.interaction_type === 'audio' && block.interaction_data && (
                             <audio

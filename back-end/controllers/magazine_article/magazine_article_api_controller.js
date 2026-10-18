@@ -5,6 +5,7 @@ import magazine_article_model from "../../models/magazine_article_model.js";
 import article_author_invitation_model from "../../models/article_author_invitation_model.js";
 import user_model from "../../models/user_model.js";
 import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
+import { normalizeTranslations } from "../../utils/translations.js";
 
 // Returns true if userId is an author of the given article (checks junction table + legacy author_id)
 async function isArticleAuthor(articleId, userId) {
@@ -127,7 +128,8 @@ async function create(req, res) {
             status_article,
             featured_article,
             is_premium,
-            sections
+            sections,
+            translations_article
         } = req.body;
 
         if (!title_article || !content_article) {
@@ -156,7 +158,9 @@ async function create(req, res) {
             featured_article: featured_article || false,
             is_premium: is_premium || false,
             // Magazine sections (the controller decides approved vs requested).
-            sections
+            sections,
+            // Title / excerpt in other languages (utils/translations.js).
+            translations_article: normalizeTranslations('article', translations_article) ?? null
         };
 
         const callerUser = await getRequestUser(req);
@@ -208,7 +212,8 @@ async function update(req, res) {
             featured_article,
             active_article,
             is_premium,
-            sections
+            sections,
+            translations_article
         } = req.body;
 
         const updateData = {};
@@ -228,6 +233,7 @@ async function update(req, res) {
         if (active_article !== undefined) updateData.active_article = active_article;
         if (is_premium !== undefined) updateData.is_premium = is_premium;
         if (sections !== undefined) updateData.sections = sections;
+        if (translations_article !== undefined) updateData.translations_article = normalizeTranslations('article', translations_article);
 
         const callerUser = await getRequestUser(req);
         const { error, data, success } = await magazineArticleController.update(id_article, updateData, roleSnapshot(callerUser));

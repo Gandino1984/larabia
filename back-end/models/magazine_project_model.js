@@ -99,6 +99,12 @@ const magazine_project_model = sequelize.define(
             allowNull: true,
             comment: 'Section keys requested by the author, awaiting a super admin (null = none)'
         },
+        // Title / description in other languages (utils/translations.js).
+        translations_project: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: '{ en: { title, description }, eu: { … } } — the original is Spanish'
+        },
         featured_project: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

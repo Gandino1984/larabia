@@ -64,6 +64,12 @@ const magazine_article_model = sequelize.define(
             allowNull: true,
             comment: 'Section keys requested by the author, awaiting a super admin (null = none)'
         },
+        // Title / excerpt in other languages (utils/translations.js).
+        translations_article: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: '{ en: { title, excerpt }, eu: { … } } — the original is Spanish'
+        },
         date_published: {
             type: DataTypes.DATE,
             allowNull: true,

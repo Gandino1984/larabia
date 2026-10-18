@@ -533,6 +533,8 @@ async function create(projectData, roleCtx = EMPTY_ROLE_CTX) {
         // Magazine sections: approved at once for super admins, a request
         // for everyone else (utils/sections.js).
         const sectionFields = sectionsUpdate('project', projectData.sections, null, roleCtx);
+        // Title / description in other languages (utils/translations.js).
+        if (projectData.translations_project !== undefined) sectionFields.translations_project = projectData.translations_project;
         if (Object.keys(sectionFields).length) await project.update(sectionFields);
 
         console.log("✅ Proyecto creado:", {
@@ -651,6 +653,7 @@ async function update(id_project, projectData, roleCtx = EMPTY_ROLE_CTX) {
         // Magazine sections: approved at once for super admins, a request
         // (the approved ones stay) for everyone else.
         const sectionFields = sectionsUpdate('project', projectData.sections, project.sections_project, roleCtx);
+        if (projectData.translations_project !== undefined) sectionFields.translations_project = projectData.translations_project;
         if (Object.keys(sectionFields).length) {
             await magazine_project_model.update(sectionFields, { where: { id_project } });
         }

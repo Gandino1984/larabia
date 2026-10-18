@@ -13,6 +13,7 @@ import { EMPTY_ARTICLE_FILTERS, applyArticleFilters, countActiveFilters } from '
 import { inSection, sectionLabel } from '../../utils/sections';
 import { useSectionCatalog } from '../../app_context/useSectionCatalog';
 import SectionProjects from './SectionProjects';
+import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
 import './ArticlesList.css';
 import './ArticlesCarousel.css';
 
@@ -74,7 +75,9 @@ function getPageNumbers(currentPage, totalPages) {
 }
 
 function ArticlesList() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Titles and excerpts in the header's language (or the original).
+  const lang = i18n.language;
   const { articles, loading, fetchArticles, setSelectedArticle, deleteArticle, filters: navFilters, setFilters: setNavFilters } = useMagazine();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
   const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError, openAuthorCard, navigateToMyPublications, articlesSection, navigateToArticlesList } = useUI();
@@ -249,12 +252,14 @@ function ArticlesList() {
           </span>
         )}
         {article.project_title && (
-          <span className="article-project-label">Proyecto: {article.project_title}</span>
+          <span className="article-project-label">
+            {t('article.projectLabel', { title: articleProjectTitle(article, lang), defaultValue: 'Proyecto: {{title}}' })}
+          </span>
         )}
-        <h2 className="article-title">{article.title_article}</h2>
+        <h2 className="article-title">{articleTitle(article, lang)}</h2>
 
-        {article.excerpt_article && (
-          <p className="article-excerpt">{article.excerpt_article}</p>
+        {articleExcerpt(article, lang) && (
+          <p className="article-excerpt">{articleExcerpt(article, lang)}</p>
         )}
 
         <div className="article-meta">

@@ -4,6 +4,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import magazineProjectController from "./magazine_project_controller.js";
 import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
+import { normalizeTranslations } from "../../utils/translations.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -128,7 +129,8 @@ async function create(req, res) {
             status_project,
             featured_project,
             authors,
-            sections
+            sections,
+            translations_project
         } = req.body;
 
         if (!title_project) {
@@ -161,7 +163,9 @@ async function create(req, res) {
             // are persisted in project_authors (not just the primary author_id).
             authors: Array.isArray(authors) ? authors : undefined,
             // Magazine sections (the controller decides approved vs requested).
-            sections
+            sections,
+            // Title / description in other languages (utils/translations.js).
+            translations_project: normalizeTranslations('project', translations_project) ?? null
         };
 
         const callerUser = await getRequestUser(req);
@@ -203,7 +207,8 @@ async function update(req, res) {
             status_project,
             featured_project,
             authors,
-            sections
+            sections,
+            translations_project
         } = req.body;
 
         // Convert empty strings to null for ENUM fields
@@ -226,6 +231,7 @@ async function update(req, res) {
         // Sync collaborators when provided (controller replaces project_authors).
         if (authors !== undefined) projectData.authors = authors;
         if (sections !== undefined) projectData.sections = sections;
+        if (translations_project !== undefined) projectData.translations_project = normalizeTranslations('project', translations_project);
 
         const callerUser = await getRequestUser(req);
         const { error, data, success } = await magazineProjectController.update(id_project, projectData, roleSnapshot(callerUser));

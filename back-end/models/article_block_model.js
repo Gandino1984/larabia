@@ -102,6 +102,12 @@ const article_block_model = sequelize.define(
             type: DataTypes.TEXT,
             allowNull: true,
             comment: 'Soundscape piece (JSON) for paisaje blocks / comic panels'
+        },
+        // Text / caption / alt in other languages (utils/translations.js).
+        translations_block: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: '{ en: { content, caption, alt }, eu: { … } } — the original is Spanish'
         }
     },
     {

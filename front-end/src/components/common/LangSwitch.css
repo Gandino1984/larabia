@@ -1,0 +1,60 @@
+/* magazine-front/src/components/common/LangSwitch.css — mobile first */
+
+.lang-switch {
+  display: inline-flex;
+  border: 2px solid #1a1a1a;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.lang-switch__btn {
+  position: relative;
+  min-width: 48px;
+  min-height: 40px;
+  padding: 0.4rem 0.85rem;
+  border: none;
+  border-left: 1px solid #d6d6d6;
+  background: transparent;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.lang-switch__btn:first-child {
+  border-left: none;
+}
+
+.lang-switch__btn:hover:not(:disabled):not(.is-active),
+.lang-switch__btn:focus-visible {
+  background: #ececec;
+}
+
+.lang-switch__btn.is-active {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+.lang-switch__btn:disabled {
+  color: #b5b5b5;
+  cursor: not-allowed;
+}
+
+/* This language already has text (creator). */
+.lang-switch__dot {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+.lang-switch__btn.is-active .lang-switch__dot {
+  background: #86efac;
+}

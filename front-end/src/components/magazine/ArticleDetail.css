@@ -564,6 +564,23 @@
   gap: 1rem;
 }
 
+/* Read it in ES · EN · EU (when it has versions in other languages). */
+.article-detail-langs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0 0 1.5rem;
+}
+
+.article-detail-langs__label {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555555;
+}
+
 .meta-item {
   display: flex;
   align-items: center;

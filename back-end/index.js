@@ -131,10 +131,12 @@ Promise.all([
                 console.log(`>>> Added user.${col}`);
             }
         }
-        // Magazine sections of articles and projects (migration 017).
+        // Magazine sections of articles and projects (migration 017) and
+        // content in other languages (migration 019).
         for (const [table, cols] of [
-            ['magazine_articles', ['sections_article', 'sections_requested_article']],
-            ['magazine_projects', ['sections_project', 'sections_requested_project']]
+            ['magazine_articles', ['sections_article', 'sections_requested_article', 'translations_article']],
+            ['magazine_projects', ['sections_project', 'sections_requested_project', 'translations_project']],
+            ['article_blocks', ['translations_block']]
         ]) {
             const desc = await qi.describeTable(table);
             for (const col of cols) {

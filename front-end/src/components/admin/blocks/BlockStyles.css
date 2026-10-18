@@ -288,3 +288,25 @@
         font-size: 0.95rem;
     }
 }
+
+/* A text block's original, above the version being written. */
+.block-original {
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid #cfcfcf;
+  background: #f7f7f7;
+  font-size: 0.9rem;
+}
+
+.block-original summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #444444;
+}
+
+.block-original__text {
+  margin-top: 0.5rem;
+  color: #555555;
+  max-height: 14rem;
+  overflow-y: auto;
+}
