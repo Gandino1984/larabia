@@ -713,11 +713,9 @@
   "workshops.delete": "Ezabatu tailerra",
   "hscroll.audioPanel.paisaje": "Bineta honek soinua du: sakatu play entzuteko.",
   "hscroll.audioPanel.interactive": "Bineta honek soinua du: sakatu entzuteko.",
-  "paisaje.editor.tabs.summary": "Laburpena",
   "paisaje.editor.summary.image": "Irudia",
   "paisaje.editor.summary.audio": "Audioa",
   "paisaje.editor.summary.player": "Erreproduzigailua",
-  "paisaje.editor.summary.panelHint": "Horrela ikusiko da bineta komikian: piezak bineta osoa betetzen du.",
   "paisaje.editor.audio.reducedMotion": "Zure gailuak «mugimendua murriztu» (edo «animazioak kendu») aktibatuta du. Horregatik ikusiko duzu, ezarpen hori duen edozein irakurlek bezala, erreproduzigailuaren bertsio sinplifikatua: marrazki osoa bolumenarekin agertu eta desagertzen da, trazurik eta maiztasun-bandarik gabe. Desaktibatu irisgarritasun-ezarpenetan animazio osoa ikusteko.",
   "paisaje.editor.summary.audioValue": "AAC 192 kbps · bolumena normalizatuta: {{before}} → {{after}}",
   "sections.editor.legend": "Aldizkariaren atalak",
@@ -736,5 +734,14 @@
   "sections.page.noArticles": "Oraindik ez dago artikulurik atal honetan.",
   "sections.page.projects": "Proiektuak",
   "sections.projectBadge": "Proiektua",
-  "sections.page.articles": "Artikuluak"
+  "sections.page.articles": "Artikuluak",
+  "paisaje.editor.framing.panelHint": "Horrela ikusiko da binetan. Arrastatu marrazkia zirkuluaren barruan zein zati geratzen den aukeratzeko.",
+  "paisaje.wizard.stepOf": "Soinu-paisaia · {{n}}. urratsa / {{total}}",
+  "paisaje.wizard.step.drawing": "Irudia eta estiloa",
+  "paisaje.wizard.step.audio": "Soinua eta erreproduzigailua",
+  "paisaje.wizard.step.framing": "Enkoadraketa eta laburpena",
+  "paisaje.wizard.hint.audio": "Igo audioa eta aukeratu marrazkiak nola erantzuten duen. Sakatu play aurrebistan probatzeko.",
+  "paisaje.wizard.needAudio": "Igo lehenik audioa eta itxaron prest egon arte.",
+  "paisaje.wizard.donePanel": "Prest: orain bineta gorde dezakezu komikian.",
+  "paisaje.wizard.doneArticle": "Prest: jarraitu sortzailearen «Hurrengoa» botoiarekin berrikusi eta argitaratzeko."
 }

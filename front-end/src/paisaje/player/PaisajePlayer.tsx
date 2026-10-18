@@ -141,10 +141,8 @@ interface PaisajePlayerBaseProps {
    *   barra de progreso, tiempo ni volumen; el volumen queda al dispositivo
    *   del lector.
    * La animación (analyser) es idéntica en ambas.
-   * - [La Rabia] 'panel': panel de cómic — la pieza ocupa todo el panel
-   *   (sin círculo ni título), con el mismo botón play/pausa de 'minimal'.
    */
-  variant?: "full" | "minimal" | "panel";
+  variant?: "full" | "minimal";
   /** [La Rabia] Textos que ve el lector (traducción); default castellano. */
   labels?: Partial<PlayerLabels>;
   onReady?: () => void;
@@ -1070,7 +1068,7 @@ export default function PaisajePlayer({
   const content = offsetTransform ? <g transform={offsetTransform}>{svgContent}</g> : svgContent;
 
   return (
-    <div className={`paisaje-player paisaje-player--${variant}`}>
+    <div className="paisaje-player">
       {variant === "full" && (title || description) && (
         <header className="paisaje-player-header">
           {title && <h2 className="paisaje-player-title">{title}</h2>}
@@ -1134,7 +1132,7 @@ export default function PaisajePlayer({
         m:ss debajo (duración en pausa, cuenta regresiva sonando). Accesible:
         <button> real, focable, estado anunciado; el tiempo es role="timer"
         con aria-live off (un anuncio por segundo sería ruido para SR). ------ */}
-        {(variant === "minimal" || variant === "panel") && (
+        {variant === "minimal" && (
           <div className="paisaje-minimal-chrome">
             <button
               type="button"

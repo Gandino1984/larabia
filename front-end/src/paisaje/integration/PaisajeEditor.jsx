@@ -1,16 +1,18 @@
 // front-end/src/paisaje/integration/PaisajeEditor.jsx
 //
 // Creates / edits a soundscape (engine: Cristian Vergara — see ../README.md),
-// replacing the engine's demo wizard inside the magazine:
-//   1 · Dibujo    style + its editor (the engine's converters) → upload
-//   2 · Sonido    audio upload (normalised in the background), reaction mode
-//                 (amplitude / spectrum) and veil, with a live preview
-//   3 · Encuadre  (article) drag the drawing behind the circle + summary
-//       Resumen   (comic panel) the panel as it'll look + summary — the
-//                 piece fills the panel, there's nothing to frame
-// The three steps of the engine's wizard (image & style → audio & player →
-// summary). Used as the "Paisaje sonoro" article format and inside the comic
-// editor ("Panel paisaje sonoro").
+// replacing the engine's demo wizard inside the magazine. A step-by-step
+// wizard like the publication creator's (numbered progress, "Paso X de 3",
+// Anterior / Siguiente), with the three steps of the engine's own wizard:
+//   1 · Imagen y estilo      style + its editor (the engine's converters) →
+//                            «Usar este dibujo» uploads it
+//   2 · Sonido y reproductor audio upload (normalised in the background),
+//                            reaction mode (amplitude / spectrum) and veil,
+//                            with a live preview
+//   3 · Encuadre y resumen   drag the drawing behind the circle + summary
+// A step opens once the previous one is done. Used as the "Paisaje sonoro"
+// article format and inside the comic editor ("Panel paisaje sonoro"): both
+// show the piece in its circle (the engine's 'minimal' presentation).
 //
 //   value     the piece (block.soundscape_data: object or JSON string)
 //   onChange  called with the draft { imageId, audioId, mode, veil, offsetX,
@@ -19,7 +21,7 @@
 //   title     shown in the article preview
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image as ImageIcon, Music, Move, Upload, RotateCcw, Check, RefreshCw, ListChecks } from 'lucide-react';
+import { Image as ImageIcon, Upload, RotateCcw, Check, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import PaisajePlayer from '../player/PaisajePlayer';
 import { STYLES, DEFAULT_STYLE_ID, getStyle } from '../styles/registry';
 import { useAuth } from '../../app_context/AuthContext';
@@ -73,6 +75,13 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
   }, []);
 
   const [tab, setTab] = useState(() => (!initial?.imageId ? 'drawing' : !initial?.audioId ? 'audio' : 'audio'));
+  // Changing step: bring the wizard's top into view (not on first render).
+  const rootRef = useRef(null);
+  const firstStep = useRef(true);
+  useEffect(() => {
+    if (firstStep.current) { firstStep.current = false; return; }
+    rootRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, [tab]);
 
   // ---- step 1 · drawing -------------------------------------------------
   const [editingDrawing, setEditingDrawing] = useState(!initial?.imageId);
@@ -236,13 +245,16 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
     return def ? t(`paisaje.styles.${def.id}`, def.nombre) : s;
   };
 
-  const tabs = [
-    { key: 'drawing', Icon: ImageIcon, label: t('paisaje.editor.tabs.drawing', 'Dibujo'), done: !!drawing },
-    { key: 'audio', Icon: Music, label: t('paisaje.editor.tabs.audio', 'Sonido'), done: !!audio, disabled: !drawing },
-    variant === 'article'
-      ? { key: 'framing', Icon: Move, label: t('paisaje.editor.tabs.framing', 'Encuadre'), done: false, disabled: !drawing || !audio }
-      : { key: 'framing', Icon: ListChecks, label: t('paisaje.editor.tabs.summary', 'Resumen'), done: false, disabled: !drawing || !audio }
+  // The wizard: a step opens once the previous one is done.
+  const steps = [
+    { key: 'drawing', label: t('paisaje.wizard.step.drawing', 'Imagen y estilo'), done: !!drawing, open: true },
+    { key: 'audio', label: t('paisaje.wizard.step.audio', 'Sonido y reproductor'), done: !!audio, open: !!drawing },
+    { key: 'framing', label: t('paisaje.wizard.step.framing', 'Encuadre y resumen'), done: false, open: !!drawing && !!audio }
   ];
+  const stepIndex = Math.max(0, steps.findIndex((s) => s.key === tab));
+  const current = steps[stepIndex];
+  const next = steps[stepIndex + 1];
+  const choosingDrawing = tab === 'drawing' && (!drawing || editingDrawing);
 
   // Step 3's summary, like the engine's wizard: image, audio, player.
   const summary = drawing && audio && (
@@ -271,29 +283,42 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
   );
 
   return (
-    <div className={`larabia-paisaje-editor larabia-paisaje-editor--${variant}`}>
-      <ol className="lpe-tabs" role="tablist" aria-label={t('paisaje.editor.tabsLabel', 'Pasos del paisaje sonoro')}>
-        {tabs.map(({ key, Icon, label, done, disabled }, i) => (
-          <li key={key}>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === key}
-              className={`lpe-tab${tab === key ? ' is-active' : ''}${done ? ' is-done' : ''}`}
-              disabled={disabled}
-              onClick={() => setTab(key)}
-            >
-              <span className="lpe-tab__num">{done ? <Check size={14} /> : i + 1}</span>
-              <Icon size={16} />
-              <span>{label}</span>
-            </button>
-          </li>
-        ))}
-      </ol>
+    <div ref={rootRef} className={`larabia-paisaje-editor larabia-paisaje-editor--${variant}`}>
+      <nav className="lpe-progress" aria-label={t('paisaje.editor.tabsLabel', 'Pasos del paisaje sonoro')}>
+        <ol className="lpe-steps">
+          {steps.map(({ key, label, done, open }, i) => {
+            const state = key === tab ? 'is-current' : done ? 'is-done' : 'is-next';
+            return (
+              <li key={key} className={`lpe-step ${state}`}>
+                <button
+                  type="button"
+                  className="lpe-step__btn"
+                  onClick={() => open && setTab(key)}
+                  disabled={!open && key !== tab}
+                  aria-current={key === tab ? 'step' : undefined}
+                >
+                  <span className="lpe-step__bar" aria-hidden="true" />
+                  <span className="lpe-step__num">
+                    {String(i + 1).padStart(2, '0')}
+                    {done && key !== tab && <Check size={13} aria-hidden="true" />}
+                  </span>
+                  <span className="lpe-step__label">{label}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+      <div className="lpe-step-heading">
+        <span className="lpe-step-eyebrow">
+          {t('paisaje.wizard.stepOf', { n: stepIndex + 1, total: steps.length, defaultValue: 'Paisaje sonoro · Paso {{n}} de {{total}}' })}
+        </span>
+        <h3 className="lpe-step-title">{current.label}</h3>
+      </div>
 
       {/* ---------- 1 · Dibujo ---------- */}
       {tab === 'drawing' && (
-        <section className="lpe-panel" aria-label={t('paisaje.editor.tabs.drawing', 'Dibujo')}>
+        <section className="lpe-panel" aria-label={t('paisaje.wizard.step.drawing', 'Imagen y estilo')}>
           {drawing && !editingDrawing ? (
             <div className="lpe-current">
               <div className="lpe-current__preview">
@@ -307,9 +332,6 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
                 <div className="lpe-actions">
                   <button type="button" className="lpe-btn" onClick={() => setEditingDrawing(true)}>
                     <RefreshCw size={16} /> {t('paisaje.editor.drawing.change', 'Cambiar dibujo')}
-                  </button>
-                  <button type="button" className="lpe-btn lpe-btn--primary" onClick={() => setTab('audio')}>
-                    {t('paisaje.editor.next', 'Siguiente')}
                   </button>
                 </div>
               </div>
@@ -343,17 +365,6 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
                 </div>
               )}
               {drawingError && <p className="lpe-error" role="alert">{drawingError}</p>}
-              <div className="lpe-actions">
-                {drawing && (
-                  <button type="button" className="lpe-btn" onClick={() => { setEditingDrawing(false); setPendingDoc(null); }}>
-                    {t('paisaje.editor.drawing.keep', 'Mantener el dibujo actual')}
-                  </button>
-                )}
-                <button type="button" className="lpe-btn lpe-btn--primary" disabled={!pendingDoc || drawingBusy} onClick={confirmDrawing}>
-                  <Upload size={16} />
-                  {drawingBusy ? t('paisaje.editor.drawing.uploading', 'Subiendo…') : t('paisaje.editor.drawing.use', 'Usar este dibujo')}
-                </button>
-              </div>
             </>
           )}
         </section>
@@ -361,7 +372,8 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
 
       {/* ---------- 2 · Sonido ---------- */}
       {tab === 'audio' && drawing && (
-        <section className="lpe-panel" aria-label={t('paisaje.editor.tabs.audio', 'Sonido')}>
+        <section className="lpe-panel" aria-label={t('paisaje.wizard.step.audio', 'Sonido y reproductor')}>
+          <p className="lpe-hint">{t('paisaje.wizard.hint.audio', 'Sube el audio y elige cómo reacciona el dibujo. Pulsa play en la vista previa para probarlo.')}</p>
           <div className="lpe-audio-upload">
             <input
               ref={audioInputRef}
@@ -446,20 +458,19 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
                   />
                 </div>
               )}
-              <div className="lpe-actions">
-                <button type="button" className="lpe-btn lpe-btn--primary" onClick={() => setTab('framing')}>
-                  {t('paisaje.editor.next', 'Siguiente')}
-                </button>
-              </div>
             </>
           )}
         </section>
       )}
 
-      {/* ---------- 3 · Encuadre (artículo) ---------- */}
-      {tab === 'framing' && variant === 'article' && drawing && audio && (
-        <section className="lpe-panel" aria-label={t('paisaje.editor.tabs.framing', 'Encuadre')}>
-          <p className="lpe-hint">{t('paisaje.editor.framing.hint', 'Así se verá publicado. Arrastra el dibujo para elegir qué parte queda dentro del círculo.')}</p>
+      {/* ---------- 3 · Encuadre ---------- */}
+      {tab === 'framing' && drawing && audio && (
+        <section className="lpe-panel" aria-label={t('paisaje.wizard.step.framing', 'Encuadre y resumen')}>
+          <p className="lpe-hint">
+            {variant === 'panel'
+              ? t('paisaje.editor.framing.panelHint', 'Así se verá en la viñeta. Arrastra el dibujo para elegir qué parte queda dentro del círculo.')
+              : t('paisaje.editor.framing.hint', 'Así se verá publicado. Arrastra el dibujo para elegir qué parte queda dentro del círculo.')}
+          </p>
           <div className="lpe-pan" onPointerDown={handlePanStart}>
             <div className="larabia-paisaje larabia-paisaje--minimal">
               <PaisajePlayer
@@ -471,7 +482,7 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
                 locked
                 staticPreview
                 offset={offset}
-                title={title || undefined}
+                title={variant === 'article' ? title || undefined : undefined}
                 labels={labels}
               />
             </div>
@@ -482,36 +493,50 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
             </button>
           </div>
           {summary}
+          <p className="lpe-ok lpe-done">
+            <Check size={16} />
+            {variant === 'panel'
+              ? t('paisaje.wizard.donePanel', 'Listo: ya puedes guardar el panel en el cómic.')
+              : t('paisaje.wizard.doneArticle', 'Listo: sigue con «Siguiente» del creador para revisar y publicar.')}
+          </p>
         </section>
       )}
 
-      {/* ---------- 3 · Resumen (viñeta de cómic) ---------- */}
-      {tab === 'framing' && variant === 'panel' && drawing && audio && (
-        <section className="lpe-panel" aria-label={t('paisaje.editor.tabs.summary', 'Resumen')}>
-          <p className="lpe-hint">{t('paisaje.editor.summary.panelHint', 'Así se verá la viñeta en el cómic: la pieza ocupa toda la viñeta.')}</p>
-          <div
-            className="lpe-panel-preview"
-            style={drawing.width && drawing.height ? {
-              aspectRatio: `${drawing.width} / ${drawing.height}`,
-              width: `min(100%, calc(50vh * ${drawing.width / drawing.height}))`
-            } : undefined}
-          >
-            <div className="larabia-paisaje larabia-paisaje--panel">
-              <PaisajePlayer
-                jsonUrl={jsonUrl}
-                audioUrl={previewAudio || ''}
-                peakMode={mode}
-                veil={veil}
-                variant="panel"
-                locked
-                staticPreview
-                labels={labels}
-              />
-            </div>
-          </div>
-          {summary}
-        </section>
-      )}
+      {/* ---------- Navegación del asistente ---------- */}
+      <div className="lpe-wizard-footer">
+        <div className="lpe-wizard-footer__side">
+          {stepIndex > 0 && (
+            <button type="button" className="lpe-btn" onClick={() => setTab(steps[stepIndex - 1].key)}>
+              <ChevronLeft size={16} /> {t('editor.wizard.prev', 'Anterior')}
+            </button>
+          )}
+        </div>
+        <div className="lpe-wizard-footer__side lpe-wizard-footer__side--end">
+          {choosingDrawing ? (
+            <>
+              {drawing && (
+                <button type="button" className="lpe-btn" onClick={() => { setEditingDrawing(false); setPendingDoc(null); }}>
+                  {t('paisaje.editor.drawing.keep', 'Mantener el dibujo actual')}
+                </button>
+              )}
+              <button type="button" className="lpe-btn lpe-btn--primary" disabled={!pendingDoc || drawingBusy} onClick={confirmDrawing}>
+                <Upload size={16} />
+                {drawingBusy ? t('paisaje.editor.drawing.uploading', 'Subiendo…') : t('paisaje.editor.drawing.use', 'Usar este dibujo')}
+              </button>
+            </>
+          ) : next && (
+            <button
+              type="button"
+              className="lpe-btn lpe-btn--primary"
+              disabled={!next.open || audioBusy}
+              onClick={() => setTab(next.key)}
+              title={!next.open ? t('paisaje.wizard.needAudio', 'Sube primero el audio y espera a que esté listo.') : undefined}
+            >
+              {t('paisaje.editor.next', 'Siguiente')} <ChevronRight size={16} />
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

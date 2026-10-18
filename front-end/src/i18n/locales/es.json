@@ -713,11 +713,9 @@
   "workshops.delete": "Eliminar taller",
   "hscroll.audioPanel.paisaje": "Esta viñeta tiene sonido: pulsa play para escucharlo.",
   "hscroll.audioPanel.interactive": "Esta viñeta tiene sonido: púlsala para escucharlo.",
-  "paisaje.editor.tabs.summary": "Resumen",
   "paisaje.editor.summary.image": "Imagen",
   "paisaje.editor.summary.audio": "Audio",
   "paisaje.editor.summary.player": "Reproductor",
-  "paisaje.editor.summary.panelHint": "Así se verá la viñeta en el cómic: la pieza ocupa toda la viñeta.",
   "paisaje.editor.audio.reducedMotion": "Tu dispositivo tiene activado «reducir movimiento» (o «quitar animaciones»). Por eso verás, igual que cualquier lector con ese ajuste, la versión simplificada del reproductor: el dibujo entero aparece y desaparece con el volumen, sin trazos ni bandas de frecuencia. Desactívalo en los ajustes de accesibilidad para ver la animación completa.",
   "paisaje.editor.summary.audioValue": "AAC 192 kbps · volumen normalizado de {{before}} a {{after}}",
   "sections.editor.legend": "Secciones de la revista",
@@ -736,5 +734,14 @@
   "sections.page.noArticles": "Todavía no hay artículos en esta sección.",
   "sections.page.projects": "Proyectos",
   "sections.projectBadge": "Proyecto",
-  "sections.page.articles": "Artículos"
+  "sections.page.articles": "Artículos",
+  "paisaje.editor.framing.panelHint": "Así se verá en la viñeta. Arrastra el dibujo para elegir qué parte queda dentro del círculo.",
+  "paisaje.wizard.stepOf": "Paisaje sonoro · Paso {{n}} de {{total}}",
+  "paisaje.wizard.step.drawing": "Imagen y estilo",
+  "paisaje.wizard.step.audio": "Sonido y reproductor",
+  "paisaje.wizard.step.framing": "Encuadre y resumen",
+  "paisaje.wizard.hint.audio": "Sube el audio y elige cómo reacciona el dibujo. Pulsa play en la vista previa para probarlo.",
+  "paisaje.wizard.needAudio": "Sube primero el audio y espera a que esté listo.",
+  "paisaje.wizard.donePanel": "Listo: ya puedes guardar el panel en el cómic.",
+  "paisaje.wizard.doneArticle": "Listo: sigue con «Siguiente» del creador para revisar y publicar."
 }

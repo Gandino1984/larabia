@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 /**
  * [La Rabia] Tests de los cambios de la revista sobre el reproductor (ver
- * README): crossOrigin del <audio>, variante 'panel' (paneles de cómic) y
- * textos traducibles (`labels`). Mismos stubs que PaisajePlayer.test.tsx.
+ * README): crossOrigin del <audio> y textos traducibles (`labels`). Mismos
+ * stubs que PaisajePlayer.test.tsx.
  */
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
@@ -75,24 +75,11 @@ afterEach(() => cleanup());
 
 describe("PaisajePlayer · cambios de La Rabia", () => {
   it("el <audio> pide CORS (crossOrigin anonymous) en todas las variantes", () => {
-    for (const variant of ["full", "minimal", "panel"] as const) {
+    for (const variant of ["full", "minimal"] as const) {
       const { container } = render(<PaisajePlayer points={POINTS} audioUrl="https://api.example/a.m4a" variant={variant} />);
       expect(container.querySelector("audio")?.getAttribute("crossorigin")).toBe("anonymous");
       cleanup();
     }
-  });
-
-  it("variant='panel': sin círculo ni título, con el botón play circular", () => {
-    const { container } = render(
-      <PaisajePlayer points={POINTS} audioUrl="a.m4a" variant="panel" title="No se ve" />
-    );
-    expect(container.querySelector(".paisaje-player--panel")).not.toBeNull();
-    expect(container.querySelector("clipPath")).toBeNull();
-    expect(container.querySelector(".paisaje-disc")).toBeNull();
-    expect(container.querySelector(".paisaje-minimal-title")).toBeNull();
-    expect(container.querySelector(".paisaje-controls")).toBeNull();
-    expect(screen.getAllByRole("button")).toHaveLength(1);
-    expect(container.querySelector(".paisaje-play-minimal")).not.toBeNull();
   });
 
   it("variant='minimal' sigue teniendo círculo y título", () => {

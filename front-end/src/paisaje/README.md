@@ -25,8 +25,8 @@ Copiado del original **sin cambios en la lógica**, con su misma estructura
 **Código de la revista** (no es del original): `integration/` —
 `PaisajeEditor` (sustituye al asistente de la demo; se usa como formato de
 artículo y en el modal «Panel paisaje sonoro» del creador de cómics),
-`PaisajePiece` (lo que ve el lector: círculo en el artículo, panel completo en
-el cómic; un solo audio a la vez), la API de subidas (`paisajeApi.js`) y las
+`PaisajePiece` (lo que ve el lector: el círculo, en el artículo y en una
+viñeta cuadrada del cómic; un solo audio a la vez), la API de subidas (`paisajeApi.js`) y las
 utilidades de la pieza guardada en el bloque (`soundscape.js`). El servidor
 está en `back-end/controllers/paisaje/`.
 
@@ -40,10 +40,11 @@ revista lo reimplementa en su back-end con sus permisos, MySQL y rutas).
 **Regla (Cristian Vergara, 2026-10-18): el motor no se toca.** Conversores,
 formato, estilos y lógica del reproductor son idénticos al commit `8a6cf7f`
 (verificable con `diff -r` contra `src/converter`, `src/styles`,
-`src/player` del original). Una versión anterior de la integración cambió
-`converter/image.ts` (sin límite de imagen, decodificación reducida a 900 px):
-alteraba el puntillista (que trabaja a 2048 px) y el remuestreo del
-posterizado, y se revirtió. Los únicos cambios que quedan:
+`src/player` del original). Versiones anteriores de la integración
+cambiaron `converter/image.ts` (sin límite de imagen, decodificación reducida
+a 900 px: alteraba el puntillista, que trabaja a 2048 px, y el remuestreo del
+posterizado) y añadieron una variante `'panel'` al reproductor; las dos se
+revirtieron. Los únicos cambios que quedan:
 
 - `wizard/buildPaisajeJson.ts`: extraída de `src/demo/Wizard.tsx` tal cual
   (el test importa ahora de este módulo).
@@ -51,11 +52,13 @@ posterizado, y se revirtió. Los únicos cambios que quedan:
   props por defecto se comporta igual que el original):
   - `crossOrigin="anonymous"` en el `<audio>`: la revista sirve el audio desde
     otro origen (la API) y, sin CORS, Web Audio entrega silencio.
-  - variante `'panel'` (paneles de cómic): la pieza ocupa todo el panel, sin
-    círculo ni título, con el botón play/pausa de `'minimal'`.
   - prop `labels` (`PlayerLabels`): textos que ve el lector, para traducirlos;
-    por defecto los originales en castellano. La raíz lleva además la clase
-    `paisaje-player--{variant}`.
+    por defecto los originales en castellano.
+
+Artículos y viñetas de cómic usan la presentación `'minimal'` del original
+(el círculo, con el encuadre del paso 3). En la viñeta, `integration/` solo la
+recorta con CSS al cuadrado central de la imagen (el círculo y su aire, sin
+las franjas vacías de los lados).
 
 Todo lo demás que haga falta va en `integration/` (código de la revista),
 nunca en estos archivos.
@@ -69,7 +72,8 @@ su banda.
 
 ## Tests
 
-`npm test` (en `front-end/`) ejecuta su suite con vitest: **274 tests**
+`npm test` (en `front-end/`) ejecuta su suite con vitest: **274 tests** del motor
+(más 3 de los añadidos de la revista en `player/PaisajePlayer.larabia.test.tsx`)
 (el original tiene 284; los 10 restantes son de su servidor de demo y de la
 vista previa del asistente, que no se integran). Regla del autor: deben
 quedar en verde, incluido el validador de invariante del trazador

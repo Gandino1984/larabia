@@ -713,11 +713,9 @@
   "workshops.delete": "Delete workshop",
   "hscroll.audioPanel.paisaje": "This panel has sound: press play to listen.",
   "hscroll.audioPanel.interactive": "This panel has sound: click or tap it to listen.",
-  "paisaje.editor.tabs.summary": "Summary",
   "paisaje.editor.summary.image": "Image",
   "paisaje.editor.summary.audio": "Audio",
   "paisaje.editor.summary.player": "Player",
-  "paisaje.editor.summary.panelHint": "This is how the panel will look in the comic: the piece fills the whole panel.",
   "paisaje.editor.audio.reducedMotion": "Your device has “reduce motion” (or “remove animations”) turned on. That’s why you see — like any reader with that setting — the player’s simplified version: the whole drawing fades in and out with the volume, without tracing or frequency bands. Turn it off in the accessibility settings to see the full animation.",
   "paisaje.editor.summary.audioValue": "AAC 192 kbps · volume normalised from {{before}} to {{after}}",
   "sections.editor.legend": "Magazine sections",
@@ -736,5 +734,14 @@
   "sections.page.noArticles": "There are no articles in this section yet.",
   "sections.page.projects": "Projects",
   "sections.projectBadge": "Project",
-  "sections.page.articles": "Articles"
+  "sections.page.articles": "Articles",
+  "paisaje.editor.framing.panelHint": "This is how it will look in the panel. Drag the drawing to choose which part sits inside the circle.",
+  "paisaje.wizard.stepOf": "Soundscape · Step {{n}} of {{total}}",
+  "paisaje.wizard.step.drawing": "Image and style",
+  "paisaje.wizard.step.audio": "Sound and player",
+  "paisaje.wizard.step.framing": "Framing and summary",
+  "paisaje.wizard.hint.audio": "Upload the audio and choose how the drawing reacts. Press play in the preview to try it.",
+  "paisaje.wizard.needAudio": "Upload the audio first and wait until it is ready.",
+  "paisaje.wizard.donePanel": "Done: you can now save the panel in the comic.",
+  "paisaje.wizard.doneArticle": "Done: carry on with the creator’s “Next” to review and publish."
 }

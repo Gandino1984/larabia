@@ -8,51 +8,123 @@
   text-align: left;
 }
 
-/* Step tabs */
-.lpe-tabs {
+/* The wizard (like the publication creator's): a thin segmented bar — one
+   segment per step, black when done or current — with "01 Imagen y estilo"
+   under each; then "Paisaje sonoro · Paso X de 3" and the step's title. */
+.lpe-progress {
+  margin: 0 0 1.1rem;
+}
+.lpe-steps {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0 0 1rem;
+  gap: 10px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
-.lpe-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 40px;
-  padding: 0.45rem 0.85rem;
-  border: 1px solid #d4d4d4;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #1a1a1a;
-  font-family: 'Source Code Pro', monospace;
-  font-size: 0.85rem;
-  font-weight: 700;
+.lpe-step {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.lpe-step__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-transform: none;
   cursor: pointer;
 }
-.lpe-tab.is-active {
-  background: #000000;
-  border-color: #000000;
-  color: #ffffff;
-}
-.lpe-tab:disabled {
-  opacity: 0.45;
+.lpe-step__btn:disabled {
   cursor: not-allowed;
 }
-.lpe-tab__num {
-  display: inline-grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #e4e4e4;
-  color: #1a1a1a;
-  font-size: 0.75rem;
+.lpe-step__bar {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: #e2e2e2;
+  transition: background 0.25s ease;
 }
-.lpe-tab.is-active .lpe-tab__num { background: #ffffff; }
-.lpe-tab.is-done .lpe-tab__num { background: #1e7e34; color: #ffffff; }
+.lpe-step.is-done .lpe-step__bar,
+.lpe-step.is-current .lpe-step__bar {
+  background: #000000;
+}
+.lpe-step__btn:not(:disabled):hover .lpe-step__bar {
+  background: #7a7a7a;
+}
+.lpe-step__num {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #a5a5a5;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+.lpe-step__label {
+  color: #a5a5a5;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.lpe-step.is-done .lpe-step__num,
+.lpe-step.is-done .lpe-step__label {
+  color: #555555;
+}
+.lpe-step.is-current .lpe-step__num,
+.lpe-step.is-current .lpe-step__label {
+  color: #000000;
+  font-weight: 700;
+}
+.lpe-step-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0 0 1rem;
+}
+.lpe-step-eyebrow {
+  color: #8a8a8a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.lpe-step-title {
+  margin: 0;
+  font-size: 1.2rem;
+}
+/* Anterior (left) · Siguiente / Usar este dibujo (right). */
+.lpe-wizard-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e6e6e6;
+}
+.lpe-wizard-footer__side {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.lpe-wizard-footer__side--end {
+  margin-left: auto;
+  justify-content: flex-end;
+}
+@media (max-width: 700px) {
+  .lpe-steps { gap: 6px; }
+  /* Narrow: the numbered segments only; the step's name is in its title. */
+  .lpe-step__label { display: none; }
+}
 
 .lpe-panel {
   display: flex;
@@ -270,15 +342,8 @@
   .lpe-current { flex-direction: row; }
 }
 
-/* Step 3 · Resumen (comic panel): the panel as it'll look, and the summary
-   of the piece (both variants), like the engine's wizard. */
-.lpe-panel-preview {
-  margin: 0 auto;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #fafafa;
-}
+/* Step 3's summary of the piece (image, audio, player), like the engine's
+   wizard. */
 .lpe-summary {
   margin: 0;
   padding: 0;

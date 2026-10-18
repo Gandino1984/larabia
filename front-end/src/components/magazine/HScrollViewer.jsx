@@ -1019,12 +1019,10 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                       aspectRatio: parseAspectRatio(panel.image_caption),
                       width: 'auto',
                     }),
-                    ...(panel.soundscape_data && (() => {
-                      const piece = parseSoundscape(panel.soundscape_data);
-                      return piece?.width && piece?.height
-                        ? { aspectRatio: `${piece.width} / ${piece.height}`, width: 'auto' }
-                        : {};
-                    })()),
+                    // Paisaje panels are square: the piece's circle (PaisajePiece).
+                    ...(panel.soundscape_data && parseSoundscape(panel.soundscape_data)
+                      ? { aspectRatio: '1 / 1', width: 'auto' }
+                      : {}),
                   }}
                   role={panel.is_interactive ? 'button' : undefined}
                   aria-label={panel.is_interactive ? t('hscroll.interactivePanel', { number: index + 1 }) : undefined}

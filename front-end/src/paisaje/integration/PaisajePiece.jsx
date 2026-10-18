@@ -2,7 +2,9 @@
 //
 // A soundscape for readers (engine: Cristian Vergara — see ../README.md).
 //   variant 'minimal' — article format: the piece in its circle + title + play.
-//   variant 'panel'   — comic panel: the piece fills the panel + play.
+//   variant 'panel'   — comic panel: the same circle (with its framing), no
+//                       title, sized to the panel, over the comic's canvas.
+// Both are the engine's own 'minimal' presentation.
 // One sound at a time on the page (the others pause), and a comic panel
 // pauses when it leaves the screen. Entering a comic panel, its play button
 // shows up big in the middle of what's on screen, pulses, then glides to its
@@ -139,17 +141,16 @@ function PaisajePiece({ soundscape, title, variant = 'minimal', staticPreview = 
   return (
     <div
       ref={wrapRef}
-      className={`larabia-paisaje larabia-paisaje--${variant}`}
+      className={`larabia-paisaje larabia-paisaje--${variant}${variant === 'panel' ? (piece.height > piece.width ? ' is-tall' : ' is-wide') : ''}`}
       data-intro={introEnabled ? 'armed' : undefined}
-      style={variant === 'panel' && piece.width && piece.height ? { aspectRatio: `${piece.width} / ${piece.height}` } : undefined}
     >
       <PaisajePlayer
         jsonUrl={jsonUrlProp || pieceJsonUrl(piece)}
         audioUrl={audioUrlProp || pieceAudioUrl(piece)}
         peakMode={piece.mode === 'spectrum' ? 'spectrum' : 'amplitude'}
         veil={typeof piece.veil === 'number' ? piece.veil : 0.35}
-        variant={variant}
-        offset={variant === 'minimal' ? [piece.offsetX || 0, piece.offsetY || 0] : undefined}
+        variant="minimal"
+        offset={[piece.offsetX || 0, piece.offsetY || 0]}
         title={variant === 'minimal' ? title || undefined : undefined}
         staticPreview={staticPreview}
         locked={staticPreview}
