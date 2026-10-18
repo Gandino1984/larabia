@@ -37,10 +37,18 @@ revista lo reimplementa en su back-end con sus permisos, MySQL y rutas).
 
 ## Cambios respecto al original
 
+**Regla (Cristian Vergara, 2026-10-18): el motor no se toca.** Conversores,
+formato, estilos y lógica del reproductor son idénticos al commit `8a6cf7f`
+(verificable con `diff -r` contra `src/converter`, `src/styles`,
+`src/player` del original). Una versión anterior de la integración cambió
+`converter/image.ts` (sin límite de imagen, decodificación reducida a 900 px):
+alteraba el puntillista (que trabaja a 2048 px) y el remuestreo del
+posterizado, y se revirtió. Los únicos cambios que quedan:
+
 - `wizard/buildPaisajeJson.ts`: extraída de `src/demo/Wizard.tsx` tal cual
   (el test importa ahora de este módulo).
-- `player/PaisajePlayer.tsx` (cambios marcados con `[La Rabia]`, aditivos: con
-  las props por defecto se comporta igual que el original):
+- `player/PaisajePlayer.tsx` (marcados con `[La Rabia]`, aditivos: con las
+  props por defecto se comporta igual que el original):
   - `crossOrigin="anonymous"` en el `<audio>`: la revista sirve el audio desde
     otro origen (la API) y, sin CORS, Web Audio entrega silencio.
   - variante `'panel'` (paneles de cómic): la pieza ocupa todo el panel, sin
@@ -49,16 +57,15 @@ revista lo reimplementa en su back-end con sus permisos, MySQL y rutas).
     por defecto los originales en castellano. La raíz lleva además la clase
     `paisaje-player--{variant}`.
 
-- `converter/image.ts` (`[La Rabia]`): **sin límite de peso ni de tamaño** de
-  imagen (el original bloqueaba > 15 MB y > 4096×4096). `decodeImageFile` pide
-  la imagen ya reducida a 900 px de alto (`createImageBitmap` con
-  `resizeHeight`; si el navegador no lo admite, `normalizeHeight` reduce
-  después) y `checkDimensions` ya no bloquea. Los textos de ayuda de los 4
-  conversores lo dicen; el test del pipeline que comprobaba el bloqueo ahora
-  comprueba que se acepta. El original nunca se sube: solo el dibujo y su
-  referencia de 900 px.
+Todo lo demás que haga falta va en `integration/` (código de la revista),
+nunca en estos archivos.
 
-Cualquier otro cambio en estos archivos debe anotarse aquí.
+Nota de comportamiento (del original, no es un fallo): con
+`prefers-reduced-motion` activado en el dispositivo, el reproductor usa su
+modo `'fade'` (R5): todo el dibujo a la vez, sin trazado, con la opacidad del
+conjunto siguiendo el volumen. Y en modo **Amplitud** el posterizado hace
+responder sus 4 capas juntas al volumen global; en **Espectro**, cada capa a
+su banda.
 
 ## Tests
 

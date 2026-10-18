@@ -712,5 +712,12 @@
   "workshops.shareCopy": "Copy the workshop link:",
   "workshops.delete": "Delete workshop",
   "hscroll.audioPanel.paisaje": "This panel has sound: press play to listen.",
-  "hscroll.audioPanel.interactive": "This panel has sound: click or tap it to listen."
+  "hscroll.audioPanel.interactive": "This panel has sound: click or tap it to listen.",
+  "paisaje.editor.tabs.summary": "Summary",
+  "paisaje.editor.summary.image": "Image",
+  "paisaje.editor.summary.audio": "Audio",
+  "paisaje.editor.summary.player": "Player",
+  "paisaje.editor.summary.panelHint": "This is how the panel will look in the comic: the piece fills the whole panel.",
+  "paisaje.editor.audio.reducedMotion": "Your device has “reduce motion” (or “remove animations”) turned on. That’s why you see — like any reader with that setting — the player’s simplified version: the whole drawing fades in and out with the volume, without tracing or frequency bands. Turn it off in the accessibility settings to see the full animation.",
+  "paisaje.editor.summary.audioValue": "AAC 192 kbps · volume normalised from {{before}} to {{after}}"
 }

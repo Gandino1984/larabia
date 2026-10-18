@@ -712,5 +712,12 @@
   "workshops.shareCopy": "Kopiatu tailerraren esteka:",
   "workshops.delete": "Ezabatu tailerra",
   "hscroll.audioPanel.paisaje": "Bineta honek soinua du: sakatu play entzuteko.",
-  "hscroll.audioPanel.interactive": "Bineta honek soinua du: sakatu entzuteko."
+  "hscroll.audioPanel.interactive": "Bineta honek soinua du: sakatu entzuteko.",
+  "paisaje.editor.tabs.summary": "Laburpena",
+  "paisaje.editor.summary.image": "Irudia",
+  "paisaje.editor.summary.audio": "Audioa",
+  "paisaje.editor.summary.player": "Erreproduzigailua",
+  "paisaje.editor.summary.panelHint": "Horrela ikusiko da bineta komikian: piezak bineta osoa betetzen du.",
+  "paisaje.editor.audio.reducedMotion": "Zure gailuak «mugimendua murriztu» (edo «animazioak kendu») aktibatuta du. Horregatik ikusiko duzu, ezarpen hori duen edozein irakurlek bezala, erreproduzigailuaren bertsio sinplifikatua: marrazki osoa bolumenarekin agertu eta desagertzen da, trazurik eta maiztasun-bandarik gabe. Desaktibatu irisgarritasun-ezarpenetan animazio osoa ikusteko.",
+  "paisaje.editor.summary.audioValue": "AAC 192 kbps · bolumena normalizatuta: {{before}} → {{after}}"
 }

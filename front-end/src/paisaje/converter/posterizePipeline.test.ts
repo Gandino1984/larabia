@@ -79,23 +79,19 @@ describe("pipeline estructural del posterizado (órden con mocks)", () => {
     expect(res.trace).toBe(trace);
   });
 
-  // [La Rabia] Ya no hay máximo: la imagen se decodifica reducida a 900 px
-  // de alto (decodeImageFile). El original bloqueaba > 4096×4096 aquí.
-  it("acepta imágenes enormes y las normaliza (sin límite de tamaño)", async () => {
+  it("bloquea imágenes > 4096×4096 ANTES de redimensionar (guardarraíl de memoria)", async () => {
     let resized = false;
-    const res = await loadPosterizedImage({ name: "enorme.png" } as unknown as File, {
-      decodeImageFile: async () =>
-        ({ width: 8000, height: 8000, close() {} }) as unknown as ImageBitmap,
-      normalizeHeight: () => {
-        resized = true;
-        return { canvas: {} as HTMLCanvasElement, imageData: { width: 900, height: 900, data: new Uint8ClampedArray(4) } as unknown as ImageData, resized: true };
-      },
-      convertCanvas: async () => ({ blob: new Blob(), mime: "image/webp", fallbackUsed: false, warning: null, size: 0, suggestedName: "x.webp" }),
-      posterizeImage: () => ({}) as never,
-      encodeRasterJpeg: async () => new Blob([], { type: "image/jpeg" }),
-    });
-    expect(resized).toBe(true);
-    expect(res.warning).toBeNull();
+    await expect(
+      loadPosterizedImage({ name: "enorme.png" } as unknown as File, {
+        decodeImageFile: async () =>
+          ({ width: 8000, height: 8000, close() {} }) as unknown as ImageBitmap,
+        normalizeHeight: () => {
+          resized = true;
+          return {} as never;
+        },
+      })
+    ).rejects.toThrow(/4096/);
+    expect(resized).toBe(false);
   });
 
   it("trazado: decodifica el JPEG y re-snapea a la paleta antes de trazar", async () => {

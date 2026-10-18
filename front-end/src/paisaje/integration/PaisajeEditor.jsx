@@ -5,9 +5,12 @@
 //   1 · Dibujo    style + its editor (the engine's converters) → upload
 //   2 · Sonido    audio upload (normalised in the background), reaction mode
 //                 (amplitude / spectrum) and veil, with a live preview
-//   3 · Encuadre  (article format only) drag the drawing behind the circle
-// Used as the "Paisaje sonoro" article format and inside the comic editor
-// ("Panel paisaje sonoro"; there the piece fills the panel: no framing).
+//   3 · Encuadre  (article) drag the drawing behind the circle + summary
+//       Resumen   (comic panel) the panel as it'll look + summary — the
+//                 piece fills the panel, there's nothing to frame
+// The three steps of the engine's wizard (image & style → audio & player →
+// summary). Used as the "Paisaje sonoro" article format and inside the comic
+// editor ("Panel paisaje sonoro").
 //
 //   value     the piece (block.soundscape_data: object or JSON string)
 //   onChange  called with the draft { imageId, audioId, mode, veil, offsetX,
@@ -16,7 +19,7 @@
 //   title     shown in the article preview
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image as ImageIcon, Music, Move, Upload, RotateCcw, Check, RefreshCw } from 'lucide-react';
+import { Image as ImageIcon, Music, Move, Upload, RotateCcw, Check, RefreshCw, ListChecks } from 'lucide-react';
 import PaisajePlayer from '../player/PaisajePlayer';
 import { STYLES, DEFAULT_STYLE_ID, getStyle } from '../styles/registry';
 import { useAuth } from '../../app_context/AuthContext';
@@ -56,6 +59,19 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
   const [veil, setVeil] = useState(typeof initial?.veil === 'number' ? initial.veil : 0.35);
   const [offset, setOffset] = useState([initial?.offsetX || 0, initial?.offsetY || 0]);
 
+  // The engine plays a simplified version (its R5 'fade': the whole drawing
+  // at once, its opacity following the volume — no tracing, no bands) when
+  // the device asks for reduced motion. Tell the author why the preview
+  // looks flat.
+  const [reducedMotion, setReducedMotion] = useState(() => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  useEffect(() => {
+    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    if (!mq) return undefined;
+    const update = () => setReducedMotion(mq.matches);
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
   const [tab, setTab] = useState(() => (!initial?.imageId ? 'drawing' : !initial?.audioId ? 'audio' : 'audio'));
 
   // ---- step 1 · drawing -------------------------------------------------
@@ -90,7 +106,7 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
       setOffset([0, 0]); // another drawing: the old framing no longer applies
       setEditingDrawing(false);
       setPendingDoc(null);
-      setTab(audio ? (variant === 'article' ? 'framing' : 'audio') : 'audio');
+      setTab(audio ? 'framing' : 'audio');
     } catch (err) {
       setDrawingError(err.message);
     } finally {
@@ -223,10 +239,36 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
   const tabs = [
     { key: 'drawing', Icon: ImageIcon, label: t('paisaje.editor.tabs.drawing', 'Dibujo'), done: !!drawing },
     { key: 'audio', Icon: Music, label: t('paisaje.editor.tabs.audio', 'Sonido'), done: !!audio, disabled: !drawing },
-    ...(variant === 'article'
-      ? [{ key: 'framing', Icon: Move, label: t('paisaje.editor.tabs.framing', 'Encuadre'), done: false, disabled: !drawing || !audio }]
-      : [])
+    variant === 'article'
+      ? { key: 'framing', Icon: Move, label: t('paisaje.editor.tabs.framing', 'Encuadre'), done: false, disabled: !drawing || !audio }
+      : { key: 'framing', Icon: ListChecks, label: t('paisaje.editor.tabs.summary', 'Resumen'), done: false, disabled: !drawing || !audio }
   ];
+
+  // Step 3's summary, like the engine's wizard: image, audio, player.
+  const summary = drawing && audio && (
+    <ul className="lpe-summary">
+      <li>
+        <span>{t('paisaje.editor.summary.image', 'Imagen')}</span>
+        <strong>{styleName(drawing.style)}</strong>
+        {drawing.width && drawing.height ? ` · ${drawing.width}×${drawing.height}` : ''}
+      </li>
+      <li>
+        <span>{t('paisaje.editor.summary.audio', 'Audio')}</span>
+        {t('paisaje.editor.summary.audioValue', {
+          before: fmtLufs(audio.loudnessBefore),
+          after: fmtLufs(audio.loudnessAfter),
+          defaultValue: 'AAC 192 kbps · volumen normalizado de {{before}} a {{after}}'
+        })}
+      </li>
+      <li>
+        <span>{t('paisaje.editor.summary.player', 'Reproductor')}</span>
+        <strong>{mode === 'spectrum'
+          ? t('paisaje.editor.audio.modeSpectrum', 'Espectro')
+          : t('paisaje.editor.audio.modeAmplitude', 'Amplitud')}</strong>
+        {' · '}{t('paisaje.editor.audio.veil', { pct: Math.round(veil * 100), defaultValue: 'Velo: {{pct}} %' })}
+      </li>
+    </ul>
+  );
 
   return (
     <div className={`larabia-paisaje-editor larabia-paisaje-editor--${variant}`}>
@@ -388,6 +430,11 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
               {jsonUrl && previewAudio && (
                 <div className="lpe-preview larabia-paisaje">
                   <p className="lpe-muted">{t('paisaje.editor.audio.previewHint', 'Vista previa: pulsa play para ver cómo responde el dibujo.')}</p>
+                  {reducedMotion && (
+                    <p className="lpe-warning" role="note">
+                      {t('paisaje.editor.audio.reducedMotion', 'Tu dispositivo tiene activado «reducir movimiento» (o «quitar animaciones»). Por eso verás, igual que cualquier lector con ese ajuste, la versión simplificada del reproductor: el dibujo entero aparece y desaparece con el volumen, sin trazos ni bandas de frecuencia. Desactívalo en los ajustes de accesibilidad para ver la animación completa.')}
+                    </p>
+                  )}
                   <PaisajePlayer
                     key={`${drawing.imageId}-${audio.audioId}`}
                     jsonUrl={jsonUrl}
@@ -399,13 +446,11 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
                   />
                 </div>
               )}
-              {variant === 'article' && (
-                <div className="lpe-actions">
-                  <button type="button" className="lpe-btn lpe-btn--primary" onClick={() => setTab('framing')}>
-                    {t('paisaje.editor.next', 'Siguiente')}
-                  </button>
-                </div>
-              )}
+              <div className="lpe-actions">
+                <button type="button" className="lpe-btn lpe-btn--primary" onClick={() => setTab('framing')}>
+                  {t('paisaje.editor.next', 'Siguiente')}
+                </button>
+              </div>
             </>
           )}
         </section>
@@ -436,6 +481,35 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
               <RotateCcw size={16} /> {t('paisaje.editor.framing.recenter', 'Recentrar')}
             </button>
           </div>
+          {summary}
+        </section>
+      )}
+
+      {/* ---------- 3 · Resumen (viñeta de cómic) ---------- */}
+      {tab === 'framing' && variant === 'panel' && drawing && audio && (
+        <section className="lpe-panel" aria-label={t('paisaje.editor.tabs.summary', 'Resumen')}>
+          <p className="lpe-hint">{t('paisaje.editor.summary.panelHint', 'Así se verá la viñeta en el cómic: la pieza ocupa toda la viñeta.')}</p>
+          <div
+            className="lpe-panel-preview"
+            style={drawing.width && drawing.height ? {
+              aspectRatio: `${drawing.width} / ${drawing.height}`,
+              width: `min(100%, calc(50vh * ${drawing.width / drawing.height}))`
+            } : undefined}
+          >
+            <div className="larabia-paisaje larabia-paisaje--panel">
+              <PaisajePlayer
+                jsonUrl={jsonUrl}
+                audioUrl={previewAudio || ''}
+                peakMode={mode}
+                veil={veil}
+                variant="panel"
+                locked
+                staticPreview
+                labels={labels}
+              />
+            </div>
+          </div>
+          {summary}
         </section>
       )}
     </div>

@@ -712,5 +712,12 @@
   "workshops.shareCopy": "Copia el enlace del taller:",
   "workshops.delete": "Eliminar taller",
   "hscroll.audioPanel.paisaje": "Esta viñeta tiene sonido: pulsa play para escucharlo.",
-  "hscroll.audioPanel.interactive": "Esta viñeta tiene sonido: púlsala para escucharlo."
+  "hscroll.audioPanel.interactive": "Esta viñeta tiene sonido: púlsala para escucharlo.",
+  "paisaje.editor.tabs.summary": "Resumen",
+  "paisaje.editor.summary.image": "Imagen",
+  "paisaje.editor.summary.audio": "Audio",
+  "paisaje.editor.summary.player": "Reproductor",
+  "paisaje.editor.summary.panelHint": "Así se verá la viñeta en el cómic: la pieza ocupa toda la viñeta.",
+  "paisaje.editor.audio.reducedMotion": "Tu dispositivo tiene activado «reducir movimiento» (o «quitar animaciones»). Por eso verás, igual que cualquier lector con ese ajuste, la versión simplificada del reproductor: el dibujo entero aparece y desaparece con el volumen, sin trazos ni bandas de frecuencia. Desactívalo en los ajustes de accesibilidad para ver la animación completa.",
+  "paisaje.editor.summary.audioValue": "AAC 192 kbps · volumen normalizado de {{before}} a {{after}}"
 }

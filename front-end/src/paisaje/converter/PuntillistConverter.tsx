@@ -240,7 +240,7 @@ export default function PuntillistConverter({ onDocument }: PuntillistConverterP
           </label>
         </p>
         <p className="paisaje-hint">
-          Cualquier tamaño · se reduce a 900 px de alto · png, jpg, webp…
+          Máximo 15 MB y 4096×4096 px · se redimensiona a 2048 px · png, jpg, webp…
         </p>
         {busy && <p className="paisaje-hint">Procesando…</p>}
       </div>

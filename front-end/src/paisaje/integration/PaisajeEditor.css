@@ -269,3 +269,40 @@
   .lpe-config { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .lpe-current { flex-direction: row; }
 }
+
+/* Step 3 · Resumen (comic panel): the panel as it'll look, and the summary
+   of the piece (both variants), like the engine's wizard. */
+.lpe-panel-preview {
+  margin: 0 auto;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fafafa;
+}
+.lpe-summary {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+}
+.lpe-summary li > span:first-child {
+  display: inline-block;
+  min-width: 6.5rem;
+  margin-right: 0.4rem;
+  color: #555555;
+  font-weight: 700;
+}
+
+/* The device asks for reduced motion: why the preview looks flat. */
+.lpe-warning {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #f0c36d;
+  border-radius: 6px;
+  background: #fff7e6;
+  color: #3d2b00;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
