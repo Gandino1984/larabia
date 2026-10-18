@@ -126,7 +126,8 @@ async function create(req, res) {
             date_published,
             status_article,
             featured_article,
-            is_premium
+            is_premium,
+            sections
         } = req.body;
 
         if (!title_article || !content_article) {
@@ -153,7 +154,9 @@ async function create(req, res) {
             date_published: date_published || null,
             status_article: status_article || 'draft',
             featured_article: featured_article || false,
-            is_premium: is_premium || false
+            is_premium: is_premium || false,
+            // Magazine sections (the controller decides approved vs requested).
+            sections
         };
 
         const callerUser = await getRequestUser(req);
@@ -204,7 +207,8 @@ async function update(req, res) {
             status_article,
             featured_article,
             active_article,
-            is_premium
+            is_premium,
+            sections
         } = req.body;
 
         const updateData = {};
@@ -223,6 +227,7 @@ async function update(req, res) {
         if (featured_article !== undefined) updateData.featured_article = featured_article;
         if (active_article !== undefined) updateData.active_article = active_article;
         if (is_premium !== undefined) updateData.is_premium = is_premium;
+        if (sections !== undefined) updateData.sections = sections;
 
         const callerUser = await getRequestUser(req);
         const { error, data, success } = await magazineArticleController.update(id_article, updateData, roleSnapshot(callerUser));
@@ -609,12 +614,30 @@ async function approveArticle(req, res) {
         if (!admin) return; // requireSuperAdmin already wrote 403
         const { id_article } = req.params;
         if (!id_article) return res.status(400).json({ error: 'El ID del artículo es obligatorio' });
-        const result = await magazineArticleController.approveArticle(id_article);
+        // Optional: the sections the approver settled on (else the requested ones).
+        const result = await magazineArticleController.approveArticle(id_article, req.body?.sections);
         if (result.error) return res.status(400).json(result);
         res.json(result);
     } catch (err) {
         console.error('-> approveArticle API - Error =', err);
         res.status(500).json({ error: 'Error al aprobar el artículo', details: err.message });
+    }
+}
+
+// Super-admin: set an article's approved sections (approve, change or reject
+// what its author requested).
+async function setSections(req, res) {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return;
+        const { id_article } = req.params;
+        if (!id_article) return res.status(400).json({ error: 'El ID del artículo es obligatorio' });
+        const result = await magazineArticleController.setSections(id_article, req.body?.sections);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error('-> setSections API - Error =', err);
+        res.status(500).json({ error: 'Error al actualizar las secciones', details: err.message });
     }
 }
 
@@ -665,5 +688,6 @@ export default {
     revertToDraft,
     approveArticle,
     rejectArticle,
-    getPending
+    getPending,
+    setSections
 };

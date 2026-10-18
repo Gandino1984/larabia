@@ -52,6 +52,18 @@ const magazine_article_model = sequelize.define(
             allowNull: true,
             comment: 'Array of tags for the article'
         },
+        // Magazine sections (header buttons) the article also appears in —
+        // approved / requested by the author (utils/sections.js).
+        sections_article: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: 'Approved section keys (besides Artículos)'
+        },
+        sections_requested_article: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: 'Section keys requested by the author, awaiting a super admin (null = none)'
+        },
         date_published: {
             type: DataTypes.DATE,
             allowNull: true,

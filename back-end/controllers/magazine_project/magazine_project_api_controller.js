@@ -127,7 +127,8 @@ async function create(req, res) {
             date_published,
             status_project,
             featured_project,
-            authors
+            authors,
+            sections
         } = req.body;
 
         if (!title_project) {
@@ -158,7 +159,9 @@ async function create(req, res) {
             featured_project: featured_project || false,
             // Multi-author support: forward the collaborators array so co-authors
             // are persisted in project_authors (not just the primary author_id).
-            authors: Array.isArray(authors) ? authors : undefined
+            authors: Array.isArray(authors) ? authors : undefined,
+            // Magazine sections (the controller decides approved vs requested).
+            sections
         };
 
         const callerUser = await getRequestUser(req);
@@ -199,7 +202,8 @@ async function update(req, res) {
             date_published,
             status_project,
             featured_project,
-            authors
+            authors,
+            sections
         } = req.body;
 
         // Convert empty strings to null for ENUM fields
@@ -221,6 +225,7 @@ async function update(req, res) {
         if (featured_project !== undefined) projectData.featured_project = featured_project;
         // Sync collaborators when provided (controller replaces project_authors).
         if (authors !== undefined) projectData.authors = authors;
+        if (sections !== undefined) projectData.sections = sections;
 
         const callerUser = await getRequestUser(req);
         const { error, data, success } = await magazineProjectController.update(id_project, projectData, roleSnapshot(callerUser));
@@ -391,12 +396,30 @@ async function approveProject(req, res) {
         if (!admin) return; // requireSuperAdmin already wrote 403
         const { id_project } = req.params;
         if (!id_project) return res.status(400).json({ error: 'El ID del proyecto es obligatorio' });
-        const result = await magazineProjectController.approveProject(id_project);
+        // Optional: the sections the approver settled on (else the requested ones).
+        const result = await magazineProjectController.approveProject(id_project, req.body?.sections);
         if (result.error) return res.status(400).json(result);
         res.json(result);
     } catch (err) {
         console.error('-> approveProject API - Error =', err);
         res.status(500).json({ error: 'Error al aprobar el proyecto', details: err.message });
+    }
+}
+
+// Super-admin: set a project's approved sections (approve, change or reject
+// what its author requested).
+async function setSections(req, res) {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return;
+        const { id_project } = req.params;
+        if (!id_project) return res.status(400).json({ error: 'El ID del proyecto es obligatorio' });
+        const result = await magazineProjectController.setSections(id_project, req.body?.sections);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error('-> setSections API - Error =', err);
+        res.status(500).json({ error: 'Error al actualizar las secciones', details: err.message });
     }
 }
 
@@ -490,6 +513,7 @@ export default {
     approveProject,
     rejectProject,
     getPending,
+    setSections,
     getProjectFiles,
     downloadFile
 };

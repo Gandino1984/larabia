@@ -11,6 +11,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { deleteFile, cleanupArticleImages, cleanupBlockImages } from '../../utils/file_cleanup.js';
+import { normalizeSections, sectionsUpdate, sectionsOnApproval } from '../../utils/sections.js';
 
 const EMPTY_ROLE_CTX = Object.freeze({
     userId: null,
@@ -522,7 +523,12 @@ async function create(articleData, roleCtx = EMPTY_ROLE_CTX) {
             articleData.date_published = new Date();
         }
 
-        const article = await magazine_article_model.create(articleData);
+        // Magazine sections: approved at once for super admins, a request
+        // for everyone else (utils/sections.js).
+        const { sections, ...fields } = articleData;
+        Object.assign(fields, sectionsUpdate('article', sections, null, roleCtx));
+
+        const article = await magazine_article_model.create(fields);
 
         // Handle multi-author system
         if (articleData.authors && Array.isArray(articleData.authors) && articleData.authors.length > 0) {
@@ -593,6 +599,12 @@ async function update(id_article, articleData, roleCtx = EMPTY_ROLE_CTX) {
         if (articleData.status_article === 'published' && article.status_article !== 'published' && !articleData.date_published) {
             articleData.date_published = new Date();
         }
+
+        // Magazine sections: approved at once for super admins, a request
+        // (the approved ones stay) for everyone else.
+        const { sections } = articleData;
+        delete articleData.sections;
+        Object.assign(articleData, sectionsUpdate('article', sections, article.sections_article, roleCtx));
 
         await article.update(articleData);
 
@@ -944,7 +956,7 @@ async function submitForApproval(id_article, roleCtx) {
 /**
  * Super-admin flow: approve a pending article → published.
  */
-async function approveArticle(id_article) {
+async function approveArticle(id_article, chosenSections) {
     try {
         const article = await magazine_article_model.findByPk(id_article);
         if (!article) return { error: 'Artículo no encontrado' };
@@ -953,7 +965,12 @@ async function approveArticle(id_article) {
             return { error: `Solo se pueden aprobar artículos en estado 'pending_approval' (estado actual: ${article.status_article})` };
         }
 
-        const updates = { status_article: 'published', rejection_reason: null };
+        // The sections it asked for — or the ones the approver picked.
+        const updates = {
+            status_article: 'published',
+            rejection_reason: null,
+            ...sectionsOnApproval('article', article, chosenSections)
+        };
         if (!article.date_published) updates.date_published = new Date();
 
         await article.update(updates);
@@ -1001,13 +1018,50 @@ async function getPending() {
             where: { status_article: 'pending_approval', active_article: true },
             order: [['updated_at', 'DESC']]
         });
+        // Published articles whose author asked to change their sections.
+        const requests = await magazine_article_model.findAll({
+            where: { status_article: 'published', active_article: true, sections_requested_article: { [Op.ne]: null } },
+            order: [['updated_at', 'DESC']]
+        });
+        const sectionRequests = await withAuthors(requests);
         if (!articles || articles.length === 0) {
-            return { data: [], message: 'No hay artículos pendientes' };
+            return { data: [], sectionRequests, message: 'No hay artículos pendientes' };
         }
+        return { data: await withAuthors(articles), sectionRequests };
+    } catch (err) {
+        console.error('-> getPending() - Error =', err);
+        return { error: 'Error al obtener artículos pendientes' };
+    }
+}
+
+/**
+ * Super-admin flow: set the approved sections of an article (approve, change
+ * or reject what its author requested). Settles any pending request.
+ */
+async function setSections(id_article, sections) {
+    try {
+        const article = await magazine_article_model.findByPk(id_article);
+        if (!article) return { error: 'Artículo no encontrado' };
+        const value = normalizeSections(sections);
+        await article.update({ sections_article: value.length ? value : null, sections_requested_article: null });
+        return {
+            success: 'Secciones actualizadas',
+            data: { id_article: article.id_article, sections_article: article.sections_article }
+        };
+    } catch (err) {
+        console.error('-> setSections() - Error =', err);
+        return { error: 'Error al actualizar las secciones' };
+    }
+}
+
+/** Articles (instances) → JSON with their authors, for the review lists. */
+async function withAuthors(articles) {
+    if (!articles || articles.length === 0) return [];
+    try {
         const articleIds = articles.map((a) => a.id_article);
         const authorsMap = await loadBatchArticleAuthors(articleIds);
         const legacyMap = await loadBatchLegacyAuthors(articles, authorsMap);
-        const data = articles.map((article) => {
+        return articles.map((article) => {
             const authors = authorsMap.get(article.id_article) || [];
             const legacy = authors.length === 0 && article.author_id ? legacyMap[article.author_id] : null;
             return {
@@ -1019,10 +1073,9 @@ async function getPending() {
                 author_name: authors.length > 0 ? authors[0].name_user : article.author_name
             };
         });
-        return { data };
     } catch (err) {
-        console.error('-> getPending() - Error =', err);
-        return { error: 'Error al obtener artículos pendientes' };
+        console.error('-> withAuthors() - Error =', err);
+        return articles.map((article) => article.toJSON());
     }
 }
 
@@ -1043,5 +1096,6 @@ export default {
     revertToDraft,
     approveArticle,
     rejectArticle,
-    getPending
+    getPending,
+    setSections
 };

@@ -6,6 +6,7 @@ import user_model from "../../models/user_model.js";
 import project_author_model from "../../models/project_author_model.js";
 import { Op } from "sequelize";
 import mysql from 'mysql2/promise';
+import { normalizeSections, sectionsUpdate, sectionsOnApproval } from '../../utils/sections.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -529,6 +530,11 @@ async function create(projectData, roleCtx = EMPTY_ROLE_CTX) {
             await project_author_model.bulkCreate(authorRecords, { ignoreDuplicates: true });
         }
 
+        // Magazine sections: approved at once for super admins, a request
+        // for everyone else (utils/sections.js).
+        const sectionFields = sectionsUpdate('project', projectData.sections, null, roleCtx);
+        if (Object.keys(sectionFields).length) await project.update(sectionFields);
+
         console.log("✅ Proyecto creado:", {
             id_project: project.id_project,
             title: project.title_project,
@@ -640,6 +646,13 @@ async function update(id_project, projectData, roleCtx = EMPTY_ROLE_CTX) {
             await connection.execute(query, values);
         } finally {
             connection.release();
+        }
+
+        // Magazine sections: approved at once for super admins, a request
+        // (the approved ones stay) for everyone else.
+        const sectionFields = sectionsUpdate('project', projectData.sections, project.sections_project, roleCtx);
+        if (Object.keys(sectionFields).length) {
+            await magazine_project_model.update(sectionFields, { where: { id_project } });
         }
 
         const updatedProject = await magazine_project_model.findByPk(id_project);
@@ -933,7 +946,7 @@ async function submitForApproval(id_project, roleCtx) {
 /**
  * Super-admin flow: approve a pending project → published.
  */
-async function approveProject(id_project) {
+async function approveProject(id_project, chosenSections) {
     try {
         const project = await magazine_project_model.findByPk(id_project);
         if (!project) return { error: 'Proyecto no encontrado' };
@@ -942,7 +955,12 @@ async function approveProject(id_project) {
             return { error: `Solo se pueden aprobar proyectos en estado 'pending_approval' (estado actual: ${project.status_project})` };
         }
 
-        const updates = { status_project: 'published', rejection_reason: null };
+        // The sections it asked for — or the ones the approver picked.
+        const updates = {
+            status_project: 'published',
+            rejection_reason: null,
+            ...sectionsOnApproval('project', project, chosenSections)
+        };
         if (!project.date_published) updates.date_published = new Date();
 
         await project.update(updates);
@@ -989,18 +1007,47 @@ async function getPending() {
             where: { status_project: 'pending_approval', active_project: true },
             order: [['updated_at', 'DESC']]
         });
+        // Published projects whose author asked to change their sections.
+        const requests = await magazine_project_model.findAll({
+            where: { status_project: 'published', active_project: true, sections_requested_project: { [Op.ne]: null } },
+            order: [['updated_at', 'DESC']]
+        });
+        const withAuthors = async (list) => {
+            const out = [];
+            for (const project of list) {
+                const authors = await loadProjectAuthors(project.id_project);
+                out.push({ ...project.toJSON(), authors });
+            }
+            return out;
+        };
+        const sectionRequests = await withAuthors(requests);
         if (!projects || projects.length === 0) {
-            return { data: [], message: 'No hay proyectos pendientes' };
+            return { data: [], sectionRequests, message: 'No hay proyectos pendientes' };
         }
-        const data = [];
-        for (const project of projects) {
-            const authors = await loadProjectAuthors(project.id_project);
-            data.push({ ...project.toJSON(), authors });
-        }
-        return { data };
+        return { data: await withAuthors(projects), sectionRequests };
     } catch (err) {
         console.error('-> getPending() - Error =', err);
         return { error: 'Error al obtener proyectos pendientes' };
+    }
+}
+
+/**
+ * Super-admin flow: set the approved sections of a project (approve, change
+ * or reject what its author requested). Settles any pending request.
+ */
+async function setSections(id_project, sections) {
+    try {
+        const project = await magazine_project_model.findByPk(id_project);
+        if (!project) return { error: 'Proyecto no encontrado' };
+        const value = normalizeSections(sections);
+        await project.update({ sections_project: value.length ? value : null, sections_requested_project: null });
+        return {
+            success: 'Secciones actualizadas',
+            data: { id_project: project.id_project, sections_project: project.sections_project }
+        };
+    } catch (err) {
+        console.error('-> setSections() - Error =', err);
+        return { error: 'Error al actualizar las secciones' };
     }
 }
 
@@ -1103,6 +1150,7 @@ export default {
     approveProject,
     rejectProject,
     getPending,
+    setSections,
     isProjectAuthor,
     buildFilesManifest
 };

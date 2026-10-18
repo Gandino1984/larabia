@@ -28,6 +28,7 @@ router.post(
 router.patch("/update/:id_project", magazineProjectApiController.update);
 router.patch("/approve/:id_project", magazineProjectApiController.approveProject);   // super-admin
 router.patch("/reject/:id_project", magazineProjectApiController.rejectProject);     // super-admin
+router.patch("/sections/:id_project", magazineProjectApiController.setSections);     // super-admin: approved sections
 router.patch("/deactivate/:id_project", magazineProjectApiController.deactivate);
 
 // DELETE routes

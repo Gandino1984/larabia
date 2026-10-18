@@ -719,5 +719,22 @@
   "paisaje.editor.summary.player": "Player",
   "paisaje.editor.summary.panelHint": "This is how the panel will look in the comic: the piece fills the whole panel.",
   "paisaje.editor.audio.reducedMotion": "Your device has “reduce motion” (or “remove animations”) turned on. That’s why you see — like any reader with that setting — the player’s simplified version: the whole drawing fades in and out with the volume, without tracing or frequency bands. Turn it off in the accessibility settings to see the full animation.",
-  "paisaje.editor.summary.audioValue": "AAC 192 kbps · volume normalised from {{before}} to {{after}}"
+  "paisaje.editor.summary.audioValue": "AAC 192 kbps · volume normalised from {{before}} to {{after}}",
+  "sections.editor.legend": "Magazine sections",
+  "sections.editor.legendProject": "The project's magazine sections",
+  "sections.editor.hintArticle": "Your publication always appears in “Articles”. If you like, tick other menu sections it should also appear in.",
+  "sections.editor.hintProject": "The project always appears in “Projects”. If you like, tick other menu sections it should also appear in.",
+  "sections.editor.approvalNote": "The editorial team checks the sections before publishing them; if they don’t fit, they can change them.",
+  "sections.editor.pendingChange": "It now appears in: {{list}}. Your change will wait until it is approved.",
+  "sections.editor.requestedBy": "Its author asked for: {{list}}. You can approve it in Admin › Pending, or leave the final sections ticked here.",
+  "sections.none": "none",
+  "sections.review.label": "Sections",
+  "sections.review.none": "Only “Articles”",
+  "sections.review.pending": "awaiting approval",
+  "sections.page.subtitle": "Articles and projects in this section.",
+  "sections.page.allArticles": "See all articles",
+  "sections.page.noArticles": "There are no articles in this section yet.",
+  "sections.page.projects": "Projects",
+  "sections.projectBadge": "Project",
+  "sections.page.articles": "Articles"
 }

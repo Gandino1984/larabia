@@ -10,6 +10,9 @@ import { useDragScroll } from '../../hooks/useDragScroll';
 import ArticleFilters from '../common/ArticleFilters';
 import SubscriberMark from '../common/SubscriberMark';
 import { EMPTY_ARTICLE_FILTERS, applyArticleFilters, countActiveFilters } from '../../utils/articleFilters';
+import { inSection, sectionLabel } from '../../utils/sections';
+import { useSectionCatalog } from '../../app_context/useSectionCatalog';
+import SectionProjects from './SectionProjects';
 import './ArticlesList.css';
 import './ArticlesCarousel.css';
 
@@ -74,12 +77,23 @@ function ArticlesList() {
   const { t } = useTranslation();
   const { articles, loading, fetchArticles, setSelectedArticle, deleteArticle, filters: navFilters, setFilters: setNavFilters } = useMagazine();
   const { canCreateContent, isArticleAuthor, isSuperAdmin } = useAuth();
-  const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError, openAuthorCard, navigateToMyPublications } = useUI();
+  const { navigateToHome, navigateToArticle, getCurrentLocale, showSuccess, showError, openAuthorCard, navigateToMyPublications, articlesSection, navigateToArticlesList } = useUI();
+  // A magazine section (header button such as «Internacional»): this list
+  // then shows its publications — its projects above, its articles below.
+  const catalog = useSectionCatalog();
+  const section = articlesSection;
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   // Category / project / author / date filters + sort (ArticleFilters).
   const [listFilters, setListFilters] = useState(EMPTY_ARTICLE_FILTERS);
+
+  // Another section (or the whole list): start from its first page, unfiltered.
+  useEffect(() => {
+    setListFilters(EMPTY_ARTICLE_FILTERS);
+    setSearchTerm('');
+    setCurrentPage(1);
+  }, [section]);
 
   // A category picked in the header ("Más" → Internacional…) arrives as a
   // server-side filter; turn it into this list's category filter and fetch
@@ -136,9 +150,12 @@ function ArticlesList() {
     setCurrentPage(1);
   }, [articles.length, searchTerm, listFilters]);
 
+
+  const listArticles = section ? articles.filter((article) => inSection(article, section)) : articles;
+
   // Filters + order. By default, publication order: the first published
   // article first.
-  const orderedArticles = applyArticleFilters(articles, listFilters, 'oldest');
+  const orderedArticles = applyArticleFilters(listArticles, listFilters, 'oldest');
 
   // Live in-page search across the same fields as the header search bar.
   const filteredArticles = searchTerm.trim()
@@ -327,7 +344,7 @@ function ArticlesList() {
     <div className="articles-list-page">
       <div className="articles-list-header">
         <div className="header-title-row">
-          <h1>{t('article.list.title')}</h1>
+          <h1>{section ? sectionLabel(section, catalog) : t('article.list.title')}</h1>
           <div className="articles-view-toggle" data-mode={viewMode} role="group" aria-label={t('article.list.viewMode')}>
             <button
               type="button"
@@ -361,6 +378,17 @@ function ArticlesList() {
             </button>
           )}
         </div>
+        {section && (
+          <div className="articles-section-intro">
+            <p>{t('sections.page.subtitle', 'Artículos y proyectos de esta sección.')}</p>
+            <button type="button" className="articles-section-all" onClick={() => navigateToArticlesList()}>
+              {t('sections.page.allArticles', 'Ver todos los artículos')}
+            </button>
+          </div>
+        )}
+        {/* A section: its projects first, then its articles (with the filters). */}
+        {section && <SectionProjects sectionKey={section} />}
+        {section && <h2 className="articles-section-heading">{t('sections.page.articles', 'Artículos')}</h2>}
         <div className="articles-list-subheader">
           <div className="articles-search">
             <div className="search-input-wrapper">
@@ -380,7 +408,7 @@ function ArticlesList() {
             </div>
           </div>
           <ArticleFilters
-            articles={articles}
+            articles={listArticles}
             filters={listFilters}
             onChange={setListFilters}
             defaultSort="oldest"
@@ -390,9 +418,11 @@ function ArticlesList() {
         </div>
       </div>
 
-      {articles.length === 0 ? (
+      {listArticles.length === 0 ? (
         <div className="no-articles">
-          <p>{t('article.list.empty')}</p>
+          <p>{section
+            ? t('sections.page.noArticles', 'Todavía no hay artículos en esta sección.')
+            : t('article.list.empty')}</p>
         </div>
       ) : filteredArticles.length === 0 ? (
         <div className="no-articles">

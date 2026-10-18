@@ -1,0 +1,39 @@
+/* magazine-front/src/components/common/SectionPicker.css */
+
+.section-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Section names keep their case, like the menu entries they stand for. */
+.section-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid #cfcfcf;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-transform: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.section-chip:hover:not(:disabled),
+.section-chip:focus-visible {
+  border-color: #000000;
+}
+.section-chip.is-on {
+  border-color: #000000;
+  background: #000000;
+  color: #ffffff;
+}
+.section-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

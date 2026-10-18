@@ -4,14 +4,24 @@ import { useAuth } from '../../../app_context/AuthContext';
 import { useUI } from '../../../app_context/UIContext';
 import { useMagazine } from '../../../app_context/MagazineContext';
 import { usePendingReview } from '../../../app_context/PendingReviewContext';
+import { useSectionCatalog } from '../../../app_context/useSectionCatalog';
+import { sectionsOf, requestedSectionsOf, sectionList } from '../../../utils/sections';
+import SectionPicker from '../../common/SectionPicker';
 import './AdminPendingTab.css';
 
 function AdminPendingTab() {
   const { currentUser } = useAuth();
   const { showSuccess, showError, navigateToProjectDetail, navigateToArticle } = useUI();
   const { fetchArticleById, setSelectedProject } = useMagazine?.() || {};
-  const { pendingArticles, pendingProjects, loading, refresh } = usePendingReview();
+  const { pendingArticles, pendingProjects, sectionRequestArticles, sectionRequestProjects, loading, refresh } = usePendingReview();
   const [actingId, setActingId] = useState(null);
+  // Magazine sections (utils/sections.js): what the approver settles on for
+  // each publication — by default what its author asked for.
+  const catalog = useSectionCatalog();
+  const [chosen, setChosen] = useState({});
+  const chosenKey = (kind, item) => `${kind}-${kind === 'article' ? item.id_article : item.id_project}`;
+  const sectionsFor = (kind, item) => chosen[chosenKey(kind, item)] ?? requestedSectionsOf(item) ?? sectionsOf(item);
+  const choose = (kind, item, value) => setChosen((prev) => ({ ...prev, [chosenKey(kind, item)]: value }));
   // Reject-with-reason modal: { kind: 'article'|'project', id, title } | null
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
@@ -27,12 +37,13 @@ function AdminPendingTab() {
   const resourcePath = (kind) => (kind === 'article' ? 'magazine-article' : 'magazine-project');
   const idOf = (kind, item) => (kind === 'article' ? item.id_article : item.id_project);
 
-  const handleApprove = async (kind, id) => {
+  const handleApprove = async (kind, item) => {
+    const id = idOf(kind, item);
     setActingId(id);
     try {
       const res = await axiosInstance.patch(
         `/${resourcePath(kind)}/approve/${id}`,
-        {},
+        { sections: sectionsFor(kind, item) },
         buildAuthHeader()
       );
       if (res.data.error) {
@@ -43,6 +54,30 @@ function AdminPendingTab() {
       }
     } catch (err) {
       showError(err.response?.data?.error || 'Error al aprobar el contenido');
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  // A published publication whose author asked for other sections: set the
+  // approved ones (`keep` = leave them as they are, i.e. reject the change).
+  const settleSections = async (kind, item, keep) => {
+    const id = idOf(kind, item);
+    setActingId(`s-${kind}-${id}`);
+    try {
+      const res = await axiosInstance.patch(
+        `/${resourcePath(kind)}/sections/${id}`,
+        { sections: keep ? sectionsOf(item) : sectionsFor(kind, item) },
+        buildAuthHeader()
+      );
+      if (res.data.error) {
+        showError(res.data.error);
+      } else {
+        showSuccess(keep ? 'Cambio de sección rechazado' : 'Secciones actualizadas');
+        await refresh();
+      }
+    } catch (err) {
+      showError(err.response?.data?.error || 'Error al actualizar las secciones');
     } finally {
       setActingId(null);
     }
@@ -90,7 +125,68 @@ function AdminPendingTab() {
       ? item.authors.map((a) => a.name_user).join(', ')
       : (item.author_name || 'Autor desconocido');
 
-  const total = pendingArticles.length + pendingProjects.length;
+  const total = pendingArticles.length + pendingProjects.length
+    + sectionRequestArticles.length + sectionRequestProjects.length;
+
+  // The sections block of a pending card.
+  const sectionsBlock = (kind, item) => (
+    <div className="admin-pending-card__sections">
+      <p className="admin-pending-card__note">
+        Secciones de la revista (además de {kind === 'article' ? '«Artículos»' : '«Proyectos»'}) — puedes cambiarlas antes de aprobar:
+      </p>
+      <SectionPicker
+        catalog={catalog}
+        value={sectionsFor(kind, item)}
+        onChange={(value) => choose(kind, item, value)}
+        idPrefix={`pending-${chosenKey(kind, item)}`}
+      />
+    </div>
+  );
+
+  const sectionRequestCard = (kind, item) => {
+    const id = idOf(kind, item);
+    const isActing = actingId === `s-${kind}-${id}`;
+    const title = kind === 'article' ? item.title_article : item.title_project;
+    return (
+      <li key={`s-${kind}-${id}`} className="admin-pending-card">
+        <div className="admin-pending-card__body">
+          <h3 className="admin-pending-card__title">{title}</h3>
+          <p className="admin-pending-card__author">
+            {kind === 'article' ? 'Artículo' : 'Proyecto'} · Por {authorLabelOf(item)}
+          </p>
+          <p className="admin-pending-card__note">
+            Ahora aparece en: <strong>{sectionList(sectionsOf(item), catalog, 'ninguna sección')}</strong>
+            {' · '}Pide: <strong>{sectionList(requestedSectionsOf(item) || [], catalog, 'quitarla de todas')}</strong>
+          </p>
+          <div className="admin-pending-card__sections">
+            <p className="admin-pending-card__note">Secciones que quedarán (puedes cambiarlas):</p>
+            <SectionPicker
+              catalog={catalog}
+              value={sectionsFor(kind, item)}
+              onChange={(value) => choose(kind, item, value)}
+              idPrefix={`request-${chosenKey(kind, item)}`}
+            />
+          </div>
+        </div>
+        <div className="admin-pending-card__actions">
+          <button
+            className="admin-pending-card__btn admin-pending-card__btn--reject"
+            disabled={isActing}
+            onClick={() => settleSections(kind, item, true)}
+          >
+            Rechazar cambio
+          </button>
+          <button
+            className="admin-pending-card__btn admin-pending-card__btn--approve"
+            disabled={isActing}
+            onClick={() => settleSections(kind, item, false)}
+          >
+            Aprobar secciones
+          </button>
+        </div>
+      </li>
+    );
+  };
 
   return (
     <section className="admin-pending">
@@ -126,6 +222,7 @@ function AdminPendingTab() {
                         Categoría: <strong>{article.category_article || 'sin categoría'}</strong>
                         {article.is_premium ? ' · Premium' : ''}
                       </p>
+                      {sectionsBlock('article', article)}
                     </div>
                     <div className="admin-pending-card__actions">
                       <button
@@ -144,7 +241,7 @@ function AdminPendingTab() {
                       <button
                         className="admin-pending-card__btn admin-pending-card__btn--approve"
                         disabled={isActing}
-                        onClick={() => handleApprove('article', article.id_article)}
+                        onClick={() => handleApprove('article', article)}
                       >
                         Aprobar y publicar
                       </button>
@@ -176,6 +273,7 @@ function AdminPendingTab() {
                         {project.type_project ? <>Tipo: <strong>{project.type_project}</strong></> : 'Sin tipo'}
                         {project.format_project ? ` · ${project.format_project}` : ''}
                       </p>
+                      {sectionsBlock('project', project)}
                     </div>
                     <div className="admin-pending-card__actions">
                       <button
@@ -194,7 +292,7 @@ function AdminPendingTab() {
                       <button
                         className="admin-pending-card__btn admin-pending-card__btn--approve"
                         disabled={isActing}
-                        onClick={() => handleApprove('project', project.id_project)}
+                        onClick={() => handleApprove('project', project)}
                       >
                         Aprobar y publicar
                       </button>
@@ -202,6 +300,19 @@ function AdminPendingTab() {
                   </li>
                 );
               })}
+            </ul>
+          )}
+
+          <h3 className="admin-pending__section-title">
+            Cambios de sección{' '}
+            <span className="admin-pending__count">{sectionRequestArticles.length + sectionRequestProjects.length}</span>
+          </h3>
+          {sectionRequestArticles.length + sectionRequestProjects.length === 0 ? (
+            <p className="admin-pending__empty">Nadie ha pedido cambiar las secciones de lo ya publicado.</p>
+          ) : (
+            <ul className="admin-pending__list">
+              {sectionRequestArticles.map((article) => sectionRequestCard('article', article))}
+              {sectionRequestProjects.map((project) => sectionRequestCard('project', project))}
             </ul>
           )}
         </>

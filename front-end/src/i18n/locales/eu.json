@@ -719,5 +719,22 @@
   "paisaje.editor.summary.player": "Erreproduzigailua",
   "paisaje.editor.summary.panelHint": "Horrela ikusiko da bineta komikian: piezak bineta osoa betetzen du.",
   "paisaje.editor.audio.reducedMotion": "Zure gailuak «mugimendua murriztu» (edo «animazioak kendu») aktibatuta du. Horregatik ikusiko duzu, ezarpen hori duen edozein irakurlek bezala, erreproduzigailuaren bertsio sinplifikatua: marrazki osoa bolumenarekin agertu eta desagertzen da, trazurik eta maiztasun-bandarik gabe. Desaktibatu irisgarritasun-ezarpenetan animazio osoa ikusteko.",
-  "paisaje.editor.summary.audioValue": "AAC 192 kbps · bolumena normalizatuta: {{before}} → {{after}}"
+  "paisaje.editor.summary.audioValue": "AAC 192 kbps · bolumena normalizatuta: {{before}} → {{after}}",
+  "sections.editor.legend": "Aldizkariaren atalak",
+  "sections.editor.legendProject": "Proiektuaren atalak aldizkarian",
+  "sections.editor.hintArticle": "Zure argitalpena beti agertzen da «Artikuluak» atalean. Nahi baduzu, markatu menuko beste atal batzuk, horietan ere ager dadin.",
+  "sections.editor.hintProject": "Proiektua beti agertzen da «Proiektuak» atalean. Nahi baduzu, markatu menuko beste atal batzuk, horietan ere ager dadin.",
+  "sections.editor.approvalNote": "Erredakzio-taldeak egiaztatzen ditu atalak argitaratu aurretik; egokiak ez badira, alda ditzake.",
+  "sections.editor.pendingChange": "Orain hemen agertzen da: {{list}}. Zure aldaketa onartu arte zain geratuko da.",
+  "sections.editor.requestedBy": "Egileak eskatu du: {{list}}. Admin › Zain atalean onar dezakezu, edo hemen utzi behin betiko atalak markatuta.",
+  "sections.none": "bat ere ez",
+  "sections.review.label": "Atalak",
+  "sections.review.none": "«Artikuluak» bakarrik",
+  "sections.review.pending": "onarpenaren zain",
+  "sections.page.subtitle": "Atal honetako artikuluak eta proiektuak.",
+  "sections.page.allArticles": "Ikusi artikulu guztiak",
+  "sections.page.noArticles": "Oraindik ez dago artikulurik atal honetan.",
+  "sections.page.projects": "Proiektuak",
+  "sections.projectBadge": "Proiektua",
+  "sections.page.articles": "Artikuluak"
 }

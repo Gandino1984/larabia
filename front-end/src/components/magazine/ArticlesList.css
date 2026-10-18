@@ -629,3 +629,39 @@
 .articles-search .search-input-wrapper {
   margin-bottom: 1rem;
 }
+
+/* A magazine section (header button such as «Internacional»): what it is,
+   and the way back to every article. */
+.articles-section-intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  margin: -1.5rem 0 2rem;
+  color: #cfcfcf;
+}
+.articles-section-heading {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+  color: #e0e0e0;
+}
+.articles-section-intro p {
+  margin: 0;
+}
+.articles-section-all {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.articles-section-all:hover,
+.articles-section-all:focus-visible {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}

@@ -119,6 +119,19 @@ Promise.all([
             await qi.addColumn('article_blocks', 'soundscape_data', { type: DataTypes.TEXT, allowNull: true });
             console.log('>>> Added article_blocks.soundscape_data');
         }
+        // Magazine sections of articles and projects (migration 017).
+        for (const [table, cols] of [
+            ['magazine_articles', ['sections_article', 'sections_requested_article']],
+            ['magazine_projects', ['sections_project', 'sections_requested_project']]
+        ]) {
+            const desc = await qi.describeTable(table);
+            for (const col of cols) {
+                if (!desc[col]) {
+                    await qi.addColumn(table, col, { type: DataTypes.JSON, allowNull: true });
+                    console.log(`>>> Added ${table}.${col}`);
+                }
+            }
+        }
     } catch (err) {
         console.error('Error ensuring added columns:', err.message);
     }

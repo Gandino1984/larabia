@@ -30,6 +30,7 @@ router.patch("/update/:id_article", magazineArticleApiController.update);
 router.patch("/revert-to-draft/:id_article", magazineArticleApiController.revertToDraft);  // author / super-admin
 router.patch("/approve/:id_article", magazineArticleApiController.approveArticle);   // super-admin
 router.patch("/reject/:id_article", magazineArticleApiController.rejectArticle);     // super-admin
+router.patch("/sections/:id_article", magazineArticleApiController.setSections);     // super-admin: approved sections
 router.patch("/deactivate/:id_article", magazineArticleApiController.deactivate);
 router.patch("/invitation/:id/respond", magazineArticleApiController.respondToInvitation);
 

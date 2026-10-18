@@ -5,6 +5,8 @@ import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { ArrowLeft } from 'lucide-react';
 import ArticleCard from '../magazine/ArticleCard';
+import SectionProjects from '../magazine/SectionProjects';
+import { inSection } from '../../utils/sections';
 import './OpenMicPublications.css';
 
 function OpenMicPublications() {
@@ -19,7 +21,8 @@ function OpenMicPublications() {
 
   const openMicArticles = useMemo(() => {
     if (!articles) return [];
-    return articles.filter(article => article.category_article === 'terrenito en pluton' || article.category_article === 'micro abierto');
+    // Its category (terrenito en pluton) or the section (utils/sections.js).
+    return articles.filter(article => inSection(article, 'openmic'));
   }, [articles]);
 
   return (
@@ -33,6 +36,8 @@ function OpenMicPublications() {
             <p className="openmic-subtitle">{t('openmic.subtitle')}</p>
           </div>
         </header>
+
+        <SectionProjects sectionKey="openmic" />
 
         {loading && (
           <div className="openmic-loading">

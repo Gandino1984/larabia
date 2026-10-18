@@ -14,6 +14,7 @@ import { useMagazine } from '../../app_context/MagazineContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useUI } from '../../app_context/UIContext';
 import SectionPreviewRow from './SectionPreviewRow';
+import { inSection } from '../../utils/sections';
 import './SectionPreviews.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -32,6 +33,10 @@ const resolveImage = (path) => {
 // Article categories that make up the "Barrio" section (neighbourhood content:
 // micro-perfiles, espacio abierto, talleres, infantil).
 const BARRIO_CATEGORIES = ['micro-perfiles', 'terrenito en pluton', 'micro abierto', 'talleres', 'infantil'];
+// …and the publications placed in the sections under «Barrio» in the menu
+// (utils/sections.js), projects included.
+const BARRIO_SECTIONS = ['microperfiles', 'openmic', 'galeria', 'infantil'];
+const inAnySection = (pub, keys) => keys.some((key) => inSection(pub, key));
 
 // Each section declares which projects/articles belong to it, and whether it
 // also pulls in workshops.
@@ -39,15 +44,15 @@ const PREVIEW_SECTIONS = [
   {
     id: 'barrio',
     titleKey: 'sectionPreviews.barrio',
-    matchProject: () => false,
-    matchArticle: (a) => BARRIO_CATEGORIES.includes(norm(a.category_article)),
+    matchProject: (p) => inAnySection(p, BARRIO_SECTIONS),
+    matchArticle: (a) => BARRIO_CATEGORIES.includes(norm(a.category_article)) || inAnySection(a, BARRIO_SECTIONS),
     includeWorkshops: true,
   },
   {
     id: 'no-ficcion',
     titleKey: 'editor.category.noficcion',
-    matchProject: (p) => ['no-ficcion', 'periodistico'].includes(norm(p.type_project)),
-    matchArticle: (a) => norm(a.category_article) === 'no-ficcion',
+    matchProject: (p) => ['no-ficcion', 'periodistico'].includes(norm(p.type_project)) || inSection(p, 'no-ficcion'),
+    matchArticle: (a) => inSection(a, 'no-ficcion'),
   },
   // Ficción is temporarily hidden from the landing (only Barrio + No-ficción).
 ];

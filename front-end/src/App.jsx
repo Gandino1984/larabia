@@ -133,7 +133,7 @@ function App() {
     if (showAdmin) return <AdminPage />;
     if (showProjectDetail) return <ProjectDetail />;
     if (showOpenMic) return <OpenMicPublications />;
-    if (showMicroPerfiles) return <CategorySectionPage category="micro-perfiles" titleKey="microperfiles.title" subtitleKey="microperfiles.subtitle" />;
+    if (showMicroPerfiles) return <CategorySectionPage category="micro-perfiles" sectionKey="microperfiles" titleKey="microperfiles.title" subtitleKey="microperfiles.subtitle" />;
     if (showWorkshopDetail) return <WorkshopDetail />;
     if (showTalleres) return <WorkshopsList />;
     if (showAbout) return <AboutRabia />;

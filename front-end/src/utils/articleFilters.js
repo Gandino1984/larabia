@@ -22,12 +22,16 @@ export const CATEGORIES = [
   ['fotoreportaje', 'editor.category.fotoreportaje'], ['video reportaje', 'editor.category.videoreportaje'],
   ['podcast', 'editor.category.podcast'], ['cómic multimedia', 'editor.category.comic'],
   ['crítica', 'editor.category.critica'], ['ensayo', 'editor.category.ensayo'],
-  ['terrenito en pluton', 'editor.category.microAbierto'], ['internacional', 'editor.category.internacional'],
-  ['no-ficcion', 'editor.category.noficcion'], ['ficcion', 'editor.category.ficcion'],
-  ['micro-perfiles', 'editor.category.microperfiles'], ['talleres', 'editor.category.talleres'],
-  ['infantil', 'editor.category.infantil']
+  ['terrenito en pluton', 'editor.category.microAbierto'],
+  ['micro-perfiles', 'editor.category.microperfiles'], ['talleres', 'editor.category.talleres']
 ];
-const CATEGORY_KEYS = Object.fromEntries([['general', 'editor.category.general'], ...CATEGORIES]);
+// Former categories that are magazine SECTIONS now (header buttons, chosen
+// apart — utils/sections.js). Older publications may still carry them.
+const SECTION_CATEGORIES = [
+  ['internacional', 'editor.category.internacional'], ['no-ficcion', 'editor.category.noficcion'],
+  ['ficcion', 'editor.category.ficcion'], ['infantil', 'editor.category.infantil']
+];
+const CATEGORY_KEYS = Object.fromEntries([['general', 'editor.category.general'], ...CATEGORIES, ...SECTION_CATEGORIES]);
 
 /** i18n key for a category value (undefined for unknown values). */
 export const categoryLabelKey = (value) => CATEGORY_KEYS[value];

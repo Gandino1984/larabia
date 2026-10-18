@@ -87,6 +87,18 @@ const magazine_project_model = sequelize.define(
             allowNull: true,
             comment: 'Super-admin feedback when a submission is rejected back to draft'
         },
+        // Magazine sections (header buttons) the project also appears in —
+        // approved / requested by the author (utils/sections.js).
+        sections_project: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: 'Approved section keys (besides Proyectos)'
+        },
+        sections_requested_project: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: 'Section keys requested by the author, awaiting a super admin (null = none)'
+        },
         featured_project: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

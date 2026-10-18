@@ -67,6 +67,10 @@ export const UIProvider = ({ children }) => {
   // above gets overwritten when you open an article from inside a project, so
   // the project's own "Volver" needs its own remembered origin.
   const [projectBackView, setProjectBackView] = useState('home');
+  // The magazine section (header button such as «Internacional») the
+  // «Artículos» list is showing, or null for all of it. Kept while the reader
+  // opens a publication from it and comes back.
+  const [articlesSection, setArticlesSection] = useState(null);
 
   // Card notification states
   const [error, setError] = useState({ databaseResponseError: '', imageError: '', articleError: '', userError: '' });
@@ -149,7 +153,16 @@ export const UIProvider = ({ children }) => {
     setShowArticleDetail(true);
   };
 
-  const navigateToArticlesList = () => {
+  // `section`: a section key (header button) — anything else (no argument,
+  // a click event) means the whole list.
+  const navigateToArticlesList = (section) => {
+    setArticlesSection(typeof section === 'string' && section ? section : null);
+    setPreviousView('home');
+    resetAllViews();
+    setShowArticlesList(true);
+  };
+  // Back to the list as it was (same section).
+  const returnToArticlesList = () => {
     setPreviousView('home');
     resetAllViews();
     setShowArticlesList(true);
@@ -168,7 +181,7 @@ export const UIProvider = ({ children }) => {
         }
         break;
       case 'articlesList':
-        navigateToArticlesList();
+        returnToArticlesList();
         break;
       case 'editor':
         navigateToEditor();
@@ -414,6 +427,7 @@ export const UIProvider = ({ children }) => {
     navigateToArticle,
     navigateToArticleDetail,
     navigateToArticlesList,
+    articlesSection,
     navigateToEditor,
     navigateToEditorForEdit,
     navigateToMyPublications,

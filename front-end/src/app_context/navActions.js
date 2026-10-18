@@ -21,7 +21,7 @@ const SECTION_NAV = {
 
 export function useNavActions() {
   const ui = useUI();
-  const { allArticles, projects, setSelectedArticle, setSelectedProject, setFilters } = useMagazine();
+  const { allArticles, projects, setSelectedArticle, setSelectedProject } = useMagazine();
 
   return useCallback((action) => {
     if (!action || typeof action !== 'object') return;
@@ -39,9 +39,9 @@ export function useNavActions() {
         else if (value === 'recommendations') ui.openRecommendationsModal?.();
         break;
       case 'category':
-        // Open the article list pre-filtered to a category (e.g. "internacional").
-        setFilters?.({ category: value, searchTerm: '' });
-        ui.navigateToArticlesList?.();
+        // A magazine section («Internacional»…): the publications — articles
+        // AND projects — that belong to it (utils/sections.js).
+        ui.navigateToArticlesList?.(value);
         break;
       case 'article': {
         const a = (allArticles || []).find((x) => String(x.id_article) === String(value));
@@ -67,5 +67,5 @@ export function useNavActions() {
       default:
         break;
     }
-  }, [ui, allArticles, projects, setSelectedArticle, setSelectedProject, setFilters]);
+  }, [ui, allArticles, projects, setSelectedArticle, setSelectedProject]);
 }

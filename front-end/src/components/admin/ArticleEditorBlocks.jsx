@@ -19,7 +19,10 @@ import { isPieceComplete, pieceForSave } from '../../paisaje/integration/soundsc
 const PaisajeEditor = lazy(() => import('../../paisaje/integration/PaisajeEditor'));
 import LoadFailBoundary from '../common/LoadFailBoundary';
 import ArticleFilters from '../common/ArticleFilters';
-import { CATEGORIES, EMPTY_ARTICLE_FILTERS, applyArticleFilters } from '../../utils/articleFilters';
+import SectionPicker from '../common/SectionPicker';
+import { useSectionCatalog } from '../../app_context/useSectionCatalog';
+import { sectionsOf, requestedSectionsOf, sameKey, sectionList } from '../../utils/sections';
+import { CATEGORIES, EMPTY_ARTICLE_FILTERS, applyArticleFilters, categoryLabelKey } from '../../utils/articleFilters';
 import axios from 'axios';
 import './ArticleEditorBlocks.css';
 
@@ -60,7 +63,7 @@ const PROJECT_FORMATS = [
   ['reportaje', 'Reportaje'], ['entrevista', 'Entrevista'], ['poesía', 'Poesía']
 ];
 
-const EMPTY_WIZARD_PROJECT = { title_project: '', description_project: '', type_project: '', format_project: '' };
+const EMPTY_WIZARD_PROJECT = { title_project: '', description_project: '', type_project: '', format_project: '', sections: [] };
 const TOTAL_STEPS = 6;
 
 function ArticleEditorBlocks() {
@@ -104,6 +107,49 @@ function ArticleEditorBlocks() {
   const [wizardProjectCoverFile, setWizardProjectCoverFile] = useState(null);
   const [wizardProjectCoverPreview, setWizardProjectCoverPreview] = useState(null);
   const [editingArticle, setEditingArticle] = useState(null);
+  // Magazine sections (header buttons) a publication also appears in —
+  // approved by a super admin (utils/sections.js).
+  const sectionCatalog = useSectionCatalog();
+  // What the section picker starts with for an article / a project: its
+  // author edits what they asked for while it's pending; a super admin, the
+  // approved sections.
+  const startingSections = (pub) => {
+    const asked = requestedSectionsOf(pub);
+    return !canPublishDirectly && asked !== null ? asked : sectionsOf(pub);
+  };
+  const sameSections = (a, b) => a.length === b.length && a.every((k) => b.some((x) => sameKey(x, k)));
+  // Under a section picker: who decides, and what readers see meanwhile.
+  const sectionsNote = (pub, value) => {
+    const live = pub ? sectionsOf(pub) : [];
+    const asked = pub ? requestedSectionsOf(pub) : null;
+    const published = !!pub && (pub.status_article ?? pub.status_project) === 'published';
+    const none = t('sections.none', 'ninguna');
+    if (canPublishDirectly) {
+      return asked !== null ? (
+        <p className="pub-step-note">
+          {t('sections.editor.requestedBy', {
+            list: sectionList(asked, sectionCatalog, none),
+            defaultValue: 'Su autora o autor pidió: {{list}}. Puedes aprobarlo en Admin › Pendientes o dejar marcadas aquí las secciones definitivas.'
+          })}
+        </p>
+      ) : null;
+    }
+    return (
+      <>
+        <p className="pub-step-note">
+          {t('sections.editor.approvalNote', 'Las secciones las valida el equipo de edición antes de publicarlas; si no encajan, pueden cambiarlas.')}
+        </p>
+        {published && !sameSections(value, live) && (
+          <p className="pub-step-note">
+            {t('sections.editor.pendingChange', {
+              list: sectionList(live, sectionCatalog, none),
+              defaultValue: 'Ahora aparece en: {{list}}. Tu cambio quedará pendiente hasta que se apruebe.'
+            })}
+          </p>
+        )}
+      </>
+    );
+  };
   const [formData, setFormData] = useState({
     title_article: '',
     excerpt_article: '',
@@ -111,7 +157,8 @@ function ArticleEditorBlocks() {
     authors: [currentUser?.id_user].filter(Boolean),
     project_id: '',
     status_article: 'draft',
-    featured_article: false
+    featured_article: false,
+    sections: []
   });
   const [selectedAuthorToAdd, setSelectedAuthorToAdd] = useState('');
   const [coverImageFile, setCoverImageFile] = useState(null);
@@ -140,7 +187,8 @@ function ArticleEditorBlocks() {
     description_project: '',
     type_project: '',
     format_project: '',
-    status_project: 'published'
+    status_project: 'published',
+    sections: []
   });
   const [newProjectAuthors, setNewProjectAuthors] = useState([]);
   const [selectedProjectAuthorToAdd, setSelectedProjectAuthorToAdd] = useState('');
@@ -206,7 +254,8 @@ function ArticleEditorBlocks() {
         authors: authorIds,
         project_id: selectedArticle.project_id || '',
         status_article: selectedArticle.status_article,
-        featured_article: selectedArticle.featured_article
+        featured_article: selectedArticle.featured_article,
+        sections: startingSections(selectedArticle)
       });
 
       // Detect content type from blocks + category (micro-perfil is category-driven).
@@ -329,6 +378,7 @@ function ArticleEditorBlocks() {
       description_project: newProjectData.description_project,
       type_project: newProjectData.type_project,
       format_project: newProjectData.format_project,
+      sections: newProjectData.sections,
       author_id: primaryAuthor.id_user,
       author_name: primaryAuthor.name_user,
       authors: newProjectAuthors.map((a, index) => ({ user_id: a.id_user, author_order: index }))
@@ -384,7 +434,8 @@ function ArticleEditorBlocks() {
       description_project: '',
       type_project: '',
       format_project: '',
-      status_project: 'draft'
+      status_project: 'draft',
+      sections: []
     });
     setProjectCoverFile(null);
     setProjectCoverPreview(null);
@@ -398,7 +449,8 @@ function ArticleEditorBlocks() {
       description_project: project.description_project || '',
       type_project: project.type_project || '',
       format_project: project.format_project || '',
-      status_project: project.status_project || 'draft'
+      status_project: project.status_project || 'draft',
+      sections: startingSections(project)
     });
     const authors = (project.authors && project.authors.length > 0)
       ? project.authors.map(a => ({ id_user: a.id_user, name_user: a.name_user, image_user: a.image_user }))
@@ -834,6 +886,7 @@ function ArticleEditorBlocks() {
       description_project: wizardProject.description_project,
       type_project: wizardProject.type_project,
       format_project: wizardProject.format_project,
+      sections: wizardProject.sections,
       status_project: status,
       author_id: authorIds[0],
       author_name: primary?.name_user || currentUser.name_user,
@@ -1131,7 +1184,8 @@ function ArticleEditorBlocks() {
       authors: authorIds,
       project_id: article.project_id || '',
       status_article: article.status_article,
-      featured_article: article.featured_article
+      featured_article: article.featured_article,
+      sections: startingSections(article)
     });
     // Load the existing cover into the preview so it shows AND isn't wiped on
     // save (save clears the cover when there's no preview and no new file).
@@ -1178,7 +1232,8 @@ function ArticleEditorBlocks() {
       authors: [currentUser?.id_user].filter(Boolean),
       project_id: '',
       status_article: 'draft',
-      featured_article: false
+      featured_article: false,
+      sections: []
     });
     setFieldErrors({});
     setBlocks([]);
@@ -1263,8 +1318,8 @@ function ArticleEditorBlocks() {
     || selectedProject.authors?.some(a => a.id_user === currentUser?.id_user)
   );
   const categoryLabel = (() => {
-    const found = CATEGORIES.find(([value]) => value === formData.category_article);
-    return found ? t(found[1]) : t('editor.category.general');
+    const key = categoryLabelKey(formData.category_article);
+    return key ? t(key) : (formData.category_article || t('editor.category.general'));
   })();
   const publishIssues = [1, 2, 3].map(stepIssue).filter(Boolean);
   const pendingContent = contentIssue();
@@ -1461,6 +1516,19 @@ function ArticleEditorBlocks() {
               </select>
             </div>
           </div>
+          <div className="form-group">
+            <span className="pub-field-label">{t('sections.editor.legendProject', 'Secciones de la revista del proyecto')}</span>
+            <p className="pub-step-hint">
+              {t('sections.editor.hintProject', 'El proyecto aparece siempre en «Proyectos». Marca, si quieres, otras secciones del menú en las que también debe aparecer.')}
+            </p>
+            <SectionPicker
+              catalog={sectionCatalog}
+              value={wizardProject.sections}
+              onChange={(sections) => setWizardProject(prev => ({ ...prev, sections }))}
+              idPrefix="pub-project-section"
+            />
+            {sectionsNote(null, wizardProject.sections)}
+          </div>
         </fieldset>
       )}
 
@@ -1480,9 +1548,30 @@ function ArticleEditorBlocks() {
           >
             <option value="general">{editingArticle ? t('editor.category.general') : t('editor.wizard.pickCategory', 'Elige una categoría…')}</option>
             {CATEGORIES.map(([value, key]) => <option key={value} value={value}>{t(key)}</option>)}
+            {/* A category that is now a section (Internacional…) on an older
+                publication: keep it selectable so saving doesn't change it. */}
+            {formData.category_article !== 'general' && !CATEGORIES.some(([value]) => value === formData.category_article) && (
+              <option value={formData.category_article}>
+                {categoryLabelKey(formData.category_article) ? t(categoryLabelKey(formData.category_article)) : formData.category_article}
+              </option>
+            )}
           </select>
           {fieldErrors.category_article && <span className="field-error-msg" role="alert">{fieldErrors.category_article}</span>}
         </div>
+      </fieldset>
+
+      <fieldset className="pub-fieldset">
+        <legend>{t('sections.editor.legend', 'Secciones de la revista')}</legend>
+        <p className="pub-step-hint">
+          {t('sections.editor.hintArticle', 'Tu publicación aparece siempre en «Artículos». Marca, si quieres, otras secciones del menú en las que también debe aparecer.')}
+        </p>
+        <SectionPicker
+          catalog={sectionCatalog}
+          value={formData.sections}
+          onChange={(sections) => setFormData(prev => ({ ...prev, sections }))}
+          idPrefix="pub-section"
+        />
+        {sectionsNote(editingArticle, formData.sections)}
       </fieldset>
 
       <fieldset className={`pub-fieldset ${fieldErrors.authors ? 'has-error' : ''}`}>
@@ -1751,6 +1840,14 @@ function ArticleEditorBlocks() {
         <dt>{t('editor.category.label')}</dt>
         <dd>
           {categoryLabel}
+          <button type="button" className="pub-link" onClick={() => setStep(2)}>{t('editor.wizard.review.change', 'Cambiar')}</button>
+        </dd>
+        <dt>{t('sections.review.label', 'Secciones')}</dt>
+        <dd>
+          {sectionList(formData.sections, sectionCatalog, t('sections.review.none', 'Solo «Artículos»'))}
+          {!canPublishDirectly && formData.sections.length > 0 && !sameSections(formData.sections, editingArticle ? sectionsOf(editingArticle) : []) && (
+            <> · {t('sections.review.pending', 'pendiente de aprobación')}</>
+          )}
           <button type="button" className="pub-link" onClick={() => setStep(2)}>{t('editor.wizard.review.change', 'Cambiar')}</button>
         </dd>
         <dt>{t('editor.authors.label')}</dt>
@@ -2231,6 +2328,20 @@ function ArticleEditorBlocks() {
                     {PROJECT_FORMATS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                   </select>
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label>{t('sections.editor.legend', 'Secciones de la revista')}</label>
+                <p className="pub-step-hint">
+                  {t('sections.editor.hintProject', 'El proyecto aparece siempre en «Proyectos». Marca, si quieres, otras secciones del menú en las que también debe aparecer.')}
+                </p>
+                <SectionPicker
+                  catalog={sectionCatalog}
+                  value={newProjectData.sections || []}
+                  onChange={(sections) => setNewProjectData(prev => ({ ...prev, sections }))}
+                  idPrefix="project-section"
+                />
+                {sectionsNote(editingProjectId ? projects.find(p => p.id_project === editingProjectId) : null, newProjectData.sections || [])}
               </div>
 
               <div className="form-group">
