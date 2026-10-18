@@ -3,12 +3,14 @@
 // In the profile editor, for super admins: where the invitation of an author
 // they signed up stands (InviteAuthorModal). Pending: resend the email, or
 // correct the address while the person hasn't signed in. Declined: their
-// profile can't be published; invite them again.
+// profile can't be published and their publications are signed by the
+// magazine; invite them again.
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../../utils/axiosConfig';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
+import { useMetadata } from '../../app_context/MetadataContext';
 import './AuthorInvitationBox.css';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,6 +27,7 @@ function AuthorInvitationBox({ userId }) {
   const { t, i18n } = useTranslation();
   const { currentUser } = useAuth();
   const { showSuccess, showError } = useUI();
+  const brand = useMetadata()?.metadata?.name || 'La Rabia';
   const [invite, setInvite] = useState(null);
   const [busy, setBusy] = useState(false);
   const [editingEmail, setEditingEmail] = useState(false);
@@ -100,7 +103,7 @@ function AuthorInvitationBox({ userId }) {
       <section className="author-invitation-box is-declined" aria-live="polite">
         <h2 className="author-invitation-box__title">{t('authors.invitation.declinedTitle', 'Rechazó la invitación')}</h2>
         <p className="author-invitation-box__text">
-          {t('authors.invitation.declinedText', 'Su perfil no se muestra en Autoras/es y no se puede publicar. Las publicaciones en las que aparece conservan su nombre.')}
+          {t('authors.invitation.declinedText', { brand, defaultValue: 'Su perfil no se muestra en Autoras/es y no se puede publicar. Las publicaciones que firmaba pasaron a firmarse como «{{brand}}».' })}
         </p>
         <div className="author-invitation-box__actions">
           <button type="button" className="author-invitation-box__btn" onClick={inviteAgain} disabled={busy}>

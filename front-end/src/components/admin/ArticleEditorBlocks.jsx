@@ -73,6 +73,7 @@ function ArticleEditorBlocks() {
     fetchEditorArticles,
     fetchArticles,
     editors,
+    fetchEditors,
     selectedArticle,
     setSelectedArticle,
     createArticle,
@@ -91,10 +92,14 @@ function ArticleEditorBlocks() {
     fetchArticleById
   } = useMagazine();
   const {
-    showSuccess, showError, navigateToHome, navigateToArticlesList, navigateToArticle, showEditor,
+    showSuccess, showError, showInfo, navigateToHome, navigateToArticlesList, navigateToArticle, showEditor,
     openEditorToEdit, setOpenEditorToEdit, editorInitialView, editorReturnTo
   } = useUI();
   const { t } = useTranslation();
+
+  // Who can be credited: refreshed when the creator opens, so someone a super
+  // admin has just signed up in «Autoras/es» is already on the list.
+  useEffect(() => { fetchEditors?.(); }, [fetchEditors]);
 
   // The creator is a step-by-step process ('wizard'); the author's own list
   // lives apart in "Mis publicaciones" ('mine').
@@ -355,7 +360,13 @@ function ArticleEditorBlocks() {
     }
     const editor = editors.find(e => e.id_user === authorId);
     if (editor) {
-      setNewProjectAuthors(prev => [...prev, { id_user: editor.id_user, name_user: editor.name_user, image_user: editor.image_user }]);
+      const added = { id_user: editor.id_user, name_user: editor.name_user, image_user: editor.image_user, author_invite_status: editor.author_invite_status };
+      if (writesOnBehalf(editor, newProjectAuthors.map(a => a.id_user))) {
+        setNewProjectAuthors([added]);
+        showInfo(onBehalfNotice(editor));
+      } else {
+        setNewProjectAuthors(prev => [...prev, added]);
+      }
     }
     setSelectedProjectAuthorToAdd('');
   };
@@ -953,7 +964,9 @@ function ArticleEditorBlocks() {
       const targetStatus = publishNow ? 'published' : intent === 'update' ? currentStatus : 'draft';
       const articleData = {
         ...formData,
-        author_id: currentUser.id_user,
+        // The legacy primary author is whoever signs first (a super admin may
+        // be publishing on someone else's behalf).
+        author_id: formData.authors[0] || currentUser.id_user,
         authors: formData.authors,
         project_id: projectId,
         status_article: targetStatus,
@@ -1254,9 +1267,21 @@ function ArticleEditorBlocks() {
       showError(t('editor.author.alreadyAdded'));
       return;
     }
+    const added = getAuthorDetails(authorId);
+    if (writesOnBehalf(added, formData.authors)) {
+      setFormData(prev => ({ ...prev, authors: [authorId] }));
+      setSelectedAuthorToAdd('');
+      showInfo(onBehalfNotice(added));
+      return;
+    }
     // Functional update avoids stale-state loss when adding several in a row.
     setFormData(prev => ({ ...prev, authors: [...prev.authors, authorId] }));
     setSelectedAuthorToAdd('');
+  };
+
+  // The main author is the first one: they sign the publication.
+  const handleMakeFirstAuthor = (authorId) => {
+    setFormData(prev => ({ ...prev, authors: [authorId, ...prev.authors.filter(id => id !== authorId)] }));
   };
 
   const handleRemoveAuthor = (authorId) => {
@@ -1268,6 +1293,22 @@ function ArticleEditorBlocks() {
   };
 
   const getAuthorDetails = (authorId) => editors.find(e => e.id_user === authorId);
+
+  // Authors a super admin signed up who haven't accepted yet: they can already
+  // be credited (provisionally — if they decline, the magazine signs instead).
+  const isPendingInvitee = (author) => author?.author_invite_status === 'pending';
+  const authorOptionLabel = (author) => (isPendingInvitee(author)
+    ? `${author.name_user} · ${t('editor.author.pendingInvite', 'pendiente de aceptar')}`
+    : author.name_user);
+  // A super admin who is still the only author and adds someone who hasn't
+  // joined yet is writing on their behalf: the publication goes out in that
+  // person's name, not the super admin's (who can add themselves back).
+  const writesOnBehalf = (added, authorIds) => isSuperAdmin && isPendingInvitee(added)
+    && authorIds.length === 1 && authorIds[0] === currentUser?.id_user;
+  const onBehalfNotice = (added) => t('editor.author.onBehalf', {
+    name: added.name_user,
+    defaultValue: 'Se publicará en nombre de {{name}}. Si también quieres figurar, vuelve a añadirte.'
+  });
 
   // Google-auth users store a full avatar URL in image_user; local uploads store
   // a filename served by the API. Resolve both so the thumbnail never breaks.
@@ -1579,6 +1620,11 @@ function ArticleEditorBlocks() {
         <p className="pub-step-hint">
           {t('editor.wizard.authorsHint', '¿Quieres añadir colaboradoras/es? La primera persona de la lista figura como autora principal.')}
         </p>
+        {isSuperAdmin && (
+          <p className="pub-step-hint">
+            {t('editor.author.onBehalfHint', 'Puedes publicar en nombre de alguien que aún no ha aceptado su alta en Autoras/es: añádela y la publicación saldrá con su nombre.')}
+          </p>
+        )}
         <div className="authors-list-compact">
           {formData.authors.map((authorId, index) => {
             const author = getAuthorDetails(authorId);
@@ -1589,7 +1635,20 @@ function ArticleEditorBlocks() {
                   ? <img src={resolveUserImage(author.image_user)} alt={author.name_user} className="author-avatar-tiny" />
                   : <User className="author-icon-placeholder" size={14} />}
                 <span className="author-name-compact">{author?.name_user || t('editor.author.unknown', { id: authorId })}</span>
+                {isPendingInvitee(author) && (
+                  <span className="author-pending-compact">{t('editor.author.pendingInvite', 'pendiente de aceptar')}</span>
+                )}
                 {index === 0 && <span className="first-author-badge-compact">{t('editor.author.firstBadge')}</span>}
+                {index > 0 && (
+                  <button
+                    type="button"
+                    className="btn-first-author-compact"
+                    onClick={() => handleMakeFirstAuthor(authorId)}
+                    title={t('editor.author.makeFirstTitle', 'Que firme en primer lugar')}
+                  >
+                    {t('editor.author.makeFirst', 'Poner primero')}
+                  </button>
+                )}
                 {formData.authors.length > 1 && (
                   <button
                     type="button"
@@ -1614,7 +1673,7 @@ function ArticleEditorBlocks() {
           >
             <option value="">{t('editor.author.add')}</option>
             {editors.filter(e => !formData.authors.includes(e.id_user)).map(editor => (
-              <option key={editor.id_user} value={editor.id_user}>{editor.name_user}</option>
+              <option key={editor.id_user} value={editor.id_user}>{authorOptionLabel(editor)}</option>
             ))}
           </select>
         </div>
@@ -2353,6 +2412,9 @@ function ArticleEditorBlocks() {
                         ? <img src={resolveUserImage(author.image_user)} alt={author.name_user} className="author-avatar-tiny" />
                         : <User size={12} />}
                       <span>{author.name_user}</span>
+                      {isPendingInvitee(author) && (
+                        <span className="author-pending-compact">{t('editor.author.pendingInvite', 'pendiente de aceptar')}</span>
+                      )}
                       <button
                         type="button"
                         className="remove-author-btn"
@@ -2372,7 +2434,7 @@ function ArticleEditorBlocks() {
                   >
                     <option value="">{t('editor.project.addCollaborator')}</option>
                     {editors.filter(e => !newProjectAuthors.some(a => a.id_user === e.id_user)).map(editor => (
-                      <option key={editor.id_user} value={editor.id_user}>{editor.name_user}</option>
+                      <option key={editor.id_user} value={editor.id_user}>{authorOptionLabel(editor)}</option>
                     ))}
                   </select>
                 </div>

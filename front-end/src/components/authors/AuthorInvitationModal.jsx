@@ -1,19 +1,21 @@
 // magazine-front/src/components/authors/AuthorInvitationModal.jsx
 //
 // The invited person's answer to being signed up as an author
-// (AuthorInvitationContext): Aceptar → editora; No, gracias → stays a reader
-// and their author profile is hidden (the publications keep their name);
+// (AuthorInvitationContext): Aceptar → editora; No, gracias → stays a reader,
+// their author profile is hidden and their publications pass to the magazine;
 // Decidir más tarde → the bell keeps the invitation.
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { X, PenLine } from 'lucide-react';
 import { useAuthorInvitation } from '../../app_context/AuthorInvitationContext';
+import { useMetadata } from '../../app_context/MetadataContext';
 import './AuthorInvitationModal.css';
 
 function AuthorInvitationModal() {
   const { t } = useTranslation();
   const { invitation, modalOpen, busy, later, respond } = useAuthorInvitation();
+  const brand = useMetadata()?.metadata?.name || 'La Rabia';
   const [confirmingDecline, setConfirmingDecline] = useState(false);
   const open = !!invitation && modalOpen;
 
@@ -92,7 +94,7 @@ function AuthorInvitationModal() {
               {t('authorInvitation.confirmDecline', '¿Seguro que no quieres formar parte de Autoras/es?')}
             </p>
             <p className="author-invite-modal__text">
-              {t('authorInvitation.declineInfo', 'Tu perfil de autora o autor dejará de mostrarse. Las publicaciones en las que apareces conservarán tu nombre, y seguirás teniendo tu cuenta en la revista.')}
+              {t('authorInvitation.declineInfo', { brand, defaultValue: 'Tu perfil de autora o autor dejará de mostrarse y las publicaciones que firmas pasarán a firmarse como «{{brand}}». Seguirás teniendo tu cuenta en la revista.' })}
             </p>
             <div className="author-invite-modal__actions">
               <button

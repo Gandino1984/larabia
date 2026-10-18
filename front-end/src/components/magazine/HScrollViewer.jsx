@@ -1,7 +1,7 @@
 // magazine-front/src/components/magazine/HScrollViewer.jsx
 import { useRef, useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, ArrowRight, Play, Pause, X, Volume2, Link as LinkIcon, Bookmark, RotateCcw, Smartphone, Maximize } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Play, Pause, X, Volume2, Link as LinkIcon, Bookmark, RotateCcw, Smartphone, Maximize, ChevronFirst, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext.jsx';
 import { useAuth } from '../../app_context/AuthContext.jsx';
@@ -65,8 +65,6 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
   const [scrollLeftStart, setScrollLeftStart] = useState(0);
   const [hasDragged, setHasDragged] = useState(false);
 
-  // Touch gesture state for swipe detection
-  const [touchStart, setTouchStart] = useState({ x: 0, time: 0 });
 
   // Audio player ref for interactive audio panels
   const audioRef = useRef(null);
@@ -608,6 +606,27 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
     }
   };
 
+  // Panel by panel (bottom bar): the left edge of the next / previous panel,
+  // counted from where the reader is now.
+  const goToPanel = (direction) => {
+    const box = scrollContainerRef.current;
+    if (!box) return;
+    const boxLeft = box.getBoundingClientRect().left;
+    const edges = [...box.querySelectorAll('.hscroll-viewer-panel')]
+      .map((el) => el.getBoundingClientRect().left - boxLeft + box.scrollLeft);
+    const here = box.scrollLeft;
+    const max = box.scrollWidth - box.clientWidth;
+    const target = direction > 0
+      ? edges.find((x) => x > here + 2)
+      : [...edges].reverse().find((x) => x < here - 2);
+    const left = target ?? (direction > 0 ? max : 0);
+    box.scrollTo({ left: Math.min(max, Math.max(0, left)), behavior: 'smooth' });
+  };
+
+  const goToStart = () => {
+    scrollContainerRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
+  };
+
   // Drag handlers for horizontal scrolling
   const handleMouseDown = (e) => {
     setIsDragging(true);
@@ -645,55 +664,9 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
     }
   };
 
-  // Haptic feedback helper
-  const vibrate = (pattern) => {
-    if ('vibrate' in navigator) {
-      navigator.vibrate(pattern);
-    }
-  };
-
-  // Touch handlers for mobile with swipe detection
-  const handleTouchStart = (e) => {
-    setIsDragging(true);
-    const touchX = e.touches[0].pageX;
-    setStartX(touchX - scrollContainerRef.current.offsetLeft);
-    setScrollLeftStart(scrollContainerRef.current.scrollLeft);
-    setTouchStart({
-      x: touchX,
-      time: Date.now()
-    });
-  };
-
-  const handleTouchMove = (e) => {
-    if (!isDragging) return;
-    const x = e.touches[0].pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX); // 1:1 ratio for smoother touch dragging
-    scrollContainerRef.current.scrollLeft = scrollLeftStart - walk;
-  };
-
-  const handleTouchEnd = (e) => {
-    if (!isDragging) return;
-
-    const touchEnd = {
-      x: e.changedTouches[0].pageX,
-      time: Date.now()
-    };
-
-    const distance = touchEnd.x - touchStart.x;
-    const duration = touchEnd.time - touchStart.time;
-
-    // Swipe detected: >50px movement in <300ms
-    if (Math.abs(distance) > 50 && duration < 300) {
-      vibrate([10]); // Light haptic feedback
-      if (distance > 0) {
-        scrollLeft(); // Swipe right = previous panel
-      } else {
-        scrollRight(); // Swipe left = next panel
-      }
-    }
-
-    setIsDragging(false);
-  };
+  // Touch: the browser scrolls the strip itself (1:1 with the finger, with
+  // momentum). Moving it from touchmove as well made it lag behind the finger
+  // and jump after letting go.
 
   // Format time in MM:SS
   const formatTime = (timeInSeconds) => {
@@ -997,9 +970,6 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
             tabIndex={0}
             role="list"
             aria-label={t('hscroll.panelsAriaLabel')}
@@ -1134,6 +1104,37 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
               {currentVisiblePanel ? t('hscroll.progress.currentPanel', { panel: currentVisiblePanel }) : t('common.states.loading')} • {t('hscroll.progress.percentRead', { percent: scrollPercentage })}
             </div>
             <div className="hscroll-progress-controls">
+              <button
+                className="btn-progress-action"
+                onClick={goToStart}
+                title={t('hscroll.progress.startTitle', 'Volver al primer panel')}
+                aria-label={t('hscroll.progress.startTitle', 'Volver al primer panel')}
+                disabled={!showLeftArrow}
+              >
+                <ChevronFirst size={16} />
+                <span>{t('hscroll.progress.start', 'Inicio')}</span>
+              </button>
+              <button
+                className="btn-progress-action"
+                onClick={() => goToPanel(-1)}
+                title={t('hscroll.progress.previousTitle', 'Panel anterior')}
+                aria-label={t('hscroll.progress.previousTitle', 'Panel anterior')}
+                disabled={!showLeftArrow}
+              >
+                <ChevronLeft size={16} />
+                <span>{t('hscroll.progress.previous', 'Anterior')}</span>
+              </button>
+              <button
+                className="btn-progress-action"
+                onClick={() => goToPanel(1)}
+                title={t('hscroll.progress.nextTitle', 'Panel siguiente')}
+                aria-label={t('hscroll.progress.nextTitle', 'Panel siguiente')}
+                disabled={!showRightArrow}
+              >
+                <ChevronRight size={16} />
+                <span>{t('hscroll.progress.next', 'Siguiente')}</span>
+              </button>
+              <span className="hscroll-progress-divider" aria-hidden="true" />
               <button
                 className="btn-progress-action"
                 onClick={handleManualSave}

@@ -10,6 +10,7 @@ import SectionPreviews from './SectionPreviews';
 import ScrollHint from '../common/ScrollHint';
 import RollText from '../common/RollText';
 import SubscriberMark from '../common/SubscriberMark';
+import { categoryLabelKey } from '../../utils/articleFilters';
 import './HomePage.css';
 
 function AuthorAvatar({ author, getUrl }) {
@@ -330,6 +331,14 @@ function HomePage({ ready = true }) {
   };
 
   const currentArticle = featuredArticles?.[currentSlide];
+  // The story's category, translated when it's one of the known ones
+  // ("general" isn't shown).
+  const heroCategory = (() => {
+    const value = currentArticle?.category_article;
+    if (!value || value.toLowerCase() === 'general') return null;
+    const key = categoryLabelKey(value) || categoryLabelKey(value.toLowerCase());
+    return key ? t(key) : value;
+  })();
 
   return (
     <div className="home-page">
@@ -398,12 +407,17 @@ function HomePage({ ready = true }) {
                     <p className="hero-excerpt">{currentArticle.excerpt_article}</p>
                   )}
                   <div className="hero-media">
-                    <div
-                      className="hero-desc-image"
-                      style={{ backgroundImage: `url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})` }}
-                      role="img"
-                      aria-label={currentArticle.title_article}
-                    />
+                    {/* The story's image, with its category on top (like the
+                        badges of the article cards). */}
+                    <div className="hero-desc-figure">
+                      <div
+                        className="hero-desc-image"
+                        style={{ backgroundImage: `url(${brokenImages[currentArticle.id_article] ? '/logoFondoNegro.jpg' : getCoverImageUrl(currentArticle)})` }}
+                        role="img"
+                        aria-label={currentArticle.title_article}
+                      />
+                      {heroCategory && <span className="hero-category">{heroCategory}</span>}
+                    </div>
                     <div className="hero-actions">
                       <button
                         type="button"
@@ -449,9 +463,6 @@ function HomePage({ ready = true }) {
                             : <span className="hero-author-name">{currentArticle.author_name}</span>
                           }
                         </span>
-                      )}
-                      {currentArticle.category_article && currentArticle.category_article.toLowerCase() !== 'general' && (
-                        <span className="hero-category">{currentArticle.category_article}</span>
                       )}
                     </div>
                   </div>

@@ -148,7 +148,7 @@
 .hero-content.hero-anim .hero-headline,
 .hero-content.hero-anim .hero-date,
 .hero-content.hero-anim .hero-excerpt,
-.hero-content.hero-anim .hero-desc-image,
+.hero-content.hero-anim .hero-desc-figure,
 .hero-content.hero-anim .hero-actions,
 .hero-content.hero-anim .hero-meta {
   opacity: 0;
@@ -162,7 +162,7 @@
 .hero-content.hero-in .hero-headline { animation: hero-rise 0.6s ease both; }
 .hero-content.hero-in .hero-date { animation: hero-rise 0.6s ease both; animation-delay: 0.2s; }
 .hero-content.hero-in .hero-excerpt { animation: hero-rise 0.6s ease both; animation-delay: 0.4s; }
-.hero-content.hero-in .hero-desc-image { animation: hero-rise 0.6s ease both; animation-delay: 0.4s; }
+.hero-content.hero-in .hero-desc-figure { animation: hero-rise 0.6s ease both; animation-delay: 0.4s; }
 .hero-content.hero-in .hero-actions { animation: hero-rise 0.6s ease both; animation-delay: 0.55s; }
 .hero-content.hero-in .hero-meta { animation: hero-rise 0.6s ease both; animation-delay: 0.55s; }
 
@@ -227,19 +227,25 @@
   margin-right: auto;
 }
 
+/* The story's category, over the top-right corner of its image — the same
+   translucent pill as the article cards' badges (information: keeps its case). */
 .hero-category {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 20px;
-  font-size: 0.62rem;
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 1;
+  max-width: calc(100% - 1.2rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
   font-family: 'Source Code Pro', monospace;
+  font-size: 0.7rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  pointer-events: none;
 }
 
 .hero-title {
@@ -339,10 +345,6 @@
   color: white;
   font-size: 0.85rem;
   opacity: 0.9;
-}
-
-.hero-meta .hero-category {
-  align-self: center;
 }
 
 /* Authors (+ category) row inside the meta block. */
@@ -624,8 +626,8 @@
   }
 
   .hero-category {
-    padding: 0.2rem 0.65rem;
-    font-size: 0.65rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.72rem;
   }
 
   .hero-title {
@@ -682,12 +684,6 @@
   .hero-headline {
     padding: 0.9rem 1rem;
     margin-bottom: 1.5rem;
-  }
-
-  .hero-category {
-    padding: 0.2rem 0.7rem;
-    font-size: 0.68rem;
-    margin-bottom: 1.25rem;
   }
 
   .hero-title {
@@ -760,12 +756,6 @@
 @media (min-width: 1024px) {
   .hero-content {
     max-width: 980px;
-  }
-
-  .hero-category {
-    padding: 0.2rem 0.75rem;
-    font-size: 0.7rem;
-    margin-bottom: 1.5rem;
   }
 
   .hero-title {
@@ -869,12 +859,6 @@
     padding: 0.75rem;
   }
 
-  .hero-category {
-    padding: 0.3rem 0.8rem;
-    font-size: 0.7rem;
-    margin-bottom: 0.5rem;
-  }
-
   .hero-title {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
@@ -931,6 +915,7 @@
    buttons centered beneath it (same width as the image). On mobile the image is
    hidden (the cover is the slide bg) and the buttons stay centered. */
 .hero-desc-image { display: none; }
+.hero-desc-figure { position: relative; }
 @media (min-width: 768px) {
   /* Two-column grid so related pieces line up:
        description  | project image
@@ -959,15 +944,19 @@
     margin: 0;
     padding: 0;
   }
-  .hero-desc-image {
+  .hero-desc-figure {
     grid-area: image;
-    display: block;
     width: 100%;
     align-self: stretch;
     min-height: 160px;
     /* Top edge level with the first line of the description (line-height
        half-leading of the excerpt text). */
     margin-top: 0.4rem;
+  }
+  .hero-desc-image {
+    display: block;
+    position: absolute;
+    inset: 0;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -1031,18 +1020,22 @@
   .hero-media {
     display: contents;
   }
-  .hero-desc-image {
-    display: block;
+  .hero-desc-figure {
     order: -1;
     align-self: center;
     width: 88%;
     height: 16vh;
     max-height: 138px;
+    margin-bottom: 0.2rem;
+  }
+  .hero-desc-image {
+    display: block;
+    width: 100%;
+    height: 100%;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 3px;
-    margin-bottom: 0.2rem;
   }
   /* Full-bleed, taller description on mobile; clamp keeps it within the slide. */
   .hero-desc-row .hero-excerpt {

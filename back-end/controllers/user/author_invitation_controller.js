@@ -4,8 +4,8 @@
 // account yet (or are only readers). Until they answer, the super admin can
 // already write their profile and credit them on publications. When they
 // sign in with that email they accept (→ editora) or decline: declining
-// hides their author profile, and the publications that credit them keep
-// their name.
+// hides their author profile, and the publications that credited them pass
+// to the magazine — signed «La Rabia» when nobody else signs them.
 //
 // A new account is a Google account without a password, so the first
 // Google sign-in with that email links to it (google_oauth_controller.js).
@@ -13,6 +13,13 @@
 // user.author_invite_status: null (never invited) | 'pending' | 'accepted' | 'declined'
 import user_model from "../../models/user_model.js";
 import author_profile_model from "../../models/author_profile_model.js";
+import article_author_model from "../../models/article_author_model.js";
+import project_author_model from "../../models/project_author_model.js";
+import workshop_author_model from "../../models/workshop_author_model.js";
+import magazine_article_model from "../../models/magazine_article_model.js";
+import magazine_project_model from "../../models/magazine_project_model.js";
+import magazine_workshop_model from "../../models/magazine_workshop_model.js";
+import magazine_metadata_model from "../../models/magazine_metadata_model.js";
 import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
 import { sanitizeUserData } from "./google_oauth_controller.js";
 import { sendAuthorInvitationEmail } from "../../services/emailService.js";
@@ -38,6 +45,41 @@ function invitationOf(user) {
         // Signed in at least once: the address is theirs, it can't be corrected.
         has_signed_in: !!(user.google_id || user.pass_user)
     };
+}
+
+// Where someone is credited: the authors table of each kind of publication,
+// plus its legacy primary author (author_id / author_name).
+const CREDITS = [
+    { junction: article_author_model, fk: 'article_id', model: magazine_article_model, pk: 'id_article' },
+    { junction: project_author_model, fk: 'project_id', model: magazine_project_model, pk: 'id_project' },
+    { junction: workshop_author_model, fk: 'workshop_id', model: magazine_workshop_model, pk: 'id_workshop' }
+];
+
+/**
+ * Someone declined: their credits go away. A publication still signed by
+ * others keeps those; one nobody else signs is signed by the magazine.
+ */
+async function passCreditsToMagazine(user) {
+    const meta = await magazine_metadata_model.findByPk(1).catch(() => null);
+    const brand = meta?.name || 'La Rabia';
+    for (const { junction, fk, model, pk } of CREDITS) {
+        const credited = await junction.findAll({ where: { user_id: user.id_user }, attributes: [fk] });
+        const primary = await model.findAll({ where: { author_id: user.id_user }, attributes: [pk] });
+        const ids = [...new Set([...credited.map((r) => r[fk]), ...primary.map((r) => r[pk])])];
+        if (ids.length === 0) continue;
+        await junction.destroy({ where: { user_id: user.id_user } });
+        for (const id of ids) {
+            const record = await model.findByPk(id, { attributes: [pk, 'author_id'] });
+            if (!record) continue;
+            const next = await junction.findOne({ where: { [fk]: id }, order: [['author_order', 'ASC']] });
+            if (!next) {
+                await record.update({ author_id: null, author_name: brand });
+            } else if (record.author_id === user.id_user || record.author_id === null) {
+                const nextUser = await user_model.findByPk(next.user_id, { attributes: ['id_user', 'name_user'] });
+                await record.update({ author_id: next.user_id, author_name: nextUser?.name_user || null });
+            }
+        }
+    }
 }
 
 async function sendInvitation(user, inviter) {
@@ -239,8 +281,9 @@ async function respond(req, res) {
         }
 
         await user.update({ author_invite_status: 'declined' });
-        // Their profile leaves «Autoras/es»; the publications keep their name.
+        // Their profile leaves «Autoras/es»; their publications pass to the magazine.
         await author_profile_model.update({ status_profile: 'draft' }, { where: { user_id: user.id_user } });
+        await passCreditsToMagazine(user);
         res.json({ error: null, data: sanitizeUserData(user), success: 'Has rechazado la invitación' });
     } catch (err) {
         console.error('author_invitation_controller - respond:', err);

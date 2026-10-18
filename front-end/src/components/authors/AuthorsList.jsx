@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthor } from '../../app_context/AuthorContext';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
+import { useMagazine } from '../../app_context/MagazineContext';
 import AuthorCard from './AuthorCard';
 import InviteAuthorModal from './InviteAuthorModal';
 import { Plus, UserPlus } from 'lucide-react';
@@ -20,6 +21,7 @@ function AuthorsList() {
     showAuthors, showSuccess, showInfo
   } = useUI();
   const { canCreateContent, isSuperAdmin, currentUser } = useAuth();
+  const { fetchEditors } = useMagazine();
   const [inviting, setInviting] = useState(false);
 
   // Re-fetch whenever the authors list becomes visible (e.g. after editing a profile)
@@ -80,6 +82,7 @@ function AuthorsList() {
     else showSuccess(response?.success);
     if (!invited) return;
     fetchEditorUsers();
+    fetchEditors(); // the creator's author list: they can be credited at once
     const res = await fetchAllProfilesAdmin();
     const profile = (res?.data || []).find((p) => p.user_id === invited.id_user);
     if (profile) navigateToAuthorEditorForProfile(profile);

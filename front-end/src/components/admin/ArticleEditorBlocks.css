@@ -203,6 +203,38 @@
   color: #d32f2f;
 }
 
+/* Someone a super admin signed up who hasn't accepted yet (information, so
+   it keeps its case). */
+.author-pending-compact {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #fde8e8;
+  color: #b91c1c;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-transform: none;
+}
+
+.btn-first-author-compact {
+  margin-left: auto;
+  padding: 2px 8px;
+  border: 1px solid #1a1a1a;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-first-author-compact:hover,
+.btn-first-author-compact:focus-visible {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
 .add-author-row-compact {
   display: flex;
   gap: 6px;

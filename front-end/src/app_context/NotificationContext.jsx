@@ -32,6 +32,7 @@ import { useEngagement } from './EngagementContext';
 import { useSubscription } from './SubscriptionContext';
 import { useWorkshop } from './WorkshopContext';
 import { useAuthorInvitation } from './AuthorInvitationContext';
+import { useMetadata } from './MetadataContext';
 
 const NotificationContext = createContext(null);
 const MAX_CONTENT_NOTIFS = 30;
@@ -49,6 +50,7 @@ export const NotificationProvider = ({ children }) => {
   const subscription = useSubscription();
   const membership = subscription?.mine;
   const authorInvite = useAuthorInvitation();
+  const brand = useMetadata()?.metadata?.name || 'La Rabia';
 
   const [publishedArticles, setPublishedArticles] = useState([]);
   const [publishedProjects, setPublishedProjects] = useState([]);
@@ -179,7 +181,7 @@ export const NotificationProvider = ({ children }) => {
             variant: 'secondary',
             label: t('notifications.authorInvite.decline', 'Rechazar'),
             onClick: () => {
-              if (window.confirm(t('authorInvitation.confirmDeclineShort', '¿Rechazar la invitación? Tu perfil de autora o autor dejará de mostrarse; las publicaciones conservarán tu nombre.'))) {
+              if (window.confirm(t('authorInvitation.confirmDeclineShort', { brand, defaultValue: '¿Rechazar la invitación? Tu perfil de autora o autor dejará de mostrarse y tus publicaciones pasarán a firmarse como «{{brand}}».' }))) {
                 authorInvite.respond('decline');
               }
             }
@@ -325,7 +327,7 @@ export const NotificationProvider = ({ children }) => {
   }, [
     profilesReady, currentUser, canCreateContent, authorProfiles, lastSeen,
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
-    invitationFeed, openWorkshop, answerInvitation, authorInvite,
+    invitationFeed, openWorkshop, answerInvitation, authorInvite, brand,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

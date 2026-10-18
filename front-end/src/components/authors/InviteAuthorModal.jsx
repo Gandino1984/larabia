@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { X, UserPlus } from 'lucide-react';
 import axiosInstance from '../../utils/axiosConfig';
 import { useAuth } from '../../app_context/AuthContext';
+import { useMetadata } from '../../app_context/MetadataContext';
 import './AuthorInvitationModal.css';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,6 +23,7 @@ const FIELD_OF = { invalid_name: 'name', name_taken: 'name', invalid_email: 'ema
 function InviteAuthorModal({ onClose, onInvited }) {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
+  const brand = useMetadata()?.metadata?.name || 'La Rabia';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState(null); // { field: 'name' | 'email' | null, message }
@@ -141,7 +143,7 @@ function InviteAuthorModal({ onClose, onInvited }) {
           {error && !error.field && <p className="author-invite-form__error" role="alert">{error.message}</p>}
 
           <p className="author-invite-form__note">
-            {t('authors.invite.note', 'Mientras no responda, ya puedes crear su perfil e incluir su nombre en tus publicaciones. Si rechaza, su perfil deja de mostrarse y las publicaciones conservan su nombre.')}
+            {t('authors.invite.note', { brand, defaultValue: 'Mientras no responda, ya puedes crear su perfil y publicar en su nombre. Si rechaza, su perfil deja de mostrarse y sus publicaciones pasan a firmarse como «{{brand}}».' })}
           </p>
 
           <div className="author-invite-modal__actions">
