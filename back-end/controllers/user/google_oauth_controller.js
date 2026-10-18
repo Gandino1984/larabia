@@ -251,6 +251,7 @@ async function completeGoogleRegistration(googleId, email, name, picture) {
 }
 
 export {
+    sanitizeUserData,
     verifyGoogleToken,
     googleLogin,
     linkGoogleAccount,

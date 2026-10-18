@@ -2,11 +2,12 @@ import { Router } from "express";
 import userApiController from "../controllers/user/user_api_controller.js";
 import userController from "../controllers/user/user_controller.js";
 import { handleProfileImageUpload } from "../middleware/ProfileUploadMiddleware.js";
-import { requireSuperAdmin, requireAdmin } from "../utils/authHelper.js";
+import { requireSuperAdmin, requireAdmin, getRequestUser, roleSnapshot } from "../utils/authHelper.js";
 import { isSuperAdminEmail } from "../config/environment.js";
 import user_model from '../models/user_model.js';
 import magazine_article_model from '../models/magazine_article_model.js';
 import { sendNewsletterEmail } from '../services/emailService.js';
+import authorInvitation from '../controllers/user/author_invitation_controller.js';
 import { Op } from 'sequelize';
 import dotenv from 'dotenv';
 
@@ -22,17 +23,23 @@ router.get("/", userApiController.getAll);
 // Creator directory — used by magazine-front for co-author selection + the author list.
 // Returns anyone with editor, admin, or super_admin role. Endpoint still called /editors
 // for back-compat with magazine-front (UI labels say "editores" generically).
+// Super admins also get the authors they invited who haven't answered yet.
 router.get('/editors', async (req, res) => {
     try {
+        const caller = roleSnapshot(await getRequestUser(req));
         const editors = await user_model.findAll({
             where: {
                 [Op.or]: [
                     { is_editor: true },
                     { is_admin: true },
-                    { is_super_admin: true }
+                    { is_super_admin: true },
+                    ...(caller.isSuperAdmin ? [{ author_invite_status: 'pending' }] : [])
                 ]
             },
-            attributes: ['id_user', 'name_user', 'image_user'],
+            attributes: [
+                'id_user', 'name_user', 'image_user',
+                ...(caller.isSuperAdmin ? ['is_editor', 'is_admin', 'is_super_admin', 'author_invite_status'] : [])
+            ],
             order: [['name_user', 'ASC']]
         });
         res.json({ error: null, data: editors });
@@ -41,6 +48,16 @@ router.get('/editors', async (req, res) => {
         res.status(500).json({ error: 'Error al obtener los editores', details: err.message });
     }
 });
+
+// ============================================================
+// Authors signed up by a super admin before they had an account
+// (controllers/user/author_invitation_controller.js)
+// ============================================================
+router.post('/invite-author', authorInvitation.invite);
+router.get('/invite-author/:id_user', authorInvitation.details);
+router.post('/invite-author/:id_user/resend', authorInvitation.resend);
+router.get('/author-invitation', authorInvitation.mine);
+router.post('/author-invitation/respond', authorInvitation.respond);
 
 // ============================================================
 // Admin: user list + role management (super-admin only)

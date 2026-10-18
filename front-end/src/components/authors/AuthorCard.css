@@ -383,3 +383,24 @@
     font-size: 1.75rem;
   }
 }
+
+/* Super admins: where the invitation of an author they signed up stands.
+   Information, not a button: keeps its case. */
+.author-invite-status {
+  display: inline-block;
+  align-self: flex-start;
+  width: fit-content;
+  margin: 0 0 0.6rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  background: #fde8e8;
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.author-invite-status.is-declined {
+  background: #ececec;
+  color: #444444;
+}

@@ -2,11 +2,14 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import axiosInstance from '../utils/axiosConfig';
 import { useUI } from './UIContext';
+import { useAuth } from './AuthContext';
 
 const AuthorContext = createContext();
 
 export const AuthorProvider = ({ children }) => {
   const { showSuccess, showError } = useUI();
+  const { currentUser } = useAuth();
+  const callerId = currentUser?.id_user;
 
   const [authorProfiles, setAuthorProfiles] = useState([]);
   const [allProfilesAdmin, setAllProfilesAdmin] = useState([]);
@@ -66,11 +69,12 @@ export const AuthorProvider = ({ children }) => {
   }, [showError]);
 
   /**
-   * Fetch all editor users (super admin only)
+   * Fetch all editor users (super admin only) — with the authors they
+   * invited who haven't answered yet.
    */
   const fetchEditorUsers = useCallback(async () => {
     try {
-      const response = await axiosInstance.get('/user/editors');
+      const response = await axiosInstance.get('/user/editors', { headers: { 'x-user-id': callerId } });
       if (!response.data.error) {
         setEditorUsers(response.data.data || []);
         return { success: true, data: response.data.data };
@@ -80,7 +84,7 @@ export const AuthorProvider = ({ children }) => {
       console.error('AuthorContext - fetchEditorUsers error:', err);
       return { error: 'Error al cargar los editores' };
     }
-  }, []);
+  }, [callerId]);
 
   /**
    * Fetch featured author profiles only

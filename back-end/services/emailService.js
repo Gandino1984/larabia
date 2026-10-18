@@ -156,6 +156,45 @@ export const sendWelcomeEmail = async (userEmail, userName) => {
   }
 };
 
+// A super admin signed this person up as an author («Autoras/es»): they
+// accept it the first time they sign in with this email. Returns whether the
+// email went out (the author is created either way).
+export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName) => {
+  try {
+    const transporter = createTransporter();
+    const magazineUrl = config.urls.frontend;
+    const { name: BRAND } = await getBrand();
+    // Names typed by a super admin: keep them as text in the HTML.
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    const htmlContent = `
+      <!DOCTYPE html><html><head><style>${baseStyles}</style></head><body>
+        <div class="container">
+          <div class="header">${BRAND}</div>
+          <div class="content">
+            <h2>Hola, ${esc(userName)}</h2>
+            <p>${inviterName ? `${esc(inviterName)} te ha dado de alta` : 'Te hemos dado de alta'} como autora o autor de ${BRAND}.</p>
+            <p>Para aceptarlo, inicia sesión en la revista con Google usando este email (<strong>${esc(userEmail)}</strong>). Al aceptar podrás editar tu perfil de autora o autor y publicar en la revista.</p>
+            <p>Si prefieres no formar parte, también podrás decirlo al iniciar sesión.</p>
+            <div style="text-align: center;"><a href="${magazineUrl}" class="button">Ir a ${BRAND}</a></div>
+          </div>
+        </div>
+      </body></html>
+    `;
+
+    await transporter.sendMail({
+      from: `"${BRAND}" <${process.env.EMAIL_USER}>`,
+      to: userEmail,
+      subject: `${BRAND} te ha dado de alta como autora o autor`,
+      html: htmlContent
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending author invitation email:', error);
+    return false;
+  }
+};
+
 export const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
   try {
     const transporter = createTransporter();

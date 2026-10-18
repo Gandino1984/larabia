@@ -153,10 +153,13 @@ export const MagazineProvider = ({ children }) => {
     }
   }, []);
 
-  // Fetch editors (users with is_editor=true)
+  // Fetch editors (users with is_editor=true). Super admins also get the
+  // authors they invited who haven't answered yet, to credit them.
   const fetchEditors = useCallback(async () => {
     try {
-      const response = await axiosInstance.get('/magazine-article/editors');
+      const response = await axiosInstance.get('/magazine-article/editors', {
+        headers: { 'x-user-id': currentUser?.id_user }
+      });
 
       if (!response.data.error) {
         setEditors(response.data.data || []);
@@ -169,7 +172,7 @@ export const MagazineProvider = ({ children }) => {
       console.error('Error fetching editors:', err);
       return { error: 'Error al cargar editores' };
     }
-  }, []);
+  }, [currentUser?.id_user]);
 
   // Fetch article by ID
   const fetchArticleById = useCallback(async (id_article) => {

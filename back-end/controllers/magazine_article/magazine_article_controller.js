@@ -839,20 +839,23 @@ async function deactivate(id_article) {
     }
 }
 
-async function getEditors() {
+async function getEditors({ withInvited = false } = {}) {
     // Returns the list of users that can be selected as co-authors of an article —
     // anyone with admin, editor, or super_admin role. (The endpoint is still called
     // "getEditors" for back-compat with magazine-front; the result set is broader.)
+    // withInvited (super admins): also the authors they invited who haven't
+    // answered yet, so they can credit them from the start.
     try {
         const editors = await user_model.findAll({
             where: {
                 [Op.or]: [
                     { is_editor: true },
                     { is_admin: true },
-                    { is_super_admin: true }
+                    { is_super_admin: true },
+                    ...(withInvited ? [{ author_invite_status: 'pending' }] : [])
                 ]
             },
-            attributes: ['id_user', 'name_user', 'image_user'],
+            attributes: ['id_user', 'name_user', 'image_user', ...(withInvited ? ['author_invite_status'] : [])],
             order: [['name_user', 'ASC']]
         });
 

@@ -119,6 +119,18 @@ Promise.all([
             await qi.addColumn('article_blocks', 'soundscape_data', { type: DataTypes.TEXT, allowNull: true });
             console.log('>>> Added article_blocks.soundscape_data');
         }
+        // Authors signed up by a super admin, waiting to accept (migration 018).
+        const users = await qi.describeTable('user');
+        for (const [col, type] of [
+            ['author_invite_status', DataTypes.STRING(20)],
+            ['author_invited_by', DataTypes.INTEGER.UNSIGNED],
+            ['author_invited_at', DataTypes.DATE]
+        ]) {
+            if (!users[col]) {
+                await qi.addColumn('user', col, { type, allowNull: true });
+                console.log(`>>> Added user.${col}`);
+            }
+        }
         // Magazine sections of articles and projects (migration 017).
         for (const [table, cols] of [
             ['magazine_articles', ['sections_article', 'sections_requested_article']],

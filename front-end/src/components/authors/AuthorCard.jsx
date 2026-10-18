@@ -6,6 +6,13 @@ import { useAuth } from '../../app_context/AuthContext';
 import { Globe, Twitter, Instagram, ChevronDown, ChevronUp, BookOpen, Edit, UserPlus } from 'lucide-react';
 import './AuthorCard.css';
 
+const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin].some((v) => v === true || v === 1);
+// Where the invitation of an author a super admin signed up stands
+// (InviteAuthorModal): 'pending' | 'declined' | null.
+const inviteStatusOf = (u) => (u && !isCreator(u) && ['pending', 'declined'].includes(u.author_invite_status)
+  ? u.author_invite_status
+  : null);
+
 // editorUser prop: when set, renders a "no profile yet" card for that editor (super admin view)
 function AuthorCard({ profile, editorUser }) {
   const { t } = useTranslation();
@@ -21,6 +28,7 @@ function AuthorCard({ profile, editorUser }) {
     const editorImageUrl = editorUser.image_user
       ? `${apiUrl}/user/image/${encodeURIComponent(editorUser.image_user)}`
       : null;
+    const invited = inviteStatusOf(editorUser) === 'pending';
     return (
       <article className="author-card no-profile-card">
         <div className="no-profile-badge"><span>Sin perfil</span></div>
@@ -35,7 +43,14 @@ function AuthorCard({ profile, editorUser }) {
         </div>
         <div className="author-card-content">
           <h3 className="author-name">{editorUser.name_user}</h3>
-          <p className="bio-preview no-profile-text">Este/a editor/a aún no tiene perfil de autor/a.</p>
+          {invited && (
+            <p className="author-invite-status">{t('authors.invitation.pendingBadge', 'Invitación pendiente')}</p>
+          )}
+          <p className="bio-preview no-profile-text">
+            {invited
+              ? t('authors.invitation.noProfileText', 'Aún no ha aceptado la invitación. Ya puedes crear su perfil.')
+              : 'Este/a editor/a aún no tiene perfil de autor/a.'}
+          </p>
           <button
             className="btn-create-profile-admin"
             onClick={() => navigateToAuthorEditorForUser(editorUser)}
@@ -130,6 +145,13 @@ function AuthorCard({ profile, editorUser }) {
         <div className="author-name-row">
           <h3 className="author-name">{profile.display_name}</h3>
         </div>
+        {isSuperAdmin && inviteStatusOf(profile.user) && (
+          <p className={`author-invite-status is-${inviteStatusOf(profile.user)}`}>
+            {inviteStatusOf(profile.user) === 'pending'
+              ? t('authors.invitation.pendingBadge', 'Invitación pendiente')
+              : t('authors.invitation.declinedBadge', 'Rechazó la invitación')}
+          </p>
+        )}
 
         <p className="bio-preview">
           {isExpanded ? profile.bio_text : bioPreview}

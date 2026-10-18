@@ -92,6 +92,21 @@ const user_model = sequelize.define("user", {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false
+    },
+    // Authors a super admin signed up before they had an account
+    // (controllers/user/author_invitation_controller.js).
+    author_invite_status: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+        comment: 'pending | accepted | declined — null: never invited'
+    },
+    author_invited_by: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: true
+    },
+    author_invited_at: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
 }, {
     timestamps: false,

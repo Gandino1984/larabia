@@ -3,6 +3,11 @@ import author_profile_model from "../../models/author_profile_model.js";
 import user_model from "../../models/user_model.js";
 import { roleSnapshot } from "../../utils/authHelper.js";
 
+// Someone a super admin signed up as an author who said no
+// (controllers/user/author_invitation_controller.js): their profile stays hidden.
+const declinedAuthor = (user) => user?.author_invite_status === 'declined' && !roleSnapshot(user).canCreateContent;
+const DECLINED_ERROR = "Esta persona rechazó la invitación de autora o autor: su perfil no se puede publicar";
+
 const authorProfileController = {
     /**
      * Get all published author profiles with user information
@@ -50,7 +55,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
+                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin', 'author_invite_status']
                 }],
                 order: [
                     ['featured_profile', 'DESC'],
@@ -196,11 +201,16 @@ const authorProfileController = {
                 };
             }
 
-            if (!roleSnapshot(user).canCreateContent) {
+            // Or an author a super admin invited who hasn't answered yet
+            // (controllers/user/author_invitation_controller.js).
+            if (!roleSnapshot(user).canCreateContent && user.author_invite_status !== 'pending') {
                 return {
                     error: "Solo los editores pueden crear perfiles de autor",
                     data: null
                 };
+            }
+            if (profileData.status_profile === 'published' && declinedAuthor(user)) {
+                return { error: DECLINED_ERROR, data: null };
             }
 
             // Check if user already has a profile
@@ -262,6 +272,10 @@ const authorProfileController = {
                     error: "Perfil de autor no encontrado",
                     data: null
                 };
+            }
+
+            if (updateData.status_profile === 'published' && declinedAuthor(await user_model.findByPk(profile.user_id))) {
+                return { error: DECLINED_ERROR, data: null };
             }
 
             // Update the profile

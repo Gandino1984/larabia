@@ -33,6 +33,7 @@ import ForgotPasswordPage from './components/layout/ForgotPasswordPage';
 import CardDisplay from './components/notifications/CardDisplay';
 import LoadingScreen from './components/layout/LoadingScreen';
 import UserInfoCard from './components/user/UserInfoCard';
+import AuthorInvitationModal from './components/authors/AuthorInvitationModal';
 import { useAuthor } from './app_context/AuthorContext';
 import './App.css';
 
@@ -232,6 +233,8 @@ function App() {
         </main>
         {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Footer />}
       </div>
+
+      {!isPreview && <AuthorInvitationModal />}
 
       {authorCardUser && (
         <UserInfoCard

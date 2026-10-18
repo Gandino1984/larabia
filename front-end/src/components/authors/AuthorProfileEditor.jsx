@@ -4,7 +4,10 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import { useAuthor } from '../../app_context/AuthorContext';
 import { ArrowLeft, Upload } from 'lucide-react';
+import AuthorInvitationBox from './AuthorInvitationBox';
 import './AuthorProfileEditor.css';
+
+const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin].some((v) => v === true || v === 1);
 
 function AuthorProfileEditor() {
   const { currentUser, canCreateContent, isSuperAdmin } = useAuth();
@@ -16,6 +19,11 @@ function AuthorProfileEditor() {
   const isCreatingForUser = isSuperAdmin && superAdminEditingProfile?._noProfile;
   const targetProfile = isCreatingForUser ? null : (isSuperAdmin && superAdminEditingProfile) ? superAdminEditingProfile : myProfile;
   const targetUser = (isSuperAdmin && superAdminEditingProfile) ? superAdminEditingProfile.user : currentUser;
+  // An author a super admin signed up (InviteAuthorModal) who hasn't accepted.
+  const inviteStatus = isSuperAdmin && superAdminEditingProfile && !isCreator(targetUser)
+    ? targetUser?.author_invite_status
+    : null;
+  const declined = inviteStatus === 'declined';
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
   const [formData, setFormData] = useState({
@@ -165,6 +173,10 @@ function AuthorProfileEditor() {
           </div>
         </header>
 
+        {(inviteStatus === 'pending' || declined) && targetUser?.id_user && (
+          <AuthorInvitationBox userId={targetUser.id_user} />
+        )}
+
         <form onSubmit={handleSubmit} className="profile-form">
           {/* Profile image preview + upload */}
           <div className="form-group profile-image-preview">
@@ -310,12 +322,14 @@ function AuthorProfileEditor() {
               onChange={(e) => setFormData({ ...formData, status_profile: e.target.value })}
             >
               <option value="draft">Borrador (no visible públicamente)</option>
-              <option value="published">Publicado (visible para todos)</option>
+              <option value="published" disabled={declined}>Publicado (visible para todos)</option>
             </select>
             <span className="field-hint">
-              {formData.status_profile === 'draft'
-                ? 'Tu perfil no será visible hasta que lo publiques'
-                : 'Tu perfil es visible en la página de Autoras/es'}
+              {declined
+                ? 'Rechazó la invitación: su perfil no se puede publicar'
+                : formData.status_profile === 'draft'
+                  ? 'Tu perfil no será visible hasta que lo publiques'
+                  : 'Tu perfil es visible en la página de Autoras/es'}
             </span>
           </div>
 

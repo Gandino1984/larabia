@@ -15,6 +15,8 @@
 //    Aceptar / Rechazar (`actions`); stays until answered.
 //  - workshop-invite-response:  a reader answered an invitation this user
 //    sent (until the bell is opened).
+//  - author-invite:  a super admin signed the user up as an author
+//    (AuthorInvitationContext) — Aceptar / Rechazar; stays until answered.
 //
 // "New content" notifications accumulate (persist as unread) until the user
 // opens the bell — the last-seen timestamp is stored per user in localStorage,
@@ -29,6 +31,7 @@ import { useMagazine } from './MagazineContext';
 import { useEngagement } from './EngagementContext';
 import { useSubscription } from './SubscriptionContext';
 import { useWorkshop } from './WorkshopContext';
+import { useAuthorInvitation } from './AuthorInvitationContext';
 
 const NotificationContext = createContext(null);
 const MAX_CONTENT_NOTIFS = 30;
@@ -45,6 +48,7 @@ export const NotificationProvider = ({ children }) => {
   const { subscribedProjectIds } = useEngagement();
   const subscription = useSubscription();
   const membership = subscription?.mine;
+  const authorInvite = useAuthorInvitation();
 
   const [publishedArticles, setPublishedArticles] = useState([]);
   const [publishedProjects, setPublishedProjects] = useState([]);
@@ -155,6 +159,33 @@ export const NotificationProvider = ({ children }) => {
           onClick: () => navigateToAuthorEditor()
         });
       }
+    }
+
+    // Signed up as an author by a super admin, waiting for an answer.
+    if (currentUser && authorInvite.invitation) {
+      const inviter = authorInvite.invitation.inviter?.name_user;
+      list.push({
+        id: 'author-invite',
+        type: 'author-invite',
+        title: t('notifications.authorInvite.title', 'Te han dado de alta como autora o autor'),
+        message: inviter
+          ? t('notifications.authorInvite.message', { name: inviter, defaultValue: '{{name}} te invita a formar parte de Autoras/es.' })
+          : t('notifications.authorInvite.messageNoName', 'Te invitan a formar parte de Autoras/es.'),
+        onClick: () => authorInvite.openModal(),
+        actions: [
+          { key: 'accept', variant: 'primary', label: t('notifications.authorInvite.accept', 'Aceptar'), onClick: () => authorInvite.respond('accept') },
+          {
+            key: 'decline',
+            variant: 'secondary',
+            label: t('notifications.authorInvite.decline', 'Rechazar'),
+            onClick: () => {
+              if (window.confirm(t('authorInvitation.confirmDeclineShort', '¿Rechazar la invitación? Tu perfil de autora o autor dejará de mostrarse; las publicaciones conservarán tu nombre.'))) {
+                authorInvite.respond('decline');
+              }
+            }
+          }
+        ]
+      });
     }
 
     // Invitations to a workshop, waiting for an answer.
@@ -294,7 +325,7 @@ export const NotificationProvider = ({ children }) => {
   }, [
     profilesReady, currentUser, canCreateContent, authorProfiles, lastSeen,
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
-    invitationFeed, openWorkshop, answerInvitation,
+    invitationFeed, openWorkshop, answerInvitation, authorInvite,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

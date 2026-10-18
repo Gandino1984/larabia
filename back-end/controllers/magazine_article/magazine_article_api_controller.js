@@ -413,7 +413,8 @@ async function trackView(req, res) {
 
 async function getEditors(req, res) {
     try {
-        const { error, data } = await magazineArticleController.getEditors();
+        const caller = roleSnapshot(await getRequestUser(req));
+        const { error, data } = await magazineArticleController.getEditors({ withInvited: caller.isSuperAdmin });
 
         if (error) {
             return res.status(500).json({ error });

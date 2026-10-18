@@ -1,11 +1,12 @@
 // magazine-front/src/components/authors/AuthorsList.jsx
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthor } from '../../app_context/AuthorContext';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import AuthorCard from './AuthorCard';
-import { Plus } from 'lucide-react';
+import InviteAuthorModal from './InviteAuthorModal';
+import { Plus, UserPlus } from 'lucide-react';
 import './AuthorsList.css';
 
 function AuthorsList() {
@@ -14,8 +15,12 @@ function AuthorsList() {
     authorProfiles, allProfilesAdmin, editorUsers,
     loading, fetchAllProfiles, fetchAllProfilesAdmin, fetchEditorUsers, authorSearch
   } = useAuthor();
-  const { navigateToAuthorEditor, showAuthors } = useUI();
+  const {
+    navigateToAuthorEditor, navigateToAuthorEditorForUser, navigateToAuthorEditorForProfile,
+    showAuthors, showSuccess, showInfo
+  } = useUI();
   const { canCreateContent, isSuperAdmin, currentUser } = useAuth();
+  const [inviting, setInviting] = useState(false);
 
   // Re-fetch whenever the authors list becomes visible (e.g. after editing a profile)
   useEffect(() => {
@@ -66,6 +71,21 @@ function AuthorsList() {
     navigateToAuthorEditor();
   };
 
+  // A super admin signed up a new author: write their profile next (or edit
+  // the one they already have, e.g. someone invited again).
+  const handleInvited = async (response, typedName) => {
+    setInviting(false);
+    const invited = response?.data;
+    if (response?.emailSent === false) showInfo(response.success);
+    else showSuccess(response?.success);
+    if (!invited) return;
+    fetchEditorUsers();
+    const res = await fetchAllProfilesAdmin();
+    const profile = (res?.data || []).find((p) => p.user_id === invited.id_user);
+    if (profile) navigateToAuthorEditorForProfile(profile);
+    else navigateToAuthorEditorForUser({ ...invited, name_user: typedName || invited.name_user });
+  };
+
   const isEmpty = sourceProfiles.length === 0 && editorsWithoutProfile.length === 0;
 
   return (
@@ -86,7 +106,18 @@ function AuthorsList() {
             <span>{t('authors.editProfile')}</span>
           </button>
         )}
+
+        {isSuperAdmin && (
+          <button type="button" onClick={() => setInviting(true)} className="create-profile-btn">
+            <UserPlus size={20} />
+            <span>{t('authors.invite.button', 'Nueva autora o autor')}</span>
+          </button>
+        )}
       </header>
+
+      {inviting && (
+        <InviteAuthorModal onClose={() => setInviting(false)} onInvited={handleInvited} />
+      )}
 
       {loading && (
         <div className="loading-container">
