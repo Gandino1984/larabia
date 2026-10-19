@@ -71,6 +71,7 @@ See [Languages (i18n)](#languages-i18n).
 
 - Subscribers get a badge and can book workshops.
 - The feature stays off until the `STRIPE_*` variables are set.
+- A super admin can give a **complimentary subscription** in Admin › Usuarios: the reader counts as a subscriber (same badge, workshops) without Stripe. It's the `complimentary` column of `reader_subscriptions`, which the Stripe sync never writes.
 
 ## Stack
 

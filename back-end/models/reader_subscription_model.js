@@ -3,7 +3,11 @@
 // A reader's paid subscription to the magazine (Stripe). One row per user,
 // kept in sync by the Stripe webhook. It only supports the magazine and shows
 // a "suscriptor/a" badge — it grants no extra permissions.
-import { DataTypes } from "sequelize";
+//
+// A super admin can also give a complimentary subscription (`complimentary`,
+// migration 021): it counts as a live subscription with no Stripe behind it.
+// The Stripe sync never writes that column, so it survives any event.
+import { DataTypes, Op } from "sequelize";
 import sequelize from "../config/sequelize.js";
 
 const reader_subscription_model = sequelize.define(
@@ -45,6 +49,15 @@ const reader_subscription_model = sequelize.define(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
+        },
+        complimentary: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
+        complimentary_at: {
+            type: DataTypes.DATE,
+            allowNull: true
         }
     },
     {
@@ -59,7 +72,20 @@ const reader_subscription_model = sequelize.define(
     }
 );
 
-/** Statuses that count as "subscribed" (badge shown). */
+/** Stripe statuses that count as "subscribed" (badge shown). */
 export const ACTIVE_STATUSES = ['active', 'trialing', 'past_due'];
+
+const truthy = (v) => v === true || v === 1;
+
+/** Paid through Stripe right now. */
+export const isPaid = (row) => !!row && ACTIVE_STATUSES.includes(row.status);
+
+/** A subscriber: paying, or with a complimentary subscription. */
+export const isLiveSubscription = (row) => isPaid(row) || truthy(row?.complimentary);
+
+/** `where` for the rows of subscribers (paying or complimentary). */
+export const liveSubscriptionWhere = () => ({
+    [Op.or]: [{ status: ACTIVE_STATUSES }, { complimentary: true }]
+});
 
 export default reader_subscription_model;

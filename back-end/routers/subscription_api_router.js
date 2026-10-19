@@ -12,5 +12,8 @@ router.get("/status/:userId", subscriptionApiController.getStatus);
 router.get("/subscribers", subscriptionApiController.getSubscribers);
 router.post("/checkout", subscriptionApiController.createCheckout);
 router.post("/portal", subscriptionApiController.createPortal);
+// Super admins: complimentary subscriptions (Admin › Usuarios).
+router.get("/admin", subscriptionApiController.getAdminList);
+router.patch("/complimentary/:userId", subscriptionApiController.setComplimentary);
 
 export default router;

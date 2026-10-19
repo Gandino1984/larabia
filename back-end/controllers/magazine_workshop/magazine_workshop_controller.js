@@ -4,7 +4,7 @@ import workshop_author_model from "../../models/workshop_author_model.js";
 import workshop_reservation_model from "../../models/workshop_reservation_model.js";
 import workshop_block_model from "../../models/workshop_block_model.js";
 import workshop_invitation_model from "../../models/workshop_invitation_model.js";
-import reader_subscription_model, { ACTIVE_STATUSES } from "../../models/reader_subscription_model.js";
+import reader_subscription_model, { liveSubscriptionWhere } from "../../models/reader_subscription_model.js";
 import user_model from "../../models/user_model.js";
 import { Op } from "sequelize";
 import { deleteFile } from "../../utils/file_cleanup.js";
@@ -97,7 +97,7 @@ async function bookableUserIds(users) {
     const rest = users.map(u => u.id_user).filter(id => !ids.has(id));
     if (rest.length > 0) {
         const subs = await reader_subscription_model.findAll({
-            where: { user_id: rest, status: ACTIVE_STATUSES },
+            where: { user_id: rest, ...liveSubscriptionWhere() },
             attributes: ['user_id']
         });
         subs.forEach(sub => ids.add(sub.user_id));

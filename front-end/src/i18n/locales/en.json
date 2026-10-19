@@ -1382,5 +1382,11 @@
   "admin.proposals.statusLabel": "Status",
   "admin.proposals.reply": "Reply",
   "admin.proposals.delete": "Delete",
-  "magazine.loadingArticles": "Loading publications…"
+  "magazine.loadingArticles": "Loading publications…",
+  "admin.users.complimentary": "Complimentary subscription",
+  "admin.users.complimentaryHelp": "A subscriber without paying: the same badge and workshops as a paid subscription.",
+  "admin.users.complimentarySaved": "Subscription updated",
+  "admin.users.complimentaryError": "The subscription could not be changed",
+  "admin.users.paid": "Paid subscription",
+  "admin.users.paidHelp": "Pays for their subscription with Stripe."
 }

@@ -19,6 +19,8 @@ function AdminUsersTab() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [savingByKey, setSavingByKey] = useState({}); // { "<id>:<role>": true }
+  // Subscriptions by user id: { paid, complimentary } (GET /subscription/admin).
+  const [subs, setSubs] = useState({});
 
   const buildAuthHeader = useCallback(() => ({
     headers: { 'x-user-id': currentUser?.id_user }
@@ -48,6 +50,36 @@ function AdminUsersTab() {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  useEffect(() => {
+    axiosInstance.get('/subscription/admin', buildAuthHeader())
+      .then((res) => setSubs(Object.fromEntries((res.data?.data || []).map((s) => [s.user_id, s]))))
+      .catch(() => setSubs({}));
+  }, [buildAuthHeader]);
+
+  // A complimentary subscription: a subscriber like a paying one (badge,
+  // workshops), without Stripe.
+  const handleComplimentary = async (user, on) => {
+    const key = `${user.id_user}:complimentary`;
+    setSavingByKey((prev) => ({ ...prev, [key]: true }));
+    try {
+      const res = await axiosInstance.patch(
+        `/subscription/complimentary/${user.id_user}`,
+        { complimentary: on },
+        buildAuthHeader()
+      );
+      setSubs((prev) => ({ ...prev, [user.id_user]: res.data.data }));
+      showSuccess(res.data.success || t('admin.users.complimentarySaved', 'Suscripción actualizada'));
+    } catch (err) {
+      showError(err.response?.data?.error || t('admin.users.complimentaryError', 'No se pudo cambiar la suscripción'));
+    } finally {
+      setSavingByKey((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -152,6 +184,34 @@ function AdminUsersTab() {
                     </label>
                   );
                 })}
+              </div>
+
+              <div className="admin-user-row__subscription">
+                {subs[user.id_user]?.paid && (
+                  <span className="admin-user-row__paid" title={t('admin.users.paidHelp', 'Paga su suscripción con Stripe.')}>
+                    {t('admin.users.paid', 'Suscripción de pago')}
+                  </span>
+                )}
+                {(() => {
+                  const on = !!subs[user.id_user]?.complimentary;
+                  const saving = savingByKey[`${user.id_user}:complimentary`];
+                  return (
+                    <label
+                      className={`admin-role-toggle ${on ? 'is-on' : ''}`}
+                      title={t('admin.users.complimentaryHelp', 'Suscriptor/a sin pagar: mismo distintivo y talleres que una suscripción de pago.')}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        disabled={saving}
+                        onChange={() => handleComplimentary(user, !on)}
+                      />
+                      <span className="admin-role-toggle__label">
+                        {t('admin.users.complimentary', 'Suscripción de cortesía')}{saving ? '…' : ''}
+                      </span>
+                    </label>
+                  );
+                })()}
               </div>
             </article>
           ))}

@@ -71,6 +71,7 @@ Ver [Idiomas (i18n)](#idiomas-i18n).
 
 - Quien se suscribe recibe una insignia y puede reservar plaza en los talleres.
 - La función queda apagada hasta configurar las variables `STRIPE_*`.
+- Un super admin puede dar una **suscripción de cortesía** en Admin › Usuarios: la persona cuenta como suscrita (misma insignia, talleres) sin pasar por Stripe. Es la columna `complimentary` de `reader_subscriptions`, que la sincronización con Stripe nunca escribe.
 
 ## Tecnología
 

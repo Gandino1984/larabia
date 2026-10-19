@@ -1,7 +1,7 @@
 // back-end/controllers/magazine_workshop/magazine_workshop_api_controller.js
 import magazineWorkshopController from "./magazine_workshop_controller.js";
 import { getRequestUser, roleSnapshot } from "../../utils/authHelper.js";
-import reader_subscription_model, { ACTIVE_STATUSES } from "../../models/reader_subscription_model.js";
+import reader_subscription_model, { isLiveSubscription } from "../../models/reader_subscription_model.js";
 import magazine_workshop_model from "../../models/magazine_workshop_model.js";
 import workshop_author_model from "../../models/workshop_author_model.js";
 
@@ -65,7 +65,7 @@ async function requireWorkshopManager(req, res, workshopId) {
  */
 async function hasActiveSubscription(userId) {
     const sub = await reader_subscription_model.findOne({ where: { user_id: userId } });
-    return !!(sub && ACTIVE_STATUSES.includes(sub.status));
+    return isLiveSubscription(sub);
 }
 
 async function workshopAccess(req) {

@@ -1382,5 +1382,11 @@
   "admin.proposals.statusLabel": "Egoera",
   "admin.proposals.reply": "Erantzun",
   "admin.proposals.delete": "Ezabatu",
-  "magazine.loadingArticles": "Argitalpenak kargatzen…"
+  "magazine.loadingArticles": "Argitalpenak kargatzen…",
+  "admin.users.complimentary": "Doako harpidetza",
+  "admin.users.complimentaryHelp": "Ordaindu gabeko harpideduna: ordainpeko harpidetza baten bereizgarri eta tailer berak.",
+  "admin.users.complimentarySaved": "Harpidetza eguneratuta",
+  "admin.users.complimentaryError": "Ezin izan da harpidetza aldatu",
+  "admin.users.paid": "Ordainpeko harpidetza",
+  "admin.users.paidHelp": "Stripe bidez ordaintzen du harpidetza."
 }

@@ -461,6 +461,12 @@ export const MESSAGES = {
     "No tienes permiso para esta propuesta": { en: "You don't have permission for this proposal", eu: "Ez duzu baimenik proposamen honetarako" },
     "Propuesta eliminada": { en: "Proposal deleted", eu: "Proposamena ezabatuta" },
     "Error al eliminar la propuesta": { en: "The proposal could not be deleted", eu: "Ezin izan da proposamena ezabatu" },
+    // Complimentary subscriptions (subscription_api_controller.js)
+    "Solo el super-administrador puede gestionar las suscripciones de cortesía": { en: "Only the super admin can manage complimentary subscriptions", eu: "Super-administratzaileak bakarrik kudea ditzake doako harpidetzak" },
+    "Error al cargar las suscripciones": { en: "The subscriptions could not be loaded", eu: "Ezin izan dira harpidetzak kargatu" },
+    "Suscripción de cortesía activada": { en: "Complimentary subscription on", eu: "Doako harpidetza aktibatuta" },
+    "Suscripción de cortesía retirada": { en: "Complimentary subscription removed", eu: "Doako harpidetza kenduta" },
+    "No se pudo cambiar la suscripción de cortesía": { en: "The complimentary subscription could not be changed", eu: "Ezin izan da doako harpidetza aldatu" },
 };
 
 // Messages with values: the value(s) are kept, in order ($1, $2…).

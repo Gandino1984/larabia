@@ -1382,5 +1382,11 @@
   "admin.proposals.statusLabel": "Estado",
   "admin.proposals.reply": "Responder",
   "admin.proposals.delete": "Eliminar",
-  "magazine.loadingArticles": "Cargando publicaciones…"
+  "magazine.loadingArticles": "Cargando publicaciones…",
+  "admin.users.complimentary": "Suscripción de cortesía",
+  "admin.users.complimentaryHelp": "Suscriptor/a sin pagar: mismo distintivo y talleres que una suscripción de pago.",
+  "admin.users.complimentarySaved": "Suscripción actualizada",
+  "admin.users.complimentaryError": "No se pudo cambiar la suscripción",
+  "admin.users.paid": "Suscripción de pago",
+  "admin.users.paidHelp": "Paga su suscripción con Stripe."
 }

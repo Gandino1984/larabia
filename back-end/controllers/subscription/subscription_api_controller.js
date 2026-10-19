@@ -13,9 +13,15 @@
 //   FRONTEND_URL            where Stripe sends the reader back
 // Until STRIPE_SECRET_KEY and at least one price are set, the feature reports
 // itself as disabled and the front-end hides the subscribe button.
+//
+// Super admins can also give a complimentary subscription (no Stripe): the
+// reader is a subscriber like a paying one — same badge, workshops.
 import Stripe from 'stripe';
-import { getRequestUser } from '../../utils/authHelper.js';
-import reader_subscription_model, { ACTIVE_STATUSES } from '../../models/reader_subscription_model.js';
+import { getRequestUser, roleSnapshot } from '../../utils/authHelper.js';
+import user_model from '../../models/user_model.js';
+import reader_subscription_model, {
+    ACTIVE_STATUSES, isPaid, isLiveSubscription, liveSubscriptionWhere
+} from '../../models/reader_subscription_model.js';
 
 const PLANS = {
     monthly: process.env.STRIPE_PRICE_MONTHLY || '',
@@ -47,15 +53,22 @@ async function getPrices() {
     return result;
 }
 
-const isActive = (row) => !!row && ACTIVE_STATUSES.includes(row.status);
-const serialize = (row) => ({
-    active: isActive(row),
-    status: row?.status || null,
-    plan: row?.plan || null,
-    current_period_end: row?.current_period_end || null,
-    cancel_at_period_end: !!row?.cancel_at_period_end,
-    since: row?.created_at || null
-});
+// Paying or complimentary.
+const isActive = (row) => isLiveSubscription(row);
+const serialize = (row) => {
+    const paid = isPaid(row);
+    const complimentary = !!row?.complimentary;
+    return {
+        active: isActive(row),
+        paid,
+        complimentary,
+        status: row?.status || null,
+        plan: row?.plan || null,
+        current_period_end: paid ? row?.current_period_end || null : null,
+        cancel_at_period_end: !!row?.cancel_at_period_end,
+        since: (!paid && complimentary ? row?.complimentary_at : null) || row?.created_at || null
+    };
+};
 
 // ── Keeping `reader_subscriptions` in step with Stripe ──
 //
@@ -177,7 +190,7 @@ async function getSubscribers(req, res) {
     try {
         if (!subscribersCache || Date.now() - subscribersCachedAt > 60 * 1000) {
             const rows = await reader_subscription_model.findAll({
-                where: { status: ACTIVE_STATUSES },
+                where: liveSubscriptionWhere(),
                 attributes: ['user_id']
             });
             subscribersCache = rows.map((r) => r.user_id);
@@ -252,6 +265,58 @@ async function createPortal(req, res) {
     }
 }
 
+// ── Complimentary subscriptions (super admins) ──
+
+/** The super admin making the request, or null after answering 403. */
+async function requireSuperAdmin(req, res) {
+    const user = await getRequestUser(req);
+    if (user && roleSnapshot(user).isSuperAdmin) return user;
+    res.status(403).json({ error: 'Solo el super-administrador puede gestionar las suscripciones de cortesía', code: 'forbidden' });
+    return null;
+}
+
+// GET /subscription/admin — every reader with a subscription row: paying
+// and/or complimentary (Admin › Usuarios).
+async function getAdminList(req, res) {
+    try {
+        if (!(await requireSuperAdmin(req, res))) return;
+        const rows = await reader_subscription_model.findAll();
+        res.json({
+            error: null,
+            data: rows.map((r) => ({ user_id: r.user_id, paid: isPaid(r), complimentary: !!r.complimentary }))
+        });
+    } catch (err) {
+        console.error('[subscription] admin list error:', err.message);
+        res.status(500).json({ error: 'Error al cargar las suscripciones' });
+    }
+}
+
+// PATCH /subscription/complimentary/:userId { complimentary } — give or take
+// back a complimentary subscription. A Stripe subscription isn't touched.
+async function setComplimentary(req, res) {
+    try {
+        if (!(await requireSuperAdmin(req, res))) return;
+        const userId = parseInt(req.params.userId, 10);
+        const target = Number.isFinite(userId) ? await user_model.findByPk(userId) : null;
+        if (!target) return res.status(404).json({ error: 'Usuario no encontrado' });
+        const on = req.body?.complimentary === true;
+        let row = await reader_subscription_model.findOne({ where: { user_id: userId } });
+        const values = { complimentary: on, complimentary_at: on ? new Date() : null };
+        if (row) await row.update(values);
+        else if (on) row = await reader_subscription_model.create({ user_id: userId, ...values });
+        subscribersCache = null;
+        console.log(`[subscription] complimentary ${on ? 'on' : 'off'} for user ${userId}`);
+        res.json({
+            error: null,
+            data: { user_id: userId, paid: isPaid(row), complimentary: on },
+            success: on ? 'Suscripción de cortesía activada' : 'Suscripción de cortesía retirada'
+        });
+    } catch (err) {
+        console.error('[subscription] complimentary error:', err.message);
+        res.status(500).json({ error: 'No se pudo cambiar la suscripción de cortesía' });
+    }
+}
+
 // POST /subscription/webhook — Stripe events (raw body, signature-checked).
 async function handleWebhook(req, res) {
     if (!stripe || !process.env.STRIPE_WEBHOOK_SECRET) return res.status(503).end();
@@ -292,4 +357,4 @@ async function handleWebhook(req, res) {
     }
 }
 
-export default { getConfig, getMine, getStatus, getSubscribers, createCheckout, createPortal, handleWebhook };
+export default { getConfig, getMine, getStatus, getSubscribers, createCheckout, createPortal, handleWebhook, getAdminList, setComplimentary };

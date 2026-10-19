@@ -86,6 +86,29 @@
   gap: 8px;
 }
 
+/* Subscription line: paid chip + complimentary toggle, full width. */
+.admin-user-row__subscription {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed #ececec;
+}
+
+.admin-user-row__paid {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .admin-role-toggle {
   display: inline-flex;
   align-items: center;

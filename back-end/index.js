@@ -141,6 +141,16 @@ Promise.all([
                 console.log(`>>> Added user.${col}`);
             }
         }
+        // Complimentary subscriptions given by a super admin (migration 021).
+        const subs = await qi.describeTable('reader_subscriptions');
+        if (!subs.complimentary) {
+            await qi.addColumn('reader_subscriptions', 'complimentary', { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false });
+            console.log('>>> Added reader_subscriptions.complimentary');
+        }
+        if (!subs.complimentary_at) {
+            await qi.addColumn('reader_subscriptions', 'complimentary_at', { type: DataTypes.DATE, allowNull: true });
+            console.log('>>> Added reader_subscriptions.complimentary_at');
+        }
         // Magazine sections of articles and projects (migration 017) and
         // content in other languages (migration 019).
         for (const [table, cols] of [
