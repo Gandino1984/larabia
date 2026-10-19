@@ -167,10 +167,18 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
           </div>
 
           {/* User Info */}
-          <div className="user-info">
+          <div className="user-card-info">
             <div className="user-info-header">
               <div className="user-name-container">
-                <h2 className="user-name">{user?.name_user}</h2>
+                <div className="user-name-row">
+                  <h2 className="user-name">{user?.name_user}</h2>
+                  {isSubscriber && (
+                    <span className="user-subscriber-badge">
+                      <MedalIcon size={14} />
+                      {t('subscription.badge', 'Suscriptor/a')}
+                    </span>
+                  )}
+                </div>
                 <p className="user-type">
                   {(() => {
                     const on = (v) => v === true || v === 1;
@@ -180,12 +188,6 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                     return t('user.role.reader', 'Lector/a');
                   })()}
                 </p>
-                {isSubscriber && (
-                  <span className="user-subscriber-badge">
-                    <MedalIcon size={16} />
-                    {t('subscription.badge', 'Suscriptor/a')}
-                  </span>
-                )}
                 {isOwner && subscription?.mine?.status && (
                   <button
                     type="button"
