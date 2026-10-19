@@ -1388,5 +1388,10 @@
   "admin.users.complimentarySaved": "Harpidetza eguneratuta",
   "admin.users.complimentaryError": "Ezin izan da harpidetza aldatu",
   "admin.users.paid": "Ordainpeko harpidetza",
-  "admin.users.paidHelp": "Stripe bidez ordaintzen du harpidetza."
+  "admin.users.paidHelp": "Stripe bidez ordaintzen du harpidetza.",
+  "authors.search.placeholder": "Bilatu izenaren arabera…",
+  "authors.search.label": "Bilatu egileak",
+  "authors.search.clear": "Garbitu bilaketa",
+  "authors.search.results_one": "Egile 1",
+  "authors.search.results_other": "{{count}} egile"
 }

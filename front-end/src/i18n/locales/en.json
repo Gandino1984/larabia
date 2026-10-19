@@ -1388,5 +1388,10 @@
   "admin.users.complimentarySaved": "Subscription updated",
   "admin.users.complimentaryError": "The subscription could not be changed",
   "admin.users.paid": "Paid subscription",
-  "admin.users.paidHelp": "Pays for their subscription with Stripe."
+  "admin.users.paidHelp": "Pays for their subscription with Stripe.",
+  "authors.search.placeholder": "Search by name…",
+  "authors.search.label": "Search authors",
+  "authors.search.clear": "Clear the search",
+  "authors.search.results_one": "1 author",
+  "authors.search.results_other": "{{count}} authors"
 }

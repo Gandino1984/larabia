@@ -7,14 +7,17 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import AuthorCard from './AuthorCard';
 import InviteAuthorModal from './InviteAuthorModal';
-import { Plus, UserPlus } from 'lucide-react';
+import { Plus, UserPlus, Search, X } from 'lucide-react';
 import './AuthorsList.css';
 
+// For searching and sorting: no case, no accents («maria» finds «María»).
+const fold = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
 function AuthorsList() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     authorProfiles, allProfilesAdmin, editorUsers,
-    loading, fetchAllProfiles, fetchAllProfilesAdmin, fetchEditorUsers, authorSearch
+    loading, fetchAllProfiles, fetchAllProfilesAdmin, fetchEditorUsers, authorSearch, setAuthorSearch
   } = useAuthor();
   const {
     navigateToAuthorEditor, navigateToAuthorEditorForUser, navigateToAuthorEditorForProfile,
@@ -51,23 +54,22 @@ function AuthorsList() {
   // Source profiles for rendering
   const sourceProfiles = isSuperAdmin ? allProfilesAdmin : authorProfiles;
 
-  // Filter profiles by search query from header search bar
-  const filteredProfiles = useMemo(() => {
-    if (!authorSearch) return sourceProfiles;
-    const q = authorSearch.toLowerCase();
-    return sourceProfiles.filter(profile =>
-      profile.display_name?.toLowerCase().includes(q) ||
-      profile.bio_text?.toLowerCase().includes(q) ||
-      profile.specialty_tags?.some(tag => tag.toLowerCase().includes(q))
-    );
-  }, [sourceProfiles, authorSearch]);
-
-  // Filter editors without profile by search
-  const filteredEditorsWithoutProfile = useMemo(() => {
-    if (!authorSearch) return editorsWithoutProfile;
-    const q = authorSearch.toLowerCase();
-    return editorsWithoutProfile.filter(u => u.name_user?.toLowerCase().includes(q));
-  }, [editorsWithoutProfile, authorSearch]);
+  // Everyone in one list, in alphabetical order (profiles and, for super
+  // admins, the editors still without one), filtered by the search — this
+  // page's search bar or the header's (both set `authorSearch`). It looks in
+  // the name and the specialty tags.
+  const shownAuthors = useMemo(() => {
+    const items = [
+      ...sourceProfiles.map((profile) => ({ key: `p-${profile.id_author_profile}`, name: profile.display_name, tags: profile.specialty_tags, profile })),
+      ...editorsWithoutProfile.map((editorUser) => ({ key: `no-profile-${editorUser.id_user}`, name: editorUser.name_user, tags: [], editorUser }))
+    ];
+    const q = fold(authorSearch).trim();
+    const found = q
+      ? items.filter((it) => fold(it.name).includes(q) || (it.tags || []).some((tag) => fold(tag).includes(q)))
+      : items;
+    const collator = new Intl.Collator(i18n.language || 'es', { sensitivity: 'base', numeric: true });
+    return [...found].sort((a, b) => collator.compare(String(a.name || '').trim(), String(b.name || '').trim()));
+  }, [sourceProfiles, editorsWithoutProfile, authorSearch, i18n.language]);
 
   const handleCreateProfile = () => {
     navigateToAuthorEditor();
@@ -116,6 +118,38 @@ function AuthorsList() {
             <span>{t('authors.invite.button', 'Nueva autora o autor')}</span>
           </button>
         )}
+
+        {!isEmpty && (
+          <div className="authors-search" role="search">
+            <Search size={20} className="authors-search__icon" aria-hidden="true" />
+            <input
+              type="search"
+              className="authors-search__input"
+              value={authorSearch}
+              onChange={(e) => setAuthorSearch(e.target.value)}
+              placeholder={t('authors.search.placeholder', 'Busca por nombre…')}
+              aria-label={t('authors.search.label', 'Buscar autoras y autores')}
+              autoComplete="off"
+              enterKeyHint="search"
+            />
+            {authorSearch && (
+              <button
+                type="button"
+                className="authors-search__clear"
+                onClick={() => setAuthorSearch('')}
+                aria-label={t('authors.search.clear', 'Borrar la búsqueda')}
+                title={t('authors.search.clear', 'Borrar la búsqueda')}
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+        )}
+        {!loading && !isEmpty && authorSearch.trim() && shownAuthors.length > 0 && (
+          <p className="authors-search__count" aria-live="polite">
+            {t('authors.search.results', { count: shownAuthors.length })}
+          </p>
+        )}
       </header>
 
       {inviting && (
@@ -138,19 +172,17 @@ function AuthorsList() {
         </div>
       )}
 
-      {!loading && !isEmpty && filteredProfiles.length === 0 && filteredEditorsWithoutProfile.length === 0 && (
-        <div className="empty-state">
-          <p>{t('authors.searchNoResults', { query: authorSearch })}</p>
+      {!loading && !isEmpty && shownAuthors.length === 0 && (
+        <div className="empty-state" role="status">
+          <p>{t('authors.searchNoResults', { query: authorSearch.trim() })}</p>
         </div>
       )}
 
-      {!loading && (filteredProfiles.length > 0 || filteredEditorsWithoutProfile.length > 0) && (
+      {!loading && shownAuthors.length > 0 && (
         <div className="authors-grid">
-          {filteredProfiles.map(profile => (
-            <AuthorCard key={profile.id_author_profile} profile={profile} />
-          ))}
-          {filteredEditorsWithoutProfile.map(user => (
-            <AuthorCard key={`no-profile-${user.id_user}`} editorUser={user} />
+          {shownAuthors.map((it) => (it.profile
+            ? <AuthorCard key={it.key} profile={it.profile} />
+            : <AuthorCard key={it.key} editorUser={it.editorUser} />
           ))}
         </div>
       )}

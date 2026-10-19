@@ -32,7 +32,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
   - un **cómic** (lector horizontal con paneles que pueden ser imagen, enlace, audio, incrustado o paisaje sonoro; navegación panel a panel, progreso de lectura guardado y pantalla completa);
   - un **micro-perfil**;
   - un **paisaje sonoro** (un dibujo que se mueve con un sonido).
-- **Autoras/es:** el directorio de perfiles y las publicaciones de cada persona.
+- **Autoras/es:** el directorio de perfiles, en orden alfabético y con buscador (por nombre o especialidad, sin importar mayúsculas ni tildes), y las publicaciones de cada persona.
 - **Talleres:**
   - Las tarjetas son públicas.
   - Para abrir uno hay que iniciar sesión, y para reservar plaza hace falta suscripción (el equipo no la necesita).

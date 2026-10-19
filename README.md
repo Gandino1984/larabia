@@ -32,7 +32,7 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
   - a **comic** (a horizontal reader whose panels can be images, links, audio, embeds or soundscapes, with panel-by-panel navigation, saved reading progress and full screen);
   - a **micro-profile**;
   - a **soundscape** (*paisaje sonoro*, a drawing that moves with a sound).
-- **Authors:** the directory of author profiles and each author's publications.
+- **Authors:** the directory of author profiles, in alphabetical order with a search bar (by name or specialty, ignoring case and accents), and each author's publications.
 - **Workshops:**
   - The cards are public.
   - Opening one needs a sign-in, and booking a place needs a subscription (the team doesn't need one).

@@ -1388,5 +1388,10 @@
   "admin.users.complimentarySaved": "Suscripción actualizada",
   "admin.users.complimentaryError": "No se pudo cambiar la suscripción",
   "admin.users.paid": "Suscripción de pago",
-  "admin.users.paidHelp": "Paga su suscripción con Stripe."
+  "admin.users.paidHelp": "Paga su suscripción con Stripe.",
+  "authors.search.placeholder": "Busca por nombre…",
+  "authors.search.label": "Buscar autoras y autores",
+  "authors.search.clear": "Borrar la búsqueda",
+  "authors.search.results_one": "1 autora o autor",
+  "authors.search.results_other": "{{count}} autoras y autores"
 }
