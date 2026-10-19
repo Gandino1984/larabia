@@ -293,7 +293,7 @@ export const NotificationProvider = ({ children }) => {
             id: `membership-${ts}`,
             type: 'membership',
             ts,
-            title: t('notifications.membership.title', 'Suscripción activa'),
+            title: t('notifications.membership.title', 'Ya eres socio/a'),
             message: renews
               ? t('notifications.membership.messageRenews', { date: renews, defaultValue: 'Gracias por apoyar La Rabia. Próxima renovación: {{date}}' })
               : t('notifications.membership.message', 'Gracias por apoyar La Rabia.'),

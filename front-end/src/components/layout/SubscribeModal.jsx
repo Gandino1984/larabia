@@ -63,14 +63,14 @@ function SubscribeModal({ onClose }) {
         </button>
 
         <span className="subscribe-modal__icon" aria-hidden="true"><Flame size={28} /></span>
-        <h2 id="subscribe-modal-title">{t('subscription.title', 'Suscríbete a La Rabia')}</h2>
+        <h2 id="subscribe-modal-title">{t('subscription.title', 'Hazte socio/a de La Rabia')}</h2>
         {modalReason === 'workshops' && (
           <p className="subscribe-modal__reason">
-            {t('subscription.reasonWorkshops', 'Los talleres son exclusivos para personas suscriptoras. Suscríbete para ver el calendario y reservar tu plaza.')}
+            {t('subscription.reasonWorkshops', 'Reservar plaza en los talleres es exclusivo para socios/as. Hazte socio/a para apuntarte a los talleres y a los talleres infantiles.')}
           </p>
         )}
         <p className="subscribe-modal__lead">
-          {t('subscription.lead', 'La Rabia se sostiene gracias a sus lectoras y lectores. Con tu suscripción apoyas el periodismo independiente y la creación de la revista, y luces la insignia de suscriptor/a en tu perfil.')}
+          {t('subscription.lead', 'La Rabia se sostiene gracias a sus lectoras y lectores. Haciéndote socio/a apoyas el periodismo independiente y la creación de la revista, y luces la insignia de socio/a en tu perfil.')}
         </p>
 
         {!enabled && (
@@ -113,7 +113,7 @@ function SubscribeModal({ onClose }) {
         </button>
         <p className="subscribe-modal__note">
           <Lock size={14} />
-          {t('subscription.secure', 'Pago seguro con Stripe. Puedes cancelar cuando quieras.')}
+          {t('subscription.secure', 'Pago seguro con Stripe. Puedes darte de baja cuando quieras.')}
         </p>
       </div>
     </div>,

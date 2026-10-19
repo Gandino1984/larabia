@@ -206,8 +206,8 @@ function WorkshopDetail() {
               {bookingCode && (
                 <p className="workshop-booking-note">
                   {bookingCode === 'login_required'
-                    ? t('workshops.bookingNote.login', 'Para reservar plaza, inicia sesión con tu cuenta de suscriptor/a.')
-                    : t('workshops.bookingNote.subscribe', 'Las reservas son exclusivas para personas suscriptoras de La Rabia.')}
+                    ? t('workshops.bookingNote.login', 'Para reservar plaza, inicia sesión con tu cuenta de socio/a.')
+                    : t('workshops.bookingNote.subscribe', 'Las reservas son exclusivas para socios/as de La Rabia.')}
                 </p>
               )}
             </>

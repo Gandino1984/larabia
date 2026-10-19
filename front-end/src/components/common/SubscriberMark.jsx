@@ -13,7 +13,7 @@ function SubscriberMark({ userId, children }) {
   const { t } = useTranslation();
   const subscription = useSubscription();
   if (!subscription?.isUserSubscriber?.(userId)) return children;
-  const label = t('subscription.markTitle', 'Suscriptor/a de La Rabia');
+  const label = t('subscription.markTitle', 'Socio/a de La Rabia');
   return (
     <span className="subscriber-avatar" title={label}>
       {children}

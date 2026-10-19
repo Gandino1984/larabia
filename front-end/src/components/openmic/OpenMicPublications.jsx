@@ -71,7 +71,7 @@ function OpenMicPublications() {
   };
 
   const steps = [
-    { key: 'who', title: t('openspace.how.whoTitle', 'Quién puede participar'), text: t('openspace.how.who', 'Cualquier persona con cuenta en la revista. No hace falta estar suscrita.') },
+    { key: 'who', title: t('openspace.how.whoTitle', 'Quién puede participar'), text: t('openspace.how.who', 'Cualquier persona con cuenta en la revista. No hace falta ser socio/a.') },
     { key: 'what', title: t('openspace.how.whatTitle', 'Qué puedes enviar'), text: t('openspace.how.what', 'Poesía, relato, microrrelato, crónica, ensayo… textos escritos por ti.') },
     { key: 'how', title: t('openspace.how.howTitle', 'Cómo'), text: t('openspace.how.how', 'Con el formulario: el título, una explicación breve de tu propuesta y el texto, pegado o en un archivo (PDF, Word, ODT, TXT o RTF).') },
     { key: 'then', title: t('openspace.how.thenTitle', 'Y después'), text: t('openspace.how.then', 'El equipo de la revista lee todas las propuestas. Si la tuya encaja, te escribiremos para publicarla aquí. Puedes seguir su estado en esta página.') }

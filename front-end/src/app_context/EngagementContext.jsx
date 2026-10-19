@@ -74,7 +74,7 @@ export const EngagementProvider = ({ children }) => {
       });
     } catch (err) {
       setSubscribedProjectIds(prev => prev.includes(id_project) ? prev.filter(x => x !== id_project) : [...prev, id_project]);
-      showError(i18n.t('messages.error.updateFollow', 'No se pudo actualizar la suscripción'));
+      showError(i18n.t('messages.error.updateFollow', 'No se pudo actualizar el seguimiento del proyecto'));
     }
   }, [currentUser, authHeader, showError]);
 

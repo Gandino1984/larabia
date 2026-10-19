@@ -104,7 +104,7 @@ async function toggleSubscription(id_project, userId) {
         return { data: { subscribed } };
     } catch (err) {
         console.error("-> engagement_controller.js - toggleSubscription() - Error =", err);
-        return { error: "Error al actualizar la suscripción" };
+        return { error: "Error al actualizar el seguimiento del proyecto" };
     }
 }
 
@@ -115,7 +115,7 @@ async function getMySubscriptions(userId) {
         return { data: { projectIds: rows.map(r => r.project_id) } };
     } catch (err) {
         console.error("-> engagement_controller.js - getMySubscriptions() - Error =", err);
-        return { error: "Error al obtener las suscripciones" };
+        return { error: "Error al obtener los proyectos que sigues" };
     }
 }
 

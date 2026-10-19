@@ -136,7 +136,7 @@ export const SubscriptionProvider = ({ children }) => {
       const url = res.data?.data?.url;
       if (url) window.location.assign(url);
     } catch (err) {
-      showError(err.response?.data?.error || t('subscription.portalError', 'No se pudo abrir la gestión de la suscripción'));
+      showError(err.response?.data?.error || t('subscription.portalError', 'No se pudo abrir la gestión de tu cuota de socio/a'));
     } finally {
       setBusy(false);
     }

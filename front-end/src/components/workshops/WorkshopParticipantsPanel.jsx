@@ -167,7 +167,7 @@ function WorkshopParticipantsPanel({ workshop }) {
           {t('workshops.manage.addTitle', 'Invitar a alguien')}
         </label>
         <p className="workshop-people__hint workshop-people__hint--add">
-          {t('workshops.manage.inviteHint', 'Solo personas suscritas a la revista (o del equipo). Recibirán una notificación para aceptar o rechazar.')}
+          {t('workshops.manage.inviteHint', 'Solo socios/as de la revista (o del equipo). Recibirán una notificación para aceptar o rechazar.')}
         </p>
         <div className="workshop-people__search">
           <Search size={16} aria-hidden="true" />
@@ -209,7 +209,7 @@ function WorkshopParticipantsPanel({ workshop }) {
                       {btn('withdraw', u, { icon: Undo2, label: t('workshops.manage.withdraw', 'Retirar') })}
                     </>
                   ) : u.id_user === me ? null : !u.can_book ? (
-                    <span className="workshop-people__tag workshop-people__tag--muted">{t('workshops.manage.notSubscriber', 'Sin suscripción')}</span>
+                    <span className="workshop-people__tag workshop-people__tag--muted">{t('workshops.manage.notSubscriber', 'No es socio/a')}</span>
                   ) : (
                     btn('invite', u, {
                       icon: UserPlus,

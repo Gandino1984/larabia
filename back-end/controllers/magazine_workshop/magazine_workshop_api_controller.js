@@ -86,7 +86,7 @@ async function requireWorkshopAccess(req, res) {
     res.status(403).json({
         error: code === 'login_required'
             ? 'Inicia sesión para reservar plaza'
-            : 'Las reservas de los talleres son exclusivas para personas suscriptoras de la revista',
+            : 'Las reservas de los talleres son exclusivas para socios/as de la revista',
         code
     });
     return null;

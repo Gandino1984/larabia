@@ -374,7 +374,7 @@ async function inviteUser(id_workshop, inviteeId, inviterId) {
         const existing = await workshop_invitation_model.findOne({ where: { workshop_id: id_workshop, invitee_user_id: inviteeId } });
         if (existing?.status === 'pending') return { error: "Esta persona ya tiene una invitación pendiente" };
         if (!(await bookableUserIds([user])).has(user.id_user)) {
-            return { error: "Solo se puede invitar a personas suscritas a la revista", code: 'not_subscriber' };
+            return { error: "Solo se puede invitar a socios/as de la revista", code: 'not_subscriber' };
         }
         const count = await workshop_reservation_model.count({ where: { workshop_id: id_workshop } });
         const pending = await countPendingInvitations(id_workshop);

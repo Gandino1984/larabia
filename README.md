@@ -35,12 +35,12 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
 - **Authors:** the directory of author profiles, in alphabetical order with a search bar (by name or specialty, ignoring case and accents), and each author's publications.
 - **Workshops:**
   - The cards are public.
-  - Opening one needs a sign-in, and booking a place needs a subscription (the team doesn't need one).
+  - Opening one needs a sign-in, and booking a place needs being a member — *socio/a* (the team doesn't need it).
   - Managers invite people (an invitation holds a place), remove participants or block them.
-  - Each workshop has a location on a map (Leaflet/OpenStreetMap).
-- **Espacio abierto** (open space): the literary proposals the magazine publishes. Anyone with an account (no subscription needed) can send one through a form, then follow its status there.
+  - Each workshop has a location on a map (Leaflet/OpenStreetMap). There's no link out to Google Maps: people find their way on the map itself.
+- **Espacio abierto** (open space): the literary proposals the magazine publishes. Anyone with an account (no need to be a member) can send one through a form, then follow its status there.
 - **Engagement:** likes, favourites, comments and following projects.
-- **Notifications** in the header bell: new content, invitations, answers and the subscription.
+- **Notifications** in the header bell: new content, invitations, answers and membership.
 - **Contact form** and **newsletter**.
 
 **Three languages:** Spanish, English and Basque.
@@ -67,11 +67,11 @@ See [Languages (i18n)](#languages-i18n).
 - appearance (theme presets, colours, animations);
 - the top-bar **menu builder** (labels in ES / EN / EU, who sees each button, what it opens).
 
-**Subscriptions:** paid reader subscriptions through **Stripe** (monthly and yearly).
+**Membership** (*hacerse socio/a*): readers become paying members through **Stripe** (monthly and yearly). The interface says «socio/a» («Hazte socio/a», the «Socio/a» badge); the code and the tables still call it *subscription*.
 
-- Subscribers get a badge and can book workshops.
+- Members get a badge and can book workshops.
 - The feature stays off until the `STRIPE_*` variables are set.
-- A super admin can give a **complimentary subscription** in Admin › Usuarios: the reader counts as a subscriber (same badge, workshops) without Stripe. It's the `complimentary` column of `reader_subscriptions`, which the Stripe sync never writes.
+- A super admin can make someone a **complimentary member** (*socio/a de cortesía*) in Admin › Usuarios: they count as a member (same badge, workshops) without Stripe. It's the `complimentary` column of `reader_subscriptions`, which the Stripe sync never writes.
 
 ## Stack
 
@@ -119,7 +119,7 @@ Roles are independent flags on `user`. One account can hold several.
 
 | Role | Can |
 |---|---|
-| Reader (default) | Read, like, comment, follow projects, subscribe, book workshops (with a subscription) |
+| Reader (default) | Read, like, comment, follow projects, become a member, book workshops (as a member) |
 | Premium reader (`is_premium_reader`) | Also read articles marked premium |
 | Editor (`is_editor`) | Create publications and author profiles; everything goes through review |
 | Admin (`is_admin`) | Like an editor, plus workshops and newsletter recommendations |

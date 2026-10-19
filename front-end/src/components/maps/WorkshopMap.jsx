@@ -2,17 +2,15 @@
 //
 // Read-only map (Leaflet + OpenStreetMap) with the workshop's place — its
 // own position or, if its creator didn't set one, the default (Matiko,
-// Uribarri). Full version (workshop page): zoomable + "Cómo llegar" link.
+// Uribarri). Full version (workshop page): zoomable, so people find their
+// way on it — no link out of the magazine (to Google Maps or elsewhere).
 // `compact` (cards): a small static preview that lets clicks reach the card.
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { useTranslation } from 'react-i18next';
-import { Navigation } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import { mapPinIcon, OSM_TILES, OSM_ATTRIBUTION, workshopPosition } from './mapPin';
 import './Maps.css';
 
 function WorkshopMap({ lat, lng, label, compact = false }) {
-  const { t } = useTranslation();
   const [la, ln] = workshopPosition(lat, lng);
 
   if (compact) {
@@ -39,7 +37,6 @@ function WorkshopMap({ lat, lng, label, compact = false }) {
     );
   }
 
-  const directions = `https://www.google.com/maps/dir/?api=1&destination=${la},${ln}`;
   return (
     <div className="workshop-map">
       <div className="map-frame">
@@ -50,10 +47,6 @@ function WorkshopMap({ lat, lng, label, compact = false }) {
           </Marker>
         </MapContainer>
       </div>
-      <a className="map-directions" href={directions} target="_blank" rel="noopener noreferrer">
-        <Navigation size={16} />
-        <span>{t('workshops.map.directions', 'Cómo llegar')}</span>
-      </a>
     </div>
   );
 }

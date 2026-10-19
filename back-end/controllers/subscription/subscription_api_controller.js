@@ -205,16 +205,16 @@ async function getSubscribers(req, res) {
 
 // POST /subscription/checkout { plan } — start Stripe Checkout; returns its URL.
 async function createCheckout(req, res) {
-    if (!isEnabled()) return res.status(503).json({ error: 'Las suscripciones no están disponibles todavía' });
+    if (!isEnabled()) return res.status(503).json({ error: 'Todavía no es posible hacerse socio/a' });
     const user = await getRequestUser(req);
-    if (!user) return res.status(401).json({ error: 'Inicia sesión para suscribirte' });
+    if (!user) return res.status(401).json({ error: 'Inicia sesión para hacerte socio/a' });
     const plan = req.body?.plan;
     const priceId = PLANS[plan];
     if (!priceId) return res.status(400).json({ error: 'Plan no válido' });
 
     try {
         let row = await reader_subscription_model.findOne({ where: { user_id: user.id_user } });
-        if (isActive(row)) return res.status(409).json({ error: 'Ya tienes una suscripción activa' });
+        if (isActive(row)) return res.status(409).json({ error: 'Ya eres socio/a' });
 
         // One Stripe customer per user, reused across checkouts.
         let customerId = row?.stripe_customer_id;
@@ -248,11 +248,11 @@ async function createCheckout(req, res) {
 
 // POST /subscription/portal — Stripe's customer portal (change card, cancel).
 async function createPortal(req, res) {
-    if (!stripe) return res.status(503).json({ error: 'Las suscripciones no están disponibles todavía' });
+    if (!stripe) return res.status(503).json({ error: 'Todavía no es posible hacerse socio/a' });
     const user = await getRequestUser(req);
     if (!user) return res.status(401).json({ error: 'Autenticación requerida' });
     const row = await reader_subscription_model.findOne({ where: { user_id: user.id_user } });
-    if (!row?.stripe_customer_id) return res.status(404).json({ error: 'No tienes ninguna suscripción' });
+    if (!row?.stripe_customer_id) return res.status(404).json({ error: 'No eres socio/a' });
     try {
         const portal = await stripe.billingPortal.sessions.create({
             customer: row.stripe_customer_id,
@@ -261,7 +261,7 @@ async function createPortal(req, res) {
         res.json({ error: null, data: { url: portal.url } });
     } catch (err) {
         console.error('[subscription] portal error:', err.message);
-        res.status(500).json({ error: 'No se pudo abrir la gestión de la suscripción' });
+        res.status(500).json({ error: 'No se pudo abrir la gestión de tu cuota de socio/a' });
     }
 }
 
@@ -271,7 +271,7 @@ async function createPortal(req, res) {
 async function requireSuperAdmin(req, res) {
     const user = await getRequestUser(req);
     if (user && roleSnapshot(user).isSuperAdmin) return user;
-    res.status(403).json({ error: 'Solo el super-administrador puede gestionar las suscripciones de cortesía', code: 'forbidden' });
+    res.status(403).json({ error: 'Solo el super-administrador puede gestionar los socios/as de cortesía', code: 'forbidden' });
     return null;
 }
 
@@ -287,7 +287,7 @@ async function getAdminList(req, res) {
         });
     } catch (err) {
         console.error('[subscription] admin list error:', err.message);
-        res.status(500).json({ error: 'Error al cargar las suscripciones' });
+        res.status(500).json({ error: 'Error al cargar los socios/as' });
     }
 }
 
@@ -309,11 +309,11 @@ async function setComplimentary(req, res) {
         res.json({
             error: null,
             data: { user_id: userId, paid: isPaid(row), complimentary: on },
-            success: on ? 'Suscripción de cortesía activada' : 'Suscripción de cortesía retirada'
+            success: on ? 'Ahora es socio/a de cortesía' : 'Ya no es socio/a de cortesía'
         });
     } catch (err) {
         console.error('[subscription] complimentary error:', err.message);
-        res.status(500).json({ error: 'No se pudo cambiar la suscripción de cortesía' });
+        res.status(500).json({ error: 'No se pudo guardar el cambio' });
     }
 }
 

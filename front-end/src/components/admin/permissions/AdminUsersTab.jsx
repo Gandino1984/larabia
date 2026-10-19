@@ -69,9 +69,9 @@ function AdminUsersTab() {
         buildAuthHeader()
       );
       setSubs((prev) => ({ ...prev, [user.id_user]: res.data.data }));
-      showSuccess(res.data.success || t('admin.users.complimentarySaved', 'Suscripción actualizada'));
+      showSuccess(res.data.success || t('admin.users.complimentarySaved', 'Cambio guardado'));
     } catch (err) {
-      showError(err.response?.data?.error || t('admin.users.complimentaryError', 'No se pudo cambiar la suscripción'));
+      showError(err.response?.data?.error || t('admin.users.complimentaryError', 'No se pudo guardar el cambio'));
     } finally {
       setSavingByKey((prev) => {
         const next = { ...prev };
@@ -188,8 +188,8 @@ function AdminUsersTab() {
 
               <div className="admin-user-row__subscription">
                 {subs[user.id_user]?.paid && (
-                  <span className="admin-user-row__paid" title={t('admin.users.paidHelp', 'Paga su suscripción con Stripe.')}>
-                    {t('admin.users.paid', 'Suscripción de pago')}
+                  <span className="admin-user-row__paid" title={t('admin.users.paidHelp', 'Paga su cuota con Stripe.')}>
+                    {t('admin.users.paid', 'Socio/a de pago')}
                   </span>
                 )}
                 {(() => {
@@ -198,7 +198,7 @@ function AdminUsersTab() {
                   return (
                     <label
                       className={`admin-role-toggle ${on ? 'is-on' : ''}`}
-                      title={t('admin.users.complimentaryHelp', 'Suscriptor/a sin pagar: mismo distintivo y talleres que una suscripción de pago.')}
+                      title={t('admin.users.complimentaryHelp', 'Socio/a sin pagar cuota: la misma insignia y los mismos talleres que quien paga.')}
                     >
                       <input
                         type="checkbox"
@@ -207,7 +207,7 @@ function AdminUsersTab() {
                         onChange={() => handleComplimentary(user, !on)}
                       />
                       <span className="admin-role-toggle__label">
-                        {t('admin.users.complimentary', 'Suscripción de cortesía')}{saving ? '…' : ''}
+                        {t('admin.users.complimentary', 'Socio/a de cortesía')}{saving ? '…' : ''}
                       </span>
                     </label>
                   );

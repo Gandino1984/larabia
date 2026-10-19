@@ -35,12 +35,12 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 - **Autoras/es:** el directorio de perfiles, en orden alfabético y con buscador (por nombre o especialidad, sin importar mayúsculas ni tildes), y las publicaciones de cada persona.
 - **Talleres:**
   - Las tarjetas son públicas.
-  - Para abrir uno hay que iniciar sesión, y para reservar plaza hace falta suscripción (el equipo no la necesita).
+  - Para abrir uno hay que iniciar sesión, y para reservar plaza hay que ser socio/a (el equipo no lo necesita).
   - Quien lo gestiona invita (la invitación reserva plaza), quita participantes o los bloquea.
-  - Cada taller tiene su ubicación en un mapa (Leaflet/OpenStreetMap).
-- **Espacio abierto:** las propuestas literarias que publica la revista. Cualquier persona con cuenta (no hace falta suscripción) puede enviar la suya con un formulario y seguir allí su estado.
+  - Cada taller tiene su ubicación en un mapa (Leaflet/OpenStreetMap). No hay enlace a Google Maps: la gente se ubica en el propio mapa.
+- **Espacio abierto:** las propuestas literarias que publica la revista. Cualquier persona con cuenta (no hace falta ser socio/a) puede enviar la suya con un formulario y seguir allí su estado.
 - **Interacción:** me gusta, favoritos, comentarios y seguir proyectos.
-- **Avisos** en la campana de la cabecera: contenido nuevo, invitaciones, respuestas y suscripción.
+- **Avisos** en la campana de la cabecera: contenido nuevo, invitaciones, respuestas y hacerse socio/a.
 - **Formulario de contacto** y **newsletter**.
 
 **Tres idiomas:** castellano, inglés y euskera.
@@ -67,11 +67,11 @@ Ver [Idiomas (i18n)](#idiomas-i18n).
 - apariencia (temas, colores, animaciones);
 - el **constructor del menú** de la barra superior (etiquetas en ES / EN / EU, quién ve cada botón y qué abre).
 
-**Suscripciones:** suscripciones de pago con **Stripe** (mensual y anual).
+**Hazte socio/a:** las lectoras y lectores se hacen socios/as de pago con **Stripe** (mensual y anual). La interfaz dice «socio/a» («Hazte socio/a», la insignia «Socio/a»); el código y las tablas lo siguen llamando *subscription*.
 
-- Quien se suscribe recibe una insignia y puede reservar plaza en los talleres.
+- Los socios/as reciben una insignia y pueden reservar plaza en los talleres.
 - La función queda apagada hasta configurar las variables `STRIPE_*`.
-- Un super admin puede dar una **suscripción de cortesía** en Admin › Usuarios: la persona cuenta como suscrita (misma insignia, talleres) sin pasar por Stripe. Es la columna `complimentary` de `reader_subscriptions`, que la sincronización con Stripe nunca escribe.
+- Un super admin puede hacer a alguien **socio/a de cortesía** en Admin › Usuarios: cuenta como socio/a (misma insignia, talleres) sin pasar por Stripe. Es la columna `complimentary` de `reader_subscriptions`, que la sincronización con Stripe nunca escribe.
 
 ## Tecnología
 
@@ -119,7 +119,7 @@ Los roles son marcas independientes en `user`; una cuenta puede tener varias.
 
 | Rol | Puede |
 |---|---|
-| Lector/a (por defecto) | Leer, dar me gusta, comentar, seguir proyectos, suscribirse, reservar talleres (con suscripción) |
+| Lector/a (por defecto) | Leer, dar me gusta, comentar, seguir proyectos, hacerse socio/a, reservar talleres (siendo socio/a) |
 | Lector/a premium (`is_premium_reader`) | Además, leer los artículos marcados como premium |
 | Editor/a (`is_editor`) | Crear publicaciones y perfiles de autoría; todo pasa por revisión |
 | Admin (`is_admin`) | Como editor/a, más talleres y recomendaciones de la newsletter |

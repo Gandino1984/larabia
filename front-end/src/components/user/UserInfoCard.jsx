@@ -107,7 +107,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                 <span
                   className="subscriber-avatar__mark subscriber-avatar__mark--framed"
                   role="img"
-                  aria-label={t('subscription.markTitle', 'Suscriptor/a de La Rabia')}
+                  aria-label={t('subscription.markTitle', 'Socio/a de La Rabia')}
                 >
                   <MedalIcon />
                 </span>
@@ -175,7 +175,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                   {isSubscriber && (
                     <span className="user-subscriber-badge">
                       <MedalIcon size={14} />
-                      {t('subscription.badge', 'Suscriptor/a')}
+                      {t('subscription.badge', 'Socio/a')}
                     </span>
                   )}
                 </div>
@@ -195,7 +195,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                     onClick={subscription.openPortal}
                     disabled={subscription.busy}
                   >
-                    {t('subscription.manage', 'Gestionar suscripción')}
+                    {t('subscription.manage', 'Gestionar mi cuota')}
                   </button>
                 )}
               </div>

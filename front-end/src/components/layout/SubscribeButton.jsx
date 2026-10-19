@@ -41,8 +41,8 @@ function SubscribeButton({ ready = true }) {
   useEffect(() => {
     if (!ready || !notice) return undefined;
     const timer = setTimeout(() => {
-      if (notice === 'success') showSuccess(t('subscription.thanks', '¡Gracias por suscribirte a La Rabia!'));
-      else if (notice === 'cancel') showInfo(t('subscription.cancelled', 'Pago cancelado. Puedes suscribirte cuando quieras.'));
+      if (notice === 'success') showSuccess(t('subscription.thanks', '¡Gracias por hacerte socio/a de La Rabia!'));
+      else if (notice === 'cancel') showInfo(t('subscription.cancelled', 'Pago cancelado. Puedes hacerte socio/a cuando quieras.'));
       markNoticeShown?.();
     }, 1200);
     return () => clearTimeout(timer);
@@ -55,11 +55,11 @@ function SubscribeButton({ ready = true }) {
   if (!subscription.enabled && !isSuperAdmin) return modal;
 
   const isHidden = showEditor || showArticleDetail;
-  const label = t('subscription.button', 'Suscríbete');
+  const label = t('subscription.button', 'Hazte socio/a');
 
   const handleClick = () => {
     if (!currentUser) {
-      showInfo(t('subscription.loginFirst', 'Inicia sesión para suscribirte a la revista'));
+      showInfo(t('subscription.loginFirst', 'Inicia sesión para hacerte socio/a de la revista'));
       navigateToLogin();
       return;
     }
