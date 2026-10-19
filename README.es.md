@@ -1,0 +1,277 @@
+# La Rabia — larabia-magazine
+
+[English](README.md) · **Español**
+
+**La Rabia** es la revista comunitaria digital del distrito 02 de Bilbao (Uribarri). En marcha en **https://larabiamag.com** (API: **https://api.larabiamag.com**).
+
+Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.online) y se separó para crecer como producto propio, con su back-end, su base de datos y sus cuentas.
+
+## Índice
+
+- [Qué hace](#qué-hace)
+- [Tecnología](#tecnología)
+- [Estructura del repositorio](#estructura-del-repositorio)
+- [Roles y permisos](#roles-y-permisos)
+- [Cómo funcionan las piezas principales](#cómo-funcionan-las-piezas-principales)
+- [Idiomas (i18n)](#idiomas-i18n)
+- [Desarrollo en local](#desarrollo-en-local)
+- [Tests](#tests)
+- [Despliegue](#despliegue)
+- [Base de datos y migraciones](#base-de-datos-y-migraciones)
+- [Convenciones](#convenciones)
+- [Créditos](#créditos)
+
+## Qué hace
+
+**Lectura**
+
+- **Portada:** un hero con las historias destacadas (su título, entradilla y proyecto siguen el idioma elegido en la cabecera) y, debajo, avances de las secciones.
+- **Secciones:** los botones de la barra superior (Artículos, Proyectos, Talleres, Más › Ficción, Internacional…). Cualquier artículo o proyecto puede aparecer también en otras secciones si un super admin lo aprueba.
+- **Las publicaciones** pertenecen a un **proyecto**. Cada una es de uno de estos tipos:
+  - un **artículo** (texto, imágenes e incrustados, por bloques);
+  - un **cómic** (lector horizontal con paneles que pueden ser imagen, enlace, audio, incrustado o paisaje sonoro; navegación panel a panel, progreso de lectura guardado y pantalla completa);
+  - un **micro-perfil**;
+  - un **paisaje sonoro** (un dibujo que se mueve con un sonido).
+- **Autoras/es:** el directorio de perfiles y las publicaciones de cada persona.
+- **Talleres:**
+  - Las tarjetas son públicas.
+  - Para abrir uno hay que iniciar sesión, y para reservar plaza hace falta suscripción (el equipo no la necesita).
+  - Quien lo gestiona invita (la invitación reserva plaza), quita participantes o los bloquea.
+  - Cada taller tiene su ubicación en un mapa (Leaflet/OpenStreetMap).
+- **Interacción:** me gusta, favoritos, comentarios y seguir proyectos.
+- **Avisos** en la campana de la cabecera: contenido nuevo, invitaciones, respuestas y suscripción.
+- **Formulario de contacto** y **newsletter**.
+
+**Tres idiomas:** castellano, inglés y euskera.
+
+- Toda la interfaz, los mensajes del servidor y las fechas siguen el idioma de la cabecera.
+- Los artículos y proyectos pueden llevar versión en inglés y en euskera de sus textos, y el lector del artículo tiene su propio selector ES · EN · EU.
+
+Ver [Idiomas (i18n)](#idiomas-i18n).
+
+**Publicar**
+
+- **El creador** es un asistente de seis pasos: proyecto → clasificación, autoras/es y secciones → portada, título y entradilla → tipo → contenido → revisar y publicar.
+- **Revisión:** todo es borrador hasta publicarse. Quien no es super admin envía su trabajo a revisión. Un super admin lo aprueba o lo devuelve con un motivo; la autora o autor puede volver a pasarlo a borrador.
+- **Editor de paisajes sonoros:** asistente de tres pasos (imagen y estilo → sonido y reproductor → encuadre y resumen), para artículos y para paneles de cómic.
+- **Autoras invitadas:** un super admin puede dar de alta a una autora o autor que aún no tiene cuenta y publicar en su nombre. La persona acepta o rechaza al iniciar sesión por primera vez (ver más abajo).
+
+**Administración** (*Admin*, super admins):
+
+- usuarios y roles;
+- la cola de revisión (artículos, proyectos y cambios de sección);
+- datos de la revista (nombre, eslogan, logos);
+- talleres;
+- apariencia (temas, colores, animaciones);
+- el **constructor del menú** de la barra superior (etiquetas en ES / EN / EU, quién ve cada botón y qué abre).
+
+**Suscripciones:** suscripciones de pago con **Stripe** (mensual y anual).
+
+- Quien se suscribe recibe una insignia y puede reservar plaza en los talleres.
+- La función queda apagada hasta configurar las variables `STRIPE_*`.
+
+## Tecnología
+
+- **Back-end:** Node.js 22+ · Express 4 · Sequelize 6 · MySQL 8 · Sharp (imágenes → WebP) · ffmpeg (audio → AAC con volumen normalizado) · Nodemailer · google-auth-library · Stripe
+- **Front-end:** React 18 · Vite 6 · i18next (es / en / eu) · react-quill · Leaflet · @react-spring/web · Vitest
+- **Infraestructura:** Docker Compose (db, back-end, front-end) · nginx-proxy externo + compañero de Let's Encrypt
+
+## Estructura del repositorio
+
+```
+back-end/
+  index.js        App de Express: estáticos, CORS, middleware de idioma, rutas, columnas que se añaden al arrancar
+  config/         Sequelize + entorno (los orígenes CORS salen de FRONTEND_URL)
+  models/         Modelos de Sequelize (21 tablas)
+  controllers/    Una carpeta por área: user (incluye author_invitation_controller y google_oauth_controller),
+                  magazine_article, magazine_project, article_blocks, author_profile, magazine_workshop,
+                  engagement, subscription, paisaje, magazine_metadata, magazine_theme, magazine_nav, contact
+  routers/        Rutas de Express (api_router las monta todas)
+  middleware/     Subidas (portadas, bloques, perfiles, logos, fondos)
+  services/       emailService.js (verificación, restablecer, bienvenida, contacto, newsletter, invitación de autoría)
+  utils/          authHelper (roles), sections, translations, conversión/validación de imágenes, limpieza
+  i18n/           messages.js (los mensajes del servidor en en/eu) + translateResponses.js (middleware)
+  migrations/     Migraciones SQL numeradas (ver su README)
+  uploads/        Subidas en tiempo de ejecución (fuera de git, volumen en producción)
+
+front-end/
+  src/app_context/  Contextos de React: Auth, UI, Magazine, Author, AuthorInvitation, Workshop, Engagement,
+                    Subscription, Notification, PendingReview, Metadata, Theme, Nav (+ navConfig, themePresets)
+  src/components/   layout, magazine (portada, listas, lector, visor de cómic), admin (creador, bloques, editor de cómic,
+                    pestañas de Admin), authors, workshops, maps, google-auth, notifications, user, common
+  src/paisaje/      El motor de paisajes sonoros (traído tal cual, no se toca) + integration/ (código de la revista); ver su README
+  src/utils/        contentLang (versiones del contenido), locale (fechas), sections, articleFilters, projectKinds…
+  src/i18n/         Configuración de i18next + locales/{es,en,eu}.json (claves planas con puntos)
+  nginx/            Configuración de nginx de producción + keep-assets.sh (conserva los trozos JS de versiones anteriores)
+
+Dockerfile            Imagen del back-end (incluye ffmpeg)
+front-end/Dockerfile  Dos etapas: vite build → nginx
+docker-compose.yml    db, back-end, front-end
+.env.example          Cópialo a .env y rellénalo
+```
+
+## Roles y permisos
+
+Los roles son marcas independientes en `user`; una cuenta puede tener varias.
+
+| Rol | Puede |
+|---|---|
+| Lector/a (por defecto) | Leer, dar me gusta, comentar, seguir proyectos, suscribirse, reservar talleres (con suscripción) |
+| Lector/a premium (`is_premium_reader`) | Además, leer los artículos marcados como premium |
+| Editor/a (`is_editor`) | Crear publicaciones y perfiles de autoría; todo pasa por revisión |
+| Admin (`is_admin`) | Como editor/a, más talleres y recomendaciones de la newsletter |
+| Super admin (`is_super_admin`) | Todo; publica directamente; revisa lo de los demás; panel de Admin; invita autoras/es |
+
+- `canCreateContent` = editor/a, admin o super admin. `canPublishDirectly` = solo super admin.
+- El servidor comprueba el rol en cada petición: lee la cabecera `x-user-id` y busca al usuario (`back-end/utils/authHelper.js`).
+- Cuando se niega el acceso, el servidor responde 403 con un `code`, nunca 401: con un 401 la web cierra la sesión.
+- Los emails de `SUPER_ADMIN_EMAILS` pasan a ser super admins al iniciar sesión.
+
+## Cómo funcionan las piezas principales
+
+**Inicio de sesión:** solo con Google (Google Identity Services). Si se entra con un email que ya tiene una cuenta sin contraseña, Google se vincula a esa cuenta.
+
+**Revisión:**
+
+- Lo de quien no es super admin pasa de `draft` a `pending_approval` (enviar a revisión), y de ahí a `published` (aprobar) o de vuelta a `draft` con un motivo (devolver).
+- Los super admins lo gestionan en Admin › Pendientes. El contador de la cabecera muestra lo que espera.
+
+**Secciones** (`back-end/utils/sections.js`, `front-end/src/utils/sections.js`):
+
+- La lista de secciones sale del menú: los botones de tipo «categoría de artículos», más Espacio abierto y Micro-perfiles.
+- Cada publicación guarda sus secciones *aprobadas* y las *pedidas* (columnas JSON). Un super admin resuelve las peticiones.
+
+**Autoras invitadas** (`back-end/controllers/user/author_invitation_controller.js`):
+
+1. En «Autoras/es», un super admin pone nombre y email. El servidor crea una cuenta de Google sin contraseña (o invita a la cuenta de lectora que ya exista) y manda la invitación por email.
+2. Mientras la persona no responde, los super admins pueden escribir su perfil y acreditarla. Si un super admin es el único autor y la añade, publica en su nombre.
+3. Al iniciar sesión por primera vez, la persona ve la invitación (un modal y un aviso en la campana):
+   - **Aceptar** → pasa a editora.
+   - **Rechazar** → sigue como lectora, su perfil se oculta y lo que nadie más firma pasa a firmarse «La Rabia».
+
+**Contenido en otros idiomas** (`back-end/utils/translations.js`, `front-end/src/utils/contentLang.js`):
+
+- El original es en castellano. Las versiones en inglés y en euskera van en columnas JSON: `translations_article` (título, entradilla), `translations_block` (texto, pie de foto, texto alternativo) y `translations_project` (título, descripción).
+- En el creador, el selector «Idioma en el que escribes» elige qué versión se escribe.
+- Cada lectora ve la versión de su idioma, o el original si no la hay.
+
+**Paisajes sonoros** (`front-end/src/paisaje/`):
+
+- El motor es de Cristian Vergara y **no se modifica**; el código de la revista va en `integration/`.
+- La imagen se procesa en el navegador. El servidor solo guarda el dibujo y normaliza el audio con ffmpeg.
+- Todo el audio de la revista, cómics incluidos, pasa por esta cadena (cualquier tamaño, se guarda en AAC).
+
+**Trozos JS antiguos:** cada versión del front-end cambia el nombre de sus trozos. nginx sirve `/assets/` de la versión actual y, si no lo encuentra, de un volumen que guarda las versiones anteriores 30 días, para que las pestañas abiertas antes de un despliegue sigan funcionando.
+
+## Idiomas (i18n)
+
+La interfaz está traducida entera al **castellano, inglés y euskera**, en tres capas:
+
+1. **Interfaz:**
+   - Todo texto visible pasa por `t('clave', 'texto por defecto en castellano')`. Las claves están en `front-end/src/i18n/locales/{es,en,eu}.json` (claves planas con puntos; los plurales con `_one` / `_other`).
+   - Contextos y utilidades usan `i18n.t` de `src/i18n/config`.
+   - Las etiquetas del menú se guardan con `es` / `en` / `eu` y se editan en Admin › Menú.
+2. **Mensajes del servidor:**
+   - La web manda el idioma de la cabecera como `Accept-Language`.
+   - `back-end/i18n/translateResponses.js` traduce los textos `error`, `success` y `message` de cada respuesta JSON con `back-end/i18n/messages.js`.
+   - El código sigue escribiendo los mensajes en castellano. Un mensaje nuevo necesita su entrada ahí (texto exacto, o patrón si lleva valores).
+3. **Contenido:** las versiones de artículos y proyectos descritas arriba.
+
+**Las fechas** pasan por `front-end/src/utils/locale.js` (`localDate`). Chrome no trae fechas en euskera (su `Intl` recurre al castellano), así que ahí el euskera se escribe a mano («2026ko urriaren 19a»).
+
+**Sin traducir:** los textos de la propia interfaz del motor de paisajes sonoros (el motor se mantiene como se entregó) y el contenido propio de la revista en la base de datos (nombre, eslogan, biografías).
+
+## Desarrollo en local
+
+```bash
+# 1. Dependencias (una vez)
+npm install                      # raíz del repositorio: mueve el back-end
+cd front-end && npm install
+
+# 2. MySQL (lo más fácil, con Docker)
+docker compose up -d db
+
+# 3. Back-end (desde la raíz): nodemon sobre back-end/index.js
+npm run dev
+
+# 4. Front-end: Vite en localhost:5174, con proxy a VITE_API_URL (por defecto localhost:3000)
+cd front-end && npm run dev
+```
+
+- El back-end necesita `ffmpeg` instalado para procesar audio.
+- Sin las variables `EMAIL_*` no se envían emails; el resto funciona.
+
+## Tests
+
+- `cd front-end && npm test` ejecuta la suite del motor de paisajes sonoros (Vitest, 277 tests). Tienen que quedar en verde.
+- El resto de funciones se probaron de punta a punta con Puppeteer contra un MySQL desechable. Esos scripts no forman parte del repositorio.
+
+## Despliegue
+
+Producción está en un VPS: **https://larabiamag.com** (+ `www.`) y **https://api.larabiamag.com**.
+
+- La web está detrás de un nginx-proxy externo con su compañero de Let's Encrypt, en la red Docker compartida `nginx-proxy`.
+- El enrutado y los certificados salen de `VIRTUAL_HOST` / `LETSENCRYPT_HOST` de cada servicio (desde `.env`).
+
+### Primera puesta en marcha
+
+1. Clona el repositorio en el VPS (por ejemplo, `~/larabia`).
+2. Copia `.env.example` a `.env` y rellénalo. Los valores por defecto apuntan a `larabiamag.com` / `api.larabiamag.com`.
+3. Arranca: `docker compose up -d --build`. El primer arranque de la base de datos ejecuta `back-end/migrations/001_init_schema.sql`.
+4. Mira cómo se emiten los certificados: `docker logs -f nginx-proxy-le | grep larabiamag`.
+5. Comprueba `https://larabiamag.com` y `https://api.larabiamag.com/health`.
+
+### Despliegue habitual
+
+```bash
+cd ~/larabia && git pull origin main \
+  && docker compose build --no-cache back-end front-end \
+  && docker compose up -d back-end front-end \
+  && docker image prune -f && docker builder prune -f
+```
+
+- **Reconstruye solo lo que cambió.** `VITE_API_URL` y `VITE_GOOGLE_CLIENT_ID` se fijan en el front-end al compilar.
+- **Limpia tras cada compilación:** cada `--no-cache` deja la imagen vieja (~1,4 GB la del back-end).
+- **Haz backup de la base de datos antes de un despliegue que cambie el esquema:**
+  ```bash
+  docker exec larabia_db sh -c 'mysqldump --single-transaction -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' \
+    | gzip > ~/larabia-backups/db-$(date +%F).sql.gz
+  ```
+
+### Primer super admin
+
+Pon tu email en `SUPER_ADMIN_EMAILS` antes de iniciar sesión por primera vez. Se promociona solo en cada inicio de sesión.
+
+### Cambiar de dominio
+
+1. Apunta los registros DNS **A** (`nuevodominio.com`, `www.nuevodominio.com`, `api.nuevodominio.com`) al VPS.
+2. Cambia `FRONT_VIRTUAL_HOST`, `API_VIRTUAL_HOST`, `FRONTEND_URL` y `VITE_API_URL` en `.env`.
+3. Reconstruye con `docker compose build --no-cache front-end && docker compose up -d`.
+4. Añade los nuevos orígenes al cliente OAuth de Google («Authorized JavaScript origins»).
+
+Los orígenes CORS salen de `FRONTEND_URL`, que añade la variante `www.`.
+
+## Base de datos y migraciones
+
+El esquema está en `back-end/migrations/` ([README](back-end/migrations/README.md) · [ES](back-end/migrations/README.es.md)).
+
+- `001` lo crea todo en una base vacía; los archivos numerados siguientes son incrementales.
+- Desde la `012`, el back-end también añade al arrancar las columnas nuevas que falten (`back-end/index.js`), así que un despliegue no depende de aplicarlas a mano.
+- Varias tablas se crean al arrancar con `sync()` si no existen (interacción, suscripciones, bloqueos e invitaciones de talleres).
+
+## Convenciones
+
+- **Todo texto visible en los tres idiomas, en el mismo cambio** (claves de la interfaz; `messages.js` para los mensajes del servidor).
+- **Mayúsculas solo en botones de verdad.** Insignias, avisos y textos pulsables mantienen su caja (`text-transform: none`).
+- **Primero el móvil:** comprueba cada pantalla a 390 px de ancho además de en escritorio.
+- **Motor de paisajes sonoros:** no se tocan `src/paisaje/converter`, `styles`, `wizard` ni la lógica del reproductor; el código de la revista va en `integration/`.
+- **Peticiones autenticadas:** pasan `headers: { 'x-user-id': currentUser.id_user }` explícitamente.
+
+## Créditos
+
+- **Paisaje sonoro** (el motor de paisajes sonoros): **Cristian Vergara**, 2026. Integrado con su permiso ([origen](https://github.com/zuriai-org/paisaje-sonoro-public)).
+- Mapas © colaboradores de OpenStreetMap.
+
+## Licencia
+
+ISC — ver [LICENSE](LICENSE) (pendiente de añadir).

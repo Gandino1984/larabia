@@ -1,120 +1,276 @@
-# larabia-magazine
+# La Rabia — larabia-magazine
 
-**La Rabia** — revista comunitaria digital del distrito 02 de Bilbao (Uribarri).
+**English** · [Español](README.es.md)
 
-Split out of [uribarri.online](https://github.com/Gandino1984/uribarri.online) so the magazine evolves as its own product with its own backend, database, and identity layer.
+**La Rabia** is the community digital magazine of district 02 of Bilbao (Uribarri). Live at **https://larabiamag.com** (API: **https://api.larabiamag.com**).
+
+It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.online) and was split out so the magazine could grow as its own product, with its own back-end, database and accounts.
+
+## Contents
+
+- [What it does](#what-it-does)
+- [Stack](#stack)
+- [Repository layout](#repository-layout)
+- [Roles and permissions](#roles-and-permissions)
+- [How the main pieces work](#how-the-main-pieces-work)
+- [Languages (i18n)](#languages-i18n)
+- [Local development](#local-development)
+- [Tests](#tests)
+- [Deployment](#deployment)
+- [Database and migrations](#database-and-migrations)
+- [Conventions](#conventions)
+- [Credits](#credits)
+
+## What it does
+
+**Reading**
+
+- **Home:** a hero slider of featured stories (its title, excerpt and project follow the language chosen in the header), followed by previews of the sections.
+- **Sections:** the top-bar buttons (Articles, Projects, Workshops, More › Fiction, International…). Any article or project can also appear in other sections, if a super admin approves it.
+- **Publications** belong to a **project**. Each one is one of these types:
+  - an **article** (text, images and embeds, built from blocks);
+  - a **comic** (a horizontal reader whose panels can be images, links, audio, embeds or soundscapes, with panel-by-panel navigation, saved reading progress and full screen);
+  - a **micro-profile**;
+  - a **soundscape** (*paisaje sonoro*, a drawing that moves with a sound).
+- **Authors:** the directory of author profiles and each author's publications.
+- **Workshops:**
+  - The cards are public.
+  - Opening one needs a sign-in, and booking a place needs a subscription (the team doesn't need one).
+  - Managers invite people (an invitation holds a place), remove participants or block them.
+  - Each workshop has a location on a map (Leaflet/OpenStreetMap).
+- **Engagement:** likes, favourites, comments and following projects.
+- **Notifications** in the header bell: new content, invitations, answers and the subscription.
+- **Contact form** and **newsletter**.
+
+**Three languages:** Spanish, English and Basque.
+
+- The whole interface, the server's messages and the dates follow the header language.
+- Articles and projects can carry English and Basque versions of their texts, and the article reader has its own ES · EN · EU switch.
+
+See [Languages (i18n)](#languages-i18n).
+
+**Publishing**
+
+- **The creator** is a six-step wizard: project → classification, authors and sections → cover, title and excerpt → type → content → review and publish.
+- **Review:** everything is a draft until it's published. Everyone below super admin sends their work for review. A super admin approves it, or sends it back with a reason; authors can move their work back to draft.
+- **Soundscape editor:** a three-step wizard (image and style → sound and player → framing and summary), used both in articles and in comic panels.
+- **Invited authors:** a super admin can sign up an author who has no account yet and publish on their behalf. The person accepts or declines when they first sign in (see below).
+
+**Administration** (*Admin*, super admins):
+
+- users and roles;
+- the review queue (articles, projects and section changes);
+- magazine details (name, slogan, logos);
+- workshops;
+- appearance (theme presets, colours, animations);
+- the top-bar **menu builder** (labels in ES / EN / EU, who sees each button, what it opens).
+
+**Subscriptions:** paid reader subscriptions through **Stripe** (monthly and yearly).
+
+- Subscribers get a badge and can book workshops.
+- The feature stays off until the `STRIPE_*` variables are set.
 
 ## Stack
 
-- **Backend:** Node.js 22+ · Express 4 · Sequelize 6 · MySQL 8 · Sharp · Nodemailer · google-auth-library
-- **Frontend:** React 18 · Vite 6 · i18next (es / en / eu)
-- **Container:** Docker Compose · nginx-proxy + Let's Encrypt companion
+- **Back-end:** Node.js 22+ · Express 4 · Sequelize 6 · MySQL 8 · Sharp (images → WebP) · ffmpeg (audio → AAC, loudness-normalised) · Nodemailer · google-auth-library · Stripe
+- **Front-end:** React 18 · Vite 6 · i18next (es / en / eu) · react-quill · Leaflet · @react-spring/web · Vitest
+- **Infrastructure:** Docker Compose (db, back-end, front-end) · external nginx-proxy + Let's Encrypt companion
 
-## Layout
+## Repository layout
 
 ```
 back-end/
-  config/         Sequelize + environment loaders
-  models/         Sequelize models — user + 7 magazine tables
-  controllers/    Business logic: user, contact, magazine_article, magazine_project, article_blocks, author_profile
-  routers/        Express route definitions
-  middleware/     ProfileUploadMiddleware + MagazineUploadMiddleware (covers, blocks, profiles)
-  services/       emailService.js (Nodemailer — verification, reset, welcome, contact, newsletter)
-  utils/          imageConversionUtils (Sharp → WebP), imageValidationUtilities, file_cleanup
-  uploads/        Runtime upload dir (gitignored — bind-mounted in production)
-  migrations/     001_init_schema.sql — consolidated schema, auto-applied on first DB boot
+  index.js        Express app: static files, CORS, i18n middleware, routes, boot-time column checks
+  config/         Sequelize + environment (CORS origins derive from FRONTEND_URL)
+  models/         Sequelize models (21 tables)
+  controllers/    One folder per area: user (incl. author_invitation_controller, google_oauth_controller),
+                  magazine_article, magazine_project, article_blocks, author_profile, magazine_workshop,
+                  engagement, subscription, paisaje, magazine_metadata, magazine_theme, magazine_nav, contact
+  routers/        Express routes (api_router mounts them all)
+  middleware/     Upload middlewares (covers, blocks, profiles, logos, theme backgrounds)
+  services/       emailService.js (verification, reset, welcome, contact, newsletter, author invitation)
+  utils/          authHelper (roles), sections, translations, image conversion/validation, file cleanup
+  i18n/           messages.js (the server's messages in en/eu) + translateResponses.js (middleware)
+  migrations/     Numbered SQL migrations (see its README)
+  uploads/        Runtime uploads (gitignored, a volume in production)
 
-front-end/        React/Vite app
-  src/app_context Auth, UI, Magazine, Author contexts
-  src/components  layout, magazine, admin, authors, openmic, humor, newsletter, contact, google-auth, user, notifications
-  nginx/          Production nginx config (server_name = _ so it accepts any host the proxy forwards)
+front-end/
+  src/app_context/  React contexts: Auth, UI, Magazine, Author, AuthorInvitation, Workshop, Engagement,
+                    Subscription, Notification, PendingReview, Metadata, Theme, Nav (+ navConfig, themePresets)
+  src/components/   layout, magazine (home, lists, reader, comic viewer), admin (creator, blocks, comic editor,
+                    Admin tabs), authors, workshops, maps, google-auth, notifications, user, common
+  src/paisaje/      The soundscape engine (vendored, untouched) + integration/ (the magazine's code) — see its README
+  src/utils/        contentLang (content versions), locale (dates), sections, articleFilters, projectKinds…
+  src/i18n/         i18next config + locales/{es,en,eu}.json (flat dotted keys)
+  nginx/            Production nginx config + keep-assets.sh (keeps previous builds' JS chunks)
 
-Dockerfile          (back-end image)
-front-end/Dockerfile (2-stage: vite build → nginx)
-docker-compose.yml  Three services: db, back-end, front-end
-.env.example        Copy to .env and fill in
+Dockerfile            Back-end image (includes ffmpeg)
+front-end/Dockerfile  Two stages: vite build → nginx
+docker-compose.yml    db, back-end, front-end
+.env.example          Copy to .env and fill it in
 ```
 
-## Deployment
+## Roles and permissions
 
-Production runs on the VPS at **https://larabiamag.com** (+ `www.`), API at **https://api.larabiamag.com**, behind an external nginx-proxy + Let's Encrypt companion on the shared `nginx-proxy` docker network. Routing and TLS are driven by the `VIRTUAL_HOST` / `LETSENCRYPT_HOST` env on each service (from `.env`).
+Roles are independent flags on `user`. One account can hold several.
 
-### First-time bring-up
+| Role | Can |
+|---|---|
+| Reader (default) | Read, like, comment, follow projects, subscribe, book workshops (with a subscription) |
+| Premium reader (`is_premium_reader`) | Also read articles marked premium |
+| Editor (`is_editor`) | Create publications and author profiles; everything goes through review |
+| Admin (`is_admin`) | Like an editor, plus workshops and newsletter recommendations |
+| Super admin (`is_super_admin`) | Everything; publishes directly; reviews others' work; Admin panel; invites authors |
 
-1. **Clone this repo onto the VPS** (e.g. `~/larabia`).
-2. **Copy `.env.example` to `.env`** and fill in real values. The defaults already point at `larabiamag.com` / `api.larabiamag.com`.
-3. **Start the stack:**
-   ```bash
-   docker compose up -d --build
-   ```
-   The first DB boot runs `back-end/migrations/001_init_schema.sql` automatically.
-4. **Watch the Let's Encrypt companion** mint certs:
-   ```bash
-   docker logs -f nginx-proxy-le | grep larabiamag
-   ```
-5. **Sanity check:** visit `https://larabiamag.com` and `https://api.larabiamag.com/health`.
+- `canCreateContent` = editor, admin or super admin. `canPublishDirectly` = super admin only.
+- The server checks the role on each request: it reads the `x-user-id` header and looks the user up (`back-end/utils/authHelper.js`).
+- When access is refused, the server answers 403 with a `code`, never 401: the front-end logs the user out on 401.
+- E-mails listed in `SUPER_ADMIN_EMAILS` become super admins when they sign in.
 
-### Routine deploy (already running)
+## How the main pieces work
 
-```bash
-cd ~/larabia && git pull origin main && docker compose up -d --build
-```
+**Sign-in** is with Google only (Google Identity Services). Signing in with an e-mail that already has an account without a password links Google to that account.
 
-Rebuild only the changed service to be quick (`… up -d --build front-end`). The front-end must be rebuilt whenever `VITE_API_URL` / `VITE_GOOGLE_CLIENT_ID` change — they are **baked at build time** (use `--no-cache` if a build-arg change isn't picked up).
+**Review workflow:**
 
-#### Promoting the first super admin
+- A non-super-admin's work goes from `draft` to `pending_approval` (*send for review*), and from there to `published` (approve) or back to `draft` with a reason (reject).
+- Super admins work through it in Admin › Pendientes. The header badge counts what's waiting.
 
-The schema starts empty — first registration produces a regular user. Run this once after registering your first account to grant yourself editor + super-admin:
+**Sections** (`back-end/utils/sections.js`, `front-end/src/utils/sections.js`):
 
-```sql
-docker exec -it larabia_db mysql -u root -p larabia_db -e \
-  "UPDATE user SET is_editor = 1, is_super_admin = 1 WHERE email_user = 'you@example.com';"
-```
+- The section list comes from the menu: the buttons of type "article category", plus Espacio abierto and Micro-perfiles.
+- Each publication stores its *approved* sections and the sections it *requested* (JSON columns). A super admin settles the requests.
 
-### Changing the domain
+**Invited authors** (`back-end/controllers/user/author_invitation_controller.js`):
 
-The magazine moved from `larabia.uribarri.online` to `larabiamag.com` on 2026-09-09. To move to a different domain later:
+1. In «Autoras/es», a super admin adds a name and e-mail. The server creates a Google account without a password (or invites the existing reader account) and e-mails the invitation.
+2. Until the person answers, super admins can write their profile and credit them. A super admin who is the only author and adds them publishes on their behalf.
+3. On their first sign-in, the person sees the invitation (a modal and a bell item):
+   - **Accept** → they become an editor.
+   - **Decline** → they stay a reader, their profile is hidden, and what nobody else signs is signed «La Rabia».
 
-1. Point new DNS **A** records (`newdomain.com`, `www.newdomain.com`, `api.newdomain.com`) at the VPS IP and wait for propagation (`dig +short A newdomain.com`).
-2. Edit `.env` (comma-separate multiple front hosts for a SAN cert):
-   ```
-   FRONT_VIRTUAL_HOST=newdomain.com,www.newdomain.com
-   API_VIRTUAL_HOST=api.newdomain.com
-   FRONTEND_URL=https://newdomain.com
-   VITE_API_URL=https://api.newdomain.com
-   ```
-3. Rebuild so the new `VITE_API_URL` is baked in and the back-end picks up the new env:
-   ```bash
-   docker compose build --no-cache front-end && docker compose up -d
-   ```
-4. **Add the new origins to the Google OAuth client** (`Authorized JavaScript origins`: `https://newdomain.com`, `https://www.newdomain.com`) or Google sign-in breaks on the new domain.
+**Content in other languages** (`back-end/utils/translations.js`, `front-end/src/utils/contentLang.js`):
 
-No code changes needed — CORS origins derive from `FRONTEND_URL` (the `www.` variant is added automatically). The Let's Encrypt companion mints certs automatically once DNS resolves to the VPS.
+- The original is Spanish. English and Basque versions live in JSON columns: `translations_article` (title, excerpt), `translations_block` (text, caption, alt text) and `translations_project` (title, description).
+- In the creator, the «Idioma en el que escribes» switch selects which version is being written.
+- Readers get the version of their language, or the original when there is none.
+
+**Soundscapes** (`front-end/src/paisaje/`):
+
+- The engine is by Cristian Vergara and **must not be modified**; magazine code goes in `integration/`.
+- Images are processed in the browser. The server only stores the drawing and normalises the audio with ffmpeg.
+- All magazine audio, comics included, goes through this pipeline (any size, stored as AAC).
+
+**Old JS chunks:** each front-end build renames its chunks. nginx serves `/assets/` from the current build and falls back to a volume that keeps previous builds for 30 days, so tabs opened before a deploy keep working.
+
+## Languages (i18n)
+
+The interface is fully translated into **es / en / eu**. There are three layers:
+
+1. **Interface:**
+   - Every visible string goes through `t('key', 'default in Spanish')`. The keys live in `front-end/src/i18n/locales/{es,en,eu}.json` (flat dotted keys; plurals use `_one` / `_other`).
+   - Contexts and utilities use `i18n.t` from `src/i18n/config`.
+   - The menu labels are stored with `es` / `en` / `eu` and are edited in Admin › Menú.
+2. **Server messages:**
+   - The front-end sends the header language as `Accept-Language`.
+   - `back-end/i18n/translateResponses.js` translates the `error`, `success` and `message` strings of every JSON answer, using `back-end/i18n/messages.js`.
+   - The code keeps writing messages in Spanish. A new message needs an entry there (exact text, or a pattern when it carries values).
+3. **Content:** the versions of articles and projects described above.
+
+**Dates** go through `front-end/src/utils/locale.js` (`localDate`). Chrome has no Basque dates (its `Intl` falls back to Spanish), so Basque is formatted by hand there («2026ko urriaren 19a»).
+
+**Not translated:** the soundscape engine's own interface texts (the engine is kept as delivered) and the magazine's own content in the database (name, slogan, author bios).
 
 ## Local development
 
 ```bash
-# 1. Install deps (one-time)
-cd back-end && npm install --prefix ..   # root package.json drives the back-end
-cd ../front-end && npm install
+# 1. Dependencies (once)
+npm install                      # repo root: drives the back-end
+cd front-end && npm install
 
-# 2. Bring up MySQL (Docker is easiest)
+# 2. MySQL (Docker is easiest)
 docker compose up -d db
 
-# 3. In one terminal — back-end
-npm run dev                              # from repo root, runs nodemon on back-end/index.js
+# 3. Back-end (repo root): nodemon on back-end/index.js
+npm run dev
 
-# 4. In another terminal — front-end
-cd front-end && npm run dev              # vite at localhost:5174 with proxy → localhost:3000
+# 4. Front-end: Vite on localhost:5174, proxying API paths to VITE_API_URL (default localhost:3000)
+cd front-end && npm run dev
 ```
 
-## Differences from uribarri.online
+- The back-end needs `ffmpeg` installed to process audio.
+- Without the `EMAIL_*` variables, no e-mails are sent. The rest works.
 
-- **Slim user table.** Dropped `type_user`, `phone_user`, `contributor_user`, `calification_user`, `is_manager`, and all `telegram_*` fields. Magazine doesn't have user types — one account per email.
-- **No shop / order / org / publication tables.** Those stay in uribarri.online.
-- **Independent identities.** A magazine reader does not have an uribarri.online account, and vice-versa. If you're an editor on both, you currently register twice.
-- **Email branding** flipped from "Uribarri.Online" to "La Rabia" (`back-end/services/emailService.js`).
-- **Upload paths** unified under `back-end/uploads/{magazine,article_blocks,author-profiles,user-profiles}/` and `back-end/assets/images/magazine/projects/`.
+## Tests
+
+- `cd front-end && npm test` runs the soundscape engine's test suite (Vitest, 277 tests). They must stay green.
+- The other features were tested end to end with Puppeteer against a throwaway MySQL. Those scripts aren't part of the repository.
+
+## Deployment
+
+Production runs on a VPS: **https://larabiamag.com** (+ `www.`) and **https://api.larabiamag.com**.
+
+- The site sits behind an external nginx-proxy with its Let's Encrypt companion, on the shared `nginx-proxy` Docker network.
+- Routing and certificates come from `VIRTUAL_HOST` / `LETSENCRYPT_HOST` on each service, set from `.env`.
+
+### First-time bring-up
+
+1. Clone the repository on the VPS (e.g. `~/larabia`).
+2. Copy `.env.example` to `.env` and fill it in. The defaults point at `larabiamag.com` / `api.larabiamag.com`.
+3. Start it: `docker compose up -d --build`. The first database boot runs `back-end/migrations/001_init_schema.sql`.
+4. Watch the certificates being issued: `docker logs -f nginx-proxy-le | grep larabiamag`.
+5. Check `https://larabiamag.com` and `https://api.larabiamag.com/health`.
+
+### Routine deploy
+
+```bash
+cd ~/larabia && git pull origin main \
+  && docker compose build --no-cache back-end front-end \
+  && docker compose up -d back-end front-end \
+  && docker image prune -f && docker builder prune -f
+```
+
+- **Rebuild only what changed.** `VITE_API_URL` and `VITE_GOOGLE_CLIENT_ID` are baked into the front-end at build time.
+- **Prune after every build:** each `--no-cache` build leaves the old image behind (~1.4 GB for the back-end).
+- **Back up the database before a deploy that changes the schema:**
+  ```bash
+  docker exec larabia_db sh -c 'mysqldump --single-transaction -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' \
+    | gzip > ~/larabia-backups/db-$(date +%F).sql.gz
+  ```
+
+### First super admin
+
+Put your e-mail in `SUPER_ADMIN_EMAILS` before signing in for the first time. It is promoted automatically on every sign-in.
+
+### Changing the domain
+
+1. Point the DNS **A** records (`newdomain.com`, `www.newdomain.com`, `api.newdomain.com`) at the VPS.
+2. Edit `FRONT_VIRTUAL_HOST`, `API_VIRTUAL_HOST`, `FRONTEND_URL` and `VITE_API_URL` in `.env`.
+3. Rebuild with `docker compose build --no-cache front-end && docker compose up -d`.
+4. Add the new origins to the Google OAuth client ("Authorized JavaScript origins").
+
+The CORS origins derive from `FRONTEND_URL`, which adds the `www.` variant.
+
+## Database and migrations
+
+The schema is in `back-end/migrations/` ([README](back-end/migrations/README.md) · [ES](back-end/migrations/README.es.md)).
+
+- `001` creates everything on an empty database. The numbered files after it are incremental.
+- Since `012`, the back-end also adds its newer columns at boot when they're missing (`back-end/index.js`), so a deploy doesn't depend on applying them by hand.
+- Several tables are created at boot with `sync()` if missing (engagement, subscriptions, workshop blocks and invitations).
+
+## Conventions
+
+- **Every visible string in the three languages, in the same change** (interface keys; `messages.js` for server messages).
+- **Capitals only on real buttons.** Badges, notifications and clickable text keep their case (`text-transform: none`).
+- **Mobile first:** check every screen at 390 px wide as well as on desktop.
+- **Soundscape engine:** don't touch `src/paisaje/converter`, `styles`, `wizard` or the player logic; magazine code goes in `integration/`.
+- **Authenticated requests** pass `headers: { 'x-user-id': currentUser.id_user }` explicitly.
+
+## Credits
+
+- **Paisaje sonoro** (the soundscape engine): **Cristian Vergara**, 2026. It's integrated with his permission ([origin](https://github.com/zuriai-org/paisaje-sonoro-public)).
+- Maps © OpenStreetMap contributors.
 
 ## License
 

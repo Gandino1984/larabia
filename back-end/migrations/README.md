@@ -1,5 +1,7 @@
 # Migrations
 
+**English** · [Español](README.es.md)
+
 `001_init_schema.sql` creates the entire larabia-magazine schema in a single pass against an empty database. It is the consolidation of uribarri.online's magazine migrations 027–049.
 
 Later numbered files (`002_…`, `003_…`, `004_…`) are **incremental** changes layered on top of `001`.
@@ -38,18 +40,44 @@ docker exec -i larabia_db mysql -u root -p"$ROOT_PW" \
 ```
 A row means it's already applied — do **not** re-run.
 
-## Tables created
+## Boot-time columns
+
+Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns its newer migrations add and creates any that are missing, so a deploy no longer depends on applying them by hand:
+
+| Migration | Adds |
+|---|---|
+| `012` | `magazine_workshops.audience_workshop` |
+| `013` | `magazine_workshops.lat_workshop`, `lng_workshop` |
+| `016` | `article_blocks.block_type` gains `'paisaje'`; `article_blocks.soundscape_data` |
+| `017` | `sections_article` / `sections_requested_article`, `sections_project` / `sections_requested_project` |
+| `018` | `user.author_invite_status`, `author_invited_by`, `author_invited_at` |
+| `019` | `translations_article`, `translations_block`, `translations_project` |
+
+The tables of `009`, `010`, `011`, `014` and `015` are created at boot with Sequelize `sync()` when missing. The SQL files stay the reference for a fresh database.
+
+## Tables
 
 | Table | Purpose |
 |---|---|
-| `user` | Slim user table — only magazine-relevant fields (no shop / telegram / type_user) |
-| `magazine_projects` | Project collections that can group articles |
-| `magazine_articles` | Articles (cover + metadata, content lives in `article_blocks`) |
-| `article_blocks` | Ordered content blocks per article (text / image / iframe / comic_panel) |
-| `article_authors` | M:N junction — multiple authors per article |
-| `article_author_invitations` | Pending/accepted/rejected co-author invitations |
-| `project_authors` | M:N junction — multiple authors per project |
-| `author_profiles` | 1:1 public bio per editor |
+| `user` | Accounts: roles (`is_editor`, `is_admin`, `is_super_admin`, `is_premium_reader`), Google link, author invitation status |
+| `magazine_projects` | Projects that group publications (type, format, sections, translations) |
+| `magazine_articles` | Publications: cover and metadata; the content lives in `article_blocks` |
+| `article_blocks` | Ordered content blocks: `text` / `image` / `iframe` / `comic_panel` / `paisaje` (+ translations) |
+| `article_authors` | M:N — the authors of an article |
+| `article_author_invitations` | Co-author invitations (pending / accepted / rejected) |
+| `project_authors` | M:N — the authors of a project |
+| `author_profiles` | The public author profile of a user (bio, links, draft / published) |
+| `magazine_metadata` | Singleton: name, slogan, description, logos |
+| `magazine_theme` | Singleton: theme preset, colours, front page background, animations |
+| `magazine_nav` | Singleton: the top-bar menu (`nav_config` JSON; NULL = default) |
+| `magazine_workshops` | Workshops (date, place, map location, capacity, audience) |
+| `workshop_authors` | M:N — who leads a workshop |
+| `workshop_reservations` | Bookings |
+| `workshop_blocks` | People blocked from a workshop |
+| `workshop_invitations` | Workshop invitations (they hold a place while pending) |
+| `article_likes`, `article_favorites`, `article_comments` | Readers' engagement |
+| `project_subscriptions` | Readers following a project |
+| `reader_subscriptions` | Paid subscriptions (Stripe customer and subscription) |
 
 ## Differences from uribarri.online
 

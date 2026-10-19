@@ -1,5 +1,7 @@
 # Paisaje sonoro — motor integrado en La Rabia
 
+[English](README.en.md) · **Español**
+
 **Autoría de la herramienta: Cristian Vergara, 2026.** Integrada en la revista
 con su permiso.
 
