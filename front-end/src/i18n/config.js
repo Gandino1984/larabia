@@ -18,7 +18,7 @@ i18n
     },
     fallbackLng: 'es',
     lng: localStorage.getItem('userLanguage') || 'es',
-    debug: true, // Enable debug mode to see what's happening
+    debug: import.meta.env.DEV,
 
     detection: {
       order: ['localStorage', 'navigator'],
@@ -35,8 +35,10 @@ i18n
     }
   });
 
-// Log initialization for debugging
-console.log('i18n initialized with languages:', Object.keys(i18n.options.resources));
-console.log('Current language:', i18n.language);
+// The page says which language it's in (<html lang>): screen readers pronounce
+// it right and the browser doesn't offer to translate it "from Spanish".
+const setHtmlLang = (lng) => { document.documentElement.lang = String(lng || 'es').slice(0, 2); };
+setHtmlLang(i18n.language);
+i18n.on('languageChanged', setHtmlLang);
 
 export default i18n;

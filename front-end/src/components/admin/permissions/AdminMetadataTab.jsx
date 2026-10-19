@@ -80,7 +80,7 @@ function AdminMetadataTab() {
             maxLength={255}
             value={slogan}
             onChange={(e) => setSlogan(e.target.value)}
-            placeholder="Revista comunitaria del distrito 02 de Bilbao"
+            placeholder={t('admin.metadata.sloganPlaceholder', 'Revista comunitaria del distrito 02 de Bilbao')}
           />
         </div>
 

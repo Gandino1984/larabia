@@ -396,7 +396,7 @@ function ArticlesList() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               {searchTerm && (
-                <button className="search-clear-btn" onClick={() => setSearchTerm('')} aria-label={t('header.search.clear', 'Limpiar')}>
+                <button className="search-clear-btn" onClick={() => setSearchTerm('')} aria-label={t('header.search.clear', 'Borrar la búsqueda')}>
                   <X size={16} />
                 </button>
               )}
@@ -409,7 +409,7 @@ function ArticlesList() {
             defaultSort="oldest"
             tone="dark"
           />
-          <p className="articles-count">{filteredArticles.length === 1 ? t('article.list.count', { count: 1 }) : t('article.list.count_plural', { count: filteredArticles.length })}</p>
+          <p className="articles-count">{t('article.list.count', { count: filteredArticles.length })}</p>
         </div>
       </div>
 

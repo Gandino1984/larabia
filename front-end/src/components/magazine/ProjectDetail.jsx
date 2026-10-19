@@ -222,7 +222,7 @@ function ProjectDetail() {
 
       <div className={`project-detail-articles ${articlesActive ? 'project-detail-articles--active' : ''}`} ref={articlesRef}>
         {loading ? (
-          <p className="project-detail-loading">{t('common.loading')}</p>
+          <p className="project-detail-loading">{t('common.states.loading', 'Cargando')}…</p>
         ) : projectArticles.length > 0 ? (
           (() => {
             const ordered = [...projectArticles].sort((a, b) => (a.id_article || 0) - (b.id_article || 0));
@@ -231,9 +231,7 @@ function ProjectDetail() {
                 {/* Article count with the grid / carousel toggle beside it. */}
                 <div className="project-articles-toolbar">
                   <p className="project-articles-count">
-                    {ordered.length === 1
-                      ? t('project.articlesCount', { count: 1 })
-                      : t('project.articlesCount_plural', { count: ordered.length })}
+                    {t('project.articlesCount', { count: ordered.length })}
                   </p>
                   <div className="articles-view-toggle" data-mode={viewMode} role="group" aria-label={t('article.list.viewMode')}>
                     <button

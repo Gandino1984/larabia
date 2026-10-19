@@ -83,7 +83,7 @@ function ForgotPasswordPage() {
             onClick={navigateToLogin}
             disabled={loading}
           >
-            ← Volver al inicio de sesión
+            ← {t('auth.forgotPassword.backToLogin', 'Volver al inicio de sesión')}
           </button>
         </div>
       </div>

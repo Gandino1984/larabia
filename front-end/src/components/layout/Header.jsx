@@ -738,7 +738,7 @@ function Header({ ready = true }) {
             <button className="nav-link nav-link--admin" onClick={handleAdminClick} title={t('header.admin.title', 'Administración')}>
               <RollText text={t('header.admin.label', 'Admin')} />
               {totalAttention > 0 && (
-                <span className="admin-pending-badge" title={t('header.admin.pending', { count: totalAttention, defaultValue: '{{count}} pendiente(s) de revisión' })}>
+                <span className="admin-pending-badge" title={t('header.admin.pending', { count: totalAttention, defaultValue: '{{count}} pendientes de revisión' })}>
                   {totalAttention}
                 </span>
               )}
