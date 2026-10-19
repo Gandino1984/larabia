@@ -240,7 +240,9 @@ async function googleAuth(req, res) {
                 existingAccounts: result.existingAccounts
             });
         }
-        res.json({ data: result.data, message: result.message });
+        // `code`: what happened (signed_in / account_created / account_linked…),
+        // since `message` arrives in the reader's language.
+        res.json({ data: result.data, message: result.message, code: result.code });
     } catch (err) {
         console.error('Google OAuth error:', err);
         res.status(500).json({ error: 'Error al autenticar con Google', details: err.message });
@@ -255,7 +257,9 @@ async function linkGoogleAccount(req, res) {
         }
         const result = await googleOAuthController.linkGoogleAccount(userId, googleId, password);
         if (result.error) return res.status(400).json({ error: result.error });
-        res.json({ data: result.data, message: result.message });
+        // `code`: what happened (signed_in / account_created / account_linked…),
+        // since `message` arrives in the reader's language.
+        res.json({ data: result.data, message: result.message, code: result.code });
     } catch (err) {
         res.status(500).json({ error: 'Error al vincular cuenta de Google', details: err.message });
     }
@@ -269,7 +273,9 @@ async function selectGoogleAccount(req, res) {
         }
         const result = await googleOAuthController.selectGoogleAccount(userId, googleId);
         if (result.error) return res.status(400).json({ error: result.error });
-        res.json({ data: result.data, message: result.message });
+        // `code`: what happened (signed_in / account_created / account_linked…),
+        // since `message` arrives in the reader's language.
+        res.json({ data: result.data, message: result.message, code: result.code });
     } catch (err) {
         res.status(500).json({ error: 'Error al seleccionar cuenta', details: err.message });
     }
@@ -283,7 +289,9 @@ async function completeGoogleRegistration(req, res) {
         }
         const result = await googleOAuthController.completeGoogleRegistration(googleId, email, name, picture);
         if (result.error) return res.status(400).json({ error: result.error });
-        res.json({ data: result.data, message: result.message });
+        // `code`: what happened (signed_in / account_created / account_linked…),
+        // since `message` arrives in the reader's language.
+        res.json({ data: result.data, message: result.message, code: result.code });
     } catch (err) {
         res.status(500).json({ error: 'Error al completar el registro con Google', details: err.message });
     }

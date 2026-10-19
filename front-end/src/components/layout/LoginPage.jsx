@@ -20,12 +20,13 @@ function LoginPage() {
   const [showSelectionModal, setShowSelectionModal] = useState(false);
   const [selectionData, setSelectionData] = useState(null);
 
-  const handleGoogleSuccess = async (userData, message) => {
+  // code (from the server): what happened — the message comes translated.
+  const handleGoogleSuccess = async (userData, message, code) => {
     setUser(userData);
 
-    if (message && message.includes('creada exitosamente')) {
+    if (code === 'account_created') {
       showSuccess(t('messages.success.accountCreated', { name: userData.name_user }));
-    } else if (message && message.includes('vinculada')) {
+    } else if (code === 'account_linked' || code === 'already_linked') {
       showSuccess(t('messages.success.accountLinked'));
     } else {
       showSuccess(t('messages.success.accountWelcomeBack', { name: userData.name_user }));
@@ -66,7 +67,7 @@ function LoginPage() {
       if (result.data.error) {
         showError(result.data.error);
       } else if (result.data.data) {
-        handleGoogleSuccess(result.data.data, result.data.message);
+        handleGoogleSuccess(result.data.data, result.data.message, result.data.code);
       }
     } catch (err) {
       const errorMessage = err.response?.data?.error ||
@@ -76,10 +77,10 @@ function LoginPage() {
     }
   };
 
-  const handleLinkingSuccess = async (userData, message) => {
+  const handleLinkingSuccess = async (userData, message, code) => {
     setShowLinkingModal(false);
     setLinkingData(null);
-    await handleGoogleSuccess(userData, message);
+    await handleGoogleSuccess(userData, message, code);
   };
 
   const handleLinkingCancel = () => {
@@ -87,10 +88,10 @@ function LoginPage() {
     setLinkingData(null);
   };
 
-  const handleSelectionSuccess = async (userData, message) => {
+  const handleSelectionSuccess = async (userData, message, code) => {
     setShowSelectionModal(false);
     setSelectionData(null);
-    await handleGoogleSuccess(userData, message);
+    await handleGoogleSuccess(userData, message, code);
   };
 
   const handleSelectionCancel = () => {

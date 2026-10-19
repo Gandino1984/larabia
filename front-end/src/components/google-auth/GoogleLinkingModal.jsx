@@ -57,7 +57,7 @@ export const GoogleLinkingModal = ({
         setError(result.data.error);
       } else if (result.data.data) {
         console.log('✅ Account linked successfully');
-        onSuccess(result.data.data, result.data.message);
+        onSuccess(result.data.data, result.data.message, result.data.code);
       } else {
         setError(t('auth.unexpectedResponse', 'Respuesta inesperada del servidor'));
       }

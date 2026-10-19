@@ -142,7 +142,7 @@ export const GoogleSignIn = ({ onSuccess, onError, onNeedsLinking, onNeedsSelect
         onNeedsTypeSelectionRef.current?.(result.data);
       } else if (result.data.data) {
         console.log('✅ Google auth successful');
-        onSuccessRef.current?.(result.data.data, result.data.message);
+        onSuccessRef.current?.(result.data.data, result.data.message, result.data.code);
       } else {
         console.error('Unexpected response format:', result.data);
         onErrorRef.current?.(i18n.t('auth.unexpectedResponse', 'Respuesta inesperada del servidor'));

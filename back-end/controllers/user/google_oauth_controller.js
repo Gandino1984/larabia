@@ -89,7 +89,7 @@ async function googleLogin(idToken, isRegisterMode = false) {
             await ensureSuperAdminPromotion(linked);
             return {
                 data: sanitizeUserData(linked),
-                message: 'Login exitoso con Google'
+                message: 'Login exitoso con Google', code: 'signed_in'
             };
         }
 
@@ -102,7 +102,7 @@ async function googleLogin(idToken, isRegisterMode = false) {
                 await ensureSuperAdminPromotion(existingByEmail);
                 return {
                     data: sanitizeUserData(existingByEmail),
-                    message: 'Login exitoso con Google'
+                    message: 'Login exitoso con Google', code: 'signed_in'
                 };
             }
             return {
@@ -154,7 +154,7 @@ async function linkGoogleAccount(userId, googleId, password) {
         if (!isPasswordValid) return { error: 'Contraseña incorrecta' };
 
         if (user.google_id === googleId) {
-            return { data: sanitizeUserData(user), message: 'Esta cuenta ya está vinculada a Google' };
+            return { data: sanitizeUserData(user), message: 'Esta cuenta ya está vinculada a Google', code: 'already_linked' };
         }
 
         if (user.google_id && user.google_id !== googleId) {
@@ -164,7 +164,7 @@ async function linkGoogleAccount(userId, googleId, password) {
         await user.update({ google_id: googleId, email_verified: true });
         await ensureSuperAdminPromotion(user);
 
-        return { data: sanitizeUserData(user), message: 'Cuenta de Google vinculada exitosamente' };
+        return { data: sanitizeUserData(user), message: 'Cuenta de Google vinculada exitosamente', code: 'account_linked' };
     } catch (error) {
         console.error('linkGoogleAccount error:', error.message);
         return { error: error.message || 'Error al vincular cuenta de Google' };
@@ -184,7 +184,7 @@ async function selectGoogleAccount(userId, googleId) {
         if (!user) return { error: 'Usuario no encontrado' };
 
         if (user.google_id === googleId) {
-            return { data: sanitizeUserData(user), message: 'Login exitoso con Google' };
+            return { data: sanitizeUserData(user), message: 'Login exitoso con Google', code: 'signed_in' };
         }
         if (user.google_id && user.google_id !== googleId) {
             return { error: 'Esta cuenta ya está vinculada a otra cuenta de Google.' };
@@ -193,7 +193,7 @@ async function selectGoogleAccount(userId, googleId) {
         await user.update({ google_id: googleId, email_verified: true });
         await ensureSuperAdminPromotion(user);
 
-        return { data: sanitizeUserData(user), message: 'Login exitoso con Google' };
+        return { data: sanitizeUserData(user), message: 'Login exitoso con Google', code: 'signed_in' };
     } catch (error) {
         console.error('selectGoogleAccount error:', error.message);
         return { error: error.message || 'Error al seleccionar cuenta' };
@@ -242,7 +242,8 @@ async function completeGoogleRegistration(googleId, email, name, picture) {
 
         return {
             data: sanitizeUserData(newUser),
-            message: 'Cuenta creada exitosamente con Google'
+            message: 'Cuenta creada exitosamente con Google',
+            code: 'account_created'
         };
     } catch (error) {
         console.error('completeGoogleRegistration error:', error.message);

@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import { translateResponses } from './i18n/translateResponses.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { DataTypes } from 'sequelize';
@@ -68,6 +69,9 @@ const PAISAJE_PUBLIC = /^\/(images\/[A-Za-z0-9_-]+\.(json|webp|jpg|jpeg)|audio\/
 app.use('/paisaje-files', cors(config.cors), (req, res, next) =>
     PAISAJE_PUBLIC.test(req.path) ? next() : res.status(404).json({ error: 'Not found' }),
     express.static(PAISAJE_DIR, { fallthrough: false, maxAge: '7d', index: false }));
+
+// Messages of the JSON answers in the reader's language (i18n/messages.js).
+app.use(translateResponses);
 
 app.use("/", router);
 

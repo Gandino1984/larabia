@@ -1,5 +1,6 @@
 // front-end/src/utils/axiosConfig.js
 import axios from 'axios';
+import i18n from '../i18n/config';
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.DEV
@@ -14,6 +15,11 @@ const axiosInstance = axios.create({
 // Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
+    // The server answers its messages in the language chosen in the header
+    // (back-end i18n/translateResponses.js). Accept-Language needs no CORS
+    // permission.
+    config.headers['Accept-Language'] = String(i18n.language || 'es').slice(0, 2);
+
     // Add auth token if available
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
