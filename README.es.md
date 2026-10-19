@@ -27,7 +27,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 
 - **Portada:** un hero con las historias destacadas (su título, entradilla y proyecto siguen el idioma elegido en la cabecera) y, debajo, avances de las secciones.
 - **Secciones:** los botones de la barra superior (Artículos, Proyectos, Talleres, Más › Ficción, Internacional…). Cualquier artículo o proyecto puede aparecer también en otras secciones si un super admin lo aprueba.
-- **Las publicaciones** pertenecen a un **proyecto**. Cada una es de uno de estos tipos:
+- **Las publicaciones** pueden pertenecer a un **proyecto** (una serie, un fanzine, un libro…) o ir sueltas. Cada una es de uno de estos tipos:
   - un **artículo** (texto, imágenes e incrustados, por bloques);
   - un **cómic** (lector horizontal con paneles que pueden ser imagen, enlace, audio, incrustado o paisaje sonoro; navegación panel a panel, progreso de lectura guardado y pantalla completa);
   - un **micro-perfil**;
@@ -51,7 +51,7 @@ Ver [Idiomas (i18n)](#idiomas-i18n).
 
 **Publicar**
 
-- **El creador** es un asistente de seis pasos: proyecto → clasificación, autoras/es y secciones → portada, título y entradilla → tipo → contenido → revisar y publicar.
+- **El creador** es un asistente de seis pasos: proyecto (nuevo, existente o ninguno) → clasificación, autoras/es y secciones → portada, título y entradilla → tipo → contenido → revisar y publicar.
 - **Revisión:** todo es borrador hasta publicarse. Quien no es super admin envía su trabajo a revisión. Un super admin lo aprueba o lo devuelve con un motivo; la autora o autor puede volver a pasarlo a borrador.
 - **Editor de paisajes sonoros:** asistente de tres pasos (imagen y estilo → sonido y reproductor → encuadre y resumen), para artículos y para paneles de cómic.
 - **Autoras invitadas:** un super admin puede dar de alta a una autora o autor que aún no tiene cuenta y publicar en su nombre. La persona acepta o rechaza al iniciar sesión por primera vez (ver más abajo).

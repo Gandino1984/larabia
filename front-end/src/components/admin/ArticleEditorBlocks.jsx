@@ -6,7 +6,7 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
 import {
-  Plus, Save, ArrowLeft, Edit, Trash2, FileText, Image as ImageIcon, Video, FolderPlus, FolderOpen,
+  Plus, Save, ArrowLeft, Edit, Trash2, FileText, Image as ImageIcon, Video, FolderPlus, FolderOpen, File as FileIcon,
   X, User, Eye, Check, ChevronLeft, ChevronRight, Send, Undo2, Layers, Library, AlertCircle, AudioWaveform, ExternalLink
 } from 'lucide-react';
 import TextBlock from './blocks/TextBlock';
@@ -98,8 +98,8 @@ function ArticleEditorBlocks() {
   // lives apart in "Mis publicaciones" ('mine').
   const [view, setView] = useState(editorInitialView || 'wizard');
   const [step, setStep] = useState(1);
-  // Step 1: the publication goes in a new project or an existing one.
-  const [projectMode, setProjectMode] = useState(null); // 'new' | 'existing' | null
+  // Step 1: the publication goes in a new project, an existing one or none.
+  const [projectMode, setProjectMode] = useState(null); // 'new' | 'existing' | 'none' | null
   // The new project being set up in the wizard (created on the first save).
   const [wizardProject, setWizardProject] = useState(EMPTY_WIZARD_PROJECT);
   const [wizardProjectCoverFile, setWizardProjectCoverFile] = useState(null);
@@ -268,7 +268,7 @@ function ArticleEditorBlocks() {
       // Detect content type from blocks + category (micro-perfil is category-driven).
       setArticleContentType(detectContentType(selectedArticle.blocks, selectedArticle.category_article));
       loadArticleBlocks(selectedArticle.id_article, selectedArticle.category_article);
-      setProjectMode(selectedArticle.project_id ? 'existing' : null);
+      setProjectMode(selectedArticle.project_id ? 'existing' : 'none');
       setView('wizard');
       setStep(1);
 
@@ -756,8 +756,9 @@ function ArticleEditorBlocks() {
         return formData.project_id ? null
           : problem('project_id', t('editor.wizard.need.projectPick', 'Elige un proyecto'));
       }
+      if (projectMode === 'none') return null;
       return editingArticle ? null
-        : problem('project_mode', t('editor.wizard.need.projectMode', 'Elige si la publicación va en un proyecto nuevo o en uno existente'));
+        : problem('project_mode', t('editor.wizard.need.projectMode', 'Elige si la publicación va en un proyecto nuevo, en uno existente o en ninguno'));
     }
     if (n === 2) {
       if (projectMode === 'new' && !wizardProject.type_project) {
@@ -958,7 +959,7 @@ function ArticleEditorBlocks() {
 
       // New project: create it first (published along with the publication by
       // a super admin; otherwise a draft, submitted for review with it).
-      let projectId = formData.project_id || null;
+      let projectId = projectMode === 'none' ? null : (formData.project_id || null);
       let createdProjectId = null;
       if (projectMode === 'new') {
         createdProjectId = await createWizardProject(publishNow ? 'published' : 'draft');
@@ -1224,7 +1225,7 @@ function ArticleEditorBlocks() {
       setCoverImagePreview(null);
     }
     loadArticleBlocks(article.id_article, article.category_article);
-    setProjectMode(article.project_id ? 'existing' : null);
+    setProjectMode(article.project_id ? 'existing' : 'none');
     clearWizardProject();
     setFieldErrors({});
     setView('wizard');
@@ -1424,9 +1425,9 @@ function ArticleEditorBlocks() {
   const stepProject = (
     <>
       <p className="pub-step-hint">
-        {t('editor.wizard.projectHint', 'Cada publicación forma parte de un proyecto. Crea uno nuevo o añádela a uno que ya exista.')}
+        {t('editor.wizard.projectHint', 'Una publicación puede formar parte de un proyecto (una serie, un fanzine, un libro…) o ir suelta. Crea un proyecto nuevo, añádela a uno que ya exista o publícala sin proyecto.')}
       </p>
-      <div className={`pub-choice-grid ${fieldErrors.project_mode ? 'has-error' : ''}`}>
+      <div className={`pub-choice-grid pub-choice-grid--3 ${fieldErrors.project_mode ? 'has-error' : ''}`}>
         <button
           type="button"
           id="pub-choice-new"
@@ -1447,6 +1448,21 @@ function ArticleEditorBlocks() {
           <FolderOpen size={28} />
           <span className="pub-choice__title">{t('editor.wizard.existingProject', 'Proyecto existente')}</span>
           <span className="pub-choice__desc">{t('editor.wizard.existingProjectDesc', 'Añade la publicación a un proyecto que ya existe.')}</span>
+        </button>
+        <button
+          type="button"
+          className={`pub-choice ${projectMode === 'none' ? 'is-selected' : ''}`}
+          onClick={() => {
+            setProjectMode('none');
+            setFormData(prev => ({ ...prev, project_id: '' }));
+            setSelectedProjectFormat(null);
+            clearFieldError('project_mode');
+          }}
+          aria-pressed={projectMode === 'none'}
+        >
+          <FileIcon size={28} />
+          <span className="pub-choice__title">{t('editor.wizard.noProject', 'Sin proyecto')}</span>
+          <span className="pub-choice__desc">{t('editor.wizard.noProjectDesc', 'Una publicación suelta, que no pertenece a ningún proyecto.')}</span>
         </button>
       </div>
       {fieldErrors.project_mode && <span className="field-error-msg" role="alert">{fieldErrors.project_mode}</span>}
@@ -1574,8 +1590,8 @@ function ArticleEditorBlocks() {
         </div>
       )}
 
-      {editingArticle && !projectMode && (
-        <p className="pub-step-note">{t('editor.wizard.noProjectNote', 'Esta publicación no pertenece a ningún proyecto.')}</p>
+      {projectMode === 'none' && (
+        <p className="pub-step-note">{t('editor.wizard.noProjectNote', 'Esta publicación no pertenece a ningún proyecto. Puedes añadirla a uno más adelante.')}</p>
       )}
     </>
   );

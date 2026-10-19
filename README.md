@@ -27,7 +27,7 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
 
 - **Home:** a hero slider of featured stories (its title, excerpt and project follow the language chosen in the header), followed by previews of the sections.
 - **Sections:** the top-bar buttons (Articles, Projects, Workshops, More › Fiction, International…). Any article or project can also appear in other sections, if a super admin approves it.
-- **Publications** belong to a **project**. Each one is one of these types:
+- **Publications** can belong to a **project** (a series, a zine, a book…) or stand on their own. Each one is one of these types:
   - an **article** (text, images and embeds, built from blocks);
   - a **comic** (a horizontal reader whose panels can be images, links, audio, embeds or soundscapes, with panel-by-panel navigation, saved reading progress and full screen);
   - a **micro-profile**;
@@ -51,7 +51,7 @@ See [Languages (i18n)](#languages-i18n).
 
 **Publishing**
 
-- **The creator** is a six-step wizard: project → classification, authors and sections → cover, title and excerpt → type → content → review and publish.
+- **The creator** is a six-step wizard: project (new, existing or none) → classification, authors and sections → cover, title and excerpt → type → content → review and publish.
 - **Review:** everything is a draft until it's published. Everyone below super admin sends their work for review. A super admin approves it, or sends it back with a reason; authors can move their work back to draft.
 - **Soundscape editor:** a three-step wizard (image and style → sound and player → framing and summary), used both in articles and in comic panels.
 - **Invited authors:** a super admin can sign up an author who has no account yet and publish on their behalf. The person accepts or declines when they first sign in (see below).
