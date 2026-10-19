@@ -321,15 +321,6 @@
   width: 100%;
 }
 
-.user-email {
-  font-size: 0.9rem;
-  color: gray;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  word-break: break-all;
-  max-width: 100%;
-  text-align: center;
-}
 
 .user-phone,
 .user-location {
@@ -479,9 +470,6 @@
     font-size: 0.875rem;
   }
 
-  .user-email {
-    font-size: 0.8rem;
-  }
 
   .card-content {
     gap: 1.25rem;
@@ -525,9 +513,6 @@
     font-size: 0.95rem;
   }
 
-  .user-email {
-    font-size: 0.85rem;
-  }
 
   .card-content {
     gap: 1.5rem;
@@ -558,9 +543,6 @@
     letter-spacing: 0.06rem;
   }
 
-  .user-email {
-    font-size: 0.85rem;
-  }
 
   .user-card-info {
     gap: 0.5rem;

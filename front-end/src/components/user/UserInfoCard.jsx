@@ -201,7 +201,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
               </div>
             </div>
 
-            <p className="user-email">{user?.email_user}</p>
+            {/* No email here: the card is seen by other people too. */}
 
             {user?.phone_user && (
               <p className="user-phone">
