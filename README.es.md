@@ -36,7 +36,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 - **Talleres:**
   - Las tarjetas son públicas.
   - Para abrir uno hay que iniciar sesión, y para reservar plaza hay que ser socio/a (el equipo no lo necesita).
-  - Quien lo gestiona invita (la invitación reserva plaza), quita participantes o los bloquea.
+  - Quien lo gestiona — los super admins y, como con las autoras/es de un artículo, quien lo creó o lo imparte desde el equipo (sus talleristas) — lo edita, invita (la invitación reserva plaza), quita participantes o los bloquea.
   - Cada taller tiene su ubicación en un mapa (Leaflet/OpenStreetMap). No hay enlace a Google Maps: la gente se ubica en el propio mapa.
 - **Espacio abierto:** las propuestas literarias que publica la revista. Cualquier persona con cuenta (no hace falta ser socio/a) puede enviar la suya con un formulario y seguir allí su estado.
 - **Interacción:** me gusta, favoritos, comentarios y seguir proyectos.
@@ -54,6 +54,7 @@ Ver [Idiomas (i18n)](#idiomas-i18n).
 
 - **El creador** es un asistente de seis pasos: proyecto (nuevo, existente o ninguno) → clasificación, autoras/es y secciones → portada, título y entradilla → tipo → contenido → revisar y publicar.
 - **Revisión:** todo es borrador hasta publicarse. Quien no es super admin envía su trabajo a revisión. Un super admin lo aprueba o lo devuelve con un motivo; la autora o autor puede volver a pasarlo a borrador.
+- **El editor de talleres** funciona como el creador: una página completa con cuatro pasos (el taller → cuándo y dónde → portada y talleristas → revisar y guardar) y «Mis talleres», los que gestionas. Los crean admins y super admins; los editan también sus talleristas del equipo.
 - **Editor de paisajes sonoros:** asistente de tres pasos (imagen y estilo → sonido y reproductor → encuadre y resumen), para artículos y para paneles de cómic.
 - **Autoras invitadas:** un super admin puede dar de alta a una autora o autor que aún no tiene cuenta y publicar en su nombre. La persona acepta o rechaza al iniciar sesión por primera vez (ver más abajo).
 
@@ -121,8 +122,8 @@ Los roles son marcas independientes en `user`; una cuenta puede tener varias.
 |---|---|
 | Lector/a (por defecto) | Leer, dar me gusta, comentar, seguir proyectos, hacerse socio/a, reservar talleres (siendo socio/a) |
 | Lector/a premium (`is_premium_reader`) | Además, leer los artículos marcados como premium |
-| Editor/a (`is_editor`) | Crear publicaciones y perfiles de autoría; todo pasa por revisión |
-| Admin (`is_admin`) | Como editor/a, más talleres y recomendaciones de la newsletter |
+| Editor/a (`is_editor`) | Crear publicaciones y perfiles de autoría; todo pasa por revisión. Editar los talleres que imparte |
+| Admin (`is_admin`) | Como editor/a, más crear talleres y las recomendaciones de la newsletter |
 | Super admin (`is_super_admin`) | Todo; publica directamente; revisa lo de los demás; panel de Admin; invita autoras/es |
 
 - `canCreateContent` = editor/a, admin o super admin. `canPublishDirectly` = solo super admin.

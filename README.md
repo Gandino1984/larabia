@@ -36,7 +36,7 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
 - **Workshops:**
   - The cards are public.
   - Opening one needs a sign-in, and booking a place needs being a member — *socio/a* (the team doesn't need it).
-  - Managers invite people (an invitation holds a place), remove participants or block them.
+  - Managers — super admins, and the team members who created or teach a workshop (its *talleristas*), like an article's authors — edit it, invite people (an invitation holds a place), remove participants or block them.
   - Each workshop has a location on a map (Leaflet/OpenStreetMap). There's no link out to Google Maps: people find their way on the map itself.
 - **Espacio abierto** (open space): the literary proposals the magazine publishes. Anyone with an account (no need to be a member) can send one through a form, then follow its status there.
 - **Engagement:** likes, favourites, comments and following projects.
@@ -54,6 +54,7 @@ See [Languages (i18n)](#languages-i18n).
 
 - **The creator** is a six-step wizard: project (new, existing or none) → classification, authors and sections → cover, title and excerpt → type → content → review and publish.
 - **Review:** everything is a draft until it's published. Everyone below super admin sends their work for review. A super admin approves it, or sends it back with a reason; authors can move their work back to draft.
+- **The workshop editor** works like the creator: a full page with four steps (the workshop → when and where → cover and talleristas → review and save) and «Mis talleres», the workshops you manage. Admins and super admins create workshops; their talleristas on the team edit them.
 - **Soundscape editor:** a three-step wizard (image and style → sound and player → framing and summary), used both in articles and in comic panels.
 - **Invited authors:** a super admin can sign up an author who has no account yet and publish on their behalf. The person accepts or declines when they first sign in (see below).
 
@@ -121,8 +122,8 @@ Roles are independent flags on `user`. One account can hold several.
 |---|---|
 | Reader (default) | Read, like, comment, follow projects, become a member, book workshops (as a member) |
 | Premium reader (`is_premium_reader`) | Also read articles marked premium |
-| Editor (`is_editor`) | Create publications and author profiles; everything goes through review |
-| Admin (`is_admin`) | Like an editor, plus workshops and newsletter recommendations |
+| Editor (`is_editor`) | Create publications and author profiles; everything goes through review. Edit the workshops they teach |
+| Admin (`is_admin`) | Like an editor, plus creating workshops and newsletter recommendations |
 | Super admin (`is_super_admin`) | Everything; publishes directly; reviews others' work; Admin panel; invites authors |
 
 - `canCreateContent` = editor, admin or super admin. `canPublishDirectly` = super admin only.

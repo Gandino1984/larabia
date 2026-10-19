@@ -26,9 +26,9 @@ const TABS = [
 function AdminPage() {
   const { t } = useTranslation();
   const { isSuperAdmin } = useAuth();
-  const { navigateToHome } = useUI();
+  const { navigateToHome, adminTab } = useUI();
   const { totalPending, newProposals } = usePendingReview();
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState(adminTab || 'users');
 
   if (!isSuperAdmin) {
     return (

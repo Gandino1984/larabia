@@ -60,10 +60,13 @@ export function serverDate(value) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-/** toLocaleDateString in the header's language (value: Date or anything Date takes). */
+/**
+ * toLocaleDateString in the header's language. `value`: a Date, or a date
+ * from the API (read as UTC — serverDate), or anything Date takes.
+ */
 export function localDate(value, options = {}) {
-  const d = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(d.getTime())) return '';
+  const d = value instanceof Date ? value : serverDate(value);
+  if (!d || Number.isNaN(d.getTime())) return '';
   if (lang() === 'eu' && !hasNativeBasque()) return basqueDate(d, options);
   return d.toLocaleDateString(uiLocale(), options);
 }

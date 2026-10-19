@@ -20,7 +20,7 @@ let slideInPlayed = false;
 function SubscribeButton({ ready = true }) {
   const { t } = useTranslation();
   const { currentUser, isSuperAdmin } = useAuth();
-  const { navigateToLogin, showInfo, showSuccess, showEditor, showArticleDetail } = useUI();
+  const { navigateToLogin, showInfo, showSuccess, showEditor, showWorkshopEditor, showArticleDetail } = useUI();
   const subscription = useSubscription();
   const [isIn, setIsIn] = useState(slideInPlayed);
   const timerRef = useRef(null);
@@ -54,7 +54,7 @@ function SubscribeButton({ ready = true }) {
   if (!subscription || subscription.isSubscriber) return modal;
   if (!subscription.enabled && !isSuperAdmin) return modal;
 
-  const isHidden = showEditor || showArticleDetail;
+  const isHidden = showEditor || showWorkshopEditor || showArticleDetail;
   const label = t('subscription.button', 'Hazte socio/a');
 
   const handleClick = () => {

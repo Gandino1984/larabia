@@ -33,7 +33,7 @@ const formatDate = (d) => {
 function WorkshopDetail() {
   const { t } = useTranslation();
   const { navigateToTalleres } = useUI();
-  const { currentUser, isSuperAdmin, isAdmin } = useAuth();
+  const { currentUser, isSuperAdmin, canCreateContent } = useAuth();
   const {
     selectedWorkshop, fetchWorkshopById, reserveWorkshop, cancelWorkshopReservation, loading,
     respondToWorkshopInvitation
@@ -66,7 +66,7 @@ function WorkshopDetail() {
   // The participants — like an article's author: super admins (any
   // workshop), or an admin who created or teaches it (edit / delete: the ⋯
   // options, same rule).
-  const canManage = canManageWorkshop(w, currentUser, { isSuperAdmin, isAdmin });
+  const canManage = canManageWorkshop(w, currentUser, { isSuperAdmin, canCreateContent });
 
   // null (can book) | 'login_required' | 'subscription_required' | 'blocked'
   const bookingCode = !currentUser ? 'login_required' : (w?.booking_code || null);
@@ -127,7 +127,6 @@ function WorkshopDetail() {
             workshop={w}
             align="end"
             className="project-options"
-            onSaved={() => fetchWorkshopById(id)}
             onDeleted={navigateToTalleres}
           />
         </div>

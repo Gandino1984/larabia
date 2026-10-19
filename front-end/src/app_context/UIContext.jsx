@@ -23,6 +23,13 @@ export const UIProvider = ({ children }) => {
   const [showWorkshopDetail, setShowWorkshopDetail] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  // The tab Admin opens on (navigateToAdmin('workshops')…).
+  const [adminTab, setAdminTab] = useState('users');
+  // The workshop editor (WorkshopEditor): the workshop it edits (null = a new
+  // one), its first view ('wizard' | 'mine' = «Mis talleres») and where its
+  // close button returns ('talleres' | 'workshopDetail' | 'admin').
+  const [showWorkshopEditor, setShowWorkshopEditor] = useState(false);
+  const [workshopEditor, setWorkshopEditor] = useState({ workshop: null, view: 'wizard', returnTo: 'talleres' });
   const [openEditorToEdit, setOpenEditorToEdit] = useState(false);
   // Publication creator: which view it opens on ('wizard' = the step-by-step
   // creator, 'mine' = "Mis publicaciones"), and where its close button returns
@@ -128,6 +135,7 @@ export const UIProvider = ({ children }) => {
     setShowWorkshopDetail(false);
     setShowAbout(false);
     setShowAdmin(false);
+    setShowWorkshopEditor(false);
   };
 
   const navigateToHome = () => {
@@ -349,10 +357,24 @@ export const UIProvider = ({ children }) => {
     setShowAbout(true);
   };
 
-  const navigateToAdmin = () => {
+  const navigateToAdmin = (tab) => {
     setPreviousView('home');
     resetAllViews();
+    setAdminTab(typeof tab === 'string' ? tab : 'users');
     setShowAdmin(true);
+  };
+
+  // The workshop editor, like the publications creator: a workshop to edit
+  // (null = create one) or «Mis talleres». `from` = where closing returns.
+  const navigateToWorkshopEditor = (workshop = null, from = 'talleres') => {
+    resetAllViews();
+    setWorkshopEditor({ workshop, view: 'wizard', returnTo: from });
+    setShowWorkshopEditor(true);
+  };
+  const navigateToMyWorkshops = (from = 'talleres') => {
+    resetAllViews();
+    setWorkshopEditor({ workshop: null, view: 'mine', returnTo: from });
+    setShowWorkshopEditor(true);
   };
 
   // Notification helpers
@@ -455,6 +477,11 @@ export const UIProvider = ({ children }) => {
     navigateToTalleres,
     showWorkshopDetail,
     navigateToWorkshopDetail,
+    showWorkshopEditor,
+    workshopEditor,
+    navigateToWorkshopEditor,
+    navigateToMyWorkshops,
+    adminTab,
     showAbout,
     navigateToAbout,
     showAdmin,

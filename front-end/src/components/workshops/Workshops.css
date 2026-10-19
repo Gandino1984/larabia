@@ -291,7 +291,7 @@
   color: #ffffff;
 }
 
-/* "Crear taller" (editors+), at the right of the page title. */
+/* «Mis talleres» / «Crear taller», at the right of the page title. */
 .workshops-header {
   display: flex;
   flex-wrap: wrap;
@@ -317,6 +317,22 @@
 .workshops-create-btn:hover,
 .workshops-create-btn:focus-visible {
   background: #3a3a3a;
+}
+/* «Mis talleres» (whoever manages a workshop) next to «Crear taller». */
+.workshops-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.workshops-create-btn--ghost {
+  border: 2px solid #000000;
+  background: transparent;
+  color: #000000;
+}
+.workshops-create-btn--ghost:hover,
+.workshops-create-btn--ghost:focus-visible {
+  background: #000000;
+  color: #ffffff;
 }
 
 /* Workshop page cover: lower, keeping the image's proportion (scaled down

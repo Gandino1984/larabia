@@ -1,50 +1,34 @@
-// Admin → Talleres: create / edit form (WorkshopForm, shared with the
-// workshops page) + the list of workshops.
-import { useEffect, useState } from 'react';
+// Admin → Talleres: the list of workshops. Creating and editing happen in the
+// workshop editor (WorkshopEditor, like the publications creator); closing it
+// comes back here.
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Edit } from 'lucide-react';
+import { Trash2, Edit, Plus } from 'lucide-react';
 import { useWorkshop } from '../../../app_context/WorkshopContext';
-import WorkshopForm from '../../workshops/WorkshopForm';
+import { useUI } from '../../../app_context/UIContext';
 import { localDate } from '../../../utils/locale';
 import './AdminWorkshopsTab.css';
 
 function AdminWorkshopsTab() {
   const { t } = useTranslation();
   const { workshops, fetchWorkshops, deleteWorkshop } = useWorkshop();
-  // The workshop being edited (null = the form creates a new one); formKey
-  // remounts the form to clear it after a save.
-  const [editing, setEditing] = useState(null);
-  const [formKey, setFormKey] = useState(0);
+  const { navigateToWorkshopEditor } = useUI();
 
   useEffect(() => { fetchWorkshops(); }, [fetchWorkshops]);
-
-  const startEdit = (w) => {
-    setEditing(w);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  const resetForm = () => {
-    setEditing(null);
-    setFormKey(k => k + 1);
-  };
 
   const handleDelete = async (id) => {
     if (!confirm(t('admin.workshops.confirmDelete', '¿Eliminar este taller? Se borrarán también sus reservas. Esta acción no se puede deshacer.'))) return;
     await deleteWorkshop(id);
-    if (editing?.id_workshop === id) resetForm();
   };
 
   return (
     <section className="admin-workshops">
-      <h2>{editing ? t('admin.workshops.edit', 'Editar taller') : t('admin.workshops.create', 'Crear taller')}</h2>
-
-      <WorkshopForm
-        key={editing ? `edit-${editing.id_workshop}` : `new-${formKey}`}
-        workshop={editing}
-        onSaved={resetForm}
-        onCancel={editing ? resetForm : undefined}
-      />
-
-      <h2 className="admin-workshops-list-title">{t('admin.tabs.workshops', 'Talleres')} ({workshops.length})</h2>
+      <div className="admin-workshops-head">
+        <h2 className="admin-workshops-list-title">{t('admin.tabs.workshops', 'Talleres')} ({workshops.length})</h2>
+        <button type="button" className="admin-workshops-btn admin-workshops-btn--save" onClick={() => navigateToWorkshopEditor(null, 'admin')}>
+          <Plus size={16} /> {t('admin.workshops.create', 'Crear taller')}
+        </button>
+      </div>
       {workshops.length === 0 ? (
         <p className="admin-workshops-empty">{t('admin.workshops.empty', 'Todavía no hay talleres.')}</p>
       ) : (
@@ -58,12 +42,12 @@ function AdminWorkshopsTab() {
                   {w.date_workshop ? localDate(w.date_workshop) : t('admin.workshops.noDate', 'Sin fecha')}
                   {' · '}
                   {w.capacity_workshop != null
-                    ? `${w.reservation_count}/${w.capacity_workshop} plazas`
-                    : `${w.reservation_count} inscritas/os`}
+                    ? t('workshops.editor.mine.spots', { taken: w.reservation_count || 0, total: w.capacity_workshop, defaultValue: '{{taken}}/{{total}} plazas' })
+                    : t('workshops.editor.mine.signedUp', { count: w.reservation_count || 0 })}
                 </span>
               </div>
               <div className="admin-workshops-item-actions">
-                <button onClick={() => startEdit(w)} title={t('common.buttons.edit', 'Editar')}><Edit size={18} /></button>
+                <button onClick={() => navigateToWorkshopEditor(w, 'admin')} title={t('common.buttons.edit', 'Editar')}><Edit size={18} /></button>
                 <button onClick={() => handleDelete(w.id_workshop)} title={t('common.buttons.delete', 'Eliminar')}><Trash2 size={18} /></button>
               </div>
             </li>

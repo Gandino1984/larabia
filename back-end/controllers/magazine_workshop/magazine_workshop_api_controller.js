@@ -20,15 +20,16 @@ async function requireWorkshopCreator(req, res) {
 }
 
 /**
- * Does this user manage the workshop? Super admins (any workshop), or an admin
- * who created it or teaches it. `workshop` is a model instance or the plain
- * object getById returns (its `authors` list saves a query).
+ * Does this user manage the workshop? Like an article and its authors: super
+ * admins (any workshop), and the team (editors, admins) on the workshops they
+ * created or teach — its talleristas. `workshop` is a model instance or the
+ * plain object getById returns (its `authors` list saves a query).
  */
 async function isWorkshopManager(user, workshop) {
     if (!user || !workshop) return false;
     const role = roleSnapshot(user);
     if (role.isSuperAdmin) return true;
-    if (!role.isAdmin) return false;
+    if (!role.canCreateContent) return false;
     if (workshop.author_id === user.id_user) return true;
     if (Array.isArray(workshop.authors)) return workshop.authors.some((a) => a.id_user === user.id_user);
     const teaches = await workshop_author_model.findOne({ where: { workshop_id: workshop.id_workshop, user_id: user.id_user } });

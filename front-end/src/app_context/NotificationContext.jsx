@@ -33,9 +33,11 @@ import { useSubscription } from './SubscriptionContext';
 import { useWorkshop } from './WorkshopContext';
 import { useAuthorInvitation } from './AuthorInvitationContext';
 import { useMetadata } from './MetadataContext';
-import { localDate } from '../utils/locale';
+import { localDate, serverDate } from '../utils/locale';
 
 const NotificationContext = createContext(null);
+// A date from the API as a timestamp (read as UTC: serverDate), 0 if none.
+const tsOf = (v) => serverDate(v)?.getTime() ?? 0;
 const MAX_CONTENT_NOTIFS = 30;
 
 export const NotificationProvider = ({ children }) => {
@@ -126,8 +128,8 @@ export const NotificationProvider = ({ children }) => {
   }, [respondToWorkshopInvitation, subscription, t]);
   const shortDate = (d) => {
     if (!d) return null;
-    const dt = new Date(d);
-    return isNaN(dt) ? null : localDate(dt, { day: 'numeric', month: 'short' });
+    const dt = serverDate(d);
+    return dt ? localDate(dt, { day: 'numeric', month: 'short' }) : null;
   };
 
   // Mark every current notification as seen (called when the user opens/closes
@@ -221,7 +223,7 @@ export const NotificationProvider = ({ children }) => {
       const projectById = new Map(publishedProjects.map(p => [p.id_project, p]));
 
       for (const a of publishedArticles) {
-        const ts = a.date_published ? new Date(a.date_published).getTime() : 0;
+        const ts = tsOf(a.date_published);
         if (ts <= lastSeen) continue;
         // Articles inside a followed project get a project-context notification
         // below instead of the generic one (avoids duplicates).
@@ -236,7 +238,7 @@ export const NotificationProvider = ({ children }) => {
         });
       }
       for (const p of publishedProjects) {
-        const ts = p.date_published ? new Date(p.date_published).getTime() : 0;
+        const ts = tsOf(p.date_published);
         if (ts > lastSeen) {
           content.push({
             id: `project-${p.id_project}`,
@@ -253,7 +255,7 @@ export const NotificationProvider = ({ children }) => {
       // updates to a followed project (edited after it was first published).
       for (const a of publishedArticles) {
         if (!a.project_id || !subs.has(a.project_id)) continue;
-        const ts = a.date_published ? new Date(a.date_published).getTime() : 0;
+        const ts = tsOf(a.date_published);
         if (ts <= lastSeen) continue;
         const proj = projectById.get(a.project_id);
         content.push({
@@ -267,8 +269,8 @@ export const NotificationProvider = ({ children }) => {
       }
       for (const p of publishedProjects) {
         if (!subs.has(p.id_project)) continue;
-        const publishedTs = p.date_published ? new Date(p.date_published).getTime() : 0;
-        const updatedTs = p.updated_at ? new Date(p.updated_at).getTime() : 0;
+        const publishedTs = tsOf(p.date_published);
+        const updatedTs = tsOf(p.updated_at);
         // Only "updated" (not the initial publish, which is covered above).
         if (updatedTs > lastSeen && publishedTs <= lastSeen) {
           content.push({
@@ -284,7 +286,7 @@ export const NotificationProvider = ({ children }) => {
 
       // Paid subscription activated (shown until the bell is opened).
       if (membership?.active && membership.since) {
-        const ts = new Date(membership.since).getTime();
+        const ts = tsOf(membership.since);
         if (membershipSeen !== String(membership.since)) {
           const renews = membership.current_period_end
             ? localDate(membership.current_period_end, { day: 'numeric', month: 'long', year: 'numeric' })
@@ -309,7 +311,7 @@ export const NotificationProvider = ({ children }) => {
         content.push({
           id: `workshop-invite-response-${r.id_invitation}`,
           type: 'workshop-invite-response',
-          ts: r.responded_at ? new Date(r.responded_at).getTime() : Date.now(),
+          ts: r.responded_at ? tsOf(r.responded_at) : Date.now(),
           title: accepted
             ? t('notifications.workshopInviteAccepted.title', 'Invitación aceptada')
             : t('notifications.workshopInviteDeclined.title', 'Invitación rechazada'),

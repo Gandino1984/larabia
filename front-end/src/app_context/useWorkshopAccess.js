@@ -12,13 +12,13 @@ import { useUI } from './UIContext';
 import { useSubscription } from './SubscriptionContext';
 
 // Who manages a workshop (edit, delete, participants) — the server's rule
-// (isWorkshopManager): super admins any workshop; an admin the ones they
-// created or teach. The workshop page gets it from the server (`can_manage`);
-// the list doesn't carry it.
-export function canManageWorkshop(workshop, user, { isSuperAdmin, isAdmin }) {
+// (isWorkshopManager), like an article and its authors: super admins any
+// workshop; the team (editors, admins) the ones they created or teach. The
+// workshop page gets it from the server (`can_manage`); the list doesn't.
+export function canManageWorkshop(workshop, user, { isSuperAdmin, canCreateContent }) {
   if (!user || !workshop) return false;
   if (workshop.can_manage !== undefined) return !!workshop.can_manage;
-  return isSuperAdmin || (isAdmin && (
+  return isSuperAdmin || (canCreateContent && (
     workshop.author_id === user.id_user
     || (workshop.authors || []).some(a => a.id_user === user.id_user)
   ));

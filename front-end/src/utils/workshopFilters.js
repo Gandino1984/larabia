@@ -3,6 +3,7 @@
 // Filtering + sorting for the workshops page (WorkshopFilters): text search,
 // when (upcoming / past / all), month, instructor, availability and order.
 // Pure functions — the UI lives in components/workshops/WorkshopFilters.jsx.
+import { serverDate } from './locale';
 
 export const EMPTY_WORKSHOP_FILTERS = {
   q: '',
@@ -18,8 +19,7 @@ const normalize = (s) => (s || '').toString().toLowerCase().normalize('NFD').rep
 /** The workshop's date, or null when it has none ("fecha por confirmar"). */
 export function workshopDate(w) {
   if (!w?.date_workshop) return null;
-  const d = new Date(w.date_workshop);
-  return Number.isNaN(d.getTime()) ? null : d;
+  return serverDate(w.date_workshop);
 }
 
 const monthKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;

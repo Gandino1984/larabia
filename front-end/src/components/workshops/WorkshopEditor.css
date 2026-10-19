@@ -1,0 +1,140 @@
+/* magazine-front/src/components/workshops/WorkshopEditor.css
+   The workshop editor reuses the publications creator's styles
+   (ArticleEditorBlocks.css: pub-*, form-group, articles-grid…); here only
+   what it adds. Mobile first. */
+
+/* Date + capacity side by side from tablets up. */
+.workshop-editor__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 1rem;
+}
+
+.workshop-editor .form-group input[type='datetime-local'],
+.workshop-editor .form-group input[type='number'] {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0.7rem 0.85rem;
+  border: 2px solid #d6d6d6;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.workshop-editor .form-group input[type='datetime-local']:focus,
+.workshop-editor .form-group input[type='number']:focus {
+  border-color: #1a1a1a;
+  outline: none;
+}
+
+.workshop-editor .form-group input.input-error {
+  border-color: #e53935;
+}
+
+.workshop-editor__map .location-picker {
+  margin-top: 0.4rem;
+}
+
+/* Talleristas: chips with their photo and a remove button. */
+.workshop-editor__hosts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.4rem 0 0.9rem;
+}
+
+.workshop-editor__host {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 100%;
+  padding: 0.3rem 0.35rem 0.3rem 0.4rem;
+  border: 1px solid #d6d6d6;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+}
+
+.workshop-editor__host img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.workshop-editor__host span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workshop-editor__host button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #ececec;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+
+.workshop-editor__host button:hover,
+.workshop-editor__host button:focus-visible {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+/* A label only for screen readers (the select's first option says it). */
+.workshop-editor__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* «Mis talleres»: each workshop with its details on top and the actions
+   underneath (side by side they squeezed the text into a narrow column). */
+.workshop-editor .article-item {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+}
+.workshop-editor .article-item-info {
+  min-width: 0;
+}
+.workshop-editor .article-item-actions {
+  flex-wrap: wrap;
+  align-items: center;
+  margin-left: 0;
+}
+.workshop-editor__when {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.workshop-editor__when svg {
+  flex-shrink: 0;
+}
+
+.workshop-editor .article-item.is-current {
+  border-color: #1a1a1a;
+  box-shadow: 0 0 0 2px #1a1a1a inset;
+}
+
+@media (min-width: 641px) {
+  .workshop-editor__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

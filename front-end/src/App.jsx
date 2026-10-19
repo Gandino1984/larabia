@@ -17,6 +17,7 @@ import HomePage from './components/magazine/HomePage';
 import ArticleDetail from './components/magazine/ArticleDetail';
 import ArticlesList from './components/magazine/ArticlesList';
 import ArticleEditorBlocks from './components/admin/ArticleEditorBlocks';
+import WorkshopEditor from './components/workshops/WorkshopEditor';
 import AuthorsList from './components/authors/AuthorsList';
 import AuthorProfileEditor from './components/authors/AuthorProfileEditor';
 import AuthorProfileReader from './components/authors/AuthorProfileReader';
@@ -38,7 +39,7 @@ import { useAuthor } from './app_context/AuthorContext';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, authorCardUser, closeAuthorCard } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, authorCardUser, closeAuthorCard } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { currentUser, loading: authLoading } = useAuth();
@@ -127,6 +128,7 @@ function App() {
     if (showForgotPassword) return <ForgotPasswordPage />;
     if (showLogin) return <LoginPage />;
     if (showEditor) return <ArticleEditorBlocks />;
+    if (showWorkshopEditor) return <WorkshopEditor />;
     if (showAuthorEditor) return <AuthorProfileEditor />;
     if (showAuthorPublications) return <AuthorPublications />;
     if (showAuthorProfile) return <AuthorProfileReader />;
@@ -152,6 +154,7 @@ function App() {
     (showForgotPassword && 'forgot') ||
     (showLogin && 'login') ||
     (showEditor && 'editor') ||
+    (showWorkshopEditor && 'workshopEditor') ||
     (showAuthorEditor && 'authorEditor') ||
     (showAuthorPublications && 'authorPublications') ||
     (showAuthorProfile && 'authorProfile') ||
@@ -169,7 +172,7 @@ function App() {
     'home'
   );
 
-  const appClassName = `app ${showContent ? 'content-visible' : ''} ${showEditor || showAuthorEditor ? 'editor-active' : ''} ${isPreview && showArticleDetail ? 'preview-active' : ''}`;
+  const appClassName = `app ${showContent ? 'content-visible' : ''} ${showEditor || showAuthorEditor || showWorkshopEditor ? 'editor-active' : ''} ${isPreview && showArticleDetail ? 'preview-active' : ''}`;
   console.log('App render - showContent:', showContent, 'className:', appClassName);
 
   const handleClosePreview = useCallback(() => {
@@ -222,7 +225,7 @@ function App() {
       )}
 
       <div className={appClassName}>
-        {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Header ready={appReady} />}
+        {!isPreview && !showEditor && !showAuthorEditor && !showWorkshopEditor && !isFullscreen && <Header ready={appReady} />}
         {!isPreview && <FloatingEditorButton ready={appReady} />}
         {!isPreview && <SubscribeButton ready={appReady} />}
         {!isPreview && <CardDisplay />}
@@ -231,7 +234,7 @@ function App() {
             {renderMainContent()}
           </AnimatedView>
         </main>
-        {!isPreview && !showEditor && !showAuthorEditor && !isFullscreen && <Footer />}
+        {!isPreview && !showEditor && !showAuthorEditor && !showWorkshopEditor && !isFullscreen && <Footer />}
       </div>
 
       {!isPreview && <AuthorInvitationModal />}

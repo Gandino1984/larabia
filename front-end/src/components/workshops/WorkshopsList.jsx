@@ -2,12 +2,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { localDate } from '../../utils/locale';
-import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus, CalendarDays } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useAuth } from '../../app_context/AuthContext';
-import { useWorkshopAccess } from '../../app_context/useWorkshopAccess';
-import CreateWorkshopModal from './CreateWorkshopModal';
+import { useWorkshopAccess, canManageWorkshop } from '../../app_context/useWorkshopAccess';
 import WorkshopOptions from './WorkshopOptions';
 import WorkshopFilters from './WorkshopFilters';
 import { EMPTY_WORKSHOP_FILTERS, applyWorkshopFilters, countActiveWorkshopFilters } from '../../utils/workshopFilters';
@@ -43,16 +42,18 @@ const audienceOf = (w) => (w.audience_workshop === 'infantil' ? 'infantil' : 'ge
 
 function WorkshopsList() {
   const { t } = useTranslation();
-  const { navigateToWorkshopDetail } = useUI();
+  const { navigateToWorkshopDetail, navigateToWorkshopEditor, navigateToMyWorkshops } = useUI();
   const { workshops, loading, fetchWorkshops, setSelectedWorkshop } = useWorkshop();
   const [audience, setAudience] = useState('general');
   // Search / when / month / instructor / spots / order (WorkshopFilters).
   const [filters, setFilters] = useState(EMPTY_WORKSHOP_FILTERS);
-  // Admins and super admins can create workshops here too, not only in
-  // Admin → Talleres.
-  const { isAdmin, isSuperAdmin } = useAuth();
+  // Admins and super admins create workshops (the workshop editor, also from
+  // Admin → Talleres); «Mis talleres» for whoever manages one — its
+  // talleristas on the team, like an article's authors.
+  const { currentUser, isAdmin, isSuperAdmin, canCreateContent } = useAuth();
   const canCreateWorkshop = isAdmin || isSuperAdmin;
-  const [showCreate, setShowCreate] = useState(false);
+  const managesAny = canCreateWorkshop
+    || workshops.some((w) => canManageWorkshop(w, currentUser, { isSuperAdmin, canCreateContent }));
 
   // Grid vs horizontal carousel (desktop; mobile is always a vertical list),
   // remembered like the articles' view.
@@ -151,19 +152,21 @@ function WorkshopsList() {
             <h1>{t('workshops.title')}</h1>
             <p className="workshops-subtitle">{t('workshops.subtitle')}</p>
           </div>
-          {canCreateWorkshop && (
-            <button type="button" className="workshops-create-btn" onClick={() => setShowCreate(true)}>
-              <Plus size={18} />
-              <span>{t('workshops.create', 'Crear taller')}</span>
-            </button>
+          {managesAny && (
+            <div className="workshops-header-actions">
+              <button type="button" className="workshops-create-btn workshops-create-btn--ghost" onClick={() => navigateToMyWorkshops('talleres')}>
+                <CalendarDays size={18} />
+                <span>{t('workshops.editor.mine.button', 'Mis talleres')}</span>
+              </button>
+              {canCreateWorkshop && (
+                <button type="button" className="workshops-create-btn" onClick={() => navigateToWorkshopEditor(null, 'talleres')}>
+                  <Plus size={18} />
+                  <span>{t('workshops.create', 'Crear taller')}</span>
+                </button>
+              )}
+            </div>
           )}
         </header>
-        {showCreate && (
-          <CreateWorkshopModal
-            onClose={() => setShowCreate(false)}
-            onSaved={(w) => setAudience(w?.audience_workshop === 'infantil' ? 'infantil' : 'general')}
-          />
-        )}
 
         <>
             {/* Sections (general / children's) + grid/carousel toggle */}
