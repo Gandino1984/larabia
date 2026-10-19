@@ -265,6 +265,9 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  /* Phones: 100vh is the height with the browser's toolbar hidden, so the
+     bottom (the reader's bar) ended up under it. dvh = what's visible. */
+  height: 100dvh;
   background: var(--color-surface-alt, #1a1a1a);
   z-index: 9999;
   overflow: hidden;
@@ -363,9 +366,10 @@
   margin: 0 !important;
 }
 
-/* Progress bar stays at its natural height */
+/* Progress bar stays at its natural height (above the iPhone home bar) */
 .article-fullscreen .hscroll-progress-container {
   flex-shrink: 0;
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
 /* Responsive fullscreen controls */

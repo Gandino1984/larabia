@@ -1025,11 +1025,15 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                     />
                   ) : (
                     <>
+                      {/* Not lazy: the preloader already fetched every panel, and
+                          lazy images in a horizontal strip only load + decode
+                          when they scroll in — a hitch while dragging. */}
                       <img
                         src={getImageUrl(panel.image_url)}
                         alt={panel.image_alt || t('hscroll.panel', { number: index + 1 })}
                         className="viewer-panel-image"
-                        loading="lazy"
+                        decoding="async"
+                        draggable={false}
                       />
 
                       {panel.image_caption && (
@@ -1105,7 +1109,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
             </div>
             <div className="hscroll-progress-controls">
               <button
-                className="btn-progress-action"
+                className="btn-progress-action btn-progress-action--nav"
                 onClick={goToStart}
                 title={t('hscroll.progress.startTitle', 'Volver al primer panel')}
                 aria-label={t('hscroll.progress.startTitle', 'Volver al primer panel')}
@@ -1115,7 +1119,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                 <span>{t('hscroll.progress.start', 'Inicio')}</span>
               </button>
               <button
-                className="btn-progress-action"
+                className="btn-progress-action btn-progress-action--nav"
                 onClick={() => goToPanel(-1)}
                 title={t('hscroll.progress.previousTitle', 'Panel anterior')}
                 aria-label={t('hscroll.progress.previousTitle', 'Panel anterior')}
@@ -1125,7 +1129,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                 <span>{t('hscroll.progress.previous', 'Anterior')}</span>
               </button>
               <button
-                className="btn-progress-action"
+                className="btn-progress-action btn-progress-action--nav"
                 onClick={() => goToPanel(1)}
                 title={t('hscroll.progress.nextTitle', 'Panel siguiente')}
                 aria-label={t('hscroll.progress.nextTitle', 'Panel siguiente')}
@@ -1136,7 +1140,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
               </button>
               <span className="hscroll-progress-divider" aria-hidden="true" />
               <button
-                className="btn-progress-action"
+                className="btn-progress-action btn-progress-action--tool"
                 onClick={handleManualSave}
                 title={t('hscroll.progress.saveTitle')}
                 aria-label={t('hscroll.progress.saveAria')}
@@ -1146,7 +1150,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                 <span>{t('hscroll.progress.save')}</span>
               </button>
               <button
-                className="btn-progress-action"
+                className="btn-progress-action btn-progress-action--tool"
                 onClick={handleManualRestore}
                 title={t('hscroll.progress.restoreTitle')}
                 aria-label={t('hscroll.progress.restoreAria')}
@@ -1157,7 +1161,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
               </button>
               {onFullscreen && (
                 <button
-                  className="btn-progress-action"
+                  className="btn-progress-action btn-progress-action--tool"
                   onClick={onFullscreen}
                   title={t('article.detail.fullscreen')}
                   aria-label={t('article.detail.fullscreen')}

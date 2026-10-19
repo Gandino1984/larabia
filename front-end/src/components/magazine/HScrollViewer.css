@@ -571,7 +571,8 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
+  /* No backdrop-filter: the background is opaque, and blurring behind an
+     element that moves with the strip is redone every frame while dragging. */
   border: 2px solid #ffffff;
   transition: all 0.5s ease;
 }
@@ -602,7 +603,8 @@
   border-radius: 50%;
   color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
+  /* No backdrop-filter: the background is opaque, and blurring behind an
+     element that moves with the strip is redone every frame while dragging. */
   pointer-events: none;
   animation: float 3s ease-in-out infinite;
 }
@@ -787,13 +789,20 @@
     font-size: 0.85rem;
   }
 
+  /* Phones: smaller buttons; the panel navigation says its word (Inicio ·
+     Anterior · Siguiente), the rest are icons. */
   .btn-progress-action {
     padding: 0.35rem 0.6rem;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
-  .btn-progress-action span {
+  .btn-progress-action--tool span,
+  .btn-progress-action--nav svg {
     display: none;
+  }
+
+  .btn-progress-action--nav span {
+    display: inline;
   }
 
   .btn-progress-action svg {
@@ -839,20 +848,19 @@
   .hscroll-progress-controls {
     justify-self: stretch;
     justify-content: center;
-    gap: 0.4rem;
+    flex-wrap: wrap;
+    gap: 0.35rem;
   }
 
   .btn-progress-action {
-    flex: 1;
-    justify-content: center;
-    min-height: 40px;
-    padding: 0.4rem 0.3rem;
-    font-size: 0.75rem;
+    min-height: 32px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.68rem;
   }
 
   .hscroll-progress-divider {
-    flex: 0 0 1px;
-    margin: 0 0.15rem;
+    min-height: 1.4rem;
+    margin: 0 0.1rem;
   }
 }
 

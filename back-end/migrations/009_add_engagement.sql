@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `article_likes` (
   PRIMARY KEY (`id_like`),
   UNIQUE KEY `unique_article_like` (`article_id`, `user_id`),
   CONSTRAINT `fk_article_likes_article` FOREIGN KEY (`article_id`) REFERENCES `magazine_articles` (`id_article`) ON DELETE CASCADE,
-  CONSTRAINT `fk_article_likes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id_user`) ON DELETE CASCADE
+  CONSTRAINT `fk_article_likes_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id_user`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `article_favorites` (
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `article_favorites` (
   PRIMARY KEY (`id_favorite`),
   UNIQUE KEY `unique_article_favorite` (`article_id`, `user_id`),
   CONSTRAINT `fk_article_favorites_article` FOREIGN KEY (`article_id`) REFERENCES `magazine_articles` (`id_article`) ON DELETE CASCADE,
-  CONSTRAINT `fk_article_favorites_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id_user`) ON DELETE CASCADE
+  CONSTRAINT `fk_article_favorites_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id_user`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `article_comments` (
@@ -39,5 +39,5 @@ CREATE TABLE IF NOT EXISTS `article_comments` (
   PRIMARY KEY (`id_comment`),
   KEY `idx_article_comments_article_id` (`article_id`),
   CONSTRAINT `fk_article_comments_article` FOREIGN KEY (`article_id`) REFERENCES `magazine_articles` (`id_article`) ON DELETE CASCADE,
-  CONSTRAINT `fk_article_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id_user`) ON DELETE CASCADE
+  CONSTRAINT `fk_article_comments_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id_user`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
