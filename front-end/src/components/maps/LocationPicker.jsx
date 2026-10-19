@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import { Search, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
 import { mapPinIcon, DEFAULT_CENTER, OSM_TILES, OSM_ATTRIBUTION, toCoord } from './mapPin';
 import './Maps.css';
@@ -27,6 +28,7 @@ function FollowPosition({ position }) {
 }
 
 function LocationPicker({ lat, lng, onChange, initialQuery = '' }) {
+  const { t, i18n } = useTranslation();
   const la = toCoord(lat);
   const ln = toCoord(lng);
   const position = la !== null && ln !== null ? [la, ln] : null;
@@ -43,13 +45,13 @@ function LocationPicker({ lat, lng, onChange, initialQuery = '' }) {
     setSearching(true);
     setSearchError(null);
     try {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&accept-language=es&q=${encodeURIComponent(q)}`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&accept-language=${String(i18n.language || 'es').slice(0, 2)}&q=${encodeURIComponent(q)}`;
       const res = await fetch(url, { headers: { Accept: 'application/json' } });
       const data = await res.json();
       setResults(Array.isArray(data) ? data : []);
-      if (!data?.length) setSearchError('No se encontró esa dirección. Prueba con otra o marca el sitio en el mapa.');
+      if (!data?.length) setSearchError(t('map.notFound', 'No se encontró esa dirección. Prueba con otra o marca el sitio en el mapa.'));
     } catch {
-      setSearchError('No se pudo buscar ahora. Marca el sitio directamente en el mapa.');
+      setSearchError(t('map.searchFailed', 'No se pudo buscar ahora. Marca el sitio directamente en el mapa.'));
     } finally {
       setSearching(false);
     }
@@ -63,12 +65,12 @@ function LocationPicker({ lat, lng, onChange, initialQuery = '' }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); search(); } }}
-          placeholder="Buscar dirección (calle, número, ciudad…)"
-          aria-label="Buscar dirección"
+          placeholder={t('map.searchPlaceholder', 'Buscar dirección (calle, número, ciudad…)')}
+          aria-label={t('map.searchLabel', 'Buscar dirección')}
         />
         <button type="button" onClick={search} disabled={searching || !query.trim()}>
           <Search size={16} />
-          <span>{searching ? 'Buscando…' : 'Buscar'}</span>
+          <span>{searching ? t('map.searching', 'Buscando…') : t('common.buttons.search', 'Buscar')}</span>
         </button>
       </div>
       {searchError && <p className="location-picker__msg">{searchError}</p>}
@@ -103,13 +105,13 @@ function LocationPicker({ lat, lng, onChange, initialQuery = '' }) {
       <div className="location-picker__footer">
         <span>
           {position
-            ? `Ubicación: ${la.toFixed(5)}, ${ln.toFixed(5)} — arrastra el marcador para ajustarla.`
-            : 'Busca la dirección o haz clic en el mapa para marcar el sitio.'}
+            ? t('map.placed', { coords: `${la.toFixed(5)}, ${ln.toFixed(5)}`, defaultValue: 'Ubicación: {{coords}} — arrastra el marcador para ajustarla.' })
+            : t('map.hint', 'Busca la dirección o haz clic en el mapa para marcar el sitio.')}
         </span>
         {position && (
           <button type="button" className="location-picker__clear" onClick={() => onChange({ lat: null, lng: null })}>
             <X size={14} />
-            <span>Quitar ubicación</span>
+            <span>{t('map.clear', 'Quitar ubicación')}</span>
           </button>
         )}
       </div>

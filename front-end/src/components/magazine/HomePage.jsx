@@ -11,6 +11,7 @@ import ScrollHint from '../common/ScrollHint';
 import RollText from '../common/RollText';
 import SubscriberMark from '../common/SubscriberMark';
 import { categoryLabel } from '../../utils/articleFilters';
+import { localDate } from '../../utils/locale';
 import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
 import './HomePage.css';
 
@@ -308,7 +309,7 @@ function HomePage({ ready = true }) {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
+    return localDate(date, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'

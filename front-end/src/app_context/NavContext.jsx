@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import i18n from '../i18n/config';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
 import { DEFAULT_NAV } from './navConfig';
@@ -46,9 +47,9 @@ export const NavProvider = ({ children }) => {
       );
       if (res.data.error) return { error: res.data.error };
       setRawConfig(res.data.data?.nav_config ?? null);
-      return { success: res.data.success || 'Navegación actualizada', data: res.data.data };
+      return { success: res.data.success || i18n.t('messages.success.navUpdated', 'Navegación actualizada'), data: res.data.data };
     } catch (err) {
-      return { error: err.response?.data?.error || 'Error al actualizar la navegación' };
+      return { error: err.response?.data?.error || i18n.t('messages.error.updateNav', 'Error al actualizar la navegación') };
     }
   }, [currentUser]);
 

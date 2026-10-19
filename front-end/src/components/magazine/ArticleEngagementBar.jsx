@@ -24,7 +24,7 @@ function ArticleEngagementBar({ article, onDelete }) {
 
   const handleShare = () => {
     const url = `${window.location.origin}?article=${article.id_article}`;
-    navigator.clipboard.writeText(url).then(() => showSuccess('¡Enlace copiado!'));
+    navigator.clipboard.writeText(url).then(() => showSuccess(t('hero.linkCopied', '¡Enlace copiado!')));
   };
 
   const actions = [

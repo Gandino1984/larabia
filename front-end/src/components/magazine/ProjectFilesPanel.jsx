@@ -8,18 +8,20 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Download, FileText, Image as ImageIcon, Music, Video, Loader, Package } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import axiosInstance from '../../utils/axiosConfig';
 import './ProjectFilesPanel.css';
 
 const TYPE_META = {
-  image: { label: 'Imágenes', Icon: ImageIcon },
-  audio: { label: 'Audio', Icon: Music },
-  video: { label: 'Vídeo', Icon: Video },
-  text: { label: 'Texto', Icon: FileText },
+  image: { labelKey: 'project.files.images', Icon: ImageIcon },
+  audio: { labelKey: 'project.files.audio', Icon: Music },
+  video: { labelKey: 'project.files.video', Icon: Video },
+  text: { labelKey: 'project.files.text', Icon: FileText },
 };
 const TYPE_ORDER = ['image', 'audio', 'video', 'text'];
 
 function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
+  const { t } = useTranslation();
   const [state, setState] = useState({ loading: true, error: '', files: [] });
 
   // The backend authenticates gated requests with the x-user-id header; without
@@ -37,7 +39,7 @@ function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
       })
       .catch((err) => {
         if (!active) return;
-        setState({ loading: false, error: err.response?.data?.error || 'No se pudieron cargar los archivos', files: [] });
+        setState({ loading: false, error: err.response?.data?.error || t('project.files.loadError', 'No se pudieron cargar los archivos'), files: [] });
       });
     return () => { active = false; };
   }, [projectId]);
@@ -99,16 +101,16 @@ function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
   return createPortal(
     <>
       <div className="project-files-backdrop" onClick={onClose} />
-      <div className="project-files-panel" role="dialog" aria-label="Archivos del proyecto">
+      <div className="project-files-panel" role="dialog" aria-label={t('project.files.panelTitle', 'Archivos del proyecto')}>
         <div className="project-files-header">
           <div className="project-files-title">
             <Package size={20} />
             <div>
-              <h3>Archivos del proyecto</h3>
+              <h3>{t('project.files.panelTitle', 'Archivos del proyecto')}</h3>
               {projectTitle && <span className="project-files-subtitle">{projectTitle}</span>}
             </div>
           </div>
-          <button className="project-files-close" onClick={onClose} aria-label="Cerrar">
+          <button className="project-files-close" onClick={onClose} aria-label={t('common.buttons.close', 'Cerrar')}>
             <X size={20} />
           </button>
         </div>
@@ -117,7 +119,7 @@ function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
           {state.loading && (
             <div className="project-files-status">
               <Loader className="project-files-spinner" size={28} />
-              <p>Cargando archivos…</p>
+              <p>{t('project.files.loading', 'Cargando archivos…')}</p>
             </div>
           )}
 
@@ -129,7 +131,7 @@ function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
 
           {!state.loading && !state.error && state.files.length === 0 && (
             <div className="project-files-status">
-              <p>Este proyecto no tiene archivos descargables.</p>
+              <p>{t('project.files.empty', 'Este proyecto no tiene archivos descargables.')}</p>
             </div>
           )}
 
@@ -140,7 +142,7 @@ function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
               <div className="project-files-group" key={type}>
                 <div className="project-files-group-head">
                   <Icon size={16} />
-                  <span>{meta.label}</span>
+                  <span>{t(meta.labelKey)}</span>
                   <span className="project-files-count">{items.length}</span>
                 </div>
                 <ul className="project-files-list">
@@ -154,10 +156,10 @@ function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
                         type="button"
                         className="project-files-download"
                         onClick={() => downloadFile(file)}
-                        title={file.external ? 'Abrir vídeo' : 'Descargar'}
+                        title={file.external ? t('project.files.openVideo', 'Abrir vídeo') : t('project.files.download', 'Descargar')}
                       >
                         {file.external ? <Video size={16} /> : <Download size={16} />}
-                        <span>{file.external ? 'Abrir' : 'Descargar'}</span>
+                        <span>{file.external ? t('project.files.open', 'Abrir') : t('project.files.download', 'Descargar')}</span>
                       </button>
                     </li>
                   ))}
@@ -171,7 +173,7 @@ function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
           <div className="project-files-footer">
             <button type="button" className="project-files-download-all" onClick={downloadAll}>
               <Download size={16} />
-              <span>Descargar todo</span>
+              <span>{t('project.files.downloadAll', 'Descargar todo')}</span>
             </button>
           </div>
         )}

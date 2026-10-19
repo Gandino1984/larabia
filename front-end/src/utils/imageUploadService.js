@@ -1,5 +1,6 @@
 // magazine-front/src/utils/imageUploadService.js
 import axiosInstance from './axiosConfig.js';
+import i18n from '../i18n/config';
 
 /**
  * Format image URL for display
@@ -77,7 +78,7 @@ export const formatImageUrl = (imagePath) => {
 export const uploadUserImage = async ({ file, userName, onProgress, onError }) => {
   try {
     if (!file || !userName) {
-      const errorMsg = 'Missing required parameters for user image upload';
+      const errorMsg = i18n.t('user.card.uploadError', 'Error al subir el archivo');
       console.error(errorMsg);
       if (onError) onError(errorMsg);
       throw new Error(errorMsg);
@@ -122,7 +123,7 @@ export const uploadUserImage = async ({ file, userName, onProgress, onError }) =
     }
 
     if (!response.data.data || !response.data.data.image_user) {
-      const errorMsg = 'No image path returned from server';
+      const errorMsg = i18n.t('user.card.uploadError', 'Error al subir el archivo');
       console.error(errorMsg);
       if (onError) onError(errorMsg);
       throw new Error(errorMsg);
@@ -138,7 +139,7 @@ export const uploadUserImage = async ({ file, userName, onProgress, onError }) =
     const errorMsg = error.response?.data?.error
       || error.response?.data?.details
       || error.message
-      || 'Error uploading user image';
+      || i18n.t('user.card.uploadError', 'Error al subir el archivo');
 
     if (onError) onError(errorMsg);
     throw new Error(errorMsg);

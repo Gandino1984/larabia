@@ -1,22 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../app_context/ThemeContext';
 import { useUI } from '../../../app_context/UIContext';
 import {
   THEME_PRESETS,
   COLOR_PICKER_TOKENS,
   TOKEN_LABELS,
+  TOKEN_LABEL_KEYS,
   resolveTokens,
   resolveLandingColor
 } from '../../../app_context/themePresets';
 import './AdminAppearanceTab.css';
 
 const SPEED_OPTIONS = [
-  { value: 'slow', label: 'Lenta' },
-  { value: 'normal', label: 'Normal' },
-  { value: 'fast', label: 'Rápida' }
+  { value: 'slow', key: 'admin.appearance.speed.slow', label: 'Lenta' },
+  { value: 'normal', key: 'admin.appearance.speed.normal', label: 'Normal' },
+  { value: 'fast', key: 'admin.appearance.speed.fast', label: 'Rápida' }
 ];
 
 function AdminAppearanceTab() {
+  const { t } = useTranslation();
   const { theme, loaded, updateTheme, applyTheme } = useTheme();
   const { showSuccess, showError } = useUI();
 
@@ -89,14 +92,12 @@ function AdminAppearanceTab() {
   return (
     <section className="admin-appearance">
       <p className="admin-appearance__hint">
-        Cambia el aspecto de la revista para todo el mundo. Los cambios se previsualizan
-        en vivo; pulsa <strong>Guardar</strong> para aplicarlos de forma permanente.
-        «Por defecto» restaura el diseño original.
+        {t('admin.appearance.hint', 'Cambia el aspecto de la revista para todo el mundo. Los cambios se previsualizan en vivo; pulsa «Guardar» para aplicarlos de forma permanente. «Por defecto» restaura el diseño original.')}
       </p>
 
       {/* Preset selector */}
       <div className="admin-appearance__section">
-        <h3>Tema</h3>
+        <h3>{t('admin.appearance.theme', 'Tema')}</h3>
         <div className="admin-appearance__presets">
           {Object.entries(THEME_PRESETS).map(([key, p]) => (
             <button
@@ -111,7 +112,7 @@ function AdminAppearanceTab() {
                 <span style={{ background: p.tokens['--color-accent'] }} />
                 <span style={{ background: p.tokens['--color-text'] }} />
               </span>
-              {p.label}
+              {t(p.labelKey, p.label)}
             </button>
           ))}
         </div>
@@ -119,7 +120,7 @@ function AdminAppearanceTab() {
 
       {/* Color pickers */}
       <div className="admin-appearance__section">
-        <h3>Colores</h3>
+        <h3>{t('admin.appearance.colours', 'Colores')}</h3>
         <div className="admin-appearance__colors">
           {COLOR_PICKER_TOKENS.map((token) => (
             <label key={token} className="admin-appearance__color">
@@ -128,7 +129,7 @@ function AdminAppearanceTab() {
                 value={colors[token] || '#000000'}
                 onChange={(e) => handleColor(token, e.target.value)}
               />
-              <span>{TOKEN_LABELS[token] || token}</span>
+              <span>{t(TOKEN_LABEL_KEYS[token] || token, TOKEN_LABELS[token] || token)}</span>
             </label>
           ))}
         </div>
@@ -136,37 +137,37 @@ function AdminAppearanceTab() {
 
       {/* Landing background */}
       <div className="admin-appearance__section">
-        <h3>Fondo de portada</h3>
+        <h3>{t('admin.appearance.landing', 'Fondo de portada')}</h3>
         <label className="admin-appearance__color">
           <input
             type="color"
             value={landingColor || '#252525'}
             onChange={(e) => setLandingColor(e.target.value)}
           />
-          <span>Color de fondo de la portada</span>
+          <span>{t('admin.appearance.landingColour', 'Color de fondo de la portada')}</span>
         </label>
       </div>
 
       {/* Animation controls */}
       <div className="admin-appearance__section">
-        <h3>Animaciones</h3>
+        <h3>{t('admin.appearance.animations', 'Animaciones')}</h3>
         <label className="admin-appearance__toggle">
           <input
             type="checkbox"
             checked={animationsEnabled}
             onChange={(e) => setAnimationsEnabled(e.target.checked)}
           />
-          <span>Activar animaciones</span>
+          <span>{t('admin.appearance.animationsOn', 'Activar animaciones')}</span>
         </label>
         <label className="admin-appearance__field">
-          <span>Velocidad</span>
+          <span>{t('admin.appearance.speed', 'Velocidad')}</span>
           <select
             value={animationSpeed}
             onChange={(e) => setAnimationSpeed(e.target.value)}
             disabled={!animationsEnabled}
           >
             {SPEED_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
+              <option key={o.value} value={o.value}>{t(o.key, o.label)}</option>
             ))}
           </select>
         </label>
@@ -176,16 +177,16 @@ function AdminAppearanceTab() {
             checked={respectReducedMotion}
             onChange={(e) => setRespectReducedMotion(e.target.checked)}
           />
-          <span>Respetar «reducir movimiento» del sistema del visitante</span>
+          <span>{t('admin.appearance.reducedMotion', 'Respetar «reducir movimiento» del sistema del visitante')}</span>
         </label>
       </div>
 
       <div className="admin-appearance__actions">
         <button type="button" className="admin-appearance__reset" onClick={handleResetDefault}>
-          Restaurar por defecto
+          {t('admin.nav.reset', 'Restaurar por defecto')}
         </button>
         <button type="button" className="admin-appearance__save" onClick={handleSave} disabled={saving}>
-          {saving ? 'Guardando…' : 'Guardar'}
+          {saving ? t('common.states.saving', 'Guardando') : t('common.buttons.save', 'Guardar')}
         </button>
       </div>
     </section>

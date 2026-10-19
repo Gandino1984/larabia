@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import i18n from '../i18n/config';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
 import {
@@ -83,9 +84,9 @@ export const ThemeProvider = ({ children }) => {
       });
       if (res.data.error) return { error: res.data.error };
       setTheme((prev) => ({ ...prev, ...res.data.data }));
-      return { success: res.data.success || 'Tema actualizado', data: res.data.data };
+      return { success: res.data.success || i18n.t('messages.success.themeUpdated', 'Tema actualizado'), data: res.data.data };
     } catch (err) {
-      return { error: err.response?.data?.error || 'Error al actualizar el tema' };
+      return { error: err.response?.data?.error || i18n.t('messages.error.updateTheme', 'Error al actualizar el tema') };
     }
   }, [currentUser]);
 
@@ -98,9 +99,9 @@ export const ThemeProvider = ({ children }) => {
       });
       if (res.data.error) return { error: res.data.error };
       setTheme((prev) => ({ ...prev, ...res.data.data }));
-      return { success: res.data.success || 'Fondo actualizado', data: res.data.data };
+      return { success: res.data.success || i18n.t('messages.success.backgroundUpdated', 'Fondo actualizado'), data: res.data.data };
     } catch (err) {
-      return { error: err.response?.data?.error || 'Error al subir el fondo' };
+      return { error: err.response?.data?.error || i18n.t('messages.error.uploadBackground', 'Error al subir el fondo') };
     }
   }, [currentUser]);
 

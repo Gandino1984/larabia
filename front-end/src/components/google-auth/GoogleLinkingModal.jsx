@@ -1,5 +1,6 @@
 // magazine-front/src/components/google-auth/GoogleLinkingModal.jsx
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import axiosInstance from '../../utils/axiosConfig.js';
 import { X } from 'lucide-react';
 import './GoogleLinkingModal.css';
@@ -10,6 +11,7 @@ export const GoogleLinkingModal = ({
   onSuccess,
   onCancel
 }) => {
+  const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [error, setError] = useState('');
@@ -19,17 +21,17 @@ export const GoogleLinkingModal = ({
     console.log('=== HANDLE LINK START ===');
 
     if (!selectedAccount) {
-      setError('Por favor selecciona una cuenta');
+      setError(t('auth.linking.pickAccount', 'Por favor selecciona una cuenta'));
       return;
     }
 
     if (!password) {
-      setError('Por favor ingresa tu contraseña');
+      setError(t('auth.linking.enterPassword', 'Por favor ingresa tu contraseña'));
       return;
     }
 
     if (password.length !== 4 || !/^\d+$/.test(password)) {
-      setError('La contraseña debe tener exactamente 4 dígitos');
+      setError(t('auth.linking.fourDigits', 'La contraseña debe tener exactamente 4 dígitos'));
       return;
     }
 
@@ -57,13 +59,13 @@ export const GoogleLinkingModal = ({
         console.log('✅ Account linked successfully');
         onSuccess(result.data.data, result.data.message);
       } else {
-        setError('Respuesta inesperada del servidor');
+        setError(t('auth.unexpectedResponse', 'Respuesta inesperada del servidor'));
       }
     } catch (err) {
       console.error('Link error:', err);
       const errorMessage = err.response?.data?.error ||
                           err.response?.data?.details ||
-                          'Error al vincular cuenta';
+                          t('auth.linking.error', 'Error al vincular cuenta');
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -88,24 +90,24 @@ export const GoogleLinkingModal = ({
   return (
     <div className="modal-overlay" onClick={onCancel}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button" onClick={onCancel}>
+        <button className="close-button" onClick={onCancel} aria-label={t('common.buttons.close', 'Cerrar')}>
           <X size={24} />
         </button>
 
-        <h2>🔗 Vincular cuenta de Google</h2>
+        <h2>🔗 {t('auth.linking.title', 'Vincular cuenta de Google')}</h2>
 
         <div className="modal-info">
           <p>
-            El email <strong>{googleUser.email}</strong> ya está registrado en el sistema.
+            {t('auth.linking.emailExists', { email: googleUser.email, defaultValue: 'El email {{email}} ya está registrado en el sistema.' })}
           </p>
           <p>
-            Al vincular tu cuenta de Google, podrás iniciar sesión de dos formas:
+            {t('auth.linking.twoWays', 'Al vincular tu cuenta de Google, podrás iniciar sesión de dos formas:')}
           </p>
           <ul className="benefits-list">
-            <li>✅ Con Google (sin contraseña)</li>
-            <li>✅ Con tu usuario y contraseña de 4 dígitos</li>
+            <li>✅ {t('auth.linking.withGoogle', 'Con Google (sin contraseña)')}</li>
+            <li>✅ {t('auth.linking.withPin', 'Con tu usuario y contraseña de 4 dígitos')}</li>
           </ul>
-          <p><strong>Selecciona la cuenta que deseas vincular:</strong></p>
+          <p><strong>{t('auth.linking.pickToLink', 'Selecciona la cuenta que deseas vincular:')}</strong></p>
         </div>
 
         <div className="accounts-list">
@@ -122,12 +124,7 @@ export const GoogleLinkingModal = ({
             >
               <div className="account-info">
                 <strong>{account.name_user}</strong>
-                <span className="account-type">
-                  {account.type_user === 'user' ? 'Usuario' :
-                   account.type_user === 'seller' ? 'Vendedor' :
-                   account.type_user === 'rider' ? 'Repartidor' :
-                   account.type_user}
-                </span>
+                <span className="account-type">{t('auth.account', 'Cuenta')}</span>
               </div>
               {selectedAccount?.id_user === account.id_user && (
                 <div className="checkmark">✓</div>
@@ -138,7 +135,7 @@ export const GoogleLinkingModal = ({
 
         {selectedAccount && (
           <div className="password-section">
-            <label htmlFor="password">Ingresa tu contraseña de 4 dígitos:</label>
+            <label htmlFor="password">{t('auth.linking.passwordLabel', 'Ingresa tu contraseña de 4 dígitos:')}</label>
             <input
               id="password"
               type="password"
@@ -153,7 +150,7 @@ export const GoogleLinkingModal = ({
               disabled={isLoading}
             />
             <p className="hint">
-              Esta es la contraseña que usas para iniciar sesión en {selectedAccount.name_user}
+              {t('auth.linking.passwordHint', { name: selectedAccount.name_user, defaultValue: 'Esta es la contraseña que usas para iniciar sesión en {{name}}' })}
             </p>
           </div>
         )}
@@ -166,14 +163,14 @@ export const GoogleLinkingModal = ({
             disabled={isLoading || !selectedAccount || password.length !== 4}
             className="link-button"
           >
-            {isLoading ? 'Vinculando...' : 'Vincular cuenta'}
+            {isLoading ? t('auth.linking.linking', 'Vinculando...') : t('auth.linking.link', 'Vincular cuenta')}
           </button>
           <button
             onClick={onCancel}
             className="cancel-button"
             disabled={isLoading}
           >
-            Cancelar
+            {t('common.buttons.cancel', 'Cancelar')}
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext';
 import { Globe } from 'lucide-react';
 import SpringDropdown from './SpringDropdown';
@@ -6,6 +7,7 @@ import RollText from '../common/RollText';
 import './LanguageSelector.css';
 
 function LanguageSelector() {
+  const { t } = useTranslation();
   const { currentLanguage, changeLanguage } = useUI();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -40,7 +42,7 @@ function LanguageSelector() {
       <button
         className="language-selector-btn"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Select language"
+        aria-label={t('header.language', 'Idioma')}
       >
         <Globe size={18} />
         <span className="current-lang-label">

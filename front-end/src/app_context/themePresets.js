@@ -29,7 +29,30 @@ export const TOKEN_KEYS = [
   '--color-header-text-active'
 ];
 
-// Human labels for the admin color pickers (Spanish UI).
+// i18n keys of the admin colour pickers' labels (TOKEN_LABELS: their Spanish).
+export const TOKEN_LABEL_KEYS = {
+  '--color-bg': 'admin.appearance.token.bg',
+  '--color-surface': 'admin.appearance.token.surface',
+  '--color-surface-alt': 'admin.appearance.token.surfaceAlt',
+  '--color-surface-3': 'admin.appearance.token.surface3',
+  '--color-text': 'admin.appearance.token.text',
+  '--color-text-muted': 'admin.appearance.token.textMuted',
+  '--color-accent': 'admin.appearance.token.accent',
+  '--color-accent-2': 'admin.appearance.token.accent2',
+  '--color-danger': 'admin.appearance.token.danger',
+  '--color-border': 'admin.appearance.token.border',
+  '--surface-light': 'admin.appearance.token.lightBg',
+  '--surface-light-2': 'admin.appearance.token.lightSurface',
+  '--light-border': 'admin.appearance.token.lightBorder',
+  '--on-light': 'admin.appearance.token.lightText',
+  '--on-light-muted': 'admin.appearance.token.lightTextMuted',
+  '--color-header-bg': 'admin.appearance.token.headerBg',
+  '--color-header-text': 'admin.appearance.token.headerText',
+  '--color-header-bg-active': 'admin.appearance.token.headerBgActive',
+  '--color-header-text-active': 'admin.appearance.token.headerTextActive'
+};
+
+// Human labels for the admin color pickers (Spanish).
 export const TOKEN_LABELS = {
   '--color-bg': 'Fondo general',
   '--color-surface': 'Tarjetas / paneles',
@@ -55,6 +78,7 @@ export const TOKEN_LABELS = {
 export const THEME_PRESETS = {
   default: {
     label: 'Por defecto',
+    labelKey: 'admin.appearance.preset.default',
     tokens: {
       '--color-bg': '#303030',
       '--color-surface': '#2a2a2a',
@@ -80,6 +104,7 @@ export const THEME_PRESETS = {
   },
   light: {
     label: 'Claro',
+    labelKey: 'admin.appearance.preset.light',
     tokens: {
       '--color-bg': '#f4f4f5',
       '--color-surface': '#ffffff',
@@ -105,6 +130,7 @@ export const THEME_PRESETS = {
   },
   'high-contrast': {
     label: 'Alto contraste',
+    labelKey: 'admin.appearance.preset.highContrast',
     tokens: {
       '--color-bg': '#000000',
       '--color-surface': '#0b0b0b',

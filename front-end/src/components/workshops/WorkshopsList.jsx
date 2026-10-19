@@ -1,6 +1,7 @@
 // magazine-front/src/components/workshops/WorkshopsList.jsx
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { localDate } from '../../utils/locale';
 import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
@@ -30,7 +31,7 @@ const resolveImg = (img) => {
 const formatDate = (d) => {
   if (!d) return null;
   try {
-    return new Date(d).toLocaleDateString('es-ES', {
+    return localDate(d, {
       year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
   } catch { return null; }

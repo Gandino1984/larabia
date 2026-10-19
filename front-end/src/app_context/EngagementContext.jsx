@@ -4,6 +4,7 @@
 // toggles; the card icons fill based on likedIds / favoritedIds. Comments live
 // in a modal opened from the card.
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import i18n from '../i18n/config';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
 import { useUI } from './UIContext';
@@ -58,7 +59,7 @@ export const EngagementProvider = ({ children }) => {
 
   const toggleSubscribe = useCallback(async (id_project) => {
     if (!currentUser?.id_user) {
-      showError('Inicia sesión para seguir este proyecto');
+      showError(i18n.t('messages.error.loginToFollow', 'Inicia sesión para seguir este proyecto'));
       return;
     }
     setSubscribedProjectIds(prev => prev.includes(id_project) ? prev.filter(x => x !== id_project) : [...prev, id_project]);
@@ -73,13 +74,13 @@ export const EngagementProvider = ({ children }) => {
       });
     } catch (err) {
       setSubscribedProjectIds(prev => prev.includes(id_project) ? prev.filter(x => x !== id_project) : [...prev, id_project]);
-      showError('No se pudo actualizar la suscripción');
+      showError(i18n.t('messages.error.updateFollow', 'No se pudo actualizar la suscripción'));
     }
   }, [currentUser, authHeader, showError]);
 
   const toggleLike = useCallback(async (id_article) => {
     if (!currentUser?.id_user) {
-      showError('Inicia sesión para dar me gusta');
+      showError(i18n.t('messages.error.loginToLike', 'Inicia sesión para dar me gusta'));
       return;
     }
     // Optimistic update.
@@ -97,13 +98,13 @@ export const EngagementProvider = ({ children }) => {
     } catch (err) {
       // Roll back on failure.
       setLikedIds(prev => prev.includes(id_article) ? prev.filter(x => x !== id_article) : [...prev, id_article]);
-      showError('No se pudo actualizar el me gusta');
+      showError(i18n.t('messages.error.updateLike', 'No se pudo actualizar el me gusta'));
     }
   }, [currentUser, authHeader, showError]);
 
   const toggleFavorite = useCallback(async (id_article) => {
     if (!currentUser?.id_user) {
-      showError('Inicia sesión para guardar en favoritos');
+      showError(i18n.t('messages.error.loginToFavorite', 'Inicia sesión para guardar en favoritos'));
       return;
     }
     setFavoritedIds(prev => prev.includes(id_article) ? prev.filter(x => x !== id_article) : [...prev, id_article]);
@@ -118,7 +119,7 @@ export const EngagementProvider = ({ children }) => {
       });
     } catch (err) {
       setFavoritedIds(prev => prev.includes(id_article) ? prev.filter(x => x !== id_article) : [...prev, id_article]);
-      showError('No se pudo actualizar favoritos');
+      showError(i18n.t('messages.error.updateFavorite', 'No se pudo actualizar favoritos'));
     }
   }, [currentUser, authHeader, showError]);
 
@@ -129,18 +130,18 @@ export const EngagementProvider = ({ children }) => {
       if (res.data.error) return { error: res.data.error };
       return { data: res.data.data || [] };
     } catch (err) {
-      return { error: 'Error al cargar los comentarios' };
+      return { error: i18n.t('messages.error.loadComments', 'Error al cargar los comentarios') };
     }
   }, []);
 
   const createComment = useCallback(async (id_article, content) => {
-    if (!currentUser?.id_user) return { error: 'Debes iniciar sesión para comentar' };
+    if (!currentUser?.id_user) return { error: i18n.t('messages.error.loginToComment', 'Debes iniciar sesión para comentar') };
     try {
       const res = await axiosInstance.post(`/engagement/comments/${id_article}`, { content_comment: content }, authHeader());
       if (res.data.error) return { error: res.data.error };
       return { data: res.data.data };
     } catch (err) {
-      return { error: err.response?.data?.error || 'Error al publicar el comentario' };
+      return { error: err.response?.data?.error || i18n.t('messages.error.postComment', 'Error al publicar el comentario') };
     }
   }, [currentUser, authHeader]);
 
@@ -150,7 +151,7 @@ export const EngagementProvider = ({ children }) => {
       if (res.data.error) return { error: res.data.error };
       return { success: true };
     } catch (err) {
-      return { error: err.response?.data?.error || 'Error al eliminar el comentario' };
+      return { error: err.response?.data?.error || i18n.t('messages.error.deleteComment', 'Error al eliminar el comentario') };
     }
   }, [authHeader]);
 

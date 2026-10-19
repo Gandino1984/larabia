@@ -930,7 +930,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
               <button
                 className="hscroll-rotate-dismiss"
                 onClick={() => setShowRotateBanner(false)}
-                aria-label="Cerrar"
+                aria-label={t('common.buttons.close', 'Cerrar')}
               >
                 <X size={16} />
               </button>
@@ -1020,7 +1020,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                       frameBorder="0"
                       allowFullScreen
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      title={`Panel ${index + 1}`}
+                      title={t('hscroll.panelTitle', { n: index + 1, defaultValue: 'Panel {{n}}' })}
                       loading="lazy"
                     />
                   ) : (

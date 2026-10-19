@@ -6,6 +6,7 @@
 // normalised to −16 LUFS (ffmpeg, in the background), original discarded.
 // Used by paisajes sonoros, comic audio panels and micro-perfiles.
 import axiosInstance from './axiosConfig';
+import i18n from '../i18n/config';
 
 export const AUDIO_EXTENSIONS = ['wav', 'flac', 'aiff', 'aif', 'mp3', 'm4a', 'aac', 'ogg', 'opus', 'webm', 'mp4'];
 export const AUDIO_ACCEPT = `${AUDIO_EXTENSIONS.map((e) => `.${e}`).join(',')},audio/*`;
@@ -28,7 +29,7 @@ export async function uploadAudio(file, userId, onProgress) {
     });
     return res.data.data.audioId;
   } catch (err) {
-    throw new Error(errorOf(err, 'No se pudo subir el audio'));
+    throw new Error(errorOf(err, i18n.t('messages.error.uploadAudio', 'No se pudo subir el audio')));
   }
 }
 
@@ -45,7 +46,7 @@ export async function waitForAudio(audioId, userId, isCancelled = () => false) {
     try {
       s = await getAudioStatus(audioId, userId);
     } catch (err) {
-      throw new Error(errorOf(err, 'No se pudo consultar el audio'));
+      throw new Error(errorOf(err, i18n.t('messages.error.checkAudio', 'No se pudo consultar el audio')));
     }
     if (s.status !== 'processing') return s;
     await new Promise((r) => setTimeout(r, 2000));

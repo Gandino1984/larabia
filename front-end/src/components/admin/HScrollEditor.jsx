@@ -179,14 +179,14 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
       console.error('❌ Invalid file type:', file.type);
-      alert(`Por favor selecciona una imagen válida (JPEG, PNG, WebP).\nArchivo seleccionado: ${file.name} (${file.type})`);
+      alert(t('hscroll.editor.invalidImage', { name: file.name, type: file.type, defaultValue: 'Por favor selecciona una imagen válida (JPEG, PNG, WebP).\nArchivo seleccionado: {{name}} ({{type}})' }));
       return;
     }
 
     // Validate file size (max 10MB)
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert('La imagen es demasiado grande. Máximo 10MB');
+      alert(t('hscroll.editor.imageTooLarge', 'La imagen es demasiado grande. Máximo 10MB'));
       return;
     }
 
@@ -204,7 +204,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
       }
     } catch (error) {
       console.error('❌ Error uploading panel:', error);
-      alert('Error al subir la imagen');
+      alert(t('messages.error.uploadImage', 'Error al subir la imagen'));
     }
   };
 
@@ -304,14 +304,14 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
   return (
     <div className="hscroll-editor">
       <div className="hscroll-header">
-        <h3>Editor de Cómic - Scroll Horizontal</h3>
+        <h3>{t('hscroll.editor.title', 'Editor de cómic · lectura horizontal')}</h3>
         <p className="hscroll-description">
-          Sube imágenes para crear tu cómic. Las imágenes se mostrarán en formato horizontal con altura fija.
+          {t('hscroll.editor.description', 'Sube imágenes para crear tu cómic. Las imágenes se mostrarán en formato horizontal con altura fija.')}
         </p>
       </div>
 
       <div className="hscroll-controls">
-        <button type="button" className="btn-scroll" onClick={scrollLeft} title="Desplazar izquierda">
+        <button type="button" className="btn-scroll" onClick={scrollLeft} title={t('hscroll.editor.scrollLeft', 'Desplazar a la izquierda')}>
           <ArrowLeft size={20} />
         </button>
 
@@ -335,7 +335,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                   {panel.interaction_type === 'iframe' ? (
                     <div className="panel-iframe-placeholder">
                       <Code2 size={40} />
-                      <span>Panel Iframe</span>
+                      <span>{t('hscroll.editor.iframePanel', 'Panel iframe')}</span>
                       {panel.interaction_data && (
                         <p className="panel-iframe-url">{panel.interaction_data}</p>
                       )}
@@ -343,7 +343,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                   ) : panel.image_url ? (
                     <img
                       src={getImageUrl(panel.image_url)}
-                      alt={panel.image_alt || `Panel ${index + 1}`}
+                      alt={panel.image_alt || t('hscroll.panelTitle', { n: index + 1, defaultValue: 'Panel {{n}}' })}
                       className="panel-image"
                     />
                   ) : (
@@ -355,7 +355,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                         style={{ display: 'none' }}
                       />
                       <Upload size={40} />
-                      <span>Subir imagen</span>
+                      <span>{t('hscroll.editor.uploadImage', 'Subir imagen')}</span>
                     </label>
                   )}
                 </div>
@@ -366,7 +366,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                       type="button"
                       className="btn-panel-action"
                       onClick={() => movePanel(index, index - 1)}
-                      title="Mover a la izquierda"
+                      title={t('hscroll.editor.moveLeft', 'Mover a la izquierda')}
                     >
                       <ArrowLeft size={16} />
                     </button>
@@ -377,7 +377,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                       type="button"
                       className="btn-panel-action"
                       onClick={() => movePanel(index, index + 1)}
-                      title="Mover a la derecha"
+                      title={t('hscroll.editor.moveRight', 'Mover a la derecha')}
                     >
                       <ArrowRight size={16} />
                     </button>
@@ -388,7 +388,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                       type="button"
                       className="btn-panel-action btn-configure"
                       onClick={() => editPanelInteraction(index)}
-                      title="Configurar interacción"
+                      title={t('hscroll.editor.configureInteraction', 'Configurar interacción')}
                     >
                       <MousePointer size={16} />
                     </button>
@@ -410,7 +410,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                       type="button"
                       className="btn-panel-action btn-configure"
                       onClick={() => editIframePanel(index)}
-                      title="Configurar iframe"
+                      title={t('hscroll.editor.configureIframe', 'Configurar iframe')}
                     >
                       <Code2 size={16} />
                     </button>
@@ -420,13 +420,13 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                     type="button"
                     className="btn-panel-action btn-delete"
                     onClick={() => removePanel(index)}
-                    title="Eliminar panel"
+                    title={t('hscroll.editor.deletePanel', 'Eliminar panel')}
                   >
                     <Trash2 size={16} />
                   </button>
 
                   {panel.image_url && panel.interaction_type !== 'iframe' && !panel.soundscape_data && (
-                    <label className="btn-panel-action btn-replace" title="Reemplazar imagen">
+                    <label className="btn-panel-action btn-replace" title={t('hscroll.editor.replaceImage', 'Reemplazar imagen')}>
                       <input
                         type="file"
                         accept="image/*"
@@ -443,20 +443,20 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
             <div className="hscroll-panel hscroll-panel-add">
               <button type="button" className="btn-add-panel" onClick={addPanel}>
                 <Plus size={40} />
-                <span>Agregar panel</span>
+                <span>{t('hscroll.editor.addPanel', 'Agregar panel')}</span>
               </button>
             </div>
           </div>
         </div>
 
-        <button type="button" className="btn-scroll" onClick={scrollRight} title="Desplazar derecha">
+        <button type="button" className="btn-scroll" onClick={scrollRight} title={t('hscroll.editor.scrollRight', 'Desplazar a la derecha')}>
           <ArrowRight size={20} />
         </button>
       </div>
 
       {panels.length === 0 && (
         <div className="hscroll-empty">
-          <p>No hay paneles aún. Haz clic en "Agregar panel" para comenzar.</p>
+          <p>{t('hscroll.editor.empty', 'No hay paneles aún. Haz clic en «Agregar panel» para comenzar.')}</p>
         </div>
       )}
 
@@ -465,8 +465,8 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
         <div className="modal-overlay" onClick={() => setShowPanelTypeModal(false)}>
           <div className="modal-content panel-type-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Selecciona el tipo de panel</h3>
-              <button className="modal-close" onClick={() => setShowPanelTypeModal(false)}>
+              <h3>{t('hscroll.editor.choosePanelType', 'Selecciona el tipo de panel')}</h3>
+              <button className="modal-close" onClick={() => setShowPanelTypeModal(false)} aria-label={t('common.buttons.close', 'Cerrar')}>
                 <X size={24} />
               </button>
             </div>
@@ -478,8 +478,8 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                   onClick={addSimplePanel}
                 >
                   <Upload size={48} />
-                  <h4>Panel Simple</h4>
-                  <p>Solo muestra una imagen</p>
+                  <h4>{t('hscroll.editor.simplePanel', 'Panel simple')}</h4>
+                  <p>{t('hscroll.editor.simplePanelDesc', 'Solo muestra una imagen')}</p>
                 </button>
                 <button
                   type="button"
@@ -487,8 +487,8 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                   onClick={addInteractivePanel}
                 >
                   <MousePointer size={48} />
-                  <h4>Panel Interactivo</h4>
-                  <p>Clickeable con acción personalizada</p>
+                  <h4>{t('hscroll.editor.interactivePanel', 'Panel interactivo')}</h4>
+                  <p>{t('hscroll.editor.interactivePanelDesc', 'Se puede pulsar para abrir un enlace o reproducir un audio')}</p>
                 </button>
                 <button
                   type="button"
@@ -496,8 +496,8 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                   onClick={addIframePanel}
                 >
                   <Code2 size={48} />
-                  <h4>Panel Iframe</h4>
-                  <p>Embed de video u otro contenido externo</p>
+                  <h4>{t('hscroll.editor.iframePanel', 'Panel iframe')}</h4>
+                  <p>{t('hscroll.editor.iframePanelDesc', 'Un vídeo u otro contenido externo incrustado')}</p>
                 </button>
                 <button
                   type="button"
@@ -559,14 +559,14 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
         <div className="modal-overlay" onClick={() => setShowIframeModal(false)}>
           <div className="modal-content iframe-config-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3><Code2 size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />Configurar Panel Iframe</h3>
-              <button className="modal-close" onClick={() => setShowIframeModal(false)}>
+              <h3><Code2 size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />{t('hscroll.editor.iframeModalTitle', 'Configurar panel iframe')}</h3>
+              <button className="modal-close" onClick={() => setShowIframeModal(false)} aria-label={t('common.buttons.close', 'Cerrar')}>
                 <X size={24} />
               </button>
             </div>
             <div className="modal-body">
               <div className="iframe-config-section">
-                <label className="config-label">Código iframe o URL:</label>
+                <label className="config-label">{t('hscroll.editor.iframeCode', 'Código iframe o URL')}:</label>
                 <textarea
                   className="iframe-input"
                   placeholder={'<iframe src="https://www.youtube.com/embed/..." ...></iframe>'}
@@ -574,23 +574,23 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                   onChange={(e) => setIframeHtml(e.target.value)}
                   rows={4}
                 />
-                <p className="config-hint">Pega el código iframe completo o directamente la URL del src.</p>
+                <p className="config-hint">{t('hscroll.editor.iframeCodeHint', 'Pega el código iframe completo o directamente la URL del src.')}</p>
               </div>
 
               <div className="iframe-config-section">
-                <label className="config-label">Relación de aspecto:</label>
+                <label className="config-label">{t('hscroll.editor.aspectRatio', 'Relación de aspecto')}:</label>
                 <select
                   className="config-select"
                   value={iframeAspectRatio}
                   onChange={(e) => setIframeAspectRatio(e.target.value)}
                 >
-                  <option value="16:9">16:9 — Video horizontal (YouTube, Vimeo)</option>
-                  <option value="4:3">4:3 — Formato clásico</option>
-                  <option value="1:1">1:1 — Cuadrado</option>
-                  <option value="9:16">9:16 — Video vertical (Shorts, Reels)</option>
-                  <option value="21:9">21:9 — Ultrawide</option>
+                  <option value="16:9">16:9 — {t('hscroll.editor.ratio169', 'Vídeo horizontal (YouTube, Vimeo)')}</option>
+                  <option value="4:3">4:3 — {t('hscroll.editor.ratio43', 'Formato clásico')}</option>
+                  <option value="1:1">1:1 — {t('hscroll.editor.ratio11', 'Cuadrado')}</option>
+                  <option value="9:16">9:16 — {t('hscroll.editor.ratio916', 'Vídeo vertical (Shorts, Reels)')}</option>
+                  <option value="21:9">21:9 — {t('hscroll.editor.ratio219', 'Panorámico')}</option>
                 </select>
-                <p className="config-hint">El ancho del panel se calculará automáticamente para mantener la proporción con la altura del visor.</p>
+                <p className="config-hint">{t('hscroll.editor.aspectHint', 'El ancho del panel se calculará automáticamente para mantener la proporción con la altura del visor.')}</p>
               </div>
 
               <button
@@ -599,7 +599,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                 onClick={handleConfigureIframe}
                 disabled={!iframeHtml.trim()}
               >
-                Guardar panel iframe
+                {t('hscroll.editor.saveIframe', 'Guardar panel iframe')}
               </button>
             </div>
           </div>
@@ -613,17 +613,17 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
           <div className="modal-content interactive-config-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-body">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <p className="modal-description" style={{ margin: 0 }}>¿Qué debe hacer el panel al hacer clic?</p>
-                <button className="modal-close" onClick={() => setShowInteractiveModal(false)}>
+                <p className="modal-description" style={{ margin: 0 }}>{t('hscroll.editor.clickQuestion', '¿Qué debe hacer el panel al hacer clic?')}</p>
+                <button className="modal-close" onClick={() => setShowInteractiveModal(false)} aria-label={t('common.buttons.close', 'Cerrar')}>
                   <X size={24} />
                 </button>
               </div>
               <div className="interaction-options">
                 <div className="interaction-option">
-                  <h4><span className="config-label">Tipo 1:</span> <LinkIcon size={20} /> Abrir enlace</h4>
+                  <h4><span className="config-label">{t('hscroll.editor.type', { n: 1, defaultValue: 'Tipo {{n}}' })}:</span> <LinkIcon size={20} /> {t('hscroll.editor.openLink', 'Abrir enlace')}</h4>
                   <input
                     type="url"
-                    placeholder="https://ejemplo.com"
+                    placeholder={t('hscroll.editor.linkPlaceholder', 'https://ejemplo.com')}
                     className="interaction-input"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && e.target.value) {
@@ -641,12 +641,12 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                       }
                     }}
                   >
-                    Configurar enlace
+                    {t('hscroll.editor.configureLink', 'Configurar enlace')}
                   </button>
                 </div>
 
                 <div className="interaction-option">
-                  <h4><span className="config-label">Tipo 2:</span> <Volume2 size={20} /> Reproducir audio</h4>
+                  <h4><span className="config-label">{t('hscroll.editor.type', { n: 2, defaultValue: 'Tipo {{n}}' })}:</span> <Volume2 size={20} /> {t('hscroll.editor.playAudio', 'Reproducir audio')}</h4>
                   <label className="audio-upload-btn">
                     <input
                       type="file"
@@ -656,7 +656,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                       disabled={uploadingAudio}
                     />
                     <Upload size={20} />
-                    {uploadingAudio ? `Subiendo… ${audioProgress}%` : 'Subir archivo de audio'}
+                    {uploadingAudio ? t('hscroll.editor.uploadingAudio', { pct: audioProgress, defaultValue: 'Subiendo… {{pct}}%' }) : t('hscroll.editor.uploadAudio', 'Subir archivo de audio')}
                   </label>
                   {uploadingAudio && (
                     <div className="audio-upload-progress" role="progressbar" aria-valuenow={audioProgress} aria-valuemin={0} aria-valuemax={100}>
@@ -672,7 +672,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                   <div className="audio-config-section">
                     <div className="audio-config-group">
                       <label htmlFor="audio-mode" className="config-label">
-                        Modo de reproducción:
+                        {t('hscroll.editor.playMode', 'Modo de reproducción')}:
                       </label>
                       <select
                         id="audio-mode"
@@ -680,14 +680,14 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                         value={audioMode}
                         onChange={(e) => setAudioMode(e.target.value)}
                       >
-                        <option value="once">Reproducir una vez y cerrar</option>
-                        <option value="loop">Reproducción en bucle infinito</option>
+                        <option value="once">{t('hscroll.editor.playOnce', 'Reproducir una vez y cerrar')}</option>
+                        <option value="loop">{t('hscroll.editor.playLoop', 'Reproducción en bucle infinito')}</option>
                       </select>
                     </div>
 
                     <div className="audio-config-group">
                       <label htmlFor="audio-stop-panel" className="config-label">
-                        Detener en el panel (opcional):
+                        {t('hscroll.editor.stopAt', 'Detener en el panel (opcional)')}:
                       </label>
                       <input
                         id="audio-stop-panel"
@@ -697,10 +697,10 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                         max={panels.length}
                         value={audioStopPanel || ''}
                         onChange={(e) => setAudioStopPanel(e.target.value ? parseInt(e.target.value) : null)}
-                        placeholder="Número de panel"
+                        placeholder={t('hscroll.editor.panelNumber', 'Número de panel')}
                       />
                       <p className="config-hint">
-                        El audio se detendrá automáticamente al llegar a este panel. Dejar vacío para no detener.
+                        {t('hscroll.editor.stopAtHint', 'El audio se detendrá automáticamente al llegar a este panel. Déjalo vacío para no detenerlo.')}
                       </p>
                     </div>
                   </div>

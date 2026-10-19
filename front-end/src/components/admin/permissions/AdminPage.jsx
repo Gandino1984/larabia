@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../app_context/AuthContext';
 import { useUI } from '../../../app_context/UIContext';
 import { usePendingReview } from '../../../app_context/PendingReviewContext';
@@ -17,9 +18,11 @@ const TABS = [
   { key: 'workshops', label: 'Talleres' },
   { key: 'appearance', label: 'Apariencia' },
   { key: 'navigation', label: 'Navegación' }
+  // labels: admin.tabs.<key> (Spanish here as the default)
 ];
 
 function AdminPage() {
+  const { t } = useTranslation();
   const { isSuperAdmin } = useAuth();
   const { navigateToHome } = useUI();
   const { totalPending } = usePendingReview();
@@ -29,9 +32,9 @@ function AdminPage() {
     return (
       <div className="admin-page">
         <div className="admin-page__denied">
-          <h2>Acceso restringido</h2>
-          <p>Esta sección solo está disponible para el super-administrador.</p>
-          <button className="admin-page__back" onClick={navigateToHome}>Volver al inicio</button>
+          <h2>{t('admin.page.restricted', 'Acceso restringido')}</h2>
+          <p>{t('admin.page.restrictedText', 'Esta sección solo está disponible para el super-administrador.')}</p>
+          <button className="admin-page__back" onClick={navigateToHome}>{t('common.buttons.backToHome', 'Volver al inicio')}</button>
         </div>
       </div>
     );
@@ -40,8 +43,8 @@ function AdminPage() {
   return (
     <div className="admin-page">
       <header className="admin-page__header">
-        <h1>Administración</h1>
-        <p className="admin-page__subtitle">Gestiona usuarios y revisa artículos pendientes</p>
+        <h1>{t('header.admin.title', 'Administración')}</h1>
+        <p className="admin-page__subtitle">{t('admin.page.subtitle', 'Gestiona usuarios, revisa lo pendiente y configura la revista')}</p>
       </header>
 
       <nav className="admin-page__tabs" role="tablist">
@@ -53,7 +56,7 @@ function AdminPage() {
             className={`admin-page__tab ${activeTab === tab.key ? 'is-active' : ''}`}
             onClick={() => setActiveTab(tab.key)}
           >
-            {tab.label}
+            {t(`admin.tabs.${tab.key}`, tab.label)}
             {tab.key === 'pending' && totalPending > 0 && (
               <span className="admin-page__tab-badge">{totalPending}</span>
             )}

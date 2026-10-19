@@ -14,6 +14,7 @@ import AuthorChip from '../common/AuthorChip';
 import LoadFailBoundary from '../common/LoadFailBoundary';
 import LangSwitch from '../common/LangSwitch';
 import { categoryLabel } from '../../utils/articleFilters';
+import { localDate } from '../../utils/locale';
 import {
   articleLangs, articleTitle, articleExcerpt, articleProjectTitle,
   blockText, blockCaption, blockAlt, baseLang
@@ -108,7 +109,7 @@ function ArticleDetail({ previewMode = false }) {
   const handleShareClick = () => {
     const url = `${window.location.origin}?article=${selectedArticle.id_article}`;
     navigator.clipboard.writeText(url).then(() => {
-      showSuccess('¡Enlace copiado!');
+      showSuccess(t('hero.linkCopied', '¡Enlace copiado!'));
     });
   };
 
@@ -124,7 +125,7 @@ function ArticleDetail({ previewMode = false }) {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString(getCurrentLocale(), {
+    return localDate(date, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -419,7 +420,7 @@ function ArticleDetail({ previewMode = false }) {
                             height={block.iframe_height}
                             style={{ border: 'none' }}
                             allowFullScreen
-                            title="Contenido embebido"
+                            title={t('article.detail.embedTitle', 'Contenido embebido')}
                           />
                         </div>
                       )}

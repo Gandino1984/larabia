@@ -735,10 +735,10 @@ function Header({ ready = true }) {
           })}
 
           {isSuperAdmin && (
-            <button className="nav-link nav-link--admin" onClick={handleAdminClick} title="Administración">
-              <RollText text="Admin" />
+            <button className="nav-link nav-link--admin" onClick={handleAdminClick} title={t('header.admin.title', 'Administración')}>
+              <RollText text={t('header.admin.label', 'Admin')} />
               {totalPending > 0 && (
-                <span className="admin-pending-badge" title={`${totalPending} pendiente(s) de revisión`}>
+                <span className="admin-pending-badge" title={t('header.admin.pending', { count: totalPending, defaultValue: '{{count}} pendiente(s) de revisión' })}>
                   {totalPending}
                 </span>
               )}
@@ -754,7 +754,7 @@ function Header({ ready = true }) {
           <button
             className={`burger-menu-btn ${isMobileMenuOpen ? 'is-open' : ''}`}
             onClick={toggleMobileMenu}
-            aria-label="Menu"
+            aria-label={t('header.menu', 'Menú')}
             aria-expanded={isMobileMenuOpen}
           >
             <span className="burger-box">
@@ -985,7 +985,7 @@ function Header({ ready = true }) {
             {currentUser && isSuperAdmin && (
               <button className="mobile-nav-link" onClick={handleAdminClick}>
                 <Shield size={18} />
-                <span>Admin</span>
+                <span>{t('header.admin.label', 'Admin')}</span>
                 {totalPending > 0 && (
                   <span className="admin-pending-badge">{totalPending}</span>
                 )}
@@ -993,7 +993,7 @@ function Header({ ready = true }) {
             )}
 
             {/* Language: single 3-option toggle on one line — at the very bottom */}
-            <div className="mobile-lang-toggle" role="group" aria-label="Idioma">
+            <div className="mobile-lang-toggle" role="group" aria-label={t('header.language', 'Idioma')}>
               {[
                 { code: 'es', label: 'Español' },
                 { code: 'en', label: 'English' },

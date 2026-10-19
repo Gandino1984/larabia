@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import i18n from '../i18n/config';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
 
@@ -63,9 +64,9 @@ export const MetadataProvider = ({ children }) => {
       );
       if (res.data.error) return { error: res.data.error };
       setMetadata((prev) => ({ ...prev, ...res.data.data }));
-      return { success: res.data.success || 'Datos actualizados', data: res.data.data };
+      return { success: res.data.success || i18n.t('messages.success.dataUpdated', 'Datos actualizados'), data: res.data.data };
     } catch (err) {
-      return { error: err.response?.data?.error || 'Error al actualizar los datos' };
+      return { error: err.response?.data?.error || i18n.t('messages.error.updateData', 'Error al actualizar los datos') };
     }
   }, [currentUser]);
 
@@ -85,9 +86,9 @@ export const MetadataProvider = ({ children }) => {
       );
       if (res.data.error) return { error: res.data.error };
       setMetadata((prev) => ({ ...prev, ...res.data.data }));
-      return { success: res.data.success || 'Logo actualizado', data: res.data.data };
+      return { success: res.data.success || i18n.t('messages.success.logoUpdated', 'Logo actualizado'), data: res.data.data };
     } catch (err) {
-      return { error: err.response?.data?.error || 'Error al subir el logo' };
+      return { error: err.response?.data?.error || i18n.t('messages.error.uploadLogo', 'Error al subir el logo') };
     }
   }, [currentUser]);
 

@@ -9,11 +9,12 @@ import ArticleEngagementBar from './ArticleEngagementBar';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import ArticleFilters from '../common/ArticleFilters';
 import SubscriberMark from '../common/SubscriberMark';
-import { EMPTY_ARTICLE_FILTERS, applyArticleFilters, countActiveFilters } from '../../utils/articleFilters';
+import { EMPTY_ARTICLE_FILTERS, applyArticleFilters, countActiveFilters, categoryLabel } from '../../utils/articleFilters';
 import { inSection, sectionLabel } from '../../utils/sections';
 import { useSectionCatalog } from '../../app_context/useSectionCatalog';
 import SectionProjects from './SectionProjects';
 import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
+import { localDate } from '../../utils/locale';
 import './ArticlesList.css';
 import './ArticlesCarousel.css';
 
@@ -21,18 +22,7 @@ const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
 const ARTICLES_PER_PAGE = 9;
 
-const CATEGORY_DISPLAY = {
-  'terrenito en pluton': 'Terrenito en Plut\u00F3n',
-  'micro abierto': 'Terrenito en Plut\u00F3n',
-};
 const normalize = (s) => s?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') ?? '';
-const getCategoryDisplay = (cat) => {
-  if (!cat) return cat;
-  const n = normalize(cat);
-  if (CATEGORY_DISPLAY[n]) return CATEGORY_DISPLAY[n];
-  if (n.includes('terrenito')) return 'Terrenito en Plut\u00F3n';
-  return cat;
-};
 
 function getAuthorImageUrl(author) {
   const img = author?.image_user;
@@ -207,7 +197,7 @@ function ArticlesList() {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString(getCurrentLocale(), {
+    return localDate(date, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -236,7 +226,7 @@ function ArticlesList() {
         />
         <div className="list-badges">
           {article.category_article && normalize(article.category_article) !== 'general' && (
-            <span className="list-type-badge">{getCategoryDisplay(article.category_article)}</span>
+            <span className="list-type-badge">{categoryLabel(article.category_article, t)}</span>
           )}
           {article.featured_article && (
             <span className="list-featured-badge">{t('article.detail.featured')}</span>
@@ -306,7 +296,7 @@ function ArticlesList() {
           className="pagination-btn pagination-prev"
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
-          aria-label="Página anterior"
+          aria-label={t('common.pagination.previousPage', 'Página anterior')}
         >
           <ChevronLeft size={18} />
         </button>
@@ -330,7 +320,7 @@ function ArticlesList() {
           className="pagination-btn pagination-next"
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages}
-          aria-label="Página siguiente"
+          aria-label={t('common.pagination.nextPage', 'Página siguiente')}
         >
           <ChevronRight size={18} />
         </button>
@@ -458,7 +448,7 @@ function ArticlesList() {
                 type="button"
                 className="carousel-arrow carousel-arrow--prev"
                 onClick={() => scrollCarousel(-1)}
-                aria-label="Anterior"
+                aria-label={t('common.buttons.previous', 'Anterior')}
               >
                 <ChevronLeft size={24} />
               </button>
@@ -469,7 +459,7 @@ function ArticlesList() {
                 type="button"
                 className="carousel-arrow carousel-arrow--next"
                 onClick={() => scrollCarousel(1)}
-                aria-label="Siguiente"
+                aria-label={t('common.buttons.next', 'Siguiente')}
               >
                 <ChevronRight size={24} />
               </button>

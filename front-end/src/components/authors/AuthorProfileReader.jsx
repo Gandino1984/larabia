@@ -45,10 +45,10 @@ function AuthorProfileReader() {
             <button
               onClick={() => navigateToAuthorEditorForProfile(profile)}
               className="btn-edit-profile-admin"
-              title="Editar perfil (super admin)"
+              title={t('authors.card.editAsAdmin', 'Editar perfil (super admin)')}
             >
               <Edit size={18} />
-              Editar
+              {t('common.buttons.edit', 'Editar')}
             </button>
           )}
         </header>

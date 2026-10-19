@@ -1,5 +1,6 @@
 // front-end/src/components/layout/LoadingScreen.jsx
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMetadata } from '../../app_context/MetadataContext';
 import './LoadingScreen.css';
 
@@ -15,6 +16,7 @@ function LoadingScreenLogo() {
 }
 
 function LoadingScreen({ isLoading, progress, onLoadingComplete }) {
+  const { t } = useTranslation();
   const [showSlogan, setShowSlogan] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
 
@@ -56,7 +58,7 @@ function LoadingScreen({ isLoading, progress, onLoadingComplete }) {
         </div>
 
         <p className={`loading-slogan ${showSlogan ? 'visible' : ''}`}>
-          Nos habrá seguido la rabia ese día
+          {t('loading.slogan', 'Nos habrá seguido la rabia ese día')}
         </p>
 
         {/* Progress indicator */}

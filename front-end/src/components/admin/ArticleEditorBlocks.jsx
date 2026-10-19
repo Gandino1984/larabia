@@ -2374,7 +2374,7 @@ function ArticleEditorBlocks() {
                     {newProjectData.status_project === 'published'
                       ? t('editor.status.published')
                       : newProjectData.status_project === 'pending_approval'
-                      ? 'En revisión'
+                      ? t('editor.review.statusShort', 'En revisión')
                       : t('editor.status.draft')}
                   </span>
                 </div>

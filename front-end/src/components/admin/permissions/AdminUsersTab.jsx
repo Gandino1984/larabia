@@ -1,16 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import axiosInstance from '../../../utils/axiosConfig';
 import { useAuth } from '../../../app_context/AuthContext';
 import { useUI } from '../../../app_context/UIContext';
 import './AdminUsersTab.css';
 
 const ROLES = [
-  { key: 'is_editor', label: 'Editor', help: 'Puede crear artículos y enviarlos para aprobación.' },
-  { key: 'is_premium_reader', label: 'Premium', help: 'Puede leer artículos marcados como premium.' },
-  { key: 'is_super_admin', label: 'Super admin', help: 'Control total. Concede con cuidado.' }
+  { key: 'is_editor', i18n: 'editor', label: 'Editor', help: 'Puede crear artículos y enviarlos para aprobación.' },
+  { key: 'is_premium_reader', i18n: 'premium', label: 'Premium', help: 'Puede leer artículos marcados como premium.' },
+  { key: 'is_super_admin', i18n: 'superAdmin', label: 'Super admin', help: 'Control total. Concede con cuidado.' }
 ];
 
 function AdminUsersTab() {
+  const { t } = useTranslation();
   const { currentUser } = useAuth();
   const { showSuccess, showError } = useUI();
   const [users, setUsers] = useState([]);
@@ -36,7 +38,7 @@ function AdminUsersTab() {
         setUsers(res.data.data || []);
       }
     } catch (err) {
-      showError(err.response?.data?.error || 'Error al cargar usuarios');
+      showError(err.response?.data?.error || t('admin.users.loadError', 'Error al cargar usuarios'));
       setUsers([]);
     } finally {
       setLoading(false);
@@ -71,10 +73,10 @@ function AdminUsersTab() {
             u.id_user === user.id_user ? { ...u, [role]: newValue } : u
           )
         );
-        showSuccess(res.data.success || 'Rol actualizado');
+        showSuccess(res.data.success || t('admin.users.roleUpdated', 'Rol actualizado'));
       }
     } catch (err) {
-      showError(err.response?.data?.error || 'Error al actualizar el rol');
+      showError(err.response?.data?.error || t('admin.users.roleError', 'Error al actualizar el rol'));
     } finally {
       setSavingByKey((prev) => {
         const next = { ...prev };
@@ -91,26 +93,26 @@ function AdminUsersTab() {
       <form className="admin-users__search" onSubmit={handleSearchSubmit}>
         <input
           type="text"
-          placeholder="Buscar por nombre o email…"
+          placeholder={t('admin.users.searchPlaceholder', 'Buscar por nombre o email…')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <button type="submit">Buscar</button>
+        <button type="submit">{t('common.buttons.search', 'Buscar')}</button>
         {query && (
           <button
             type="button"
             className="admin-users__clear"
             onClick={() => { setQuery(''); fetchUsers(''); }}
           >
-            Limpiar
+            {t('admin.users.clear', 'Limpiar')}
           </button>
         )}
       </form>
 
       {loading ? (
-        <p className="admin-users__loading">Cargando usuarios…</p>
+        <p className="admin-users__loading">{t('admin.users.loading', 'Cargando usuarios…')}</p>
       ) : users.length === 0 ? (
-        <p className="admin-users__empty">No hay usuarios que coincidan.</p>
+        <p className="admin-users__empty">{t('admin.users.empty', 'No hay usuarios que coincidan.')}</p>
       ) : (
         <div className="admin-users__list" role="list">
           {users.map((user) => (
@@ -120,7 +122,7 @@ function AdminUsersTab() {
                 <p className="admin-user-row__email">{user.email_user}</p>
                 <p className="admin-user-row__meta">
                   id #{user.id_user} · {user.auth_provider}
-                  {flagOn(user.email_verified) ? ' · email verificado' : ' · email pendiente'}
+                  {' · '}{flagOn(user.email_verified) ? t('admin.users.emailVerified', 'email verificado') : t('admin.users.emailPending', 'email pendiente')}
                 </p>
               </header>
 
@@ -136,7 +138,7 @@ function AdminUsersTab() {
                     <label
                       key={role.key}
                       className={`admin-role-toggle ${value ? 'is-on' : ''} ${isSelfSuperAdminRow ? 'is-locked' : ''}`}
-                      title={isSelfSuperAdminRow ? 'No puedes modificar tu propio super-admin' : role.help}
+                      title={isSelfSuperAdminRow ? t('admin.users.ownSuperAdmin', 'No puedes modificar tu propio super-admin') : t(`admin.users.role.${role.i18n}.help`, role.help)}
                     >
                       <input
                         type="checkbox"
@@ -145,7 +147,7 @@ function AdminUsersTab() {
                         onChange={() => handleToggle(user, role.key, value)}
                       />
                       <span className="admin-role-toggle__label">
-                        {role.label}{saving ? '…' : ''}
+                        {t(`admin.users.role.${role.i18n}`, role.label)}{saving ? '…' : ''}
                       </span>
                     </label>
                   );

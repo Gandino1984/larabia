@@ -4,6 +4,7 @@
 // The drawing is uploaded as its .paisaje.json + reference image; the audio
 // is accepted at once and normalised in the background (poll its status).
 import axiosInstance from '../../utils/axiosConfig';
+import i18n from '../../i18n/config';
 import { buildPaisajeJson } from '../wizard/buildPaisajeJson';
 
 // Audio: the magazine's shared pipeline (any size → AAC normalised).
@@ -24,6 +25,6 @@ export async function uploadDrawing(doc, userId) {
     });
     return res.data.data;
   } catch (err) {
-    throw new Error(errorOf(err, 'No se pudo subir el dibujo'));
+    throw new Error(errorOf(err, i18n.t('messages.error.uploadDrawing', 'No se pudo subir el dibujo')));
   }
 }

@@ -10,6 +10,7 @@ import SubscriberMark from '../common/SubscriberMark';
 import { categoryLabel } from '../../utils/articleFilters';
 import { projectTypeLabel } from '../../utils/projectKinds';
 import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
+import { localDate } from '../../utils/locale';
 import './ArticleCard.css';
 
 // Resolve a user's avatar: Google users store a full URL, local uploads a filename.
@@ -47,7 +48,7 @@ function ArticleCard({ article, typeBadge, featuredBadge }) {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
+    return localDate(date, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -66,15 +67,15 @@ function ArticleCard({ article, typeBadge, featuredBadge }) {
   const handleDelete = async (e) => {
     e.stopPropagation();
 
-    if (!confirm(`¿Estás seguro de que quieres eliminar el artículo "${article.title_article}"? Esta acción no se puede deshacer.`)) {
+    if (!confirm(t('article.detail.confirmDelete', { title: articleTitle(article, lang) }))) {
       return;
     }
 
     const result = await deleteArticle(article.id_article);
     if (!result.error) {
-      showSuccess('Artículo eliminado exitosamente');
+      showSuccess(t('messages.success.articleDeleted'));
     } else {
-      showError(result.error || 'Error al eliminar el artículo');
+      showError(result.error || t('messages.error.deleteArticle'));
     }
   };
 

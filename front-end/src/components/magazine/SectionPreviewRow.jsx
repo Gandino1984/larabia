@@ -73,7 +73,7 @@ function SectionPreviewRow({ title, items, onItemClick, enableSwipeHint = false 
               type="button"
               className="section-preview__arrow"
               onClick={() => scrollByCards(-1)}
-              aria-label="Anterior"
+              aria-label={t('common.buttons.previous', 'Anterior')}
             >
               <ChevronLeft size={22} />
             </button>
@@ -81,7 +81,7 @@ function SectionPreviewRow({ title, items, onItemClick, enableSwipeHint = false 
               type="button"
               className="section-preview__arrow"
               onClick={() => scrollByCards(1)}
-              aria-label="Siguiente"
+              aria-label={t('common.buttons.next', 'Siguiente')}
             >
               <ChevronRight size={22} />
             </button>

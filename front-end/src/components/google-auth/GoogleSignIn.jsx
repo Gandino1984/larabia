@@ -1,9 +1,12 @@
 // magazine-front/src/components/google-auth/GoogleSignIn.jsx
 import { useEffect, useRef, useState } from 'react';
 import axiosInstance from '../../utils/axiosConfig.js';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n/config';
 import './GoogleSignIn.css';
 
 export const GoogleSignIn = ({ onSuccess, onError, onNeedsLinking, onNeedsSelection, onNeedsTypeSelection, isRegisterMode = false }) => {
+  const { t } = useTranslation();
   // stackRef = the positioned wrapper we measure to size Google's button.
   // googleButtonRef = where Google renders its REAL button, overlaid transparently
   // on top of our custom-looking button so a genuine user tap hits Google directly.
@@ -45,7 +48,8 @@ export const GoogleSignIn = ({ onSuccess, onError, onNeedsLinking, onNeedsSelect
         theme: 'outline',
         size: 'large',
         text: isRegisterMode ? 'signup_with' : 'signin_with',
-        locale: 'es',
+        // Google's own (transparent) button, in the language chosen here.
+        locale: String(i18n.language || 'es').slice(0, 2),
         width
       });
     };
@@ -59,7 +63,7 @@ export const GoogleSignIn = ({ onSuccess, onError, onNeedsLinking, onNeedsSelect
 
         if (!clientId) {
           console.error('❌ VITE_GOOGLE_CLIENT_ID is not set in environment');
-          onErrorRef.current?.('Configuración de Google Sign-In no encontrada');
+          onErrorRef.current?.(i18n.t('auth.google.notConfigured', 'Configuración de Google Sign-In no encontrada'));
           return;
         }
 
@@ -79,7 +83,7 @@ export const GoogleSignIn = ({ onSuccess, onError, onNeedsLinking, onNeedsSelect
           console.log('✅ Google Sign-In ready to use');
         } catch (error) {
           console.error('Error initializing Google Sign-In:', error);
-          onErrorRef.current?.('Error al inicializar Google Sign-In');
+          onErrorRef.current?.(i18n.t('auth.google.initError', 'Error al inicializar Google Sign-In'));
         }
       } else {
         // Google library not loaded yet, retry
@@ -141,14 +145,14 @@ export const GoogleSignIn = ({ onSuccess, onError, onNeedsLinking, onNeedsSelect
         onSuccessRef.current?.(result.data.data, result.data.message);
       } else {
         console.error('Unexpected response format:', result.data);
-        onErrorRef.current?.('Respuesta inesperada del servidor');
+        onErrorRef.current?.(i18n.t('auth.unexpectedResponse', 'Respuesta inesperada del servidor'));
       }
     } catch (error) {
       console.error('Google auth error:', error);
 
       const errorMessage = error.response?.data?.error ||
                           error.response?.data?.details ||
-                          'Error al autenticar con Google';
+                          i18n.t('auth.google.authError', 'Error al autenticar con Google');
 
       console.error('Error message:', errorMessage);
       onErrorRef.current?.(errorMessage);
@@ -173,7 +177,7 @@ export const GoogleSignIn = ({ onSuccess, onError, onNeedsLinking, onNeedsSelect
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
           <span className="button-text">
-            ENTRAR CON GOOGLE
+            {t('auth.google.button', 'Entrar con Google')}
           </span>
         </div>
 
@@ -186,13 +190,13 @@ export const GoogleSignIn = ({ onSuccess, onError, onNeedsLinking, onNeedsSelect
 
       {isLoading && (
         <div className="loading-text">
-          Autenticando con Google...
+          {t('auth.google.authenticating', 'Autenticando con Google...')}
         </div>
       )}
 
       {!isInitialized && !isLoading && (
         <div className="loading-text">
-          Cargando Google Sign-In...
+          {t('auth.google.loading', 'Cargando Google Sign-In...')}
         </div>
       )}
     </div>

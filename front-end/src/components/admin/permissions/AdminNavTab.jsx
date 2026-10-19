@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNav } from '../../../app_context/NavContext';
 import { useUI } from '../../../app_context/UIContext';
 import {
@@ -17,7 +18,7 @@ const newId = (prefix) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 
 const blankLink = () => ({
   id: newId('link'),
   kind: 'link',
-  label: { es: 'Nuevo botón', en: 'New button' },
+  label: { es: 'Nuevo botón', en: 'New button', eu: 'Botoi berria' },
   visible: true,
   min_role: 'all',
   action: { type: 'section', value: 'home' }
@@ -25,7 +26,7 @@ const blankLink = () => ({
 const blankGroup = () => ({
   id: newId('group'),
   kind: 'group',
-  label: { es: 'Nuevo grupo', en: 'New group' },
+  label: { es: 'Nuevo grupo', en: 'New group', eu: 'Talde berria' },
   visible: true,
   min_role: 'all',
   children: []
@@ -33,6 +34,7 @@ const blankGroup = () => ({
 
 /** Editor for a link's action (type + value). */
 function ActionEditor({ action: rawAction, onChange }) {
+  const { t } = useTranslation();
   // Items without an action (e.g. legacy/malformed config) get a safe default.
   const action = rawAction || { type: 'section', value: 'home' };
   const set = (patch) => onChange({ ...action, ...patch });
@@ -44,24 +46,24 @@ function ActionEditor({ action: rawAction, onChange }) {
   return (
     <div className="nav-action">
       <select value={action.type} onChange={(e) => onType(e.target.value)}>
-        {ACTION_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        {ACTION_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{t(o.key, o.label)}</option>)}
       </select>
       {action.type === 'section' && (
         <select value={action.value} onChange={(e) => set({ value: e.target.value })}>
-          {SECTION_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {SECTION_OPTIONS.map((o) => <option key={o.value} value={o.value}>{t(o.key, o.label)}</option>)}
         </select>
       )}
       {action.type === 'modal' && (
         <select value={action.value} onChange={(e) => set({ value: e.target.value })}>
-          {MODAL_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {MODAL_OPTIONS.map((o) => <option key={o.value} value={o.value}>{t(o.key, o.label)}</option>)}
         </select>
       )}
       {action.type === 'category' && (
-        <input type="text" placeholder="categoría (p.ej. internacional)"
+        <input type="text" placeholder={t('admin.nav.categoryPlaceholder', 'categoría (p. ej. internacional)')}
           value={action.value} onChange={(e) => set({ value: e.target.value })} />
       )}
       {action.type === 'url' && (
-        <input type="text" placeholder="https://… o /ruta"
+        <input type="text" placeholder={t('admin.nav.urlPlaceholder', 'https://… o /ruta')}
           value={action.value} onChange={(e) => set({ value: e.target.value })} />
       )}
       {(action.type === 'article' || action.type === 'project' || action.type === 'author') && (
@@ -74,29 +76,32 @@ function ActionEditor({ action: rawAction, onChange }) {
 
 /** Shared row controls: label (es/en), visibility, role, reorder, delete. */
 function ItemMeta({ item, onChange, onMove, onDelete, canDelete, isFirst, isLast }) {
+  const { t } = useTranslation();
   const setLabel = (lang, v) => onChange({ ...item, label: { ...item.label, [lang]: v } });
   return (
     <div className="nav-item__meta">
       <div className="nav-item__labels">
-        <input className="nav-item__label" type="text" maxLength={40} placeholder="Etiqueta (ES)"
+        <input className="nav-item__label" type="text" maxLength={40} placeholder={t('admin.nav.labelEs', 'Etiqueta (ES)')} lang="es"
           value={item.label?.es || ''} onChange={(e) => setLabel('es', e.target.value)} />
-        <input className="nav-item__label" type="text" maxLength={40} placeholder="Label (EN)"
+        <input className="nav-item__label" type="text" maxLength={40} placeholder={t('admin.nav.labelEn', 'Etiqueta (EN)')} lang="en"
           value={item.label?.en || ''} onChange={(e) => setLabel('en', e.target.value)} />
+        <input className="nav-item__label" type="text" maxLength={40} placeholder={t('admin.nav.labelEu', 'Etiqueta (EU)')} lang="eu"
+          value={item.label?.eu || ''} onChange={(e) => setLabel('eu', e.target.value)} />
       </div>
       <div className="nav-item__controls">
-        <button type="button" title={item.visible ? 'Visible' : 'Oculto'}
+        <button type="button" title={item.visible ? t('admin.nav.visible', 'Visible') : t('admin.nav.hidden', 'Oculto')}
           className={`nav-icon-btn ${item.visible ? 'is-on' : ''}`}
           onClick={() => onChange({ ...item, visible: !item.visible })}>
           {item.visible ? <Eye size={16} /> : <EyeOff size={16} />}
         </button>
-        <select value={item.min_role} title="Quién lo ve"
+        <select value={item.min_role} title={t('admin.nav.whoSees', 'Quién lo ve')}
           onChange={(e) => onChange({ ...item, min_role: e.target.value })}>
-          {ROLE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {ROLE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{t(o.key, o.label)}</option>)}
         </select>
-        <button type="button" className="nav-icon-btn" disabled={isFirst} onClick={() => onMove(-1)} title="Subir"><ChevronUp size={16} /></button>
-        <button type="button" className="nav-icon-btn" disabled={isLast} onClick={() => onMove(1)} title="Bajar"><ChevronDown size={16} /></button>
+        <button type="button" className="nav-icon-btn" disabled={isFirst} onClick={() => onMove(-1)} title={t('admin.nav.moveUp', 'Subir')}><ChevronUp size={16} /></button>
+        <button type="button" className="nav-icon-btn" disabled={isLast} onClick={() => onMove(1)} title={t('admin.nav.moveDown', 'Bajar')}><ChevronDown size={16} /></button>
         {canDelete && (
-          <button type="button" className="nav-icon-btn nav-icon-btn--danger" onClick={onDelete} title="Eliminar"><Trash2 size={16} /></button>
+          <button type="button" className="nav-icon-btn nav-icon-btn--danger" onClick={onDelete} title={t('common.buttons.delete', 'Eliminar')}><Trash2 size={16} /></button>
         )}
       </div>
     </div>
@@ -106,6 +111,7 @@ function ItemMeta({ item, onChange, onMove, onDelete, canDelete, isFirst, isLast
 /** Nested subgroup inside a group (e.g. "Barrio" inside "Más"): edits its own
     links. Subgroups have no action of their own, only children. */
 function SubGroupEditor({ group, onChange }) {
+  const { t } = useTranslation();
   const kids = group.children || [];
   const setKids = (next) => onChange({ ...group, children: next });
   const moveKid = (k, dir) => {
@@ -135,13 +141,14 @@ function SubGroupEditor({ group, onChange }) {
         </div>
       ))}
       <button type="button" className="admin-nav__add-child" onClick={() => setKids([...kids, blankLink()])}>
-        <Plus size={14} /> Añadir elemento al subgrupo
+        <Plus size={14} /> {t('admin.nav.addToSubgroup', 'Añadir elemento al subgrupo')}
       </button>
     </div>
   );
 }
 
 function AdminNavTab() {
+  const { t } = useTranslation();
   const { rawConfig, isCustom, updateNav, loaded } = useNav();
   const { showSuccess, showError } = useUI();
   const [items, setItems] = useState([]);
@@ -187,15 +194,13 @@ function AdminNavTab() {
     const result = await updateNav(null); // null = back to built-in default
     setSaving(false);
     if (result.error) showError(result.error);
-    else { showSuccess('Navegación restaurada'); setItems(clone(DEFAULT_NAV)); }
+    else { showSuccess(t('admin.nav.restored', 'Navegación restaurada')); setItems(clone(DEFAULT_NAV)); }
   };
 
   return (
     <section className="admin-nav">
       <p className="admin-nav__hint">
-        Configura los botones de la barra superior: visibilidad, orden, etiquetas, quién los
-        ve y qué hacen. «Proyectos», la búsqueda, el idioma y Admin son fijos. Pulsa
-        <strong> Guardar</strong> para aplicar a todo el mundo, o <strong>Restaurar</strong> para volver al menú por defecto.
+        {t('admin.nav.hint', 'Configura los botones de la barra superior: visibilidad, orden, etiquetas (en castellano, inglés y euskera), quién los ve y qué hacen. «Proyectos», la búsqueda, el idioma y Admin son fijos. Pulsa «Guardar» para aplicar a todo el mundo, o «Restaurar» para volver al menú por defecto.')}
       </p>
 
       <div className="admin-nav__list">
@@ -203,7 +208,7 @@ function AdminNavTab() {
           <div key={item.id} className="nav-item">
             <div className="nav-item__row">
               <span className="nav-item__kind">
-                {item.kind === 'group' ? 'Grupo' : item.kind === 'projects' ? 'Proyectos (fijo)' : 'Botón'}
+                {item.kind === 'group' ? t('admin.nav.kindGroup', 'Grupo') : item.kind === 'projects' ? t('admin.nav.kindProjects', 'Proyectos (fijo)') : t('admin.nav.kindButton', 'Botón')}
               </span>
               <ItemMeta
                 item={item}
@@ -241,7 +246,7 @@ function AdminNavTab() {
                   </div>
                 ))}
                 <button type="button" className="admin-nav__add-child" onClick={() => addChild(idx)}>
-                  <Plus size={14} /> Añadir elemento al grupo
+                  <Plus size={14} /> {t('admin.nav.addToGroup', 'Añadir elemento al grupo')}
                 </button>
               </div>
             )}
@@ -250,14 +255,14 @@ function AdminNavTab() {
       </div>
 
       <div className="admin-nav__add-row">
-        <button type="button" onClick={() => setItems((p) => [...p, blankLink()])}><Plus size={14} /> Añadir botón</button>
-        <button type="button" onClick={() => setItems((p) => [...p, blankGroup()])}><Plus size={14} /> Añadir grupo</button>
+        <button type="button" onClick={() => setItems((p) => [...p, blankLink()])}><Plus size={14} /> {t('admin.nav.addButton', 'Añadir botón')}</button>
+        <button type="button" onClick={() => setItems((p) => [...p, blankGroup()])}><Plus size={14} /> {t('admin.nav.addGroup', 'Añadir grupo')}</button>
       </div>
 
       <div className="admin-nav__actions">
-        <button type="button" className="admin-nav__reset" onClick={handleReset} disabled={saving}>Restaurar por defecto</button>
+        <button type="button" className="admin-nav__reset" onClick={handleReset} disabled={saving}>{t('admin.nav.reset', 'Restaurar por defecto')}</button>
         <button type="button" className="admin-nav__save" onClick={handleSave} disabled={saving}>
-          {saving ? 'Guardando…' : 'Guardar'}
+          {saving ? t('common.states.saving', 'Guardando') : t('common.buttons.save', 'Guardar')}
         </button>
       </div>
     </section>

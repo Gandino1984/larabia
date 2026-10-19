@@ -33,6 +33,7 @@ import { useSubscription } from './SubscriptionContext';
 import { useWorkshop } from './WorkshopContext';
 import { useAuthorInvitation } from './AuthorInvitationContext';
 import { useMetadata } from './MetadataContext';
+import { localDate } from '../utils/locale';
 
 const NotificationContext = createContext(null);
 const MAX_CONTENT_NOTIFS = 30;
@@ -126,7 +127,7 @@ export const NotificationProvider = ({ children }) => {
   const shortDate = (d) => {
     if (!d) return null;
     const dt = new Date(d);
-    return isNaN(dt) ? null : dt.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+    return isNaN(dt) ? null : localDate(dt, { day: 'numeric', month: 'short' });
   };
 
   // Mark every current notification as seen (called when the user opens/closes
@@ -286,7 +287,7 @@ export const NotificationProvider = ({ children }) => {
         const ts = new Date(membership.since).getTime();
         if (membershipSeen !== String(membership.since)) {
           const renews = membership.current_period_end
-            ? new Date(membership.current_period_end).toLocaleDateString()
+            ? localDate(membership.current_period_end, { day: 'numeric', month: 'long', year: 'numeric' })
             : null;
           content.push({
             id: `membership-${ts}`,

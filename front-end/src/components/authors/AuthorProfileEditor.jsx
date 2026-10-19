@@ -1,5 +1,6 @@
 // magazine-front/src/components/authors/AuthorProfileEditor.jsx
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import { useAuthor } from '../../app_context/AuthorContext';
@@ -10,6 +11,7 @@ import './AuthorProfileEditor.css';
 const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin].some((v) => v === true || v === 1);
 
 function AuthorProfileEditor() {
+  const { t } = useTranslation();
   const { currentUser, canCreateContent, isSuperAdmin } = useAuth();
   const { navigateBack, showSuccess, showError, superAdminEditingProfile, setSuperAdminEditingProfile } = useUI();
   const { myProfile, fetchMyProfile, createProfile, updateProfile, uploadProfileImage, fetchAllProfilesAdmin } = useAuthor();
@@ -49,7 +51,7 @@ function AuthorProfileEditor() {
 
   useEffect(() => {
     if (!canCreateContent) {
-      showError('Solo los editores pueden crear perfiles de autor');
+      showError(t('authors.editor.onlyEditors', 'Solo los editores pueden crear perfiles de autor'));
       navigateBack();
       return;
     }
@@ -92,12 +94,12 @@ function AuthorProfileEditor() {
     e.preventDefault();
 
     if (!formData.bio_text.trim()) {
-      showError('La biografía es obligatoria');
+      showError(t('authors.editor.bioRequired', 'La biografía es obligatoria'));
       return;
     }
 
     if (formData.bio_text.length < 50) {
-      showError('La biografía debe tener al menos 50 caracteres');
+      showError(t('authors.editor.bioMin', 'La biografía debe tener al menos 50 caracteres'));
       return;
     }
 
@@ -161,14 +163,14 @@ function AuthorProfileEditor() {
     <div className="author-profile-editor">
       <div className="editor-container">
         <header className="editor-header">
-          <button onClick={navigateBack} className="btn-back-nav" title="Volver">
+          <button onClick={navigateBack} className="btn-back-nav" title={t('common.buttons.back', 'Volver')}>
             <ArrowLeft size={24} />
           </button>
           <div className="editor-header-content">
             <h1>
               {isSuperAdmin && superAdminEditingProfile
-                ? `Editar perfil de ${targetUser?.name_user || 'autor/a'}`
-                : targetProfile ? 'Editar perfil de autor/a' : 'Crear perfil de autor/a'}
+                ? t('authors.editor.titleFor', { name: targetUser?.name_user || t('authors.editor.someone', 'autor/a'), defaultValue: 'Editar perfil de {{name}}' })
+                : targetProfile ? t('authors.editor.titleEdit', 'Editar perfil de autor/a') : t('authors.editor.titleCreate', 'Crear perfil de autor/a')}
             </h1>
           </div>
         </header>
@@ -180,7 +182,7 @@ function AuthorProfileEditor() {
         <form onSubmit={handleSubmit} className="profile-form">
           {/* Profile image preview + upload */}
           <div className="form-group profile-image-preview">
-            <label>Imagen de perfil</label>
+            <label>{t('authors.editor.image', 'Imagen de perfil')}</label>
             <div className="image-preview-container">
               {profileImageUrl && !imageError ? (
                 <img
@@ -208,18 +210,18 @@ function AuthorProfileEditor() {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Upload size={16} />
-                  <span>{selectedImageFile ? 'Cambiar imagen' : 'Subir imagen propia'}</span>
+                  <span>{selectedImageFile ? t('authors.editor.changeImage', 'Cambiar imagen') : t('authors.editor.uploadOwnImage', 'Subir imagen propia')}</span>
                 </button>
                 {selectedImageFile && (
                   <span className="selected-file-name">{selectedImageFile.name}</span>
                 )}
                 {!selectedImageFile && !existingCustomImageUrl && (
                   <p className="image-info-text">
-                    Usando imagen de tu cuenta de Google. Puedes subir una imagen personalizada.
+                    {t('authors.editor.usingGoogleImage', 'Usando la imagen de la cuenta de Google. Puedes subir una imagen personalizada.')}
                   </p>
                 )}
                 {existingCustomImageUrl && !selectedImageFile && (
-                  <p className="image-info-text">Imagen personalizada activa.</p>
+                  <p className="image-info-text">{t('authors.editor.customImage', 'Imagen personalizada activa.')}</p>
                 )}
               </div>
             </div>
@@ -227,7 +229,7 @@ function AuthorProfileEditor() {
 
           {/* Display Name */}
           <div className="form-group">
-            <label htmlFor="display_name">Nombre público *</label>
+            <label htmlFor="display_name">{t('authors.editor.displayName', 'Nombre público')} *</label>
             <input
               type="text"
               id="display_name"
@@ -235,50 +237,50 @@ function AuthorProfileEditor() {
               onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
               required
               maxLength={100}
-              placeholder="Tu nombre como autor/a"
+              placeholder={t('authors.editor.displayNamePlaceholder', 'Tu nombre como autor/a')}
             />
           </div>
 
           {/* Bio Text */}
           <div className="form-group">
-            <label htmlFor="bio_text">Biografía / Presentación *</label>
+            <label htmlFor="bio_text">{t('authors.editor.bio', 'Biografía / Presentación')} *</label>
             <textarea
               id="bio_text"
               value={formData.bio_text}
               onChange={(e) => setFormData({ ...formData, bio_text: e.target.value })}
               required
               rows={10}
-              placeholder="Escribe tu biografía, presentación o descripción como autor/a..."
+              placeholder={t('authors.editor.bioPlaceholder', 'Escribe tu biografía, presentación o descripción como autor/a...')}
             />
             <span className="char-count">
-              {formData.bio_text.length} caracteres (mínimo 50)
+              {t('authors.editor.charCount', { count: formData.bio_text.length, defaultValue: '{{count}} caracteres (mínimo 50)' })}
             </span>
           </div>
 
           {/* Specialty Tags */}
           <div className="form-group">
-            <label htmlFor="specialty_tags">Especialidades / Géneros</label>
+            <label htmlFor="specialty_tags">{t('authors.editor.specialties', 'Especialidades / Géneros')}</label>
             <input
               type="text"
               id="specialty_tags"
-              placeholder="Ej: Cómic, Ilustración, Narrativa (separados por comas)"
+              placeholder={t('authors.editor.specialtiesPlaceholder', 'Ej.: cómic, ilustración, narrativa (separados por comas)')}
               value={tagsInput}
               onChange={handleTagsChange}
             />
             <span className="field-hint">
-              Separa las especialidades con comas
+              {t('authors.editor.specialtiesHint', 'Separa las especialidades con comas')}
             </span>
           </div>
 
           {/* Website */}
           <div className="form-group">
-            <label htmlFor="website_url">Sitio web</label>
+            <label htmlFor="website_url">{t('authors.editor.website', 'Sitio web')}</label>
             <input
               type="url"
               id="website_url"
               value={formData.website_url}
               onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-              placeholder="https://tu-sitio-web.com"
+              placeholder={t('authors.editor.websitePlaceholder', 'https://tu-sitio-web.com')}
             />
           </div>
 
@@ -293,7 +295,7 @@ function AuthorProfileEditor() {
                   id="twitter_handle"
                   value={formData.twitter_handle}
                   onChange={(e) => setFormData({ ...formData, twitter_handle: e.target.value.replace('@', '') })}
-                  placeholder="usuario"
+                  placeholder={t('authors.editor.handlePlaceholder', 'usuario')}
                 />
               </div>
             </div>
@@ -307,7 +309,7 @@ function AuthorProfileEditor() {
                   id="instagram_handle"
                   value={formData.instagram_handle}
                   onChange={(e) => setFormData({ ...formData, instagram_handle: e.target.value.replace('@', '') })}
-                  placeholder="usuario"
+                  placeholder={t('authors.editor.handlePlaceholder', 'usuario')}
                 />
               </div>
             </div>
@@ -315,31 +317,31 @@ function AuthorProfileEditor() {
 
           {/* Status */}
           <div className="form-group">
-            <label htmlFor="status_profile">Estado del perfil</label>
+            <label htmlFor="status_profile">{t('authors.editor.status', 'Estado del perfil')}</label>
             <select
               id="status_profile"
               value={formData.status_profile}
               onChange={(e) => setFormData({ ...formData, status_profile: e.target.value })}
             >
-              <option value="draft">Borrador (no visible públicamente)</option>
-              <option value="published" disabled={declined}>Publicado (visible para todos)</option>
+              <option value="draft">{t('authors.editor.statusDraft', 'Borrador (no visible públicamente)')}</option>
+              <option value="published" disabled={declined}>{t('authors.editor.statusPublished', 'Publicado (visible para todos)')}</option>
             </select>
             <span className="field-hint">
               {declined
-                ? 'Rechazó la invitación: su perfil no se puede publicar'
+                ? t('authors.editor.declinedHint', 'Rechazó la invitación: su perfil no se puede publicar')
                 : formData.status_profile === 'draft'
-                  ? 'Tu perfil no será visible hasta que lo publiques'
-                  : 'Tu perfil es visible en la página de Autoras/es'}
+                  ? t('authors.editor.draftHint', 'El perfil no será visible hasta que lo publiques')
+                  : t('authors.editor.publishedHint', 'El perfil es visible en la página de Autoras/es')}
             </span>
           </div>
 
           {/* Submit Buttons */}
           <div className="form-actions">
             <button type="submit" className="btn-save" disabled={uploadingImage}>
-              {uploadingImage ? 'Subiendo imagen...' : (targetProfile ? 'Guardar cambios' : 'Crear perfil')}
+              {uploadingImage ? t('authors.editor.uploadingImage', 'Subiendo imagen...') : (targetProfile ? t('authors.editor.save', 'Guardar cambios') : t('authors.card.createProfile', 'Crear perfil'))}
             </button>
             <button type="button" onClick={navigateBack} className="btn-cancel">
-              Cancelar
+              {t('common.buttons.cancel', 'Cancelar')}
             </button>
           </div>
         </form>

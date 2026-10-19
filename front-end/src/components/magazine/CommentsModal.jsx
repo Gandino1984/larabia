@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { localDate } from '../../utils/locale';
 import { useSpring, animated, to } from '@react-spring/web';
 import { X, Trash2, Send, User } from 'lucide-react';
 import { useAuth } from '../../app_context/AuthContext';
@@ -103,7 +104,7 @@ function CommentsModal({ articleId, articleTitle, onClose }) {
   const formatDate = (d) => {
     if (!d) return '';
     try {
-      return new Date(d).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      return localDate(d, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     } catch { return ''; }
   };
 

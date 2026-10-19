@@ -7,6 +7,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SlidersHorizontal, X, Search } from 'lucide-react';
+import { localDate } from '../../utils/locale';
 import {
   EMPTY_WORKSHOP_FILTERS,
   buildWorkshopFilterOptions,
@@ -24,7 +25,7 @@ function WorkshopFilters({ workshops, filters, onChange }) {
 
   const monthLabel = (key) => {
     const [y, m] = key.split('-').map(Number);
-    const name = new Date(y, m - 1, 1).toLocaleDateString(i18n.language || 'es', { month: 'long', year: 'numeric' });
+    const name = localDate(new Date(y, m - 1, 1), { month: 'long', year: 'numeric' });
     return name.charAt(0).toUpperCase() + name.slice(1);
   };
 

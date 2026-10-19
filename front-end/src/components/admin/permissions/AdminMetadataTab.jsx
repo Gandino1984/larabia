@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMetadata } from '../../../app_context/MetadataContext';
 import { useUI } from '../../../app_context/UIContext';
 import './AdminMetadataTab.css';
 
 function AdminMetadataTab() {
+  const { t } = useTranslation();
   const { metadata, loaded, updateMetadata, uploadLogo, resolveLogoUrl, fetchMetadata } = useMetadata();
   const { showSuccess, showError } = useUI();
 
@@ -28,7 +30,7 @@ function AdminMetadataTab() {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      showError('El nombre no puede estar vacío');
+      showError(t('admin.metadata.nameRequired', 'El nombre no puede estar vacío'));
       return;
     }
     setSaving(true);
@@ -59,7 +61,7 @@ function AdminMetadataTab() {
     <section className="admin-metadata">
       <form className="admin-metadata__form" onSubmit={handleSave}>
         <div className="admin-metadata__field">
-          <label htmlFor="meta-name">Nombre de la revista</label>
+          <label htmlFor="meta-name">{t('admin.metadata.name', 'Nombre de la revista')}</label>
           <input
             id="meta-name"
             type="text"
@@ -71,7 +73,7 @@ function AdminMetadataTab() {
         </div>
 
         <div className="admin-metadata__field">
-          <label htmlFor="meta-slogan">Eslogan</label>
+          <label htmlFor="meta-slogan">{t('admin.metadata.slogan', 'Eslogan')}</label>
           <input
             id="meta-slogan"
             type="text"
@@ -83,38 +85,38 @@ function AdminMetadataTab() {
         </div>
 
         <div className="admin-metadata__field">
-          <label htmlFor="meta-description">Descripción</label>
+          <label htmlFor="meta-description">{t('admin.metadata.description', 'Descripción')}</label>
           <textarea
             id="meta-description"
             rows={6}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="¿De qué va la revista? Esta descripción aparece en el pie de los correos y en la página de contacto."
+            placeholder={t('admin.metadata.descriptionPlaceholder', '¿De qué va la revista? Esta descripción aparece en el pie de los correos y en la página de contacto.')}
           />
         </div>
 
         <div className="admin-metadata__actions">
           <button type="submit" disabled={saving}>
-            {saving ? 'Guardando…' : 'Guardar datos'}
+            {saving ? t('common.states.saving', 'Guardando') : t('admin.metadata.save', 'Guardar datos')}
           </button>
         </div>
       </form>
 
       <div className="admin-metadata__logos">
-        <h3>Logotipos</h3>
+        <h3>{t('admin.metadata.logos', 'Logotipos')}</h3>
         <p className="admin-metadata__hint">
-          Los logos sustituyen los archivos LaRabia por defecto. Las animaciones y comportamiento del header se mantienen exactamente igual.
+          {t('admin.metadata.logosHint', 'Los logos sustituyen a los de La Rabia por defecto. Las animaciones y el comportamiento de la cabecera se mantienen exactamente igual.')}
         </p>
 
         <div className="admin-metadata__logo-grid">
           {/* Light variant — shown on dark backgrounds */}
           <article className="admin-metadata__logo-card admin-metadata__logo-card--on-dark">
             <header>
-              <h4>Logo para fondos oscuros</h4>
-              <p>Versión clara. Cabecera por defecto.</p>
+              <h4>{t('admin.metadata.logoLight', 'Logo para fondos oscuros')}</h4>
+              <p>{t('admin.metadata.logoLightHint', 'Versión clara. Cabecera por defecto.')}</p>
             </header>
             <div className="admin-metadata__logo-preview" data-bg="dark">
-              {lightUrl ? <img src={lightUrl} alt="Logo claro" /> : <span className="admin-metadata__missing">Sin logo</span>}
+              {lightUrl ? <img src={lightUrl} alt={t('admin.metadata.logoLightAlt', 'Logo claro')} /> : <span className="admin-metadata__missing">{t('admin.metadata.noLogo', 'Sin logo')}</span>}
             </div>
             <div className="admin-metadata__logo-controls">
               <input
@@ -129,7 +131,7 @@ function AdminMetadataTab() {
                 onClick={() => lightInputRef.current?.click()}
                 disabled={uploading.light}
               >
-                {uploading.light ? 'Subiendo…' : 'Subir nuevo'}
+                {uploading.light ? t('admin.metadata.uploading', 'Subiendo…') : t('admin.metadata.uploadNew', 'Subir nuevo')}
               </button>
             </div>
           </article>
@@ -137,11 +139,11 @@ function AdminMetadataTab() {
           {/* Dark variant — shown on light backgrounds */}
           <article className="admin-metadata__logo-card admin-metadata__logo-card--on-light">
             <header>
-              <h4>Logo para fondos claros</h4>
-              <p>Versión oscura. Header al pasar el ratón, correos, etc.</p>
+              <h4>{t('admin.metadata.logoDark', 'Logo para fondos claros')}</h4>
+              <p>{t('admin.metadata.logoDarkHint', 'Versión oscura. Cabecera al pasar el ratón, correos, etc.')}</p>
             </header>
             <div className="admin-metadata__logo-preview" data-bg="light">
-              {darkUrl ? <img src={darkUrl} alt="Logo oscuro" /> : <span className="admin-metadata__missing">Sin logo</span>}
+              {darkUrl ? <img src={darkUrl} alt={t('admin.metadata.logoDarkAlt', 'Logo oscuro')} /> : <span className="admin-metadata__missing">{t('admin.metadata.noLogo', 'Sin logo')}</span>}
             </div>
             <div className="admin-metadata__logo-controls">
               <input
@@ -156,7 +158,7 @@ function AdminMetadataTab() {
                 onClick={() => darkInputRef.current?.click()}
                 disabled={uploading.dark}
               >
-                {uploading.dark ? 'Subiendo…' : 'Subir nuevo'}
+                {uploading.dark ? t('admin.metadata.uploading', 'Subiendo…') : t('admin.metadata.uploadNew', 'Subir nuevo')}
               </button>
             </div>
           </article>

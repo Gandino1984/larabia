@@ -141,7 +141,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                     type="button"
                   >
                     <Eye className="action-icon" />
-                    <span className="action-text">Ver imagen</span>
+                    <span className="action-text">{t('user.card.viewImage', 'Ver imagen')}</span>
                   </button>
                 )}
                 <button
@@ -151,7 +151,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                 >
                   <Upload className="action-icon" />
                   <span className="action-text">
-                    {user?.image_user ? 'Cambiar' : 'Subir'}
+                    {user?.image_user ? t('user.card.changeImage', 'Cambiar') : t('user.card.uploadImage', 'Subir')}
                   </span>
                 </button>
               </div>
@@ -174,10 +174,10 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
                 <p className="user-type">
                   {(() => {
                     const on = (v) => v === true || v === 1;
-                    if (on(user?.is_super_admin)) return 'Editor general';
-                    if (on(user?.is_admin)) return 'Admin';
-                    if (on(user?.is_editor)) return 'Productor multimedia y editor';
-                    return 'Reader';
+                    if (on(user?.is_super_admin)) return t('user.role.superAdmin', 'Editor general');
+                    if (on(user?.is_admin)) return t('user.role.admin', 'Admin');
+                    if (on(user?.is_editor)) return t('user.role.editor', 'Productor multimedia y editor');
+                    return t('user.role.reader', 'Lector/a');
                   })()}
                 </p>
                 {isSubscriber && (
@@ -203,13 +203,13 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
 
             {user?.phone_user && (
               <p className="user-phone">
-                Teléfono: {user.phone_user}
+                {t('user.card.phone', 'Teléfono')}: {user.phone_user}
               </p>
             )}
 
             {user?.location_user && user.location_user !== 'No especificada' && (
               <p className="user-location">
-                Ubicación: {user.location_user}
+                {t('user.card.location', 'Ubicación')}: {user.location_user}
               </p>
             )}
 

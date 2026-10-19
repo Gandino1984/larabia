@@ -7,6 +7,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SlidersHorizontal, X } from 'lucide-react';
+import { localDate } from '../../utils/locale';
 import {
   EMPTY_ARTICLE_FILTERS,
   NO_PROJECT,
@@ -31,7 +32,7 @@ function ArticleFilters({ articles, filters, onChange, defaultSort = 'newest', t
     return key ? t(key) : value.charAt(0).toUpperCase() + value.slice(1);
   };
   const monthLabel = (m) => {
-    const name = new Date(2000, Number(m) - 1, 1).toLocaleDateString(i18n.language || 'es', { month: 'long' });
+    const name = localDate(new Date(2000, Number(m) - 1, 1), { month: 'long' });
     return name.charAt(0).toUpperCase() + name.slice(1);
   };
 

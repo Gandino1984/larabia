@@ -31,7 +31,7 @@ function AuthorCard({ profile, editorUser }) {
     const invited = inviteStatusOf(editorUser) === 'pending';
     return (
       <article className="author-card no-profile-card">
-        <div className="no-profile-badge"><span>Sin perfil</span></div>
+        <div className="no-profile-badge"><span>{t('authors.card.noProfile', 'Sin perfil')}</span></div>
         <div className="author-card-image">
           {editorImageUrl && !imageError ? (
             <img src={editorImageUrl} alt={editorUser.name_user} onError={() => setImageError(true)} />
@@ -49,15 +49,15 @@ function AuthorCard({ profile, editorUser }) {
           <p className="bio-preview no-profile-text">
             {invited
               ? t('authors.invitation.noProfileText', 'Aún no ha aceptado la invitación. Ya puedes crear su perfil.')
-              : 'Este/a editor/a aún no tiene perfil de autor/a.'}
+              : t('authors.card.noProfileText', 'Este/a editor/a aún no tiene perfil de autor/a.')}
           </p>
           <button
             className="btn-create-profile-admin"
             onClick={() => navigateToAuthorEditorForUser(editorUser)}
-            title="Crear perfil para este editor/a"
+            title={t('authors.card.createProfileTitle', 'Crear perfil para este editor/a')}
           >
             <UserPlus size={16} />
-            <span>Crear perfil</span>
+            <span>{t('authors.card.createProfile', 'Crear perfil')}</span>
           </button>
         </div>
       </article>
@@ -108,7 +108,7 @@ function AuthorCard({ profile, editorUser }) {
       )}
 
       {isSuperAdmin && profile.status_profile === 'draft' && (
-        <div className="draft-badge"><span>Borrador</span></div>
+        <div className="draft-badge"><span>{t('editor.status.draft', 'Borrador')}</span></div>
       )}
 
       <div className="author-card-image">
@@ -127,7 +127,7 @@ function AuthorCard({ profile, editorUser }) {
           <button
             className="btn-edit-card-admin"
             onClick={(e) => { e.stopPropagation(); navigateToAuthorEditorForProfile(profile); }}
-            title="Editar perfil"
+            title={t('authors.editProfile', 'Editar perfil')}
           >
             <Edit size={16} />
           </button>

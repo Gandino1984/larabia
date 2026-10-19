@@ -8,6 +8,7 @@
 //   onSaved   — called with the saved workshop
 //   onCancel  — optional; shows a "Cancelar" button
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, User, Save } from 'lucide-react';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useMagazine } from '../../app_context/MagazineContext';
@@ -46,6 +47,7 @@ const toForm = (w) => ({
 });
 
 function WorkshopForm({ workshop = null, onSaved, onCancel }) {
+  const { t } = useTranslation();
   const { createWorkshop, updateWorkshop, uploadWorkshopCover, fetchWorkshops } = useWorkshop();
   const { editors, fetchEditors } = useMagazine();
   const { currentUser } = useAuth();
@@ -104,45 +106,45 @@ function WorkshopForm({ workshop = null, onSaved, onCancel }) {
 
   return (
     <div className="admin-workshops-form">
-      <label>Título *
+      <label>{t('workshops.form.title', 'Título')} *
         <input type="text" value={form.title_workshop}
           onChange={e => setForm({ ...form, title_workshop: e.target.value })}
-          placeholder="Título del taller" />
+          placeholder={t('workshops.form.titlePlaceholder', 'Título del taller')} />
       </label>
 
-      <label>Descripción
+      <label>{t('workshops.form.description', 'Descripción')}
         <textarea rows={4} value={form.description_workshop}
           onChange={e => setForm({ ...form, description_workshop: e.target.value })}
-          placeholder="¿De qué trata el taller?" />
+          placeholder={t('workshops.form.descriptionPlaceholder', '¿De qué trata el taller?')} />
       </label>
 
       <div className="admin-workshops-row">
-        <label>Fecha y hora
+        <label>{t('workshops.form.date', 'Fecha y hora')}
           <input type="datetime-local" value={form.date_workshop}
             onChange={e => setForm({ ...form, date_workshop: e.target.value })} />
         </label>
-        <label>Lugar
+        <label>{t('workshops.form.place', 'Lugar')}
           <input type="text" value={form.location_workshop}
             onChange={e => setForm({ ...form, location_workshop: e.target.value })}
-            placeholder="Lugar del taller" />
+            placeholder={t('workshops.form.placePlaceholder', 'Lugar del taller')} />
         </label>
-        <label>Aforo (plazas)
+        <label>{t('workshops.form.capacity', 'Aforo (plazas)')}
           <input type="number" min="0" value={form.capacity_workshop}
             onChange={e => setForm({ ...form, capacity_workshop: e.target.value })}
-            placeholder="Ej. 20" />
+            placeholder={t('workshops.form.capacityPlaceholder', 'Ej. 20')} />
         </label>
-        <label>Tipo de taller
+        <label>{t('workshops.form.audience', 'Tipo de taller')}
           <select value={form.audience_workshop}
             onChange={e => setForm({ ...form, audience_workshop: e.target.value })}>
-            <option value="general">Taller</option>
-            <option value="infantil">Taller infantil</option>
+            <option value="general">{t('workshops.form.audienceGeneral', 'Taller')}</option>
+            <option value="infantil">{t('workshops.form.audienceKids', 'Taller infantil')}</option>
           </select>
         </label>
       </div>
 
       {/* Where it takes place: search / click / drag on the map. */}
       <div className="admin-workshops-location">
-        <span className="admin-workshops-label">Ubicación en el mapa</span>
+        <span className="admin-workshops-label">{t('workshops.form.mapLocation', 'Ubicación en el mapa')}</span>
         <LocationPicker
           lat={form.lat_workshop}
           lng={form.lng_workshop}
@@ -152,7 +154,7 @@ function WorkshopForm({ workshop = null, onSaved, onCancel }) {
       </div>
 
       <div className="admin-workshops-authors">
-        <span className="admin-workshops-label">Autoras/es (talleristas)</span>
+        <span className="admin-workshops-label">{t('workshops.form.hosts', 'Autoras/es (talleristas)')}</span>
         <div className="admin-workshops-author-chips">
           {authors.map(a => (
             <span key={a.id_user} className="admin-workshops-chip">
@@ -160,29 +162,29 @@ function WorkshopForm({ workshop = null, onSaved, onCancel }) {
                 ? <img src={resolveAvatar(a.image_user)} alt={a.name_user} />
                 : <User size={12} />}
               {a.name_user}
-              <button type="button" onClick={() => removeAuthor(a.id_user)} aria-label="Quitar"><X size={12} /></button>
+              <button type="button" onClick={() => removeAuthor(a.id_user)} aria-label={t('workshops.form.removeHost', 'Quitar')}><X size={12} /></button>
             </span>
           ))}
         </div>
         <select value="" onChange={e => { if (e.target.value) addAuthor(e.target.value); }}>
-          <option value="">+ Añadir tallerista</option>
+          <option value="">{t('workshops.form.addHost', '+ Añadir tallerista')}</option>
           {editors.filter(e => !authors.some(a => a.id_user === e.id_user)).map(ed => (
             <option key={ed.id_user} value={ed.id_user}>{ed.name_user}</option>
           ))}
         </select>
       </div>
 
-      <label>Imagen de portada
+      <label>{t('workshops.form.cover', 'Imagen de portada')}
         <input type="file" accept="image/*"
           onChange={e => { const f = e.target.files?.[0]; if (f && f.type.startsWith('image/')) setCoverFile(f); }} />
       </label>
 
       <div className="admin-workshops-actions">
         <button type="button" className="admin-workshops-btn admin-workshops-btn--save" onClick={handleSave} disabled={saving || !form.title_workshop.trim()}>
-          <Save size={16} /> {saving ? 'Guardando…' : editingId ? 'Guardar cambios' : 'Crear taller'}
+          <Save size={16} /> {saving ? t('common.states.saving', 'Guardando') : editingId ? t('authors.editor.save', 'Guardar cambios') : t('admin.workshops.create', 'Crear taller')}
         </button>
         {onCancel && (
-          <button type="button" className="admin-workshops-btn" onClick={onCancel}>Cancelar</button>
+          <button type="button" className="admin-workshops-btn" onClick={onCancel}>{t('common.buttons.cancel', 'Cancelar')}</button>
         )}
       </div>
     </div>

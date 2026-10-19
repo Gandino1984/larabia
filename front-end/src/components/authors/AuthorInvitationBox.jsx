@@ -11,6 +11,7 @@ import axiosInstance from '../../utils/axiosConfig';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import { useMetadata } from '../../app_context/MetadataContext';
+import { localDate } from '../../utils/locale';
 import './AuthorInvitationBox.css';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -47,8 +48,8 @@ function AuthorInvitationBox({ userId }) {
 
   if (!invite || (invite.author_invite_status !== 'pending' && invite.author_invite_status !== 'declined')) return null;
 
-  const when = parseDate(invite.author_invited_at)
-    ?.toLocaleDateString(i18n.language || 'es', { day: 'numeric', month: 'long', year: 'numeric' }) || null;
+  const invitedAt = parseDate(invite.author_invited_at);
+  const when = invitedAt ? localDate(invitedAt, { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
   const resend = async (newEmail) => {
     setBusy(true);

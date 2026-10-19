@@ -25,7 +25,7 @@ function Footer() {
               <p>{t('footer.location')}</p>
               <div className="footer-btns">
                 <button className="footer-contact-btn" onClick={openContactModal}>
-                  Escríbenos un correo
+                  {t('footer.writeUs', 'Escríbenos un correo')}
                 </button>
                 <button className="footer-contact-btn" onClick={openNewsletterModal}>
                   {t('footer.newsletter')}

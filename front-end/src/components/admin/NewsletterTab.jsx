@@ -1,5 +1,6 @@
 // magazine-front/src/components/admin/NewsletterTab.jsx
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -8,6 +9,7 @@ import { Users, Send, CheckSquare, Square, Search } from 'lucide-react';
 import './NewsletterTab.css';
 
 function NewsletterTab() {
+  const { t } = useTranslation();
   const { articles } = useMagazine();
   const { showSuccess, showError } = useUI();
   const { currentUser } = useAuth();
@@ -40,14 +42,14 @@ function NewsletterTab() {
 
   const handleSend = async () => {
     if (selectedIds.length === 0) {
-      showError('Selecciona al menos un artículo para recomendar');
+      showError(t('admin.newsletter.pickOne', 'Selecciona al menos un artículo para recomendar'));
       return;
     }
     if (subscriberCount === 0) {
-      showError('No hay suscriptores activos');
+      showError(t('admin.newsletter.noSubscribers', 'No hay suscriptores activos'));
       return;
     }
-    if (!confirm(`¿Enviar recomendaciones a ${subscriberCount} suscriptor${subscriberCount !== 1 ? 'es' : ''}?`)) return;
+    if (!confirm(t('admin.newsletter.confirm', { count: subscriberCount }))) return;
 
     setSending(true);
     setSendResult(null);
@@ -58,11 +60,11 @@ function NewsletterTab() {
       }, authHeader);
       const { sent, failed } = res.data.data;
       setSendResult({ sent, failed });
-      showSuccess(`Enviado a ${sent} suscriptor${sent !== 1 ? 'es' : ''}`);
+      showSuccess(t('admin.newsletter.sentTo', { count: sent }));
       setSelectedIds([]);
       setIntroText('');
     } catch (err) {
-      showError('Error al enviar el newsletter');
+      showError(t('admin.newsletter.sendError', 'Error al enviar el newsletter'));
     } finally {
       setSending(false);
     }
@@ -74,21 +76,21 @@ function NewsletterTab() {
         <div className="subscriber-badge">
           <Users size={18} />
           <span>
-            {subscriberCount === null ? 'Cargando...' : `${subscriberCount} suscriptor${subscriberCount !== 1 ? 'es' : ''}`}
+            {subscriberCount === null ? t('common.states.loading', 'Cargando') : t('admin.newsletter.subscribers', { count: subscriberCount })}
           </span>
         </div>
         <p className="newsletter-tab-desc">
-          Selecciona los artículos publicados que quieres recomendar y escribe un mensaje opcional.
+          {t('admin.newsletter.hint', 'Selecciona los artículos publicados que quieres recomendar y escribe un mensaje opcional.')}
         </p>
       </div>
 
       {/* Intro text */}
       <div className="nt-section">
-        <label className="nt-label">Mensaje de introducción <span>(opcional)</span></label>
+        <label className="nt-label">{t('admin.newsletter.intro', 'Mensaje de introducción')} <span>({t('admin.newsletter.optional', 'opcional')})</span></label>
         <textarea
           className="nt-intro"
           rows={3}
-          placeholder="Escribe un breve mensaje para acompañar las recomendaciones..."
+          placeholder={t('admin.newsletter.introPlaceholder', 'Escribe un breve mensaje para acompañar las recomendaciones...')}
           value={introText}
           onChange={e => setIntroText(e.target.value)}
         />
@@ -97,15 +99,15 @@ function NewsletterTab() {
       {/* Article picker */}
       <div className="nt-section">
         <label className="nt-label">
-          Artículos a recomendar
-          {selectedIds.length > 0 && <span className="nt-selected-count">{selectedIds.length} seleccionado{selectedIds.length !== 1 ? 's' : ''}</span>}
+          {t('admin.newsletter.articles', 'Artículos a recomendar')}
+          {selectedIds.length > 0 && <span className="nt-selected-count">{t('admin.newsletter.selected', { count: selectedIds.length })}</span>}
         </label>
 
         <div className="nt-search">
           <Search size={16} />
           <input
             type="text"
-            placeholder="Buscar artículo..."
+            placeholder={t('admin.newsletter.searchPlaceholder', 'Buscar artículo...')}
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -113,7 +115,7 @@ function NewsletterTab() {
 
         <div className="nt-article-list">
           {filteredArticles.length === 0 && (
-            <p className="nt-empty">No hay artículos publicados{search ? ' con ese término' : ''}.</p>
+            <p className="nt-empty">{search ? t('admin.newsletter.noMatches', 'No hay artículos publicados con ese término.') : t('admin.newsletter.noArticles', 'No hay artículos publicados.')}</p>
           )}
           {filteredArticles.map(article => {
             const selected = selectedIds.includes(article.id_article);
@@ -143,8 +145,8 @@ function NewsletterTab() {
       <div className="nt-actions">
         {sendResult && (
           <p className="nt-result">
-            Enviado a <strong>{sendResult.sent}</strong> suscriptor{sendResult.sent !== 1 ? 'es' : ''}
-            {sendResult.failed > 0 && ` · ${sendResult.failed} fallido${sendResult.failed !== 1 ? 's' : ''}`}
+            {t('admin.newsletter.sentTo', { count: sendResult.sent })}
+            {sendResult.failed > 0 && ` · ${t('admin.newsletter.failed', { count: sendResult.failed })}`}
           </p>
         )}
         <button
@@ -154,7 +156,7 @@ function NewsletterTab() {
           type="button"
         >
           <Send size={18} />
-          {sending ? 'Enviando...' : 'Enviar recomendaciones'}
+          {sending ? t('admin.newsletter.sending', 'Enviando...') : t('admin.newsletter.send', 'Enviar recomendaciones')}
         </button>
       </div>
     </div>

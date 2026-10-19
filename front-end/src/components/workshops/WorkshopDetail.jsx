@@ -1,6 +1,7 @@
 // magazine-front/src/components/workshops/WorkshopDetail.jsx
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { localDate } from '../../utils/locale';
 import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -23,7 +24,7 @@ const resolveImg = (img) => {
 const formatDate = (d) => {
   if (!d) return null;
   try {
-    return new Date(d).toLocaleDateString('es-ES', {
+    return localDate(d, {
       year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
   } catch { return null; }

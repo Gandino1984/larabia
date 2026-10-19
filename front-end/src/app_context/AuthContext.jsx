@@ -1,5 +1,6 @@
 // magazine-front/src/app_context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
+import i18n from '../i18n/config';
 import axiosInstance from '../utils/axiosConfig';
 
 const AuthContext = createContext();
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user };
     } catch (err) {
       console.error('Login error:', err);
-      return { error: 'Error al iniciar sesión' };
+      return { error: i18n.t('messages.error.login', 'Error al iniciar sesión') };
     }
   };
 
@@ -61,7 +62,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true, data: response.data.data };
     } catch (err) {
       console.error('Registration error:', err);
-      return { error: 'Error al registrarse' };
+      return { error: i18n.t('messages.error.register', 'Error al registrarse') };
     }
   };
 

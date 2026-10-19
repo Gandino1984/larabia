@@ -1,5 +1,6 @@
 // magazine-front/src/app_context/AuthorContext.jsx
 import { createContext, useContext, useState, useCallback } from 'react';
+import i18n from '../i18n/config';
 import axiosInstance from '../utils/axiosConfig';
 import { useUI } from './UIContext';
 import { useAuth } from './AuthContext';
@@ -37,8 +38,8 @@ export const AuthorProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('AuthorContext - fetchAllProfiles error:', err);
-      showError('Error al cargar los perfiles de autores');
-      return { error: 'Error al cargar los perfiles' };
+      showError(i18n.t('messages.error.loadAuthorProfiles', 'Error al cargar los perfiles de autores'));
+      return { error: i18n.t('messages.error.loadProfiles', 'Error al cargar los perfiles') };
     } finally {
       setLoading(false);
     }
@@ -61,8 +62,8 @@ export const AuthorProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('AuthorContext - fetchAllProfilesAdmin error:', err);
-      showError('Error al cargar todos los perfiles');
-      return { error: 'Error al cargar los perfiles' };
+      showError(i18n.t('messages.error.loadAllProfiles', 'Error al cargar todos los perfiles'));
+      return { error: i18n.t('messages.error.loadProfiles', 'Error al cargar los perfiles') };
     } finally {
       setLoading(false);
     }
@@ -82,7 +83,7 @@ export const AuthorProvider = ({ children }) => {
       return { error: response.data.error };
     } catch (err) {
       console.error('AuthorContext - fetchEditorUsers error:', err);
-      return { error: 'Error al cargar los editores' };
+      return { error: i18n.t('messages.error.loadEditors', 'Error al cargar los editores') };
     }
   }, [callerId]);
 
@@ -103,8 +104,8 @@ export const AuthorProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('AuthorContext - fetchFeaturedProfiles error:', err);
-      showError('Error al cargar perfiles destacados');
-      return { error: 'Error al cargar perfiles destacados' };
+      showError(i18n.t('messages.error.loadFeaturedProfiles', 'Error al cargar perfiles destacados'));
+      return { error: i18n.t('messages.error.loadFeaturedProfiles', 'Error al cargar perfiles destacados') };
     } finally {
       setLoading(false);
     }
@@ -127,8 +128,8 @@ export const AuthorProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('AuthorContext - fetchProfileById error:', err);
-      showError('Error al cargar el perfil');
-      return { error: 'Error al cargar el perfil' };
+      showError(i18n.t('messages.error.loadProfile', 'Error al cargar el perfil'));
+      return { error: i18n.t('messages.error.loadProfile', 'Error al cargar el perfil') };
     } finally {
       setLoading(false);
     }
@@ -153,7 +154,7 @@ export const AuthorProvider = ({ children }) => {
     } catch (err) {
       console.error('AuthorContext - fetchMyProfile error:', err);
       setMyProfile(null);
-      return { error: 'Error al cargar tu perfil' };
+      return { error: i18n.t('messages.error.loadMyProfile', 'Error al cargar tu perfil') };
     } finally {
       setLoading(false);
     }
@@ -169,7 +170,7 @@ export const AuthorProvider = ({ children }) => {
 
       if (!response.data.error) {
         setMyProfile(response.data.data);
-        showSuccess(response.data.success || 'Perfil creado exitosamente');
+        showSuccess(response.data.success || i18n.t('messages.success.profileCreated', 'Perfil creado exitosamente'));
         // Refresh profiles list
         await fetchAllProfiles();
         return { success: true, data: response.data.data };
@@ -179,7 +180,7 @@ export const AuthorProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('AuthorContext - createProfile error:', err);
-      const errorMsg = err.response?.data?.error || 'Error al crear el perfil';
+      const errorMsg = err.response?.data?.error || i18n.t('messages.error.createProfile', 'Error al crear el perfil');
       showError(errorMsg);
       return { error: errorMsg };
     } finally {
@@ -201,7 +202,7 @@ export const AuthorProvider = ({ children }) => {
         if (updateMyProfile) {
           setMyProfile(response.data.data);
         }
-        showSuccess(response.data.success || 'Perfil actualizado exitosamente');
+        showSuccess(response.data.success || i18n.t('messages.success.profileUpdated', 'Perfil actualizado exitosamente'));
         // Refresh published profiles list
         await fetchAllProfiles();
         return { success: true, data: response.data.data };
@@ -211,7 +212,7 @@ export const AuthorProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('AuthorContext - updateProfile error:', err);
-      const errorMsg = err.response?.data?.error || 'Error al actualizar el perfil';
+      const errorMsg = err.response?.data?.error || i18n.t('messages.error.updateProfile', 'Error al actualizar el perfil');
       showError(errorMsg);
       return { error: errorMsg };
     } finally {
@@ -235,7 +236,7 @@ export const AuthorProvider = ({ children }) => {
       });
 
       if (!response.data.error) {
-        showSuccess(response.data.success || 'Imagen actualizada correctamente');
+        showSuccess(response.data.success || i18n.t('messages.success.imageUpdated', 'Imagen actualizada correctamente'));
         return { success: true, data: response.data.data };
       } else {
         showError(response.data.error);
@@ -243,7 +244,7 @@ export const AuthorProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('AuthorContext - uploadProfileImage error:', err);
-      const errorMsg = err.response?.data?.error || 'Error al subir la imagen';
+      const errorMsg = err.response?.data?.error || i18n.t('messages.error.uploadImage', 'Error al subir la imagen');
       showError(errorMsg);
       return { error: errorMsg };
     }
@@ -259,7 +260,7 @@ export const AuthorProvider = ({ children }) => {
 
       if (!response.data.error) {
         setMyProfile(null);
-        showSuccess(response.data.success || 'Perfil eliminado exitosamente');
+        showSuccess(response.data.success || i18n.t('messages.success.profileDeleted', 'Perfil eliminado exitosamente'));
         // Refresh profiles list
         await fetchAllProfiles();
         return { success: true };
@@ -269,7 +270,7 @@ export const AuthorProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('AuthorContext - deleteProfile error:', err);
-      const errorMsg = err.response?.data?.error || 'Error al eliminar el perfil';
+      const errorMsg = err.response?.data?.error || i18n.t('messages.error.deleteProfile', 'Error al eliminar el perfil');
       showError(errorMsg);
       return { error: errorMsg };
     } finally {

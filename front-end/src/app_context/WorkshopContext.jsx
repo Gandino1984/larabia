@@ -11,6 +11,7 @@
 // The server answers 403 + code 'login_required' | 'subscription_required'
 // when the reader can't go on; that is kept in `accessError`.
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import i18n from '../i18n/config';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
 import { useUI } from './UIContext';
@@ -44,7 +45,7 @@ export const WorkshopProvider = ({ children }) => {
       const code = err.response?.status === 403 ? err.response?.data?.code : null;
       if (code) { setAccessError(code); return { error: err.response.data.error, code }; }
       console.error('fetchWorkshops error:', err);
-      return { error: 'Error al cargar talleres' };
+      return { error: i18n.t('messages.error.loadWorkshops', 'Error al cargar talleres') };
     } finally {
       setLoading(false);
     }
@@ -61,7 +62,7 @@ export const WorkshopProvider = ({ children }) => {
       // Not allowed to open it: the caller guides the reader (login / subscribe).
       const code = err.response?.status === 403 ? err.response?.data?.code : null;
       if (code) return { error: err.response.data.error, code };
-      const msg = err.response?.data?.error || 'Error al cargar el taller';
+      const msg = err.response?.data?.error || i18n.t('messages.error.loadWorkshop', 'Error al cargar el taller');
       showError(msg);
       return { error: msg };
     } finally {
@@ -73,11 +74,11 @@ export const WorkshopProvider = ({ children }) => {
     try {
       const res = await axiosInstance.post('/magazine-workshop/create', data, authHeader());
       if (res.data?.error) { showError(res.data.error); return { error: res.data.error }; }
-      showSuccess(res.data.success || 'Taller creado');
+      showSuccess(res.data.success || i18n.t('messages.success.workshopCreated', 'Taller creado'));
       await fetchWorkshops();
       return { success: true, data: res.data.data };
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al crear el taller';
+      const msg = err.response?.data?.error || i18n.t('messages.error.createWorkshop', 'Error al crear el taller');
       showError(msg);
       return { error: msg };
     }
@@ -87,11 +88,11 @@ export const WorkshopProvider = ({ children }) => {
     try {
       const res = await axiosInstance.patch(`/magazine-workshop/update/${id}`, data, authHeader());
       if (res.data?.error) { showError(res.data.error); return { error: res.data.error }; }
-      showSuccess(res.data.success || 'Taller actualizado');
+      showSuccess(res.data.success || i18n.t('messages.success.workshopUpdated', 'Taller actualizado'));
       await fetchWorkshops();
       return { success: true, data: res.data.data };
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al actualizar el taller';
+      const msg = err.response?.data?.error || i18n.t('messages.error.updateWorkshop', 'Error al actualizar el taller');
       showError(msg);
       return { error: msg };
     }
@@ -101,11 +102,11 @@ export const WorkshopProvider = ({ children }) => {
     try {
       const res = await axiosInstance.delete(`/magazine-workshop/remove-by-id/${id}`, authHeader());
       if (res.data?.error) { showError(res.data.error); return { error: res.data.error }; }
-      showSuccess(res.data.message || 'Taller eliminado');
+      showSuccess(res.data.message || i18n.t('messages.success.workshopDeleted', 'Taller eliminado'));
       await fetchWorkshops();
       return { success: true };
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al eliminar el taller';
+      const msg = err.response?.data?.error || i18n.t('messages.error.deleteWorkshop', 'Error al eliminar el taller');
       showError(msg);
       return { error: msg };
     }
@@ -121,7 +122,7 @@ export const WorkshopProvider = ({ children }) => {
       if (res.data?.error) { showError(res.data.error); return { error: res.data.error }; }
       return { success: true, data: res.data.data };
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al subir la imagen';
+      const msg = err.response?.data?.error || i18n.t('messages.error.uploadImage', 'Error al subir la imagen');
       showError(msg);
       return { error: msg };
     }
@@ -131,11 +132,11 @@ export const WorkshopProvider = ({ children }) => {
     try {
       const res = await axiosInstance.post(`/magazine-workshop/reserve/${id}`, {}, authHeader());
       if (res.data?.error) { showError(res.data.error); return { error: res.data.error }; }
-      showSuccess(res.data.success || 'Reserva confirmada');
+      showSuccess(res.data.success || i18n.t('messages.success.bookingConfirmed', 'Reserva confirmada'));
       return { success: true, data: res.data.data };
     } catch (err) {
       const code = err.response?.status === 403 ? err.response?.data?.code : null;
-      const msg = err.response?.data?.error || 'Error al reservar';
+      const msg = err.response?.data?.error || i18n.t('messages.error.booking', 'Error al reservar');
       // Not allowed to book: the caller guides the reader (login / subscribe).
       if (code) return { error: msg, code };
       showError(msg);
@@ -147,10 +148,10 @@ export const WorkshopProvider = ({ children }) => {
     try {
       const res = await axiosInstance.delete(`/magazine-workshop/reserve/${id}`, authHeader());
       if (res.data?.error) { showError(res.data.error); return { error: res.data.error }; }
-      showSuccess(res.data.success || 'Reserva cancelada');
+      showSuccess(res.data.success || i18n.t('messages.success.bookingCancelled', 'Reserva cancelada'));
       return { success: true, data: res.data.data };
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al cancelar la reserva';
+      const msg = err.response?.data?.error || i18n.t('messages.error.cancelBooking', 'Error al cancelar la reserva');
       showError(msg);
       return { error: msg };
     }
@@ -191,7 +192,7 @@ export const WorkshopProvider = ({ children }) => {
         { response },
         authHeader()
       );
-      showSuccess(res.data?.success || 'Hecho');
+      showSuccess(res.data?.success || i18n.t('messages.success.done', 'Hecho'));
       setInvitationFeed(prev => ({ ...prev, invitations: prev.invitations.filter(i => i.id_invitation !== invitation.id_invitation) }));
       const workshopId = res.data?.data?.id_workshop;
       if (workshopId && workshopId === selectedIdRef.current) fetchWorkshopById(workshopId);
@@ -199,7 +200,7 @@ export const WorkshopProvider = ({ children }) => {
       return { success: true };
     } catch (err) {
       const code = err.response?.status === 403 ? err.response?.data?.code : null;
-      const msg = err.response?.data?.error || 'Error al responder a la invitación';
+      const msg = err.response?.data?.error || i18n.t('messages.error.respondInvitation', 'Error al responder a la invitación');
       if (code) return { error: msg, code };
       showError(msg);
       refreshInvitationFeed();
@@ -257,10 +258,10 @@ export const WorkshopProvider = ({ children }) => {
             }
           : prev));
       }
-      showSuccess(res.data?.success || 'Hecho');
+      showSuccess(res.data?.success || i18n.t('messages.success.done', 'Hecho'));
       return { success: true, data };
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al gestionar participantes';
+      const msg = err.response?.data?.error || i18n.t('messages.error.manageParticipants', 'Error al gestionar participantes');
       showError(msg);
       return { error: msg };
     }

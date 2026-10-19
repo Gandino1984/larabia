@@ -1,5 +1,6 @@
 // magazine-front/src/app_context/MagazineContext.jsx
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import i18n from '../i18n/config';
 import axiosInstance from '../utils/axiosConfig';
 import { uploadAndProcessAudio } from '../utils/audioUpload';
 import { useUI } from './UIContext';
@@ -62,7 +63,7 @@ export const MagazineProvider = ({ children }) => {
       console.error('Error fetching articles:', err);
       // Only show error for actual network/server errors, not 404
       if (err.response?.status !== 404) {
-        showError('Error al cargar los artículos');
+        showError(i18n.t('messages.error.loadArticles', 'Error al cargar los artículos'));
       }
       setArticles([]);
     } finally {
@@ -170,7 +171,7 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error fetching editors:', err);
-      return { error: 'Error al cargar editores' };
+      return { error: i18n.t('messages.error.loadEditors', 'Error al cargar editores') };
     }
   }, [currentUser?.id_user]);
 
@@ -193,8 +194,8 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error fetching article:', err);
-      showError('Error al cargar el artículo');
-      return { error: 'Error al cargar el artículo' };
+      showError(i18n.t('messages.error.loadArticle', 'Error al cargar el artículo'));
+      return { error: i18n.t('messages.error.loadArticle', 'Error al cargar el artículo') };
     } finally {
       setLoading(false);
     }
@@ -220,7 +221,7 @@ export const MagazineProvider = ({ children }) => {
       });
 
       if (!response.data.error) {
-        showSuccess(response.data.success || 'Artículo creado exitosamente');
+        showSuccess(response.data.success || i18n.t('messages.success.articleCreated', 'Artículo creado exitosamente'));
         await Promise.all([fetchArticles(), fetchEditorArticles(), fetchAllArticles()]);
         return { success: true, data: response.data.data };
       } else {
@@ -229,8 +230,8 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error creating article:', err);
-      showError('Error al crear el artículo');
-      return { error: 'Error al crear el artículo' };
+      showError(i18n.t('messages.error.createArticle', 'Error al crear el artículo'));
+      return { error: i18n.t('messages.error.createArticle', 'Error al crear el artículo') };
     }
   }, [currentUser, fetchArticles, fetchEditorArticles, fetchAllArticles, showSuccess, showError]);
 
@@ -242,7 +243,7 @@ export const MagazineProvider = ({ children }) => {
       });
 
       if (!response.data.error) {
-        showSuccess(response.data.success || 'Artículo actualizado exitosamente');
+        showSuccess(response.data.success || i18n.t('messages.success.articleUpdated', 'Artículo actualizado exitosamente'));
         await Promise.all([fetchArticles(), fetchEditorArticles(), fetchAllArticles()]);
         if (selectedArticle?.id_article === id_article) {
           setSelectedArticle(response.data.data);
@@ -254,8 +255,8 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error updating article:', err);
-      showError('Error al actualizar el artículo');
-      return { error: 'Error al actualizar el artículo' };
+      showError(i18n.t('messages.error.updateArticle', 'Error al actualizar el artículo'));
+      return { error: i18n.t('messages.error.updateArticle', 'Error al actualizar el artículo') };
     }
   }, [fetchArticles, fetchEditorArticles, fetchAllArticles, selectedArticle, showSuccess, showError, currentUser]);
 
@@ -267,7 +268,7 @@ export const MagazineProvider = ({ children }) => {
       });
 
       if (!response.data.error) {
-        showSuccess(response.data.message || 'Artículo eliminado exitosamente');
+        showSuccess(response.data.message || i18n.t('messages.success.articleDeleted', 'Artículo eliminado exitosamente'));
         await Promise.all([fetchArticles(), fetchEditorArticles(), fetchAllArticles()]);
         if (selectedArticle?.id_article === id_article) {
           setSelectedArticle(null);
@@ -279,8 +280,8 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error deleting article:', err);
-      showError('Error al eliminar el artículo');
-      return { error: 'Error al eliminar el artículo' };
+      showError(i18n.t('messages.error.deleteArticle', 'Error al eliminar el artículo'));
+      return { error: i18n.t('messages.error.deleteArticle', 'Error al eliminar el artículo') };
     }
   }, [fetchArticles, fetchEditorArticles, fetchAllArticles, selectedArticle, showSuccess, showError, currentUser]);
 
@@ -298,7 +299,7 @@ export const MagazineProvider = ({ children }) => {
       });
 
       if (!response.data.error) {
-        showSuccess(response.data.message || 'Imagen subida exitosamente');
+        showSuccess(response.data.message || i18n.t('messages.success.imageUploaded', 'Imagen subida exitosamente'));
         return { success: true, data: response.data.data };
       } else {
         showError(response.data.error);
@@ -306,7 +307,7 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error uploading cover image:', err);
-      const msg = err.response?.data?.error || err.response?.data?.details || 'Error al subir la imagen';
+      const msg = err.response?.data?.error || err.response?.data?.details || i18n.t('messages.error.uploadImage', 'Error al subir la imagen');
       showError(msg);
       return { error: msg };
     }
@@ -326,7 +327,7 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error fetching blocks:', err);
-      return { error: 'Error al cargar bloques' };
+      return { error: i18n.t('messages.error.loadBlocks', 'Error al cargar bloques') };
     }
   }, []);
 
@@ -343,8 +344,8 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error creating block:', err);
-      showError('Error al crear bloque');
-      return { error: 'Error al crear bloque' };
+      showError(i18n.t('messages.error.createBlock', 'Error al crear bloque'));
+      return { error: i18n.t('messages.error.createBlock', 'Error al crear bloque') };
     }
   }, [showError]);
 
@@ -361,8 +362,8 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error updating block:', err);
-      showError('Error al actualizar bloque');
-      return { error: 'Error al actualizar bloque' };
+      showError(i18n.t('messages.error.updateBlock', 'Error al actualizar bloque'));
+      return { error: i18n.t('messages.error.updateBlock', 'Error al actualizar bloque') };
     }
   }, [showError]);
 
@@ -379,8 +380,8 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error deleting block:', err);
-      showError('Error al eliminar bloque');
-      return { error: 'Error al eliminar bloque' };
+      showError(i18n.t('messages.error.deleteBlock', 'Error al eliminar bloque'));
+      return { error: i18n.t('messages.error.deleteBlock', 'Error al eliminar bloque') };
     }
   }, [showError]);
 
@@ -397,8 +398,8 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error reordering blocks:', err);
-      showError('Error al reordenar bloques');
-      return { error: 'Error al reordenar bloques' };
+      showError(i18n.t('messages.error.reorderBlocks', 'Error al reordenar bloques'));
+      return { error: i18n.t('messages.error.reorderBlocks', 'Error al reordenar bloques') };
     }
   }, [showError]);
 
@@ -428,11 +429,10 @@ export const MagazineProvider = ({ children }) => {
         if (data.converted) {
           const savedKB = data.savedSpace;
           const savedPercent = Math.round((savedKB / data.originalSize) * 100);
-          showSuccess(
-            `Imagen convertida de ${data.originalFormat} a WebP. ` +
-            `Espacio ahorrado: ${savedKB}KB (${savedPercent}%) · ` +
-            `Tamaño final: ${data.finalSize}KB`
-          );
+          showSuccess(i18n.t('messages.success.imageConverted', {
+            from: data.originalFormat, saved: savedKB, percent: savedPercent, size: data.finalSize,
+            defaultValue: 'Imagen convertida de {{from}} a WebP. Espacio ahorrado: {{saved}}KB ({{percent}}%) · Tamaño final: {{size}}KB'
+          }));
         }
 
         return data.image_url;
@@ -446,7 +446,7 @@ export const MagazineProvider = ({ children }) => {
       if (err.response) {
         console.error('Backend response:', err.response.data);
       }
-      showError('Error al subir imagen del bloque');
+      showError(i18n.t('messages.error.uploadBlockImage', 'Error al subir imagen del bloque'));
       throw err;
     }
   }, [showError, showSuccess]);
@@ -460,7 +460,7 @@ export const MagazineProvider = ({ children }) => {
       return await uploadAndProcessAudio(audioFile, currentUser?.id_user, onProgress);
     } catch (err) {
       console.error('Error uploading panel audio:', err);
-      showError(err.message || 'Error al subir audio del panel');
+      showError(err.message || i18n.t('messages.error.uploadPanelAudio', 'Error al subir audio del panel'));
       throw err;
     }
   }, [currentUser, showError]);
@@ -473,7 +473,7 @@ export const MagazineProvider = ({ children }) => {
         { headers: { 'x-user-id': currentUser?.id_user } }
       );
       if (!response.data.error) {
-        showSuccess(response.data.success || 'Invitación enviada');
+        showSuccess(response.data.success || i18n.t('messages.success.invitationSent', 'Invitación enviada'));
         return { success: true };
       } else {
         showError(response.data.error);
@@ -481,7 +481,7 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error inviting co-author:', err);
-      const msg = err.response?.data?.error || 'Error al enviar la invitación';
+      const msg = err.response?.data?.error || i18n.t('messages.error.sendInvitation', 'Error al enviar la invitación');
       showError(msg);
       return { error: msg };
     }
@@ -516,12 +516,12 @@ export const MagazineProvider = ({ children }) => {
         showError(res.data.error);
         return { error: res.data.error };
       }
-      showSuccess(res.data.success || 'Artículo enviado para aprobación');
+      showSuccess(res.data.success || i18n.t('messages.success.submittedForApproval', 'Artículo enviado para aprobación'));
       await Promise.all([fetchArticles(), fetchEditorArticles(), fetchAllArticles()]);
       return { success: true, data: res.data.data };
     } catch (err) {
       console.error('Error submitting for approval:', err);
-      const msg = err.response?.data?.error || 'Error al enviar el artículo para aprobación';
+      const msg = err.response?.data?.error || i18n.t('messages.error.submitForApproval', 'Error al enviar el artículo para aprobación');
       showError(msg);
       return { error: msg };
     }
@@ -540,12 +540,12 @@ export const MagazineProvider = ({ children }) => {
         showError(res.data.error);
         return { error: res.data.error };
       }
-      showSuccess(res.data.success || 'Artículo devuelto a borrador');
+      showSuccess(res.data.success || i18n.t('messages.success.revertedToDraft', 'Artículo devuelto a borrador'));
       await Promise.all([fetchArticles(), fetchEditorArticles(), fetchAllArticles()]);
       return { success: true, data: res.data.data };
     } catch (err) {
       console.error('Error reverting to draft:', err);
-      const msg = err.response?.data?.error || 'Error al pasar el artículo a borrador';
+      const msg = err.response?.data?.error || i18n.t('messages.error.revertToDraft', 'Error al pasar el artículo a borrador');
       showError(msg);
       return { error: msg };
     }
@@ -572,7 +572,7 @@ export const MagazineProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error responding to invitation:', err);
-      const msg = err.response?.data?.error || 'Error al responder la invitación';
+      const msg = err.response?.data?.error || i18n.t('messages.error.respondInvitation', 'Error al responder la invitación');
       showError(msg);
       return { error: msg };
     }

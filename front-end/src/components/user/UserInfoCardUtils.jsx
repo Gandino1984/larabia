@@ -1,11 +1,13 @@
 // magazine-front/src/components/user/UserInfoCardUtils.jsx
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../app_context/AuthContext.jsx';
 import { useUI } from '../../app_context/UIContext.jsx';
 import { uploadProfileImage } from '../../utils/imageUploadService.js';
 import axiosInstance from '../../utils/axiosConfig.js';
 
 export const UserInfoCardUtils = () => {
+    const { t } = useTranslation();
     const { currentUser, setCurrentUser } = useAuth();
     const { setUploading, setError } = useUI();
 
@@ -35,7 +37,7 @@ export const UserInfoCardUtils = () => {
         if (!validTypes.includes(file.type)) {
             setError(prevError => ({
                 ...prevError,
-                imageError: "Formato de imagen no válido. Use JPEG, PNG o WebP."
+                imageError: t('user.card.imageType', 'Formato de imagen no válido. Use JPEG, PNG o WebP.')
             }));
             return;
         }
@@ -43,7 +45,7 @@ export const UserInfoCardUtils = () => {
         if (file.size > 10 * 1024 * 1024) {
             setError(prevError => ({
                 ...prevError,
-                imageError: "La imagen es demasiado grande. Máximo 10MB antes de la optimización."
+                imageError: t('user.card.imageSize', 'La imagen es demasiado grande. Máximo 10MB antes de la optimización.')
             }));
             return;
         }
@@ -104,7 +106,7 @@ export const UserInfoCardUtils = () => {
             console.error('Error uploading image:', err);
             setError(prevError => ({
                 ...prevError,
-                imageError: err.message || "Error al subir el archivo"
+                imageError: err.message || t('user.card.uploadError', 'Error al subir el archivo')
             }));
             setLocalImageUrl(null);
         } finally {
