@@ -273,7 +273,7 @@ function OpenSpaceProposalModal({ onClose, onSent }) {
 
               {currentUser?.email_user && (
                 <p className="proposal-form__note">
-                  {t('openspace.form.replyTo', { email: currentUser.email_user, defaultValue: 'Si la seleccionamos, te escribiremos a {{email}}.' })}
+                  {t('openspace.form.replyTo', { email: currentUser.email_user, defaultValue: 'Si la seleccionamos, te escribiremos al email de tu cuenta: {{email}}.' })}
                 </p>
               )}
 

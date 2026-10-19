@@ -14,7 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const PROPOSALS_DIR = path.resolve(__dirname, "../../uploads/proposals");
 
 export const FILE_EXTENSIONS = ['.pdf', '.doc', '.docx', '.odt', '.txt', '.rtf'];
-export const FILE_MAX_MB = 10;
+export const FILE_MAX_MB = 5;
 
 export function ensureDir() {
     fs.mkdirSync(PROPOSALS_DIR, { recursive: true });

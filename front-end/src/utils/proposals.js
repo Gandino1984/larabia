@@ -6,7 +6,7 @@
 import axiosInstance from './axiosConfig';
 
 export const PROPOSAL_KINDS = ['poesia', 'relato', 'microrrelato', 'cronica', 'ensayo', 'otro'];
-export const PROPOSAL_LIMITS = { title: 150, summary: 600, text: 50000, fileMb: 10 };
+export const PROPOSAL_LIMITS = { title: 150, summary: 600, text: 50000, fileMb: 5 };
 export const PROPOSAL_FILE_ACCEPT = '.pdf,.doc,.docx,.odt,.txt,.rtf';
 
 const KIND_DEFAULTS = {

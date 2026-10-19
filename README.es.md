@@ -154,7 +154,7 @@ Los roles son marcas independientes en `user`; una cuenta puede tener varias.
 
 **Propuestas de Espacio abierto** (`back-end/controllers/open_space/`, `front-end/src/components/openmic/`):
 
-- `POST /open-space/proposals` (multipart), para cualquier persona que haya iniciado sesión. Lleva un título, el tipo de texto, una explicación breve (≤ 600 caracteres) y el texto: pegado (≤ 50.000 caracteres), en un archivo (PDF, DOC, DOCX, ODT, TXT o RTF, ≤ 10 MB) o las dos cosas.
+- `POST /open-space/proposals` (multipart), para cualquier persona que haya iniciado sesión. Lleva un título, el tipo de texto, una explicación breve (≤ 600 caracteres) y el texto: pegado (≤ 50.000 caracteres), en un archivo (PDF, DOC, DOCX, ODT, TXT o RTF, ≤ 5 MB) o las dos cosas.
 - Como mucho 5 propuestas por persona en 24 horas. Cada una manda un email al equipo (`CONTACT_EMAIL`).
 - Los archivos se guardan en `uploads/proposals/` con nombres aleatorios y **no son públicos**. `index.js` responde 404 a esa carpeta antes de la ruta de estáticos. Quien la envió y los super admins descargan el archivo con `GET /open-space/proposals/:id/file`.
 - Estado: `new` → `read` (cuando un super admin la abre en Admin › Propuestas) → `accepted` / `declined`. Quien la envió lo ve en la sección y puede retirar la propuesta.

@@ -1337,7 +1337,7 @@
   "openspace.form.filePick": "Erantsi fitxategi bat",
   "openspace.form.fileHint": "PDF, Word, ODT, TXT edo RTF, gehienez {{mb}} MB.",
   "openspace.form.consent": "Testua nirea da, eta onartzen dut aldizkariaren taldeak irakurtzea argitaratzea baloratzeko.",
-  "openspace.form.replyTo": "Hautatzen badugu, {{email}} helbidera idatziko dizugu.",
+  "openspace.form.replyTo": "Hautatzen badugu, zure kontuko emailera idatziko dizugu: {{email}}.",
   "openspace.form.sending": "Bidaltzen…",
   "openspace.form.submit": "Bidali proposamena",
   "openspace.mine.confirmWithdraw": "«{{title}}» erretiratu? Ezabatu egingo da, baita bere fitxategia ere, baldin badu.",

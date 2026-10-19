@@ -154,7 +154,7 @@ Roles are independent flags on `user`. One account can hold several.
 
 **Espacio abierto proposals** (`back-end/controllers/open_space/`, `front-end/src/components/openmic/`):
 
-- `POST /open-space/proposals` (multipart), for anyone signed in. It takes a title, the kind of text, a short explanation (≤ 600 characters) and the text: pasted (≤ 50,000 characters), as a file (PDF, DOC, DOCX, ODT, TXT or RTF, ≤ 10 MB), or both.
+- `POST /open-space/proposals` (multipart), for anyone signed in. It takes a title, the kind of text, a short explanation (≤ 600 characters) and the text: pasted (≤ 50,000 characters), as a file (PDF, DOC, DOCX, ODT, TXT or RTF, ≤ 5 MB), or both.
 - At most 5 proposals per person in 24 hours. Each one e-mails the team (`CONTACT_EMAIL`).
 - The files are stored in `uploads/proposals/` under random names and are **not public**. `index.js` answers 404 for that folder before the static route. The sender and super admins download a file through `GET /open-space/proposals/:id/file`.
 - Status: `new` → `read` (when a super admin opens it in Admin › Propuestas) → `accepted` / `declined`. The sender sees it in the section and can withdraw the proposal.

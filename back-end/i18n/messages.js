@@ -443,7 +443,7 @@ export const MESSAGES = {
     "Inicia sesión para enviar una propuesta": { en: "Sign in to send a proposal", eu: "Hasi saioa proposamen bat bidaltzeko" },
     "Has enviado muchas propuestas hoy. Vuelve a intentarlo mañana": { en: "You've sent a lot of proposals today. Try again tomorrow", eu: "Proposamen asko bidali dituzu gaur. Saiatu berriro bihar" },
     "Solo el super-administrador puede ver las propuestas": { en: "Only the super admin can see the proposals", eu: "Super-administratzaileak bakarrik ikus ditzake proposamenak" },
-    "El archivo es demasiado grande (máximo 10 MB)": { en: "The file is too big (10 MB at most)", eu: "Fitxategia handiegia da (gehienez 10 MB)" },
+    "El archivo es demasiado grande (máximo 5 MB)": { en: "The file is too big (5 MB at most)", eu: "Fitxategia handiegia da (gehienez 5 MB)" },
     "Formato de archivo no admitido: usa PDF, DOC, DOCX, ODT, TXT o RTF": { en: "File format not supported: use PDF, DOC, DOCX, ODT, TXT or RTF", eu: "Fitxategi formatu hori ez da onartzen: erabili PDF, DOC, DOCX, ODT, TXT edo RTF" },
     "Error al enviar la propuesta": { en: "The proposal could not be sent", eu: "Ezin izan da proposamena bidali" },
     "Escribe el título de la propuesta": { en: "Write the title of the proposal", eu: "Idatzi proposamenaren izenburua" },

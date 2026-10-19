@@ -1337,7 +1337,7 @@
   "openspace.form.filePick": "Attach a file",
   "openspace.form.fileHint": "PDF, Word, ODT, TXT or RTF, up to {{mb}} MB.",
   "openspace.form.consent": "The text is mine and I agree that the magazine team may read it to consider publishing it.",
-  "openspace.form.replyTo": "If we select it, we will write to you at {{email}}.",
+  "openspace.form.replyTo": "If we select it, we'll write to you at your account's email: {{email}}.",
   "openspace.form.sending": "Sending…",
   "openspace.form.submit": "Send proposal",
   "openspace.mine.confirmWithdraw": "Withdraw “{{title}}”? It will be deleted, along with its file if it has one.",
