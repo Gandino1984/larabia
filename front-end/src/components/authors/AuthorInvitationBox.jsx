@@ -11,18 +11,10 @@ import axiosInstance from '../../utils/axiosConfig';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import { useMetadata } from '../../app_context/MetadataContext';
-import { localDate } from '../../utils/locale';
+import { localDate, serverDate } from '../../utils/locale';
 import './AuthorInvitationBox.css';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// The server sends dates as "YYYY-MM-DD HH:MM:SS" in UTC (which Safari won't
-// parse) or as ISO strings.
-function parseDate(value) {
-  const s = String(value || '');
-  const d = new Date(/^\d{4}-\d\d-\d\d \d/.test(s) ? `${s.replace(' ', 'T')}Z` : s);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
 
 function AuthorInvitationBox({ userId }) {
   const { t, i18n } = useTranslation();
@@ -48,7 +40,7 @@ function AuthorInvitationBox({ userId }) {
 
   if (!invite || (invite.author_invite_status !== 'pending' && invite.author_invite_status !== 'declined')) return null;
 
-  const invitedAt = parseDate(invite.author_invited_at);
+  const invitedAt = serverDate(invite.author_invited_at);
   const when = invitedAt ? localDate(invitedAt, { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
   const resend = async (newEmail) => {

@@ -279,6 +279,56 @@ export const sendContactToDevelopersEmail = async (senderName, senderEmail, mess
   }
 };
 
+// «Espacio abierto»: someone sent a literary proposal. Goes to the magazine
+// (CONTACT_EMAIL), replying goes to the sender. The file isn't attached: the
+// team downloads it from Administración › Propuestas. Returns whether it went out.
+export const sendOpenSpaceProposalEmail = async ({ senderName, senderEmail, title, kindLabel, summary, text, fileName }) => {
+  try {
+    const transporter = createTransporter();
+    const magazineUrl = config.urls.frontend;
+    const { name: BRAND } = await getBrand();
+    // Everything here was typed by the sender: keep it as text in the HTML.
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const excerpt = text ? (text.length > 1500 ? `${text.slice(0, 1500)}…` : text) : '';
+
+    const htmlContent = `
+      <!DOCTYPE html><html><head><style>${baseStyles}</style></head><body>
+        <div class="container">
+          <div class="header">Espacio abierto</div>
+          <div class="content">
+            <p>Ha llegado una propuesta nueva para Espacio abierto:</p>
+            <div style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <strong>De:</strong> ${esc(senderName)} (${esc(senderEmail)})<br>
+              <strong>Título:</strong> ${esc(title)}<br>
+              <strong>Tipo:</strong> ${esc(kindLabel)}
+              ${fileName ? `<br><strong>Archivo:</strong> ${esc(fileName)}` : ''}
+            </div>
+            <div style="background-color: #f8f9fa; padding: 20px; border-left: 4px solid ${ACCENT_COLOR}; border-radius: 5px; margin: 20px 0;">
+              <strong>Explicación:</strong><br><br>${esc(summary).replace(/\n/g, '<br>')}
+            </div>
+            ${excerpt ? `<div style="padding: 0 20px; margin: 20px 0; white-space: pre-wrap;"><strong>Texto:</strong><br><br>${esc(excerpt)}</div>` : ''}
+            <p>Léela entera${fileName ? ' y descarga el archivo' : ''} en Administración › Propuestas.</p>
+            <div style="text-align: center;"><a href="${magazineUrl}" class="button">Ir a ${BRAND}</a></div>
+          </div>
+        </div>
+      </body></html>
+    `;
+
+    await transporter.sendMail({
+      from: `"${BRAND}" <${process.env.EMAIL_USER}>`,
+      to: process.env.CONTACT_EMAIL || process.env.EMAIL_USER,
+      replyTo: senderEmail,
+      subject: `Espacio abierto: «${title}», de ${senderName}`,
+      text: `De: ${senderName} (${senderEmail})\nTítulo: ${title}\nTipo: ${kindLabel}${fileName ? `\nArchivo: ${fileName}` : ''}\n\nExplicación:\n${summary}${excerpt ? `\n\nTexto:\n${excerpt}` : ''}\n\nLéela en Administración › Propuestas: ${magazineUrl}`,
+      html: htmlContent
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending open space proposal email:', error);
+    return false;
+  }
+};
+
 export const sendNewsletterEmail = async (subscriberEmail, subscriberName, articles, introText) => {
   try {
     const transporter = createTransporter();

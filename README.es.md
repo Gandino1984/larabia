@@ -38,6 +38,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
   - Para abrir uno hay que iniciar sesión, y para reservar plaza hace falta suscripción (el equipo no la necesita).
   - Quien lo gestiona invita (la invitación reserva plaza), quita participantes o los bloquea.
   - Cada taller tiene su ubicación en un mapa (Leaflet/OpenStreetMap).
+- **Espacio abierto:** las propuestas literarias que publica la revista. Cualquier persona con cuenta (no hace falta suscripción) puede enviar la suya con un formulario y seguir allí su estado.
 - **Interacción:** me gusta, favoritos, comentarios y seguir proyectos.
 - **Avisos** en la campana de la cabecera: contenido nuevo, invitaciones, respuestas y suscripción.
 - **Formulario de contacto** y **newsletter**.
@@ -60,6 +61,7 @@ Ver [Idiomas (i18n)](#idiomas-i18n).
 
 - usuarios y roles;
 - la cola de revisión (artículos, proyectos y cambios de sección);
+- las propuestas enviadas desde Espacio abierto (leerlas, aceptarlas o descartarlas, descargar el archivo, responder por email);
 - datos de la revista (nombre, eslogan, logos);
 - talleres;
 - apariencia (temas, colores, animaciones);
@@ -134,7 +136,7 @@ Los roles son marcas independientes en `user`; una cuenta puede tener varias.
 **Revisión:**
 
 - Lo de quien no es super admin pasa de `draft` a `pending_approval` (enviar a revisión), y de ahí a `published` (aprobar) o de vuelta a `draft` con un motivo (devolver).
-- Los super admins lo gestionan en Admin › Pendientes. El contador de la cabecera muestra lo que espera.
+- Los super admins lo gestionan en Admin › Pendientes. El contador de la cabecera muestra lo que espera, también las propuestas de Espacio abierto sin leer.
 
 **Secciones** (`back-end/utils/sections.js`, `front-end/src/utils/sections.js`):
 
@@ -148,6 +150,13 @@ Los roles son marcas independientes en `user`; una cuenta puede tener varias.
 3. Al iniciar sesión por primera vez, la persona ve la invitación (un modal y un aviso en la campana):
    - **Aceptar** → pasa a editora.
    - **Rechazar** → sigue como lectora, su perfil se oculta y lo que nadie más firma pasa a firmarse «La Rabia».
+
+**Propuestas de Espacio abierto** (`back-end/controllers/open_space/`, `front-end/src/components/openmic/`):
+
+- `POST /open-space/proposals` (multipart), para cualquier persona que haya iniciado sesión. Lleva un título, el tipo de texto, una explicación breve (≤ 600 caracteres) y el texto: pegado (≤ 50.000 caracteres), en un archivo (PDF, DOC, DOCX, ODT, TXT o RTF, ≤ 10 MB) o las dos cosas.
+- Como mucho 5 propuestas por persona en 24 horas. Cada una manda un email al equipo (`CONTACT_EMAIL`).
+- Los archivos se guardan en `uploads/proposals/` con nombres aleatorios y **no son públicos**. `index.js` responde 404 a esa carpeta antes de la ruta de estáticos. Quien la envió y los super admins descargan el archivo con `GET /open-space/proposals/:id/file`.
+- Estado: `new` → `read` (cuando un super admin la abre en Admin › Propuestas) → `accepted` / `declined`. Quien la envió lo ve en la sección y puede retirar la propuesta.
 
 **Contenido en otros idiomas** (`back-end/utils/translations.js`, `front-end/src/utils/contentLang.js`):
 

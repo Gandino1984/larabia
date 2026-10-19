@@ -32,8 +32,10 @@ import projectSubscriptionModel from './models/project_subscription_model.js';
 import readerSubscriptionModel from './models/reader_subscription_model.js';
 import workshopBlockModel from './models/workshop_block_model.js';
 import workshopInvitationModel from './models/workshop_invitation_model.js';
+import openSpaceProposalModel from './models/open_space_proposal_model.js';
 import subscriptionApiController from './controllers/subscription/subscription_api_controller.js';
 import { PAISAJE_DIR, ensureDirs as ensurePaisajeDirs, cleanupOrphans as cleanupPaisajeOrphans } from './controllers/paisaje/paisaje_store.js';
+import { isPrivateUploadPath } from './controllers/open_space/proposal_store.js';
 
 dotenv.config();
 
@@ -46,6 +48,9 @@ const app = express();
 const INTERNAL_PORT = Number(process.env.BACKEND_LISTEN_PORT) || 3000;
 const EXTERNAL_PORT = config.app.port;
 
+// Files attached to «Espacio abierto» proposals are private (the team and the
+// sender download them through /open-space): never served from here.
+app.use('/uploads', (req, res, next) => (isPrivateUploadPath(req.path) ? res.status(404).end() : next()));
 // Serve uploaded magazine assets (article covers, block images, author profile pics, user profile pics, project covers)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/assets/images', express.static(path.join(__dirname, 'assets', 'images')));
@@ -85,9 +90,10 @@ Promise.all([
     projectSubscriptionModel.sync(),
     readerSubscriptionModel.sync(),
     workshopBlockModel.sync(),
-    workshopInvitationModel.sync()
+    workshopInvitationModel.sync(),
+    openSpaceProposalModel.sync()
 ])
-    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks + invitations)'))
+    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks + invitations/open space proposals)'))
     .catch((err) => console.error('Error syncing engagement tables:', err.message));
 
 // Columns added to tables that already exist in production (idempotent: each

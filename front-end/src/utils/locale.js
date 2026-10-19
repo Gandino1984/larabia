@@ -50,6 +50,16 @@ function basqueDate(d, o) {
   return out;
 }
 
+/**
+ * A date from the API as a Date. The DB answers «2026-10-19 08:51:31» (UTC,
+ * no zone — and Safari won't parse it): read it as UTC. null when it isn't a date.
+ */
+export function serverDate(value) {
+  const s = String(value || '');
+  const d = new Date(/^\d{4}-\d\d-\d\d \d/.test(s) ? `${s.replace(' ', 'T')}Z` : s);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 /** toLocaleDateString in the header's language (value: Date or anything Date takes). */
 export function localDate(value, options = {}) {
   const d = value instanceof Date ? value : new Date(value);

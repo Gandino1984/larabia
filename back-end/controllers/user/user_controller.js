@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail } from "../../services/emailService.js";
 import { isSuperAdminEmail } from "../../config/environment.js";
 import { Op } from "sequelize";
+import { removeFilesOfUser as removeProposalFilesOf } from "../open_space/proposal_store.js";
 
 /**
  * Idempotent super-admin auto-promotion. If the user's email is in the
@@ -541,7 +542,10 @@ async function removeById(id_user) {
             }
         }
 
-        // FK cascades handle article_authors, article_author_invitations, project_authors, author_profiles
+        // Files of their «Espacio abierto» proposals (the rows go with the FK cascade).
+        await removeProposalFilesOf(id_user).catch((err) => console.error('Error deleting proposal files:', err));
+
+        // FK cascades handle article_authors, article_author_invitations, project_authors, author_profiles, open_space_proposals
         await user.destroy();
 
         return { data: id_user, message: 'El usuario se ha eliminado exitosamente.' };

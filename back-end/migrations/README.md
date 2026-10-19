@@ -53,7 +53,7 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `018` | `user.author_invite_status`, `author_invited_by`, `author_invited_at` |
 | `019` | `translations_article`, `translations_block`, `translations_project` |
 
-The tables of `009`, `010`, `011`, `014` and `015` are created at boot with Sequelize `sync()` when missing. The SQL files stay the reference for a fresh database.
+The tables of `009`, `010`, `011`, `014`, `015` and `020` are created at boot with Sequelize `sync()` when missing. The SQL files stay the reference for a fresh database.
 
 ## Tables
 
@@ -78,6 +78,7 @@ The tables of `009`, `010`, `011`, `014` and `015` are created at boot with Sequ
 | `article_likes`, `article_favorites`, `article_comments` | Readers' engagement |
 | `project_subscriptions` | Readers following a project |
 | `reader_subscriptions` | Paid subscriptions (Stripe customer and subscription) |
+| `open_space_proposals` | Literary proposals sent from Espacio abierto (text or a private file in `uploads/proposals/`, status) |
 
 ## Differences from uribarri.online
 

@@ -13,6 +13,8 @@ back-end/uploads/author-profiles/*
 back-end/uploads/user-profiles/*
 back-end/uploads/magazine-metadata/*
 back-end/uploads/paisaje/
+# Espacio abierto proposals: private files (created at boot)
+back-end/uploads/proposals/
 !back-end/uploads/magazine/.gitkeep
 !back-end/uploads/article_blocks/.gitkeep
 !back-end/uploads/author-profiles/.gitkeep

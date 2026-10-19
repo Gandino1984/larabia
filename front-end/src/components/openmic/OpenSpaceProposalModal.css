@@ -1,0 +1,365 @@
+/* magazine-front/src/components/openmic/OpenSpaceProposalModal.css
+   The «Espacio abierto» proposal form. Mobile first: on phones it takes the
+   whole screen and scrolls; from 600px it's a centred dialog. */
+
+.proposal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.proposal-modal {
+  position: relative;
+  width: 100%;
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.5rem 1rem calc(1.5rem + env(safe-area-inset-bottom));
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+.proposal-modal__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: #ececec;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.proposal-modal__close:hover:not(:disabled),
+.proposal-modal__close:focus-visible {
+  background: #000000;
+  color: #ffffff;
+}
+
+.proposal-modal h2 {
+  margin: 0 3rem 0.5rem 0;
+  font-family: 'Alfa Slab One', serif;
+  font-size: 1.4rem;
+  line-height: 1.25;
+}
+
+.proposal-modal__lead {
+  margin: 0 0 1.25rem;
+  color: #555555;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+/* ---- the form ---- */
+.proposal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.proposal-form__field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.proposal-form__field > label,
+.proposal-form__content legend {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.proposal-form__sublabel {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.proposal-form input[type='text'],
+.proposal-form select,
+.proposal-form textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0.7rem 0.85rem;
+  border: 2px solid #d6d6d6;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.proposal-form textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.proposal-form select.is-placeholder {
+  color: #777777;
+}
+
+.proposal-form input[type='text']:focus,
+.proposal-form select:focus,
+.proposal-form textarea:focus {
+  border-color: #1a1a1a;
+  outline: none;
+}
+
+.proposal-form [aria-invalid='true'] {
+  border-color: #dc2626 !important;
+}
+
+.proposal-form__count {
+  align-self: flex-end;
+  color: #777777;
+  font-size: 0.8rem;
+}
+
+.proposal-form__count.is-near {
+  color: #b45309;
+}
+
+.proposal-form__hint {
+  margin: 0;
+  color: #666666;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.proposal-form__error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.proposal-form__error--box {
+  padding: 0.7rem 0.85rem;
+  border-radius: 6px;
+  background: #fff1f1;
+}
+
+.proposal-form__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.9rem;
+  border: 2px solid #ececec;
+  border-radius: 8px;
+}
+
+.proposal-form__content.has-error {
+  border-color: #dc2626;
+}
+
+.proposal-form__content legend {
+  padding: 0 0.35rem;
+}
+
+/* The real file input stays reachable for the label but invisible. */
+.proposal-form__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.proposal-form__file-pick {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  border: 2px dashed #9a9a9a;
+  border-radius: 6px;
+  color: #1a1a1a;
+  font-size: 0.85rem;
+  font-weight: 700;
+  /* Works as a button: written like one. */
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.proposal-form__file-pick:hover,
+.proposal-form__file-input:focus-visible + .proposal-form__file-pick {
+  border-color: #1a1a1a;
+  background: #f5f5f5;
+}
+
+.proposal-form__file {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  background: #f3f3f3;
+}
+
+.proposal-form__file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.proposal-form__file-remove {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid #1a1a1a;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.proposal-form__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.proposal-form__consent input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0.15rem 0 0;
+  accent-color: #dc2626;
+}
+
+.proposal-form__consent label {
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.proposal-form__note {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-left: 4px solid #dc2626;
+  border-radius: 4px;
+  background: #fff5f5;
+  color: #444444;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.proposal-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.proposal-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0.8rem 1.25rem;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.proposal-modal__btn:hover:not(:disabled),
+.proposal-modal__btn:focus-visible {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+.proposal-modal__btn--primary {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.proposal-modal__btn--primary:hover:not(:disabled),
+.proposal-modal__btn--primary:focus-visible {
+  border-color: #b91c1c;
+  background: #b91c1c;
+}
+
+.proposal-modal__btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ---- sent ---- */
+.proposal-modal__done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 2rem 0.5rem 1rem;
+  text-align: center;
+}
+
+.proposal-modal__done svg {
+  color: #16a34a;
+}
+
+.proposal-modal__done h2 {
+  margin: 0;
+}
+
+.proposal-modal__done p {
+  margin: 0 0 0.6rem;
+  color: #444444;
+  line-height: 1.6;
+}
+
+@media (min-width: 600px) {
+  .proposal-overlay {
+    align-items: center;
+    padding: 1.5rem;
+  }
+
+  .proposal-modal {
+    max-width: 620px;
+    max-height: calc(100vh - 3rem);
+    max-height: calc(100dvh - 3rem);
+    padding: 2.25rem 2rem 2rem;
+    border-radius: 14px;
+  }
+
+  .proposal-modal h2 {
+    font-size: 1.6rem;
+  }
+
+  .proposal-modal__actions {
+    flex-direction: row;
+  }
+
+  .proposal-modal__actions .proposal-modal__btn {
+    flex: 1;
+  }
+}

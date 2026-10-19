@@ -1,0 +1,312 @@
+/* Administración › Propuestas (AdminProposalsTab). Mobile first. The cards
+   are white: they don't inherit the admin page's light text. */
+
+.admin-proposals__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.admin-proposals__header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.admin-proposals__refresh {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-proposals__intro {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+.admin-proposals__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.admin-proposals__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid #cfcfcf;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-proposals__filter.is-active {
+  border-color: #111111;
+  background: #111111;
+  color: #ffffff;
+}
+
+.admin-proposals__filter-count {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.08);
+  font-size: 11px;
+  text-align: center;
+}
+
+.admin-proposals__filter.is-active .admin-proposals__filter-count {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-proposals__empty {
+  padding: 32px 0;
+  text-align: center;
+  opacity: 0.75;
+}
+
+.admin-proposals__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-proposal {
+  overflow: hidden;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+.admin-proposal.is-new {
+  border-left: 4px solid #e53935;
+}
+
+/* A clickable row holding text: keeps its case. */
+.admin-proposal__summary {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 14px 44px 14px 14px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.admin-proposal__summary:hover,
+.admin-proposal__summary:focus-visible {
+  background: #f7f7f7;
+}
+
+.admin-proposal__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.admin-proposal__title {
+  min-width: 0;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.admin-proposal__status {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f1f1f1;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-proposal__status--new { background: #fde8e8; color: #b91c1c; }
+.admin-proposal__status--read { background: #e0ecff; color: #1e40af; }
+.admin-proposal__status--accepted { background: #dcfce7; color: #166534; }
+.admin-proposal__status--declined { background: #f3f4f6; color: #4b5563; }
+
+.admin-proposal__meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  color: #666666;
+  font-size: 13px;
+}
+
+.admin-proposal__chevron {
+  position: absolute;
+  top: 16px;
+  right: 14px;
+  transition: transform 0.2s ease;
+}
+
+.admin-proposal__summary[aria-expanded='true'] .admin-proposal__chevron {
+  transform: rotate(180deg);
+}
+
+.admin-proposal__detail {
+  padding: 4px 14px 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.admin-proposal__label {
+  margin: 14px 0 6px;
+  color: #666666;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.admin-proposal__summary-text {
+  margin: 0;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-proposal__text {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 12px;
+  border-radius: 6px;
+  background: #f7f7f7;
+  font-family: Georgia, serif;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* A file name: keeps its case. */
+.admin-proposal__file {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 40px;
+  margin-top: 14px;
+  padding: 8px 12px;
+  border: 1px solid #d6d6d6;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 14px;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.admin-proposal__file span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-proposal__from {
+  margin: 14px 0 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.admin-proposal__from a {
+  color: inherit;
+}
+
+.admin-proposal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.admin-proposal__status-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-proposal__status-field select {
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid #cfcfcf;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 14px;
+}
+
+.admin-proposal__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid #111111;
+  border-radius: 6px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.admin-proposal__btn--danger {
+  border-color: #fbeaea;
+  background: #fbeaea;
+  color: #a72020;
+}
+
+.admin-proposal__btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+@media (min-width: 769px) {
+  .admin-proposal__summary {
+    padding: 16px 48px 16px 18px;
+  }
+
+  .admin-proposal__detail {
+    padding: 4px 18px 18px;
+  }
+
+  .admin-proposal__btn--danger {
+    margin-left: auto;
+  }
+}

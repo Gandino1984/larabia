@@ -38,6 +38,7 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
   - Opening one needs a sign-in, and booking a place needs a subscription (the team doesn't need one).
   - Managers invite people (an invitation holds a place), remove participants or block them.
   - Each workshop has a location on a map (Leaflet/OpenStreetMap).
+- **Espacio abierto** (open space): the literary proposals the magazine publishes. Anyone with an account (no subscription needed) can send one through a form, then follow its status there.
 - **Engagement:** likes, favourites, comments and following projects.
 - **Notifications** in the header bell: new content, invitations, answers and the subscription.
 - **Contact form** and **newsletter**.
@@ -60,6 +61,7 @@ See [Languages (i18n)](#languages-i18n).
 
 - users and roles;
 - the review queue (articles, projects and section changes);
+- the proposals sent from Espacio abierto (read them, accept or decline them, download the file, reply by e-mail);
 - magazine details (name, slogan, logos);
 - workshops;
 - appearance (theme presets, colours, animations);
@@ -134,7 +136,7 @@ Roles are independent flags on `user`. One account can hold several.
 **Review workflow:**
 
 - A non-super-admin's work goes from `draft` to `pending_approval` (*send for review*), and from there to `published` (approve) or back to `draft` with a reason (reject).
-- Super admins work through it in Admin › Pendientes. The header badge counts what's waiting.
+- Super admins work through it in Admin › Pendientes. The header badge counts what's waiting, including unread Espacio abierto proposals.
 
 **Sections** (`back-end/utils/sections.js`, `front-end/src/utils/sections.js`):
 
@@ -148,6 +150,13 @@ Roles are independent flags on `user`. One account can hold several.
 3. On their first sign-in, the person sees the invitation (a modal and a bell item):
    - **Accept** → they become an editor.
    - **Decline** → they stay a reader, their profile is hidden, and what nobody else signs is signed «La Rabia».
+
+**Espacio abierto proposals** (`back-end/controllers/open_space/`, `front-end/src/components/openmic/`):
+
+- `POST /open-space/proposals` (multipart), for anyone signed in. It takes a title, the kind of text, a short explanation (≤ 600 characters) and the text: pasted (≤ 50,000 characters), as a file (PDF, DOC, DOCX, ODT, TXT or RTF, ≤ 10 MB), or both.
+- At most 5 proposals per person in 24 hours. Each one e-mails the team (`CONTACT_EMAIL`).
+- The files are stored in `uploads/proposals/` under random names and are **not public**. `index.js` answers 404 for that folder before the static route. The sender and super admins download a file through `GET /open-space/proposals/:id/file`.
+- Status: `new` → `read` (when a super admin opens it in Admin › Propuestas) → `accepted` / `declined`. The sender sees it in the section and can withdraw the proposal.
 
 **Content in other languages** (`back-end/utils/translations.js`, `front-end/src/utils/contentLang.js`):
 

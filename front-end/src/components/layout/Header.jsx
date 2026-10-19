@@ -59,7 +59,7 @@ function Header({ ready = true }) {
   // Titles in the language chosen here (or the original — utils/contentLang.js).
   const lang = i18n.language;
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
-  const { totalPending } = usePendingReview();
+  const { totalAttention } = usePendingReview();
   const { notifications, count: notifCount, markAllSeen } = useNotifications();
   const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, showRecommendationsModal, closeRecommendationsModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
@@ -737,9 +737,9 @@ function Header({ ready = true }) {
           {isSuperAdmin && (
             <button className="nav-link nav-link--admin" onClick={handleAdminClick} title={t('header.admin.title', 'Administración')}>
               <RollText text={t('header.admin.label', 'Admin')} />
-              {totalPending > 0 && (
-                <span className="admin-pending-badge" title={t('header.admin.pending', { count: totalPending, defaultValue: '{{count}} pendiente(s) de revisión' })}>
-                  {totalPending}
+              {totalAttention > 0 && (
+                <span className="admin-pending-badge" title={t('header.admin.pending', { count: totalAttention, defaultValue: '{{count}} pendiente(s) de revisión' })}>
+                  {totalAttention}
                 </span>
               )}
             </button>
@@ -986,8 +986,8 @@ function Header({ ready = true }) {
               <button className="mobile-nav-link" onClick={handleAdminClick}>
                 <Shield size={18} />
                 <span>{t('header.admin.label', 'Admin')}</span>
-                {totalPending > 0 && (
-                  <span className="admin-pending-badge">{totalPending}</span>
+                {totalAttention > 0 && (
+                  <span className="admin-pending-badge">{totalAttention}</span>
                 )}
               </button>
             )}

@@ -5,6 +5,7 @@ import { useUI } from '../../../app_context/UIContext';
 import { usePendingReview } from '../../../app_context/PendingReviewContext';
 import AdminUsersTab from './AdminUsersTab';
 import AdminPendingTab from './AdminPendingTab';
+import AdminProposalsTab from './AdminProposalsTab';
 import AdminMetadataTab from './AdminMetadataTab';
 import AdminAppearanceTab from './AdminAppearanceTab';
 import AdminNavTab from './AdminNavTab';
@@ -14,6 +15,7 @@ import './AdminPage.css';
 const TABS = [
   { key: 'users', label: 'Usuarios' },
   { key: 'pending', label: 'Pendientes de aprobación' },
+  { key: 'proposals', label: 'Propuestas' },
   { key: 'metadata', label: 'Datos de la revista' },
   { key: 'workshops', label: 'Talleres' },
   { key: 'appearance', label: 'Apariencia' },
@@ -25,7 +27,7 @@ function AdminPage() {
   const { t } = useTranslation();
   const { isSuperAdmin } = useAuth();
   const { navigateToHome } = useUI();
-  const { totalPending } = usePendingReview();
+  const { totalPending, newProposals } = usePendingReview();
   const [activeTab, setActiveTab] = useState('users');
 
   if (!isSuperAdmin) {
@@ -60,6 +62,9 @@ function AdminPage() {
             {tab.key === 'pending' && totalPending > 0 && (
               <span className="admin-page__tab-badge">{totalPending}</span>
             )}
+            {tab.key === 'proposals' && newProposals > 0 && (
+              <span className="admin-page__tab-badge">{newProposals}</span>
+            )}
           </button>
         ))}
       </nav>
@@ -67,6 +72,7 @@ function AdminPage() {
       <main className="admin-page__body">
         {activeTab === 'users' && <AdminUsersTab />}
         {activeTab === 'pending' && <AdminPendingTab />}
+        {activeTab === 'proposals' && <AdminProposalsTab />}
         {activeTab === 'metadata' && <AdminMetadataTab />}
         {activeTab === 'workshops' && <AdminWorkshopsTab />}
         {activeTab === 'appearance' && <AdminAppearanceTab />}

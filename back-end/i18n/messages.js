@@ -439,6 +439,28 @@ export const MESSAGES = {
     "Workshop ID is required": { es: "El ID del taller es obligatorio", eu: "Tailerraren IDa derrigorrezkoa da" },
     "articleIds array is required and must not be empty": { es: "Hay que indicar al menos un artículo", eu: "Artikulu bat adierazi behar da gutxienez" },
     "id_user is required": { es: "El ID de usuario es obligatorio", eu: "Erabiltzailearen IDa derrigorrezkoa da" },
+    // Espacio abierto (open_space_api_controller.js)
+    "Inicia sesión para enviar una propuesta": { en: "Sign in to send a proposal", eu: "Hasi saioa proposamen bat bidaltzeko" },
+    "Has enviado muchas propuestas hoy. Vuelve a intentarlo mañana": { en: "You've sent a lot of proposals today. Try again tomorrow", eu: "Proposamen asko bidali dituzu gaur. Saiatu berriro bihar" },
+    "Solo el super-administrador puede ver las propuestas": { en: "Only the super admin can see the proposals", eu: "Super-administratzaileak bakarrik ikus ditzake proposamenak" },
+    "El archivo es demasiado grande (máximo 10 MB)": { en: "The file is too big (10 MB at most)", eu: "Fitxategia handiegia da (gehienez 10 MB)" },
+    "Formato de archivo no admitido: usa PDF, DOC, DOCX, ODT, TXT o RTF": { en: "File format not supported: use PDF, DOC, DOCX, ODT, TXT or RTF", eu: "Fitxategi formatu hori ez da onartzen: erabili PDF, DOC, DOCX, ODT, TXT edo RTF" },
+    "Error al enviar la propuesta": { en: "The proposal could not be sent", eu: "Ezin izan da proposamena bidali" },
+    "Escribe el título de la propuesta": { en: "Write the title of the proposal", eu: "Idatzi proposamenaren izenburua" },
+    "El título es demasiado largo (máximo 150 caracteres)": { en: "The title is too long (150 characters at most)", eu: "Izenburua luzeegia da (gehienez 150 karaktere)" },
+    "Explica brevemente tu propuesta": { en: "Explain your proposal briefly", eu: "Azaldu laburki zure proposamena" },
+    "La explicación es demasiado larga (máximo 600 caracteres)": { en: "The explanation is too long (600 characters at most)", eu: "Azalpena luzeegia da (gehienez 600 karaktere)" },
+    "El texto es demasiado largo: envíalo como archivo": { en: "The text is too long: send it as a file", eu: "Testua luzeegia da: bidali fitxategi gisa" },
+    "Pega el texto o adjunta un archivo": { en: "Paste the text or attach a file", eu: "Itsatsi testua edo erantsi fitxategi bat" },
+    "Confirma que el texto es tuyo": { en: "Confirm that the text is yours", eu: "Baieztatu testua zurea dela" },
+    "Propuesta enviada. ¡Gracias!": { en: "Proposal sent. Thank you!", eu: "Proposamena bidalita. Eskerrik asko!" },
+    "Error al cargar las propuestas": { en: "The proposals could not be loaded", eu: "Ezin izan dira proposamenak kargatu" },
+    "Estado no válido": { en: "Invalid status", eu: "Egoera baliogabea" },
+    "Propuesta no encontrada": { en: "Proposal not found", eu: "Ez da proposamena aurkitu" },
+    "Error al actualizar la propuesta": { en: "The proposal could not be updated", eu: "Ezin izan da proposamena eguneratu" },
+    "No tienes permiso para esta propuesta": { en: "You don't have permission for this proposal", eu: "Ez duzu baimenik proposamen honetarako" },
+    "Propuesta eliminada": { en: "Proposal deleted", eu: "Proposamena ezabatuta" },
+    "Error al eliminar la propuesta": { en: "The proposal could not be deleted", eu: "Ezin izan da proposamena ezabatu" },
 };
 
 // Messages with values: the value(s) are kept, in order ($1, $2…).
