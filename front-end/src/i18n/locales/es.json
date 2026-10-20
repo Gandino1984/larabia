@@ -1455,5 +1455,7 @@
   "workshops.editor.need.dayIncomplete": "La fecha está incompleta: pon el día, el mes y el año",
   "workshops.editor.need.timeIncomplete": "La hora está incompleta: pon la hora y los minutos",
   "workshops.editor.need.time": "Pon también la hora del taller",
-  "workshops.editor.need.day": "Pon también la fecha del taller"
+  "workshops.editor.need.day": "Pon también la fecha del taller",
+  "subscription.notOpenWorkshops": "Este taller es solo para socios/as de la revista. Pronto podrás hacerte socio/a.",
+  "subscription.notOpen": "Pronto podrás hacerte socio/a de la revista."
 }

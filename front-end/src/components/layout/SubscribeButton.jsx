@@ -4,7 +4,9 @@
 // the "Publica" button on the right). Opens the plan picker (SubscribeModal);
 // readers who aren't signed in are sent to log in first. Hidden for readers
 // who already subscribe and wherever the header is hidden (editor, article
-// reader). While Stripe isn't configured only super admins see it (preview).
+// reader). Only for whoever can become a member (SubscriptionContext
+// canJoin): while it isn't open to the public, admins and super admins only;
+// while Stripe isn't configured, super admins (preview).
 import { useEffect, useRef, useState } from 'react';
 import { Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +21,7 @@ let slideInPlayed = false;
 
 function SubscribeButton({ ready = true }) {
   const { t } = useTranslation();
-  const { currentUser, isSuperAdmin } = useAuth();
+  const { currentUser } = useAuth();
   const { navigateToLogin, showInfo, showSuccess, showEditor, showWorkshopEditor, showArticleDetail } = useUI();
   const subscription = useSubscription();
   const [isIn, setIsIn] = useState(slideInPlayed);
@@ -52,7 +54,7 @@ function SubscribeButton({ ready = true }) {
   // check), so it renders even while the button itself is hidden.
   const modal = subscription?.showModal ? <SubscribeModal onClose={subscription.closeModal} /> : null;
   if (!subscription || subscription.isSubscriber) return modal;
-  if (!subscription.enabled && !isSuperAdmin) return modal;
+  if (!subscription.canJoin) return modal;
 
   const isHidden = showEditor || showWorkshopEditor || showArticleDetail;
   const label = t('subscription.button', 'Hazte socio/a');

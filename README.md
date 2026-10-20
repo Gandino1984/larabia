@@ -72,6 +72,7 @@ See [Languages (i18n)](#languages-i18n).
 
 - Members get a badge and can book workshops.
 - The feature stays off until the `STRIPE_*` variables are set.
+- **Not public yet:** while `MEMBERSHIP_PUBLIC` isn't `true` (server `.env`), only admins and super admins see «Hazte socio/a» and can pay — to test it. Anyone else sees no button, members-only workshops just say they're for socios/as, and the server refuses to start a payment (`not_open`). Set it to `true` and restart the back-end to open it.
 - A super admin can make someone a **complimentary member** (*socio/a de cortesía*) in Admin › Usuarios: they count as a member (same badge, workshops) without Stripe. It's the `complimentary` column of `reader_subscriptions`, which the Stripe sync never writes.
 
 ## Stack

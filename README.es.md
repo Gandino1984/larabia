@@ -72,6 +72,7 @@ Ver [Idiomas (i18n)](#idiomas-i18n).
 
 - Los socios/as reciben una insignia y pueden reservar plaza en los talleres.
 - La función queda apagada hasta configurar las variables `STRIPE_*`.
+- **Todavía no es pública:** mientras `MEMBERSHIP_PUBLIC` no sea `true` (`.env` del servidor), solo admins y super admins ven «Hazte socio/a» y pueden pagar, para probarlo. El resto no ve el botón, los talleres para socios/as solo avisan de que lo son, y el servidor no deja iniciar un pago (`not_open`). Para abrirlo, ponla a `true` y reinicia el back-end.
 - Un super admin puede hacer a alguien **socio/a de cortesía** en Admin › Usuarios: cuenta como socio/a (misma insignia, talleres) sin pasar por Stripe. Es la columna `complimentary` de `reader_subscriptions`, que la sincronización con Stripe nunca escribe.
 
 ## Tecnología

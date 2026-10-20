@@ -11,6 +11,9 @@
 //   STRIPE_PRICE_MONTHLY    price_… (recurring monthly price)
 //   STRIPE_PRICE_YEARLY     price_… (recurring yearly price)
 //   FRONTEND_URL            where Stripe sends the reader back
+//   MEMBERSHIP_PUBLIC       'true' = anyone can become a member. Otherwise
+//                           (default) only admins and super admins see «Hazte
+//                           socio/a» and can pay — to test it before opening it.
 // Until STRIPE_SECRET_KEY and at least one price are set, the feature reports
 // itself as disabled and the front-end hides the subscribe button.
 //
@@ -31,6 +34,7 @@ const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SEC
 const frontendUrl = () => (process.env.FRONTEND_URL || 'https://larabiamag.com').split(',')[0].trim().replace(/\/$/, '');
 
 const isEnabled = () => !!stripe && (!!PLANS.monthly || !!PLANS.yearly);
+const isPublic = () => process.env.MEMBERSHIP_PUBLIC === 'true';
 const planForPrice = (priceId) => Object.keys(PLANS).find((k) => PLANS[k] && PLANS[k] === priceId) || null;
 
 // Price amounts are read from Stripe once and cached (they rarely change).
@@ -143,12 +147,12 @@ function syncSubscription(sub, userIdHint) {
 
 // GET /subscription/config — is it on, and the plan prices.
 async function getConfig(req, res) {
-    if (!isEnabled()) return res.json({ error: null, data: { enabled: false } });
+    if (!isEnabled()) return res.json({ error: null, data: { enabled: false, public: false } });
     try {
-        res.json({ error: null, data: { enabled: true, prices: await getPrices() } });
+        res.json({ error: null, data: { enabled: true, public: isPublic(), prices: await getPrices() } });
     } catch (err) {
         console.error('[subscription] config error:', err.message);
-        res.json({ error: null, data: { enabled: false } });
+        res.json({ error: null, data: { enabled: false, public: false } });
     }
 }
 
@@ -208,6 +212,10 @@ async function createCheckout(req, res) {
     if (!isEnabled()) return res.status(503).json({ error: 'Todavía no es posible hacerse socio/a' });
     const user = await getRequestUser(req);
     if (!user) return res.status(401).json({ error: 'Inicia sesión para hacerte socio/a' });
+    const role = roleSnapshot(user);
+    if (!isPublic() && !role.isAdmin && !role.isSuperAdmin) {
+        return res.status(403).json({ error: 'Hacerse socio/a todavía no está abierto', code: 'not_open' });
+    }
     const plan = req.body?.plan;
     const priceId = PLANS[plan];
     if (!priceId) return res.status(400).json({ error: 'Plan no válido' });

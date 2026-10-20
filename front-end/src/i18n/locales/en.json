@@ -1455,5 +1455,7 @@
   "workshops.editor.need.dayIncomplete": "The date is incomplete: fill in the day, month and year",
   "workshops.editor.need.timeIncomplete": "The time is incomplete: fill in the hour and minutes",
   "workshops.editor.need.time": "Add the time of the workshop too",
-  "workshops.editor.need.day": "Add the date of the workshop too"
+  "workshops.editor.need.day": "Add the date of the workshop too",
+  "subscription.notOpenWorkshops": "This workshop is only for the magazine’s members. You’ll be able to become a member soon.",
+  "subscription.notOpen": "You’ll be able to become a member of the magazine soon."
 }

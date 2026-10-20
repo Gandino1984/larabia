@@ -6,11 +6,19 @@
 // their profile photos). Starts Stripe Checkout / the customer portal (both
 // Stripe-hosted: card data never touches our site) and handles the return from
 // Checkout (?subscription=success|cancel).
+//
+// Who can become a member (`canJoin`): everyone once the server opens it
+// (MEMBERSHIP_PUBLIC); until then only admins and super admins, to test it.
+// For anyone else «Hazte socio/a» is hidden and the plan picker never opens
+// (a members-only workshop just says so).
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
 import { useUI } from './UIContext';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/config';
+
+const i18nT = (key, def) => i18n.t(key, def);
 
 const SubscriptionContext = createContext(null);
 
@@ -25,9 +33,9 @@ const initialCheckoutResult = (() => {
 
 export const SubscriptionProvider = ({ children }) => {
   const { t } = useTranslation();
-  const { currentUser } = useAuth();
-  const { showError } = useUI();
-  const [config, setConfig] = useState({ enabled: false, prices: {} });
+  const { currentUser, isAdmin, isSuperAdmin } = useAuth();
+  const { showError, showInfo } = useUI();
+  const [config, setConfig] = useState({ enabled: false, public: false, prices: {} });
   const [mine, setMine] = useState(null);
   // True once the signed-in reader's subscription has been fetched.
   const [mineReady, setMineReady] = useState(false);
@@ -148,8 +156,12 @@ export const SubscriptionProvider = ({ children }) => {
     [subscriberIds, mine?.active, userId]
   );
 
+  // Super admins also get a preview while Stripe isn't connected.
+  const canJoin = config.enabled ? (!!config.public || isAdmin || isSuperAdmin) : isSuperAdmin;
+
   const value = {
     enabled: !!config.enabled,
+    canJoin,
     prices: config.prices || {},
     isSubscriber: !!mine?.active,
     mine,
@@ -164,9 +176,15 @@ export const SubscriptionProvider = ({ children }) => {
     showModal,
     modalReason,
     openModal: useCallback((reason = null) => {
+      if (!canJoin) {
+        showInfo(reason === 'workshops'
+          ? i18nT('subscription.notOpenWorkshops', 'Este taller es solo para socios/as de la revista. Pronto podrás hacerte socio/a.')
+          : i18nT('subscription.notOpen', 'Pronto podrás hacerte socio/a de la revista.'));
+        return;
+      }
       setModalReason(typeof reason === 'string' ? reason : null);
       setShowModal(true);
-    }, []),
+    }, [canJoin, showInfo]),
     closeModal: useCallback(() => setShowModal(false), [])
   };
   return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;

@@ -65,6 +65,8 @@ services:
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
       - STRIPE_PRICE_MONTHLY=${STRIPE_PRICE_MONTHLY:-}
       - STRIPE_PRICE_YEARLY=${STRIPE_PRICE_YEARLY:-}
+      # 'true' opens «Hazte socio/a» to everyone; otherwise only admins (testing).
+      - MEMBERSHIP_PUBLIC=${MEMBERSHIP_PUBLIC:-false}
       # nginx-proxy + Let's Encrypt companion read these labels to route traffic + mint a cert.
       - VIRTUAL_HOST=${API_VIRTUAL_HOST}
       - VIRTUAL_PORT=3000

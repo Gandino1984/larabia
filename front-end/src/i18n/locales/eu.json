@@ -1455,5 +1455,7 @@
   "workshops.editor.need.dayIncomplete": "Data osatu gabe dago: jarri eguna, hilabetea eta urtea",
   "workshops.editor.need.timeIncomplete": "Ordua osatu gabe dago: jarri ordua eta minutuak",
   "workshops.editor.need.time": "Jarri tailerraren ordua ere",
-  "workshops.editor.need.day": "Jarri tailerraren data ere"
+  "workshops.editor.need.day": "Jarri tailerraren data ere",
+  "subscription.notOpenWorkshops": "Tailer hau aldizkariko bazkideentzat da soilik. Laster egin ahal izango zara bazkide.",
+  "subscription.notOpen": "Laster egin ahal izango zara aldizkariko bazkide."
 }

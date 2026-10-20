@@ -468,6 +468,7 @@ export const MESSAGES = {
     "Solo se puede invitar a socios/as de la revista": { en: "Only members of the magazine can be invited", eu: "Aldizkariko bazkideak bakarrik gonbida daitezke" },
     "Error al actualizar el seguimiento del proyecto": { en: "Following the project couldn't be updated", eu: "Ezin izan da proiektuaren jarraipena eguneratu" },
     "Error al obtener los proyectos que sigues": { en: "The projects you follow couldn't be loaded", eu: "Ezin izan dira jarraitzen dituzun proiektuak lortu" },
+    "Hacerse socio/a todavía no está abierto": { en: "Becoming a member isn't open yet", eu: "Bazkide egitea ez dago oraindik irekita" },
 };
 
 // Messages with values: the value(s) are kept, in order ($1, $2…).
