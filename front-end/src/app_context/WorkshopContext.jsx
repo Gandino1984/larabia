@@ -17,7 +17,9 @@ import { useAuth } from './AuthContext';
 import { useUI } from './UIContext';
 
 const WorkshopContext = createContext(null);
-const EMPTY_FEED = { invitations: [], responses: [] };
+// invitations to me · answers to mine · extra-place requests on the workshops I
+// manage · answers to my requests.
+const EMPTY_FEED = { invitations: [], responses: [], spot_requests: [], spot_answers: [] };
 
 export const WorkshopProvider = ({ children }) => {
   const { currentUser } = useAuth();
@@ -164,7 +166,7 @@ export const WorkshopProvider = ({ children }) => {
     if (!userId) { setInvitationFeed(EMPTY_FEED); return; }
     try {
       const res = await axiosInstance.get('/magazine-workshop/invitations/feed', { headers: { 'x-user-id': userId } });
-      setInvitationFeed(res.data?.data || EMPTY_FEED);
+      setInvitationFeed({ ...EMPTY_FEED, ...(res.data?.data || {}) });
     } catch {
       // Keep what we had; the next refresh will try again.
     }
@@ -214,6 +216,63 @@ export const WorkshopProvider = ({ children }) => {
     setInvitationFeed(prev => ({ ...prev, responses: prev.responses.filter(r => !ids.includes(r.id_invitation)) }));
     try {
       await axiosInstance.post('/magazine-workshop/invitations/responses/seen', { ids }, { headers: { 'x-user-id': userId } });
+    } catch {
+      // They'll show again on the next refresh.
+    }
+  }, [userId]);
+
+  // ── Extra places in a full workshop (socios/as ask, managers answer) ──
+
+  const requestExtraSpot = useCallback(async (id, message) => {
+    try {
+      const res = await axiosInstance.post(`/magazine-workshop/spot-requests/${id}`, { message }, authHeader());
+      showSuccess(res.data?.success || i18n.t('messages.success.done', 'Hecho'));
+      if (id === selectedIdRef.current) await fetchWorkshopById(id);
+      return { success: true };
+    } catch (err) {
+      const msg = err.response?.data?.error || i18n.t('workshops.extra.requestError', 'No se pudo enviar la solicitud');
+      showError(msg);
+      return { error: msg, code: err.response?.data?.code };
+    }
+  }, [authHeader, showSuccess, showError, fetchWorkshopById]);
+
+  const withdrawExtraSpot = useCallback(async (id) => {
+    try {
+      const res = await axiosInstance.delete(`/magazine-workshop/spot-requests/${id}`, authHeader());
+      showSuccess(res.data?.success || i18n.t('messages.success.done', 'Hecho'));
+      if (id === selectedIdRef.current) await fetchWorkshopById(id);
+      return { success: true };
+    } catch (err) {
+      showError(err.response?.data?.error || i18n.t('workshops.extra.withdrawError', 'No se pudo retirar la solicitud'));
+      return { error: true };
+    }
+  }, [authHeader, showSuccess, showError, fetchWorkshopById]);
+
+  // response: 'accept' (opens one more place and books it) | 'decline'.
+  const respondExtraSpot = useCallback(async (workshopId, requesterId, response) => {
+    try {
+      const res = await axiosInstance.post(`/magazine-workshop/manage/${workshopId}/spot-requests/${requesterId}`, { response }, authHeader());
+      showSuccess(res.data?.success || i18n.t('messages.success.done', 'Hecho'));
+      setInvitationFeed(prev => ({
+        ...prev,
+        spot_requests: (prev.spot_requests || []).filter(r => !(r.workshop?.id_workshop === workshopId && r.requester?.id_user === requesterId))
+      }));
+      if (workshopId === selectedIdRef.current) await fetchWorkshopById(workshopId);
+      fetchWorkshops();
+      return { success: true };
+    } catch (err) {
+      showError(err.response?.data?.error || i18n.t('workshops.extra.respondError', 'No se pudo responder a la solicitud'));
+      refreshInvitationFeed();
+      return { error: true };
+    }
+  }, [authHeader, showSuccess, showError, fetchWorkshopById, fetchWorkshops, refreshInvitationFeed]);
+
+  // The requester has seen these answers: they leave the bell.
+  const markSpotAnswersSeen = useCallback(async (ids) => {
+    if (!userId || !ids?.length) return;
+    setInvitationFeed(prev => ({ ...prev, spot_answers: (prev.spot_answers || []).filter(a => !ids.includes(a.id_spot_request)) }));
+    try {
+      await axiosInstance.post('/magazine-workshop/spot-requests/answers/seen', { ids }, { headers: { 'x-user-id': userId } });
     } catch {
       // They'll show again on the next refresh.
     }
@@ -273,7 +332,8 @@ export const WorkshopProvider = ({ children }) => {
     createWorkshop, updateWorkshop, deleteWorkshop, uploadWorkshopCover,
     reserveWorkshop, cancelWorkshopReservation,
     searchWorkshopUsers, manageWorkshopParticipant,
-    invitationFeed, refreshInvitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen
+    invitationFeed, refreshInvitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen,
+    requestExtraSpot, withdrawExtraSpot, respondExtraSpot, markSpotAnswersSeen
   };
 
   return <WorkshopContext.Provider value={value}>{children}</WorkshopContext.Provider>;

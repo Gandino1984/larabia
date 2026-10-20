@@ -533,6 +533,9 @@
   background: #3a3a3a;
 }
 .workshop-people-btn--danger { background: #dc2626; }
+.workshop-people-btn--accept { background: #1e7e34; }
+.workshop-people-btn--accept:hover:not(:disabled),
+.workshop-people-btn--accept:focus-visible { background: #196b2c; }
 .workshop-people-btn--danger:hover:not(:disabled),
 .workshop-people-btn--danger:focus-visible { background: #b91c1c; }
 .workshop-people-btn:focus-visible {
@@ -634,4 +637,78 @@
     flex-wrap: nowrap;
     justify-content: flex-end;
   }
+}
+
+/* A full workshop: socios/as ask for an extra place (WorkshopExtraSpot). */
+.workshop-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.workshop-extra__status {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-left: 4px solid #e3c25b;
+  border-radius: 4px;
+  background: #fdf6dc;
+  color: #5c4508;
+  line-height: 1.5;
+}
+.workshop-extra__status svg {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+.workshop-extra__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.workshop-extra__form label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--on-light, #1a1a1a);
+}
+.workshop-extra__form textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 0.7rem 0.85rem;
+  border: 2px solid #d6d6d6;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+.workshop-extra__form textarea:focus {
+  border-color: #1a1a1a;
+  outline: none;
+}
+.workshop-extra__count {
+  align-self: flex-end;
+  color: #777;
+  font-size: 0.8rem;
+}
+.workshop-extra__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* Extra-place requests, on top of the participants (managers). */
+.workshop-people__section--requests {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #e3c25b;
+  border-radius: 8px;
+  background: #fffbea;
+}
+.workshop-people__row--request .workshop-person__sub {
+  font-style: italic;
+  white-space: normal;
 }

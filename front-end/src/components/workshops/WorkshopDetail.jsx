@@ -12,6 +12,7 @@ import { useWorkshopAccess, canManageWorkshop } from '../../app_context/useWorks
 import WorkshopOptions from './WorkshopOptions';
 import WorkshopParticipantsPanel from './WorkshopParticipantsPanel';
 import WorkshopAccessTag from './WorkshopAccessTag';
+import WorkshopExtraSpot from './WorkshopExtraSpot';
 import '../magazine/ArticleCard.css';
 import '../magazine/ProjectDetail.css';
 import './Workshops.css';
@@ -198,7 +199,7 @@ function WorkshopDetail() {
           ) : bookingCode === 'blocked' ? (
             <p className="workshop-full-note">{t('workshops.bookingNote.blocked', 'No puedes reservar plaza en este taller.')}</p>
           ) : w.is_full ? (
-            <p className="workshop-full-note">{t('workshops.fullNote')}</p>
+            <WorkshopExtraSpot workshop={w} />
           ) : (
             <>
               <button className="workshop-btn workshop-btn--reserve" onClick={handleReserve} disabled={loading}>

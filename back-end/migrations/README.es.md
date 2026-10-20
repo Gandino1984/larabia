@@ -60,7 +60,7 @@ Desde la `012`, el back-end comprueba al arrancar (`back-end/index.js`) las colu
 | `021` | `reader_subscriptions.complimentary`, `complimentary_at` |
 | `022` | `magazine_workshops.free_workshop` |
 
-Las tablas de `009`, `010`, `011`, `014`, `015` y `020` se crean al arrancar con `sync()` de Sequelize si no existen. Los archivos SQL siguen siendo la referencia para una base nueva.
+Las tablas de `009`, `010`, `011`, `014`, `015`, `020` y `023` se crean al arrancar con `sync()` de Sequelize si no existen. Los archivos SQL siguen siendo la referencia para una base nueva.
 
 ## Tablas
 
@@ -82,6 +82,7 @@ Las tablas de `009`, `010`, `011`, `014`, `015` y `020` se crean al arrancar con
 | `workshop_reservations` | Reservas |
 | `workshop_blocks` | Personas bloqueadas en un taller |
 | `workshop_invitations` | Invitaciones a talleres (mientras están pendientes reservan plaza) |
+| `workshop_spot_requests` | Solicitudes de una plaza extra en un taller completo (socios/as; aceptar abre una más) |
 | `article_likes`, `article_favorites`, `article_comments` | La interacción de quienes leen |
 | `project_subscriptions` | Lectoras/es que siguen un proyecto |
 | `reader_subscriptions` | Suscripciones de pago (cliente y suscripción de Stripe) |

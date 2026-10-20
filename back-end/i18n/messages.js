@@ -469,6 +469,25 @@ export const MESSAGES = {
     "Error al actualizar el seguimiento del proyecto": { en: "Following the project couldn't be updated", eu: "Ezin izan da proiektuaren jarraipena eguneratu" },
     "Error al obtener los proyectos que sigues": { en: "The projects you follow couldn't be loaded", eu: "Ezin izan dira jarraitzen dituzun proiektuak lortu" },
     "Hacerse socio/a todavía no está abierto": { en: "Becoming a member isn't open yet", eu: "Bazkide egitea ez dago oraindik irekita" },
+    // Extra places in full workshops (magazine_workshop controllers)
+    "El mensaje es demasiado largo (máximo 300 caracteres)": { en: "The message is too long (300 characters at most)", eu: "Mezua luzeegia da (gehienez 300 karaktere)" },
+    "No puedes pedir plaza en este taller": { en: "You can't ask for a place in this workshop", eu: "Ezin duzu plazarik eskatu tailer honetan" },
+    "Ya participas en este taller": { en: "You're already taking part in this workshop", eu: "Dagoeneko parte hartzen duzu tailer honetan" },
+    "Este taller no tiene un aforo limitado": { en: "This workshop doesn't have a limited capacity", eu: "Tailer honek ez du edukiera mugaturik" },
+    "El taller todavía tiene plazas libres: reserva la tuya": { en: "The workshop still has free places: book yours", eu: "Tailerrak oraindik plaza libreak ditu: erreserbatu zurea" },
+    "Ya has pedido una plaza extra en este taller": { en: "You've already asked for an extra place in this workshop", eu: "Dagoeneko plaza gehigarri bat eskatu duzu tailer honetan" },
+    "Ya pediste una plaza extra en este taller y no se pudo abrir": { en: "You already asked for an extra place in this workshop and it couldn’t be opened", eu: "Dagoeneko eskatu zenuen plaza gehigarri bat tailer honetan, eta ezin izan zen ireki" },
+    "Solicitud enviada: quien gestiona el taller decidirá si abre una plaza más": { en: "Request sent: whoever runs the workshop will decide whether to open one more place", eu: "Eskaera bidalita: tailerra kudeatzen duenak erabakiko du plaza bat gehiago irekitzen duen" },
+    "Error al enviar la solicitud": { en: "The request couldn't be sent", eu: "Ezin izan da eskaera bidali" },
+    "No tienes ninguna solicitud pendiente en este taller": { en: "You don't have any pending request in this workshop", eu: "Ez duzu eskaera zain tailer honetan" },
+    "Solicitud retirada": { en: "Request withdrawn", eu: "Eskaera erretiratuta" },
+    "Error al retirar la solicitud": { en: "The request couldn't be withdrawn", eu: "Ezin izan da eskaera erretiratu" },
+    "Solicitud no encontrada": { en: "Request not found", eu: "Ez da eskaera aurkitu" },
+    "Solicitud rechazada": { en: "Request declined", eu: "Eskaera ukatuta" },
+    "Plaza abierta: ya tiene sitio en el taller": { en: "Place opened: they now have a place in the workshop", eu: "Plaza irekita: badu lekua tailerrean" },
+    "Error al responder a la solicitud": { en: "The request couldn't be answered", eu: "Ezin izan zaio eskaerari erantzun" },
+    "Inicia sesión para pedir una plaza": { en: "Sign in to ask for a place", eu: "Hasi saioa plaza bat eskatzeko" },
+    "Solo los socios/as de la revista pueden pedir una plaza extra": { en: "Only the magazine’s members can ask for an extra place", eu: "Aldizkariko bazkideek bakarrik eska dezakete plaza gehigarri bat" },
 };
 
 // Messages with values: the value(s) are kept, in order ($1, $2…).

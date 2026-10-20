@@ -4,6 +4,8 @@ import workshop_author_model from "../../models/workshop_author_model.js";
 import workshop_reservation_model from "../../models/workshop_reservation_model.js";
 import workshop_block_model from "../../models/workshop_block_model.js";
 import workshop_invitation_model from "../../models/workshop_invitation_model.js";
+import workshop_spot_request_model from "../../models/workshop_spot_request_model.js";
+import sequelize from "../../config/sequelize.js";
 import reader_subscription_model, { liveSubscriptionWhere } from "../../models/reader_subscription_model.js";
 import user_model from "../../models/user_model.js";
 import { Op } from "sequelize";
@@ -312,6 +314,8 @@ async function reserve(id_workshop, userId) {
         }
 
         await workshop_reservation_model.create({ workshop_id: id_workshop, user_id: userId });
+        // A place freed up: their pending request for an extra one is moot.
+        await workshop_spot_request_model.destroy({ where: { workshop_id: id_workshop, user_id: userId, status: 'pending' } });
         // Booking with a pending invitation answers it (the inviter is told).
         await workshop_invitation_model.update(
             { status: 'accepted', responded_at: new Date(), inviter_seen: false },
@@ -580,6 +584,166 @@ async function searchUsers(id_workshop, query) {
     }
 }
 
+// ── Extra places (socios/as ask for one in a full workshop) ──
+
+const SPOT_MESSAGE_MAX = 300;
+
+// Is it full? Bookings + places held by pending invitations vs capacity.
+async function workshopIsFull(workshop) {
+    if (workshop.capacity_workshop == null) return false;
+    const count = await workshop_reservation_model.count({ where: { workshop_id: workshop.id_workshop } });
+    const pending = await countPendingInvitations(workshop.id_workshop);
+    return count + pending >= workshop.capacity_workshop;
+}
+
+// The reader's own request on this workshop (status), or null.
+async function mySpotRequest(workshopId, userId) {
+    if (!userId) return null;
+    const r = await workshop_spot_request_model.findOne({ where: { workshop_id: workshopId, user_id: userId } });
+    return r ? { status: r.status, message: r.message, created_at: r.created_at, responded_at: r.responded_at } : null;
+}
+
+// Pending requests on a workshop, for its managers.
+async function loadWorkshopSpotRequests(workshopId) {
+    const rows = await workshop_spot_request_model.findAll({
+        where: { workshop_id: workshopId, status: 'pending' },
+        include: [{ model: user_model, as: 'requester', attributes: ['id_user', 'name_user', 'image_user'] }],
+        order: [['created_at', 'ASC']]
+    });
+    return rows.filter(r => r.requester).map(r => ({
+        id_spot_request: r.id_spot_request,
+        id_user: r.requester.id_user,
+        name_user: r.requester.name_user,
+        image_user: r.requester.image_user,
+        message: r.message,
+        created_at: r.created_at
+    }));
+}
+
+// A socio/a asks for an extra place (membership is checked by the caller).
+async function requestSpot(id_workshop, userId, rawMessage) {
+    try {
+        const workshop = await magazine_workshop_model.findByPk(id_workshop);
+        if (!workshop || !workshop.active_workshop) return { error: "Taller no encontrado" };
+        const message = String(rawMessage || '').trim();
+        if (message.length > SPOT_MESSAGE_MAX) return { error: `El mensaje es demasiado largo (máximo ${SPOT_MESSAGE_MAX} caracteres)` };
+        if (await isBlocked(id_workshop, userId)) return { error: "No puedes pedir plaza en este taller", code: 'blocked' };
+        if (await workshop_reservation_model.findOne({ where: { workshop_id: id_workshop, user_id: userId } })) {
+            return { error: "Ya participas en este taller" };
+        }
+        if (workshop.capacity_workshop == null) return { error: "Este taller no tiene un aforo limitado" };
+        if (!(await workshopIsFull(workshop))) return { error: "El taller todavía tiene plazas libres: reserva la tuya", code: 'not_full' };
+        const existing = await workshop_spot_request_model.findOne({ where: { workshop_id: id_workshop, user_id: userId } });
+        if (existing?.status === 'pending') return { error: "Ya has pedido una plaza extra en este taller" };
+        if (existing?.status === 'declined') return { error: "Ya pediste una plaza extra en este taller y no se pudo abrir", code: 'declined' };
+        if (existing) await existing.destroy(); // an old accepted one (they cancelled since)
+        await workshop_spot_request_model.create({ workshop_id: id_workshop, user_id: userId, message: message || null, status: 'pending' });
+        return { success: "Solicitud enviada: quien gestiona el taller decidirá si abre una plaza más", data: { status: 'pending' } };
+    } catch (err) {
+        console.error("-> workshop requestSpot() - Error =", err);
+        return { error: "Error al enviar la solicitud" };
+    }
+}
+
+async function withdrawSpotRequest(id_workshop, userId) {
+    try {
+        const deleted = await workshop_spot_request_model.destroy({ where: { workshop_id: id_workshop, user_id: userId, status: 'pending' } });
+        if (!deleted) return { error: "No tienes ninguna solicitud pendiente en este taller" };
+        return { success: "Solicitud retirada", data: { status: null } };
+    } catch (err) {
+        console.error("-> workshop withdrawSpotRequest() - Error =", err);
+        return { error: "Error al retirar la solicitud" };
+    }
+}
+
+// A manager answers. Accepting opens one more place and books it for them.
+async function respondSpotRequest(id_workshop, requesterId, managerId, response) {
+    if (!['accept', 'decline'].includes(response)) return { error: "Respuesta no válida" };
+    try {
+        return await sequelize.transaction(async (transaction) => {
+            const request = await workshop_spot_request_model.findOne({
+                where: { workshop_id: id_workshop, user_id: requesterId, status: 'pending' },
+                transaction, lock: transaction.LOCK.UPDATE
+            });
+            if (!request) return { error: "Solicitud no encontrada" };
+            const answered = { responded_by: managerId, responded_at: new Date(), requester_seen: false };
+            if (response === 'decline') {
+                await request.update({ status: 'declined', ...answered }, { transaction });
+                return { success: "Solicitud rechazada", data: { status: 'declined' } };
+            }
+            const workshop = await magazine_workshop_model.findByPk(id_workshop, { transaction, lock: transaction.LOCK.UPDATE });
+            if (!workshop || !workshop.active_workshop) return { error: "Taller no encontrado" };
+            const already = await workshop_reservation_model.findOne({ where: { workshop_id: id_workshop, user_id: requesterId }, transaction });
+            if (!already) {
+                if (workshop.capacity_workshop != null) await workshop.update({ capacity_workshop: workshop.capacity_workshop + 1 }, { transaction });
+                await workshop_reservation_model.create({ workshop_id: id_workshop, user_id: requesterId }, { transaction });
+            }
+            await request.update({ status: 'accepted', ...answered }, { transaction });
+            return { success: "Plaza abierta: ya tiene sitio en el taller", data: { status: 'accepted', capacity_workshop: workshop.capacity_workshop } };
+        });
+    } catch (err) {
+        console.error("-> workshop respondSpotRequest() - Error =", err);
+        return { error: "Error al responder a la solicitud" };
+    }
+}
+
+// For the bell: pending requests on the workshops this user manages, and the
+// answers to their own requests they haven't seen.
+async function spotFeed(userId, managedIds) {
+    const workshopAttrs = ['id_workshop', 'title_workshop', 'date_workshop', 'audience_workshop', 'cover_image_workshop'];
+    const pending = managedIds === 'all' || (Array.isArray(managedIds) && managedIds.length > 0)
+        ? await workshop_spot_request_model.findAll({
+            where: { status: 'pending', ...(managedIds === 'all' ? {} : { workshop_id: managedIds }) },
+            include: [
+                { model: magazine_workshop_model, as: 'workshop', attributes: workshopAttrs, where: { active_workshop: true } },
+                { model: user_model, as: 'requester', attributes: ['id_user', 'name_user'] }
+            ],
+            order: [['created_at', 'DESC']],
+            limit: 30
+        })
+        : [];
+    const answers = await workshop_spot_request_model.findAll({
+        where: { user_id: userId, status: ['accepted', 'declined'], requester_seen: false },
+        include: [{ model: magazine_workshop_model, as: 'workshop', attributes: workshopAttrs }],
+        order: [['responded_at', 'DESC']],
+        limit: 30
+    });
+    return {
+        spot_requests: pending.filter(r => r.workshop && r.requester && r.user_id !== userId).map(r => ({
+            id_spot_request: r.id_spot_request,
+            created_at: r.created_at,
+            message: r.message,
+            workshop: r.workshop.toJSON(),
+            requester: { id_user: r.requester.id_user, name_user: r.requester.name_user }
+        })),
+        spot_answers: answers.filter(a => a.workshop).map(a => ({
+            id_spot_request: a.id_spot_request,
+            status: a.status,
+            responded_at: a.responded_at,
+            workshop: a.workshop.toJSON()
+        }))
+    };
+}
+
+// Workshops this team member manages (created or teaches): ids.
+async function managedWorkshopIds(userId) {
+    const [created, teaches] = await Promise.all([
+        magazine_workshop_model.findAll({ where: { author_id: userId }, attributes: ['id_workshop'] }),
+        workshop_author_model.findAll({ where: { user_id: userId }, attributes: ['workshop_id'] })
+    ]);
+    return [...new Set([...created.map(w => w.id_workshop), ...teaches.map(a => a.workshop_id)])];
+}
+
+async function markSpotAnswersSeen(userId, ids) {
+    const list = (Array.isArray(ids) ? ids : []).map(Number).filter(n => Number.isInteger(n) && n > 0);
+    if (list.length === 0) return { data: { updated: 0 } };
+    const [updated] = await workshop_spot_request_model.update(
+        { requester_seen: true },
+        { where: { id_spot_request: list, user_id: userId } }
+    );
+    return { data: { updated } };
+}
+
 export default {
     getAll,
     getById,
@@ -601,5 +765,13 @@ export default {
     removeParticipant,
     blockUser,
     unblockUser,
-    searchUsers
+    searchUsers,
+    mySpotRequest,
+    loadWorkshopSpotRequests,
+    requestSpot,
+    withdrawSpotRequest,
+    respondSpotRequest,
+    spotFeed,
+    managedWorkshopIds,
+    markSpotAnswersSeen
 };

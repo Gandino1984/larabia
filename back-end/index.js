@@ -33,6 +33,7 @@ import readerSubscriptionModel from './models/reader_subscription_model.js';
 import workshopBlockModel from './models/workshop_block_model.js';
 import workshopInvitationModel from './models/workshop_invitation_model.js';
 import openSpaceProposalModel from './models/open_space_proposal_model.js';
+import workshopSpotRequestModel from './models/workshop_spot_request_model.js';
 import subscriptionApiController from './controllers/subscription/subscription_api_controller.js';
 import { PAISAJE_DIR, ensureDirs as ensurePaisajeDirs, cleanupOrphans as cleanupPaisajeOrphans } from './controllers/paisaje/paisaje_store.js';
 import { isPrivateUploadPath } from './controllers/open_space/proposal_store.js';
@@ -91,9 +92,10 @@ Promise.all([
     readerSubscriptionModel.sync(),
     workshopBlockModel.sync(),
     workshopInvitationModel.sync(),
-    openSpaceProposalModel.sync()
+    openSpaceProposalModel.sync(),
+    workshopSpotRequestModel.sync()
 ])
-    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks + invitations/open space proposals)'))
+    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks + invitations + spot requests/open space proposals)'))
     .catch((err) => console.error('Error syncing engagement tables:', err.message));
 
 // Columns added to tables that already exist in production (idempotent: each

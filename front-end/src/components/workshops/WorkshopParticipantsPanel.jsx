@@ -8,7 +8,7 @@
 // workshop (they lose their place / invitation and can't book it) and unblock.
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, UserPlus, UserMinus, Ban, LockOpen, Search, Send, Undo2 } from 'lucide-react';
+import { Users, UserPlus, UserMinus, Ban, LockOpen, Search, Send, Undo2, Hourglass, Check, X } from 'lucide-react';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import SubscriberMark from '../common/SubscriberMark';
@@ -41,9 +41,11 @@ function Person({ person, you, sub }) {
 function WorkshopParticipantsPanel({ workshop }) {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
-  const { searchWorkshopUsers, manageWorkshopParticipant } = useWorkshop();
+  const { searchWorkshopUsers, manageWorkshopParticipant, respondExtraSpot } = useWorkshop();
   const id = workshop.id_workshop;
   const participants = workshop.participants || [];
+  // Socios/as asking for an extra place (the workshop is full).
+  const spotRequests = workshop.spot_requests || [];
   const invitations = workshop.invitations || [];
   const blocked = workshop.blocked_users || [];
   const [query, setQuery] = useState('');
@@ -87,6 +89,14 @@ function WorkshopParticipantsPanel({ workshop }) {
     }
   };
 
+  // Accept = open one more place (capacity + 1) and give it to them.
+  const answerSpot = async (r, response) => {
+    if (response === 'decline' && !confirm(t('workshops.extra.confirmDecline', { name: r.name_user, defaultValue: '¿Rechazar la solicitud de {{name}}? No se abrirá ninguna plaza.' }))) return;
+    setBusyId(r.id_user);
+    await respondExtraSpot(id, r.id_user, response);
+    setBusyId(null);
+  };
+
   const btn = (action, person, { icon: Icon, label, danger = false, disabled = false, title }) => (
     <button
       type="button"
@@ -108,6 +118,32 @@ function WorkshopParticipantsPanel({ workshop }) {
         </h3>
         <p className="workshop-people__hint">{t('workshops.manage.subtitle', 'Solo lo ven quienes gestionan el taller.')}</p>
       </header>
+
+      {spotRequests.length > 0 && (
+        <div className="workshop-people__section workshop-people__section--requests">
+          <h4>
+            <Hourglass size={16} /> {t('workshops.extra.requestsTitle', 'Piden una plaza extra')} ({spotRequests.length})
+          </h4>
+          <p className="workshop-people__hint">
+            {t('workshops.extra.requestsHint', { capacity: workshop.capacity_workshop, defaultValue: 'Socios/as que quieren venir aunque está completo. Aceptar abre una plaza más (el aforo pasa de {{capacity}} a uno más) y se la da.' })}
+          </p>
+          <ul className="workshop-people__list">
+            {spotRequests.map(r => (
+              <li key={r.id_spot_request} className="workshop-people__row workshop-people__row--request">
+                <Person person={r} sub={r.message ? `«${r.message}»` : null} />
+                <div className="workshop-people__actions">
+                  <button type="button" className="workshop-people-btn workshop-people-btn--accept" onClick={() => answerSpot(r, 'accept')} disabled={busyId === r.id_user}>
+                    <Check size={15} /><span>{t('workshops.extra.accept', 'Abrir plaza y aceptar')}</span>
+                  </button>
+                  <button type="button" className="workshop-people-btn workshop-people-btn--danger" onClick={() => answerSpot(r, 'decline')} disabled={busyId === r.id_user}>
+                    <X size={15} /><span>{t('workshops.extra.decline', 'Rechazar')}</span>
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {participants.length === 0 ? (
         <p className="workshop-people__empty">{t('workshops.manage.empty', 'Todavía no se ha apuntado nadie.')}</p>

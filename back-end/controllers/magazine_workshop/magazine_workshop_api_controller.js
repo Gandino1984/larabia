@@ -136,9 +136,13 @@ async function getById(req, res) {
             reserved_by_me: participants.some((p) => p.id_user === user.id_user),
             booking_code: bookingCode,
             my_invitation: await magazineWorkshopController.myPendingInvitation(id_workshop, user.id_user),
+            my_spot_request: await magazineWorkshopController.mySpotRequest(id_workshop, user.id_user),
+            // Socios/as can ask for an extra place when it's full.
+            is_member: await hasActiveSubscription(user.id_user),
             can_manage: canManage
         };
         if (canManage) {
+            out.spot_requests = await magazineWorkshopController.loadWorkshopSpotRequests(id_workshop);
             out.invitations = await magazineWorkshopController.loadWorkshopInvitations(id_workshop);
             out.blocked_users = await magazineWorkshopController.loadWorkshopBlocked(id_workshop);
         } else {
@@ -331,6 +335,56 @@ const blockUser = (req, res) => manage(req, res, async (id, userId, manager) => 
 const unblockUser = (req, res) => manage(req, res,
     (id, userId) => magazineWorkshopController.unblockUser(id, userId));
 
+// ── Extra places in a full workshop ──
+
+// POST /spot-requests/:id_workshop { message } — a socio/a asks for one.
+async function requestSpot(req, res) {
+    try {
+        const user = await getRequestUser(req);
+        if (!user) return res.status(403).json({ error: 'Inicia sesión para pedir una plaza', code: 'login_required' });
+        if (!(await hasActiveSubscription(user.id_user))) {
+            return res.status(403).json({ error: 'Solo los socios/as de la revista pueden pedir una plaza extra', code: 'membership_required' });
+        }
+        const result = await magazineWorkshopController.requestSpot(req.params.id_workshop, user.id_user, req.body?.message);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error("-> workshop api requestSpot() - Error =", err);
+        res.status(500).json({ error: "Error al enviar la solicitud", details: err.message });
+    }
+}
+
+// DELETE /spot-requests/:id_workshop — they withdraw it while it's pending.
+async function withdrawSpotRequest(req, res) {
+    try {
+        const user = await getRequestUser(req);
+        if (!user) return res.status(403).json({ error: 'Inicia sesión', code: 'login_required' });
+        const result = await magazineWorkshopController.withdrawSpotRequest(req.params.id_workshop, user.id_user);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error("-> workshop api withdrawSpotRequest() - Error =", err);
+        res.status(500).json({ error: "Error al retirar la solicitud", details: err.message });
+    }
+}
+
+// POST /manage/:id_workshop/spot-requests/:id_user { response: 'accept' | 'decline' }
+const respondSpotRequest = (req, res) => manage(req, res,
+    (id, userId, manager) => magazineWorkshopController.respondSpotRequest(id, userId, manager.id_user, req.body?.response));
+
+// POST /spot-requests/answers/seen { ids } — the requester has seen the answers.
+async function markSpotAnswersSeen(req, res) {
+    try {
+        const user = await getRequestUser(req);
+        if (!user) return res.status(403).json({ error: 'Inicia sesión', code: 'login_required' });
+        const result = await magazineWorkshopController.markSpotAnswersSeen(user.id_user, req.body?.ids);
+        res.json({ error: null, data: result.data });
+    } catch (err) {
+        console.error("-> workshop api markSpotAnswersSeen() - Error =", err);
+        res.status(500).json({ error: "Error al actualizar las notificaciones", details: err.message });
+    }
+}
+
 // People to invite / block, by name (?q=, 2+ characters).
 async function searchUsers(req, res) {
     try {
@@ -354,10 +408,16 @@ async function searchUsers(req, res) {
 async function invitationFeed(req, res) {
     try {
         const user = await getRequestUser(req);
-        if (!user) return res.json({ error: null, data: { invitations: [], responses: [] } });
+        if (!user) return res.json({ error: null, data: { invitations: [], responses: [], spot_requests: [], spot_answers: [] } });
         const result = await magazineWorkshopController.invitationFeed(user.id_user);
         if (result.error) return res.status(500).json(result);
-        res.json({ error: null, data: result.data });
+        // Extra-place requests: pending ones on the workshops they manage,
+        // and the answers to their own.
+        const role = roleSnapshot(user);
+        const managed = role.isSuperAdmin ? 'all'
+            : role.canCreateContent ? await magazineWorkshopController.managedWorkshopIds(user.id_user) : [];
+        const spots = await magazineWorkshopController.spotFeed(user.id_user, managed);
+        res.json({ error: null, data: { ...result.data, ...spots } });
     } catch (err) {
         console.error("-> workshop api invitationFeed() - Error =", err);
         res.status(500).json({ error: "Error al cargar las invitaciones", details: err.message });
@@ -423,5 +483,9 @@ export default {
     removeParticipant,
     blockUser,
     unblockUser,
-    searchUsers
+    searchUsers,
+    requestSpot,
+    withdrawSpotRequest,
+    respondSpotRequest,
+    markSpotAnswersSeen
 };

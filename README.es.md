@@ -36,6 +36,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 - **Talleres:**
   - Las tarjetas son públicas.
   - Para abrir uno hay que iniciar sesión. Reservar plaza depende del taller, y se decide al crearlo o editarlo: los **gratuitos** están abiertos a cualquier persona con cuenta; los demás piden ser socio/a (el equipo no lo necesita). Las tarjetas dicen «Gratuito» o «Para socios/as», y hay un filtro «Acceso».
+  - **Plazas extra:** cuando un taller está completo, un socio/a (de pago o de cortesía) puede pedir una plaza más, con un mensaje si quiere. Quien lo gestiona ve la solicitud en la página del taller y en la campana: aceptar abre una plaza (aforo + 1) y se la da; rechazar no. El socio/a recibe la respuesta en la campana (`workshop_spot_requests`).
   - Quien lo gestiona — los super admins y, como con las autoras/es de un artículo, quien lo creó o lo imparte desde el equipo (sus talleristas) — lo edita, invita (la invitación reserva plaza), quita participantes o los bloquea.
   - Cada taller tiene su ubicación en un mapa (Leaflet/OpenStreetMap). No hay enlace a Google Maps: la gente se ubica en el propio mapa.
 - **Espacio abierto:** las propuestas literarias que publica la revista. Cualquier persona con cuenta (no hace falta ser socio/a) puede enviar la suya con un formulario y seguir allí su estado.

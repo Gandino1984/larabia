@@ -15,6 +15,10 @@
 //    Aceptar / Rechazar (`actions`); stays until answered.
 //  - workshop-invite-response:  a reader answered an invitation this user
 //    sent (until the bell is opened).
+//  - workshop-spot-request:  a socio/a asks for an extra place in a full
+//    workshop this user manages — «Abrir plaza» / «Rechazar»; until answered.
+//  - workshop-spot-answer:  the answer to the user's own request (until the
+//    bell is opened).
 //  - author-invite:  a super admin signed the user up as an author
 //    (AuthorInvitationContext) — Aceptar / Rechazar; stays until answered.
 //
@@ -46,7 +50,8 @@ export const NotificationProvider = ({ children }) => {
   const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail } = useUI();
   const {
-    invitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen, setSelectedWorkshop
+    invitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen, setSelectedWorkshop,
+    respondExtraSpot, markSpotAnswersSeen
   } = useWorkshop();
   const { setSelectedArticle, setSelectedProject } = useMagazine();
   const { subscribedProjectIds } = useEngagement();
@@ -147,7 +152,9 @@ export const NotificationProvider = ({ children }) => {
     }
     const answered = (invitationFeed?.responses || []).map(r => r.id_invitation);
     if (answered.length > 0) markInvitationResponsesSeen(answered);
-  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, markInvitationResponsesSeen]);
+    const spotAnswered = (invitationFeed?.spot_answers || []).map(a => a.id_spot_request);
+    if (spotAnswered.length > 0) markSpotAnswersSeen(spotAnswered);
+  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, invitationFeed?.spot_answers, markInvitationResponsesSeen, markSpotAnswersSeen]);
 
   const notifications = useMemo(() => {
     const list = [];
@@ -211,6 +218,34 @@ export const NotificationProvider = ({ children }) => {
           actions: [
             { key: 'accept', variant: 'primary', label: t('notifications.workshopInvite.accept', 'Aceptar'), onClick: () => answerInvitation(inv, 'accept') },
             { key: 'decline', variant: 'secondary', label: t('notifications.workshopInvite.decline', 'Rechazar'), onClick: () => answerInvitation(inv, 'decline') }
+          ]
+        });
+      }
+    }
+
+    // Socios/as asking for an extra place in a workshop this user manages.
+    if (currentUser) {
+      for (const r of invitationFeed?.spot_requests || []) {
+        list.push({
+          id: `workshop-spot-request-${r.id_spot_request}`,
+          type: 'workshop-spot-request',
+          title: t('notifications.spotRequest.title', 'Piden una plaza extra'),
+          message: t('notifications.spotRequest.message', {
+            name: r.requester?.name_user || '',
+            title: r.workshop?.title_workshop || '',
+            defaultValue: '{{name}} pide una plaza en «{{title}}», que está completo'
+          }),
+          onClick: () => openWorkshop(r.workshop),
+          actions: [
+            { key: 'accept', variant: 'primary', label: t('notifications.spotRequest.accept', 'Abrir plaza'), onClick: () => respondExtraSpot(r.workshop.id_workshop, r.requester.id_user, 'accept') },
+            {
+              key: 'decline', variant: 'secondary', label: t('notifications.spotRequest.decline', 'Rechazar'),
+              onClick: () => {
+                if (window.confirm(t('workshops.extra.confirmDecline', { name: r.requester?.name_user || '', defaultValue: '¿Rechazar la solicitud de {{name}}? No se abrirá ninguna plaza.' }))) {
+                  respondExtraSpot(r.workshop.id_workshop, r.requester.id_user, 'decline');
+                }
+              }
+            }
           ]
         });
       }
@@ -322,6 +357,24 @@ export const NotificationProvider = ({ children }) => {
         });
       }
 
+      // Answers to this user's requests for an extra place.
+      for (const a of invitationFeed?.spot_answers || []) {
+        const accepted = a.status === 'accepted';
+        const vars = { title: a.workshop?.title_workshop || '' };
+        content.push({
+          id: `workshop-spot-answer-${a.id_spot_request}`,
+          type: 'workshop-spot-answer',
+          ts: a.responded_at ? tsOf(a.responded_at) : Date.now(),
+          title: accepted
+            ? t('notifications.spotAccepted.title', 'Tienes plaza')
+            : t('notifications.spotDeclined.title', 'Sin plaza extra'),
+          message: accepted
+            ? t('notifications.spotAccepted.message', { ...vars, defaultValue: 'Te han abierto una plaza en «{{title}}». ¡Nos vemos allí!' })
+            : t('notifications.spotDeclined.message', { ...vars, defaultValue: 'No se ha podido abrir una plaza más en «{{title}}».' }),
+          onClick: () => openWorkshop(a.workshop)
+        });
+      }
+
       content.sort((x, y) => y.ts - x.ts);
       list.push(...content.slice(0, MAX_CONTENT_NOTIFS));
     }
@@ -330,7 +383,7 @@ export const NotificationProvider = ({ children }) => {
   }, [
     profilesReady, currentUser, canCreateContent, authorProfiles, lastSeen,
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
-    invitationFeed, openWorkshop, answerInvitation, authorInvite, brand,
+    invitationFeed, openWorkshop, answerInvitation, respondExtraSpot, authorInvite, brand,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

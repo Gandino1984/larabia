@@ -55,7 +55,7 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `021` | `reader_subscriptions.complimentary`, `complimentary_at` |
 | `022` | `magazine_workshops.free_workshop` |
 
-The tables of `009`, `010`, `011`, `014`, `015` and `020` are created at boot with Sequelize `sync()` when missing. The SQL files stay the reference for a fresh database.
+The tables of `009`, `010`, `011`, `014`, `015`, `020` and `023` are created at boot with Sequelize `sync()` when missing. The SQL files stay the reference for a fresh database.
 
 ## Tables
 
@@ -77,6 +77,7 @@ The tables of `009`, `010`, `011`, `014`, `015` and `020` are created at boot wi
 | `workshop_reservations` | Bookings |
 | `workshop_blocks` | People blocked from a workshop |
 | `workshop_invitations` | Workshop invitations (they hold a place while pending) |
+| `workshop_spot_requests` | Requests for an extra place in a full workshop (socios/as; accepting opens one more) |
 | `article_likes`, `article_favorites`, `article_comments` | Readers' engagement |
 | `project_subscriptions` | Readers following a project |
 | `reader_subscriptions` | Paid subscriptions (Stripe customer and subscription) |

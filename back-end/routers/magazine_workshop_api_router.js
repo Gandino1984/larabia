@@ -17,6 +17,10 @@ router.post("/reserve/:id_workshop", magazineWorkshopApiController.reserve);    
 router.post("/manage/:id_workshop/invitations", magazineWorkshopApiController.inviteParticipant); // managers: invite someone
 router.post("/invitations/:id_invitation/respond", magazineWorkshopApiController.respondInvitation); // invitee: accept / decline
 router.post("/invitations/responses/seen", magazineWorkshopApiController.markResponsesSeen);       // inviter: answers seen
+router.post("/spot-requests/answers/seen", magazineWorkshopApiController.markSpotAnswersSeen);   // requester: answers seen
+router.post("/spot-requests/:id_workshop", magazineWorkshopApiController.requestSpot);            // socios/as: ask for an extra place (full workshop)
+router.delete("/spot-requests/:id_workshop", magazineWorkshopApiController.withdrawSpotRequest);   // withdraw own pending request
+router.post("/manage/:id_workshop/spot-requests/:id_user", magazineWorkshopApiController.respondSpotRequest); // managers: accept (capacity + 1) / decline
 router.post("/manage/:id_workshop/blocks", magazineWorkshopApiController.blockUser);             // managers: block someone
 router.post("/upload-cover-image", handleWorkshopImageUpload, magazineWorkshopApiController.uploadCoverImage); // managers: super admin, or its creator / talleristas on the team
 
