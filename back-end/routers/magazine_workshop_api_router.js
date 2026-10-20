@@ -13,18 +13,18 @@ router.get("/invitations/feed", magazineWorkshopApiController.invitationFeed);  
 
 // POST
 router.post("/create", magazineWorkshopApiController.create);                       // admins / super-admin
-router.post("/reserve/:id_workshop", magazineWorkshopApiController.reserve);        // subscribers + magazine team
+router.post("/reserve/:id_workshop", magazineWorkshopApiController.reserve);        // free: anyone signed in; else socios/as + magazine team
 router.post("/manage/:id_workshop/invitations", magazineWorkshopApiController.inviteParticipant); // managers: invite someone
 router.post("/invitations/:id_invitation/respond", magazineWorkshopApiController.respondInvitation); // invitee: accept / decline
 router.post("/invitations/responses/seen", magazineWorkshopApiController.markResponsesSeen);       // inviter: answers seen
 router.post("/manage/:id_workshop/blocks", magazineWorkshopApiController.blockUser);             // managers: block someone
-router.post("/upload-cover-image", handleWorkshopImageUpload, magazineWorkshopApiController.uploadCoverImage); // managers: super-admin / admin creator or instructor
+router.post("/upload-cover-image", handleWorkshopImageUpload, magazineWorkshopApiController.uploadCoverImage); // managers: super admin, or its creator / talleristas on the team
 
 // PATCH
-router.patch("/update/:id_workshop", magazineWorkshopApiController.update);         // managers: super-admin / admin creator or instructor
+router.patch("/update/:id_workshop", magazineWorkshopApiController.update);         // managers: super admin, or its creator / talleristas on the team
 
 // DELETE
-router.delete("/remove-by-id/:id_workshop", magazineWorkshopApiController.remove);  // managers: super-admin / admin creator or instructor
+router.delete("/remove-by-id/:id_workshop", magazineWorkshopApiController.remove);  // managers: super admin, or its creator / talleristas on the team
 router.delete("/reserve/:id_workshop", magazineWorkshopApiController.cancelReservation); // cancel own reservation
 router.delete("/manage/:id_workshop/participants/:id_user", magazineWorkshopApiController.removeParticipant); // managers
 router.delete("/manage/:id_workshop/invitations/:id_user", magazineWorkshopApiController.withdrawInvitation); // managers

@@ -86,10 +86,11 @@ function spotsSummary(workshop, count, pending = 0) {
     };
 }
 
-// Who of these users can book workshops: the magazine team (editors, admins,
-// super admins) and readers with an active subscription. `users` carry
-// id_user and the role flags.
-async function bookableUserIds(users) {
+// Who of these users can book this workshop: anyone if it's free; otherwise
+// the magazine team (editors, admins, super admins) and socios/as (paying or
+// complimentary). `users` carry id_user and the role flags.
+async function bookableUserIds(users, { free = false } = {}) {
+    if (free) return new Set(users.map(u => u.id_user));
     const truthy = (v) => v === true || v === 1;
     const ids = new Set(users
         .filter(u => truthy(u.is_editor) || truthy(u.is_admin) || truthy(u.is_super_admin))
@@ -215,6 +216,7 @@ async function create(data) {
             author_id: data.author_id || null,
             author_name: data.author_name || null,
             audience_workshop: AUDIENCES.includes(data.audience_workshop) ? data.audience_workshop : 'general',
+            free_workshop: data.free_workshop === true,
             lat_workshop: coord(data.lat_workshop, 90),
             lng_workshop: coord(data.lng_workshop, 180),
             active_workshop: true
@@ -244,6 +246,7 @@ async function update(id_workshop, data) {
         if (data.audience_workshop !== undefined) {
             fields.audience_workshop = AUDIENCES.includes(data.audience_workshop) ? data.audience_workshop : 'general';
         }
+        if (data.free_workshop !== undefined) fields.free_workshop = data.free_workshop === true;
         if (data.capacity_workshop !== undefined) {
             fields.capacity_workshop = (data.capacity_workshop === '' || data.capacity_workshop === null) ? null : data.capacity_workshop;
         }
@@ -357,7 +360,8 @@ async function managementState(id_workshop) {
     };
 }
 
-// Invite someone (subscribers and the magazine team only). The invitation
+// Invite someone (in a free workshop anyone; otherwise socios/as and the
+// magazine team). The invitation
 // holds a place until they accept (→ booking) or decline. Inviting again
 // after a "no" sends a new invitation.
 async function inviteUser(id_workshop, inviteeId, inviterId) {
@@ -373,7 +377,7 @@ async function inviteUser(id_workshop, inviteeId, inviterId) {
         if (participant) return { error: "Esta persona ya participa en el taller" };
         const existing = await workshop_invitation_model.findOne({ where: { workshop_id: id_workshop, invitee_user_id: inviteeId } });
         if (existing?.status === 'pending') return { error: "Esta persona ya tiene una invitación pendiente" };
-        if (!(await bookableUserIds([user])).has(user.id_user)) {
+        if (!(await bookableUserIds([user], { free: !!workshop.free_workshop })).has(user.id_user)) {
             return { error: "Solo se puede invitar a socios/as de la revista", code: 'not_subscriber' };
         }
         const count = await workshop_reservation_model.count({ where: { workshop_id: id_workshop } });
@@ -549,11 +553,12 @@ async function searchUsers(id_workshop, query) {
             limit: 10
         });
         const ids = users.map(u => u.id_user);
+        const workshop = await magazine_workshop_model.findByPk(id_workshop, { attributes: ['free_workshop'] });
         const [reserved, blocked, invitations, bookable] = await Promise.all([
             workshop_reservation_model.findAll({ where: { workshop_id: id_workshop, user_id: ids }, attributes: ['user_id'] }),
             workshop_block_model.findAll({ where: { workshop_id: id_workshop, user_id: ids }, attributes: ['user_id'] }),
             workshop_invitation_model.findAll({ where: { workshop_id: id_workshop, invitee_user_id: ids }, attributes: ['invitee_user_id', 'status'] }),
-            bookableUserIds(users)
+            bookableUserIds(users, { free: !!workshop?.free_workshop })
         ]);
         const reservedSet = new Set(reserved.map(r => r.user_id));
         const blockedSet = new Set(blocked.map(b => b.user_id));

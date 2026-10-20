@@ -116,6 +116,11 @@ Promise.all([
                 console.log(`>>> Added magazine_workshops.${col}`);
             }
         }
+        // Free workshops: no membership needed to book (migration 022).
+        if (!workshops.free_workshop) {
+            await qi.addColumn('magazine_workshops', 'free_workshop', { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false });
+            console.log('>>> Added magazine_workshops.free_workshop');
+        }
         // Paisajes sonoros (migration 016): block type 'paisaje' + the piece JSON.
         const blocks = await qi.describeTable('article_blocks');
         if (!String(blocks.block_type?.type || '').includes("'paisaje'")) {

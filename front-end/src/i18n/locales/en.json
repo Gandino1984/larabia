@@ -1438,5 +1438,15 @@
   "workshops.editor.mine.emptyHint": "Create one with «New workshop».",
   "workshops.editor.mine.spots": "{{taken}}/{{total}} places",
   "workshops.editor.mine.signedUp_one": "1 person signed up",
-  "workshops.editor.mine.signedUp_other": "{{count}} people signed up"
+  "workshops.editor.mine.signedUp_other": "{{count}} people signed up",
+  "workshops.access.free": "Free",
+  "workshops.access.members": "For members",
+  "workshops.editor.access": "Who can book a place",
+  "workshops.editor.membersDesc": "Only the magazine’s members (and the team) can book a place.",
+  "workshops.editor.freeDesc": "Anyone with an account on the magazine can book a place, without being a member.",
+  "workshops.manage.inviteHintFree": "Anyone with an account on the magazine: the workshop is free. They get a notification to accept or decline.",
+  "workshops.filters.access": "Access",
+  "workshops.filters.anyAccess": "All",
+  "workshops.filters.accessFree": "Free",
+  "workshops.filters.accessMembers": "For members"
 }

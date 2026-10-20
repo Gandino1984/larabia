@@ -7,6 +7,7 @@ import { Trash2, Edit, Plus } from 'lucide-react';
 import { useWorkshop } from '../../../app_context/WorkshopContext';
 import { useUI } from '../../../app_context/UIContext';
 import { localDate } from '../../../utils/locale';
+import WorkshopAccessTag from '../../workshops/WorkshopAccessTag';
 import './AdminWorkshopsTab.css';
 
 function AdminWorkshopsTab() {
@@ -37,6 +38,7 @@ function AdminWorkshopsTab() {
             <li key={w.id_workshop} className="admin-workshops-item">
               <div className="admin-workshops-item-info">
                 <strong>{w.title_workshop}</strong>
+                <WorkshopAccessTag workshop={w} />
                 <span className="admin-workshops-item-meta">
                   {w.audience_workshop === 'infantil' ? `${t('admin.workshops.kids', 'Infantil')} · ` : ''}
                   {w.date_workshop ? localDate(w.date_workshop) : t('admin.workshops.noDate', 'Sin fecha')}

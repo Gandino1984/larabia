@@ -35,7 +35,7 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
 - **Authors:** the directory of author profiles, in alphabetical order with a search bar (by name or specialty, ignoring case and accents), and each author's publications.
 - **Workshops:**
   - The cards are public.
-  - Opening one needs a sign-in, and booking a place needs being a member — *socio/a* (the team doesn't need it).
+  - Opening one needs a sign-in. Booking a place depends on the workshop, decided when it's created or edited: **free** workshops are open to anyone with an account; the others need being a member — *socio/a* (the team doesn't need it). The cards say «Gratuito» or «Para socios/as», and there's an «Acceso» filter.
   - Managers — super admins, and the team members who created or teach a workshop (its *talleristas*), like an article's authors — edit it, invite people (an invitation holds a place), remove participants or block them.
   - Each workshop has a location on a map (Leaflet/OpenStreetMap). There's no link out to Google Maps: people find their way on the map itself.
 - **Espacio abierto** (open space): the literary proposals the magazine publishes. Anyone with an account (no need to be a member) can send one through a form, then follow its status there.

@@ -11,6 +11,7 @@ import WorkshopMap from '../maps/WorkshopMap';
 import { useWorkshopAccess, canManageWorkshop } from '../../app_context/useWorkshopAccess';
 import WorkshopOptions from './WorkshopOptions';
 import WorkshopParticipantsPanel from './WorkshopParticipantsPanel';
+import WorkshopAccessTag from './WorkshopAccessTag';
 import '../magazine/ArticleCard.css';
 import '../magazine/ProjectDetail.css';
 import './Workshops.css';
@@ -139,6 +140,7 @@ function WorkshopDetail() {
         <h1 className="workshop-detail-title">{w.title_workshop}</h1>
 
         <div className="workshop-detail-meta">
+          <WorkshopAccessTag workshop={w} />
           {dateStr && <span className="workshop-meta"><Calendar size={16} /> {dateStr}</span>}
           <span className="workshop-meta"><MapPin size={16} /> {w.location_workshop || t('workshops.map.defaultPlace', 'Matiko, Uribarri')}</span>
           <span className="workshop-meta">

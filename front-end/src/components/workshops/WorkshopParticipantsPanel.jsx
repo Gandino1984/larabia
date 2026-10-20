@@ -13,6 +13,7 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import SubscriberMark from '../common/SubscriberMark';
 import { getAuthorImageUrl } from '../common/AuthorChip';
+import { isFreeWorkshop } from './WorkshopAccessTag';
 
 // Photo (or initial) + name (+ an optional second line).
 function Person({ person, you, sub }) {
@@ -167,7 +168,9 @@ function WorkshopParticipantsPanel({ workshop }) {
           {t('workshops.manage.addTitle', 'Invitar a alguien')}
         </label>
         <p className="workshop-people__hint workshop-people__hint--add">
-          {t('workshops.manage.inviteHint', 'Solo socios/as de la revista (o del equipo). Recibirán una notificación para aceptar o rechazar.')}
+          {isFreeWorkshop(workshop)
+            ? t('workshops.manage.inviteHintFree', 'Cualquier persona con cuenta en la revista: el taller es gratuito. Recibirán una notificación para aceptar o rechazar.')
+            : t('workshops.manage.inviteHint', 'Solo socios/as de la revista (o del equipo). Recibirán una notificación para aceptar o rechazar.')}
         </p>
         <div className="workshop-people__search">
           <Search size={16} aria-hidden="true" />

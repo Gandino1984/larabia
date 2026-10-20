@@ -38,6 +38,8 @@ export const toForm = (w) => ({
   date_workshop: toLocalInput(w?.date_workshop),
   capacity_workshop: w?.capacity_workshop ?? '',
   audience_workshop: w?.audience_workshop === 'infantil' ? 'infantil' : 'general',
+  // Who books: false = socios/as and the team (the default), true = anyone signed in.
+  free_workshop: w?.free_workshop === true || w?.free_workshop === 1,
   lat_workshop: w?.lat_workshop ?? DEFAULT_CENTER[0],
   lng_workshop: w?.lng_workshop ?? DEFAULT_CENTER[1]
 });
@@ -56,6 +58,7 @@ export const toPayload = (form, authors) => ({
   date_workshop: form.date_workshop ? new Date(form.date_workshop).toISOString() : null,
   capacity_workshop: form.capacity_workshop === '' ? null : Number(form.capacity_workshop),
   audience_workshop: form.audience_workshop,
+  free_workshop: !!form.free_workshop,
   lat_workshop: form.lat_workshop,
   lng_workshop: form.lng_workshop,
   authors: authors.map((a, i) => ({ user_id: a.id_user, author_order: i }))

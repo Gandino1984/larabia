@@ -1,7 +1,8 @@
 // magazine-front/src/utils/workshopFilters.js
 //
 // Filtering + sorting for the workshops page (WorkshopFilters): text search,
-// when (upcoming / past / all), month, instructor, availability and order.
+// when (upcoming / past / all), month, instructor, availability, access
+// (free / for socios/as) and order.
 // Pure functions — the UI lives in components/workshops/WorkshopFilters.jsx.
 import { serverDate } from './locale';
 
@@ -10,7 +11,8 @@ export const EMPTY_WORKSHOP_FILTERS = {
   when: 'upcoming',   // 'upcoming' | 'past' | 'all'
   month: '',          // 'YYYY-MM'
   author: '',         // instructor id_user
-  availability: '',   // '' | 'free'
+  availability: '',   // '' | 'free' (places left)
+  access: '',         // '' | 'free' (free workshop) | 'members' (for socios/as)
   sort: 'date'        // 'date' | 'recent' | 'title'
 };
 
@@ -52,7 +54,7 @@ export function buildWorkshopFilterOptions(workshops, filters = EMPTY_WORKSHOP_F
 
 /** How many filters (not the sort, not the default "upcoming") are set. */
 export const countActiveWorkshopFilters = (f) =>
-  [f.q?.trim(), f.when !== 'upcoming' ? f.when : '', f.month, f.author, f.availability].filter(Boolean).length;
+  [f.q?.trim(), f.when !== 'upcoming' ? f.when : '', f.month, f.author, f.availability, f.access].filter(Boolean).length;
 
 /** Filter + sort. */
 export function applyWorkshopFilters(workshops, f, now = new Date()) {
@@ -71,6 +73,9 @@ export function applyWorkshopFilters(workshops, f, now = new Date()) {
     }
     if (f.author && !(w.authors || []).some((a) => String(a.id_user) === f.author)) return false;
     if (f.availability === 'free' && !hasFreeSpots(w)) return false;
+    const free = w.free_workshop === true || w.free_workshop === 1;
+    if (f.access === 'free' && !free) return false;
+    if (f.access === 'members' && free) return false;
     return true;
   });
 

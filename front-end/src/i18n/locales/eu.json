@@ -1438,5 +1438,15 @@
   "workshops.editor.mine.emptyHint": "Sortu bat «Tailer berria» botoiarekin.",
   "workshops.editor.mine.spots": "{{taken}}/{{total}} plaza",
   "workshops.editor.mine.signedUp_one": "Pertsona 1 izena emanda",
-  "workshops.editor.mine.signedUp_other": "{{count}} pertsona izena emanda"
+  "workshops.editor.mine.signedUp_other": "{{count}} pertsona izena emanda",
+  "workshops.access.free": "Doakoa",
+  "workshops.access.members": "Bazkideentzat",
+  "workshops.editor.access": "Nork erreserba dezake plaza",
+  "workshops.editor.membersDesc": "Aldizkariko bazkideek (eta taldeak) bakarrik erreserba dezakete plaza.",
+  "workshops.editor.freeDesc": "Aldizkarian kontua duen edonork erreserba dezake plaza, bazkide izan gabe.",
+  "workshops.manage.inviteHintFree": "Aldizkarian kontua duen edonor: tailerra doakoa da. Jakinarazpen bat jasoko dute onartu edo ukatzeko.",
+  "workshops.filters.access": "Sarbidea",
+  "workshops.filters.anyAccess": "Guztiak",
+  "workshops.filters.accessFree": "Doakoak",
+  "workshops.filters.accessMembers": "Bazkideentzat"
 }

@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   X, Plus, Edit, Check, ChevronLeft, ChevronRight, Save, Eye, Trash2,
-  CalendarDays, Users, Baby, User, MapPin
+  CalendarDays, Users, Baby, User, MapPin, Gift, Lock
 } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -22,6 +22,7 @@ import { canManageWorkshop } from '../../app_context/useWorkshopAccess';
 import LocationPicker from '../maps/LocationPicker';
 import { localDate, serverDate } from '../../utils/locale';
 import { toForm, toAuthors, toPayload, resolveAvatar, resolveCover } from './workshopForm';
+import WorkshopAccessTag from './WorkshopAccessTag';
 import '../admin/ArticleEditorBlocks.css';
 import './WorkshopEditor.css';
 
@@ -303,6 +304,28 @@ function WorkshopEditor() {
         </div>
       </fieldset>
 
+      <fieldset className="pub-fieldset">
+        <legend>{t('workshops.editor.access', 'Quién puede reservar plaza')}</legend>
+        <div className="pub-choice-grid">
+          {[
+            { free: false, Icon: Lock, title: t('workshops.access.members', 'Para socios/as'), desc: t('workshops.editor.membersDesc', 'Solo reservan plaza los socios/as de la revista (y el equipo).') },
+            { free: true, Icon: Gift, title: t('workshops.access.free', 'Gratuito'), desc: t('workshops.editor.freeDesc', 'Cualquier persona con cuenta en la revista puede reservar plaza, sin ser socio/a.') }
+          ].map(({ free, Icon, title, desc }) => (
+            <button
+              key={String(free)}
+              type="button"
+              className={`pub-choice ${form.free_workshop === free ? 'is-selected' : ''}`}
+              onClick={() => set('free_workshop', free)}
+              aria-pressed={form.free_workshop === free}
+            >
+              <Icon size={28} />
+              <span className="pub-choice__title">{title}</span>
+              <span className="pub-choice__desc">{desc}</span>
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
       <div className="form-group full-width">
         <label htmlFor="ws-description">{t('workshops.form.description', 'Descripción')}</label>
         <textarea
@@ -427,6 +450,8 @@ function WorkshopEditor() {
         <dd>{form.title_workshop || '—'} {change(1)}</dd>
         <dt>{t('workshops.form.audience', 'Tipo de taller')}</dt>
         <dd>{audienceLabel(form.audience_workshop)} {change(1)}</dd>
+        <dt>{t('workshops.editor.access', 'Quién puede reservar plaza')}</dt>
+        <dd>{form.free_workshop ? t('workshops.access.free', 'Gratuito') : t('workshops.access.members', 'Para socios/as')} {change(1)}</dd>
         <dt>{t('workshops.form.date', 'Fecha y hora')}</dt>
         <dd>{when || t('admin.workshops.noDate', 'Sin fecha')} {change(2)}</dd>
         <dt>{t('workshops.form.place', 'Lugar')}</dt>
@@ -614,6 +639,7 @@ function WorkshopEditor() {
                         <h4>{w.title_workshop}</h4>
                         <p className="article-meta">
                           <span className="category-badge">{audienceLabel(w.audience_workshop)}</span>
+                          <WorkshopAccessTag workshop={w} />
                           <span>{spots}</span>
                         </p>
                         <p className="article-author workshop-editor__when">

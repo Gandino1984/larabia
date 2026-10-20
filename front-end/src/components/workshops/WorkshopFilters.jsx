@@ -85,6 +85,15 @@ function WorkshopFilters({ workshops, filters, onChange }) {
         </label>
 
         <label className="article-filters__field">
+          <span>{t('workshops.filters.access', 'Acceso')}</span>
+          <select value={filters.access || ''} onChange={(e) => set('access', e.target.value)}>
+            <option value="">{t('workshops.filters.anyAccess', 'Todos')}</option>
+            <option value="free">{t('workshops.filters.accessFree', 'Gratuitos')}</option>
+            <option value="members">{t('workshops.filters.accessMembers', 'Para socios/as')}</option>
+          </select>
+        </label>
+
+        <label className="article-filters__field">
           <span>{t('filters.sort.label', 'Ordenar')}</span>
           <select value={filters.sort} onChange={(e) => set('sort', e.target.value)}>
             <option value="date">{t('workshops.filters.sortDate', 'Por fecha')}</option>

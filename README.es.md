@@ -35,7 +35,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 - **Autoras/es:** el directorio de perfiles, en orden alfabético y con buscador (por nombre o especialidad, sin importar mayúsculas ni tildes), y las publicaciones de cada persona.
 - **Talleres:**
   - Las tarjetas son públicas.
-  - Para abrir uno hay que iniciar sesión, y para reservar plaza hay que ser socio/a (el equipo no lo necesita).
+  - Para abrir uno hay que iniciar sesión. Reservar plaza depende del taller, y se decide al crearlo o editarlo: los **gratuitos** están abiertos a cualquier persona con cuenta; los demás piden ser socio/a (el equipo no lo necesita). Las tarjetas dicen «Gratuito» o «Para socios/as», y hay un filtro «Acceso».
   - Quien lo gestiona — los super admins y, como con las autoras/es de un artículo, quien lo creó o lo imparte desde el equipo (sus talleristas) — lo edita, invita (la invitación reserva plaza), quita participantes o los bloquea.
   - Cada taller tiene su ubicación en un mapa (Leaflet/OpenStreetMap). No hay enlace a Google Maps: la gente se ubica en el propio mapa.
 - **Espacio abierto:** las propuestas literarias que publica la revista. Cualquier persona con cuenta (no hace falta ser socio/a) puede enviar la suya con un formulario y seguir allí su estado.

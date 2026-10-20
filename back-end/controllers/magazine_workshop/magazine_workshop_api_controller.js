@@ -4,6 +4,7 @@ import { getRequestUser, roleSnapshot } from "../../utils/authHelper.js";
 import reader_subscription_model, { isLiveSubscription } from "../../models/reader_subscription_model.js";
 import magazine_workshop_model from "../../models/magazine_workshop_model.js";
 import workshop_author_model from "../../models/workshop_author_model.js";
+import workshop_invitation_model from "../../models/workshop_invitation_model.js";
 
 /**
  * Creating workshops: admins and super admins only. Returns the user, or
@@ -57,8 +58,9 @@ async function requireWorkshopManager(req, res, workshopId) {
  * Who sees what:
  *   - anyone: the workshop LIST (cards);
  *   - signed-in readers: the workshop page;
- *   - paying subscribers: booking a place (the magazine team — editors,
- *     admins, super admins — books without subscribing);
+ *   - booking a place: anyone signed in if the workshop is free
+ *     (`free_workshop`); otherwise socios/as (paying or complimentary) and
+ *     the magazine team — editors, admins, super admins;
  *   - the workshop's managers: its participants and invitations (and
  *     managing them: invite, remove, block).
  * Booking standing: { user, code } where code is null (can book),
@@ -69,9 +71,10 @@ async function hasActiveSubscription(userId) {
     return isLiveSubscription(sub);
 }
 
-async function workshopAccess(req) {
+async function workshopAccess(req, workshop) {
     const user = await getRequestUser(req);
     if (!user) return { user: null, code: 'login_required' };
+    if (workshop?.free_workshop) return { user, code: null };
     if (roleSnapshot(user).canCreateContent) return { user, code: null };
     if (await hasActiveSubscription(user.id_user)) return { user, code: null };
     return { user, code: 'subscription_required' };
@@ -81,8 +84,8 @@ async function workshopAccess(req) {
  * Booking gate. Sends a 403 with the `code` the front-end uses — never a 401,
  * which logs the reader out. Returns the user when they're allowed.
  */
-async function requireWorkshopAccess(req, res) {
-    const { user, code } = await workshopAccess(req);
+async function requireWorkshopAccess(req, res, workshop) {
+    const { user, code } = await workshopAccess(req, workshop);
     if (!code) return user;
     res.status(403).json({
         error: code === 'login_required'
@@ -124,7 +127,7 @@ async function getById(req, res) {
         const participants = data.participants || [];
         let bookingCode = null;
         if (await magazineWorkshopController.isBlocked(id_workshop, user.id_user)) bookingCode = 'blocked';
-        else if (!roleSnapshot(user).canCreateContent && !(await hasActiveSubscription(user.id_user))) {
+        else if (!data.free_workshop && !roleSnapshot(user).canCreateContent && !(await hasActiveSubscription(user.id_user))) {
             bookingCode = 'subscription_required';
         }
 
@@ -154,7 +157,7 @@ async function create(req, res) {
         if (!admin) return; // 403 already sent
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
-            cover_image_workshop, capacity_workshop, audience_workshop, lat_workshop, lng_workshop, authors, author_name } = req.body;
+            cover_image_workshop, capacity_workshop, audience_workshop, free_workshop, lat_workshop, lng_workshop, authors, author_name } = req.body;
 
         const data = {
             title_workshop,
@@ -164,6 +167,7 @@ async function create(req, res) {
             cover_image_workshop: cover_image_workshop || null,
             capacity_workshop,
             audience_workshop,
+            free_workshop: free_workshop === true,
             lat_workshop,
             lng_workshop,
             author_id: admin.id_user,
@@ -188,7 +192,7 @@ async function update(req, res) {
         if (!admin) return;
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
-            cover_image_workshop, capacity_workshop, audience_workshop, lat_workshop, lng_workshop, authors, author_name } = req.body;
+            cover_image_workshop, capacity_workshop, audience_workshop, free_workshop, lat_workshop, lng_workshop, authors, author_name } = req.body;
 
         const data = {};
         if (title_workshop !== undefined) data.title_workshop = title_workshop;
@@ -198,6 +202,7 @@ async function update(req, res) {
         if (cover_image_workshop !== undefined) data.cover_image_workshop = cover_image_workshop;
         if (capacity_workshop !== undefined) data.capacity_workshop = capacity_workshop;
         if (audience_workshop !== undefined) data.audience_workshop = audience_workshop;
+        if (free_workshop !== undefined) data.free_workshop = free_workshop === true;
         if (lat_workshop !== undefined) data.lat_workshop = lat_workshop;
         if (lng_workshop !== undefined) data.lng_workshop = lng_workshop;
         if (author_name !== undefined) data.author_name = author_name;
@@ -251,10 +256,11 @@ async function uploadCoverImage(req, res) {
 
 async function reserve(req, res) {
     try {
-        const user = await requireWorkshopAccess(req, res);
-        if (!user) return;
         const { id_workshop } = req.params;
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
+        const workshop = await magazine_workshop_model.findByPk(id_workshop, { attributes: ['id_workshop', 'free_workshop'] });
+        const user = await requireWorkshopAccess(req, res, workshop);
+        if (!user) return;
         const result = await magazineWorkshopController.reserve(id_workshop, user.id_user);
         if (result.error) return res.status(400).json(result);
         res.json(result);
@@ -364,8 +370,13 @@ async function respondInvitation(req, res) {
     try {
         const response = req.body?.response;
         if (!['accept', 'decline'].includes(response)) return res.status(400).json({ error: 'Respuesta no válida' });
+        let workshop = null;
+        if (response === 'accept') {
+            const invitation = await workshop_invitation_model.findByPk(Number(req.params.id_invitation) || 0, { attributes: ['workshop_id'] });
+            if (invitation) workshop = await magazine_workshop_model.findByPk(invitation.workshop_id, { attributes: ['id_workshop', 'free_workshop'] });
+        }
         const user = response === 'accept'
-            ? await requireWorkshopAccess(req, res)
+            ? await requireWorkshopAccess(req, res, workshop)
             : await getRequestUser(req);
         if (!user) {
             if (!res.headersSent) res.status(403).json({ error: 'Inicia sesión para responder', code: 'login_required' });

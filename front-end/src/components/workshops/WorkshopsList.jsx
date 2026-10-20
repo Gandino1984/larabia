@@ -8,6 +8,7 @@ import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshopAccess, canManageWorkshop } from '../../app_context/useWorkshopAccess';
 import WorkshopOptions from './WorkshopOptions';
+import WorkshopAccessTag from './WorkshopAccessTag';
 import WorkshopFilters from './WorkshopFilters';
 import { EMPTY_WORKSHOP_FILTERS, applyWorkshopFilters, countActiveWorkshopFilters } from '../../utils/workshopFilters';
 import { useDragScroll } from '../../hooks/useDragScroll';
@@ -116,6 +117,7 @@ function WorkshopsList() {
           )}
         </div>
         <div className="workshop-card-body">
+          <WorkshopAccessTag workshop={w} />
           <h3 className="workshop-card-title">{w.title_workshop}</h3>
           {dateStr && <p className="workshop-meta"><Calendar size={15} /> {dateStr}</p>}
           <p className="workshop-meta"><MapPin size={15} /> {w.location_workshop || t('workshops.map.defaultPlace', 'Matiko, Uribarri')}</p>

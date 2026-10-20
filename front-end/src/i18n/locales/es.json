@@ -1438,5 +1438,15 @@
   "workshops.editor.mine.emptyHint": "Crea uno con «Nuevo taller».",
   "workshops.editor.mine.spots": "{{taken}}/{{total}} plazas",
   "workshops.editor.mine.signedUp_one": "1 persona apuntada",
-  "workshops.editor.mine.signedUp_other": "{{count}} personas apuntadas"
+  "workshops.editor.mine.signedUp_other": "{{count}} personas apuntadas",
+  "workshops.access.free": "Gratuito",
+  "workshops.access.members": "Para socios/as",
+  "workshops.editor.access": "Quién puede reservar plaza",
+  "workshops.editor.membersDesc": "Solo reservan plaza los socios/as de la revista (y el equipo).",
+  "workshops.editor.freeDesc": "Cualquier persona con cuenta en la revista puede reservar plaza, sin ser socio/a.",
+  "workshops.manage.inviteHintFree": "Cualquier persona con cuenta en la revista: el taller es gratuito. Recibirán una notificación para aceptar o rechazar.",
+  "workshops.filters.access": "Acceso",
+  "workshops.filters.anyAccess": "Todos",
+  "workshops.filters.accessFree": "Gratuitos",
+  "workshops.filters.accessMembers": "Para socios/as"
 }

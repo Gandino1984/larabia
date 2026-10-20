@@ -1,0 +1,28 @@
+/* magazine-front/src/components/workshops/WorkshopAccessTag.css
+   «Gratuito» / «Para socios/as»: a label (not a button), keeps its case. */
+.workshop-access {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  align-self: flex-start;
+  width: fit-content;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.workshop-access--free {
+  border: 1px solid #86efac;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.workshop-access--members {
+  border: 1px solid #e3c25b;
+  background: #fdf6dc;
+  color: #7a5a0a;
+}

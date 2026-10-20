@@ -60,6 +60,13 @@ const magazine_workshop_model = sequelize.define(
             allowNull: false,
             defaultValue: 'general'
         },
+        // Free: anyone signed in books a place. Otherwise (default) booking is
+        // for socios/as and the magazine team. Migration 022.
+        free_workshop: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
         active_workshop: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
