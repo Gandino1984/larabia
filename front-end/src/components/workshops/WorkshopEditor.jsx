@@ -21,7 +21,7 @@ import { useMagazine } from '../../app_context/MagazineContext';
 import { canManageWorkshop } from '../../app_context/useWorkshopAccess';
 import LocationPicker from '../maps/LocationPicker';
 import { localDate, serverDate } from '../../utils/locale';
-import { toForm, toAuthors, toPayload, resolveAvatar, resolveCover } from './workshopForm';
+import { toForm, toAuthors, toPayload, formDate, resolveAvatar, resolveCover } from './workshopForm';
 import WorkshopAccessTag from './WorkshopAccessTag';
 import '../admin/ArticleEditorBlocks.css';
 import './WorkshopEditor.css';
@@ -60,6 +60,9 @@ function WorkshopEditor() {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [mineFilter, setMineFilter] = useState('upcoming');
+  // A day or time typed only halfway: the field's value stays empty
+  // (validity.badInput), so it's tracked apart to warn about it.
+  const [halfTyped, setHalfTyped] = useState({ date_day: false, date_time: false });
   const blobRef = useRef(null);
 
   useEffect(() => { fetchWorkshops(); fetchEditors(); }, [fetchWorkshops, fetchEditors]);
@@ -108,13 +111,19 @@ function WorkshopEditor() {
       if (!form.title_workshop.trim()) return { field: 'title_workshop', message: t('workshops.editor.need.title', 'Escribe el título del taller') };
       if (form.title_workshop.length > TITLE_MAX) return { field: 'title_workshop', message: t('workshops.editor.need.titleLong', { max: TITLE_MAX, defaultValue: 'El título es demasiado largo (máximo {{max}} caracteres)' }) };
     }
-    if (n === 2 && form.capacity_workshop !== '') {
-      const c = Number(form.capacity_workshop);
-      if (!Number.isInteger(c) || c < 0) return { field: 'capacity_workshop', message: t('workshops.editor.need.capacity', 'El aforo tiene que ser un número entero (0 o más)') };
+    if (n === 2) {
+      if (halfTyped.date_day) return { field: 'date_day', message: t('workshops.editor.need.dayIncomplete', 'La fecha está incompleta: pon el día, el mes y el año') };
+      if (halfTyped.date_time) return { field: 'date_time', message: t('workshops.editor.need.timeIncomplete', 'La hora está incompleta: pon la hora y los minutos') };
+      if (form.date_day && !form.date_time) return { field: 'date_time', message: t('workshops.editor.need.time', 'Pon también la hora del taller') };
+      if (form.date_time && !form.date_day) return { field: 'date_day', message: t('workshops.editor.need.day', 'Pon también la fecha del taller') };
+      if (form.capacity_workshop !== '') {
+        const c = Number(form.capacity_workshop);
+        if (!Number.isInteger(c) || c < 0) return { field: 'capacity_workshop', message: t('workshops.editor.need.capacity', 'El aforo tiene que ser un número entero (0 o más)') };
+      }
     }
     return null;
   };
-  const FIELD_IDS = { title_workshop: 'ws-title', capacity_workshop: 'ws-capacity' };
+  const FIELD_IDS = { title_workshop: 'ws-title', capacity_workshop: 'ws-capacity', date_day: 'ws-date', date_time: 'ws-time' };
   const showProblem = (p) => {
     setErrors({ [p.field]: p.message });
     setTimeout(() => document.getElementById(FIELD_IDS[p.field])?.focus(), 0);
@@ -342,11 +351,28 @@ function WorkshopEditor() {
   // ---- Step 2: when and where ----
   const stepWhere = (
     <>
+      <p className="pub-step-hint">{t('workshops.editor.dateHint', 'La fecha y la hora salen en la tarjeta y en la página del taller. Déjalas vacías si aún no están decididas.')}</p>
       <div className="workshop-editor__row">
-        <div className="form-group">
-          <label htmlFor="ws-date">{t('workshops.form.date', 'Fecha y hora')}</label>
-          <input type="datetime-local" id="ws-date" value={form.date_workshop} onChange={(e) => set('date_workshop', e.target.value)} />
-        </div>
+        {[
+          { field: 'date_day', id: 'ws-date', type: 'date', label: t('workshops.editor.day', 'Fecha') },
+          { field: 'date_time', id: 'ws-time', type: 'time', label: t('workshops.editor.time', 'Hora') }
+        ].map(({ field, id, type, label }) => (
+          <div className="form-group" key={field}>
+            <label htmlFor={id}>{label}</label>
+            <input
+              type={type}
+              id={id}
+              value={form[field]}
+              onChange={(e) => { set(field, e.target.value); setHalfTyped((h) => ({ ...h, [field]: e.target.validity.badInput })); }}
+              onBlur={(e) => setHalfTyped((h) => ({ ...h, [field]: e.target.validity.badInput }))}
+              className={errors[field] ? 'input-error' : ''}
+              aria-invalid={!!errors[field]}
+            />
+            {errorOf(field)}
+          </div>
+        ))}
+      </div>
+      <div className="workshop-editor__row">
         <div className="form-group">
           <label htmlFor="ws-capacity">{t('workshops.form.capacity', 'Aforo (plazas)')}</label>
           <input
@@ -442,7 +468,7 @@ function WorkshopEditor() {
   );
 
   // ---- Step 4: review and save ----
-  const when = form.date_workshop ? localDate(new Date(form.date_workshop), { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+  const when = formDate(form) ? localDate(formDate(form), { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
   const stepReview = (
     <div className="pub-review">
       <dl className="pub-review__list">

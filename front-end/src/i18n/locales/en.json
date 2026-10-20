@@ -1448,5 +1448,12 @@
   "workshops.filters.access": "Access",
   "workshops.filters.anyAccess": "All",
   "workshops.filters.accessFree": "Free",
-  "workshops.filters.accessMembers": "For members"
+  "workshops.filters.accessMembers": "For members",
+  "workshops.editor.day": "Date",
+  "workshops.editor.time": "Time",
+  "workshops.editor.dateHint": "The date and time appear on the card and on the workshop page. Leave them empty if they aren’t decided yet.",
+  "workshops.editor.need.dayIncomplete": "The date is incomplete: fill in the day, month and year",
+  "workshops.editor.need.timeIncomplete": "The time is incomplete: fill in the hour and minutes",
+  "workshops.editor.need.time": "Add the time of the workshop too",
+  "workshops.editor.need.day": "Add the date of the workshop too"
 }

@@ -3,14 +3,16 @@
    (ArticleEditorBlocks.css: pub-*, form-group, articles-grid…); here only
    what it adds. Mobile first. */
 
-/* Date + capacity side by side from tablets up. */
+/* Date + time side by side from tablets up (and capacity). */
 .workshop-editor__row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 0 1rem;
+  gap: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
 }
 
-.workshop-editor .form-group input[type='datetime-local'],
+.workshop-editor .form-group input[type='date'],
+.workshop-editor .form-group input[type='time'],
 .workshop-editor .form-group input[type='number'] {
   width: 100%;
   min-width: 0;
@@ -24,7 +26,8 @@
   font-size: 1rem;
 }
 
-.workshop-editor .form-group input[type='datetime-local']:focus,
+.workshop-editor .form-group input[type='date']:focus,
+.workshop-editor .form-group input[type='time']:focus,
 .workshop-editor .form-group input[type='number']:focus {
   border-color: #1a1a1a;
   outline: none;

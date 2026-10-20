@@ -19,15 +19,23 @@ export const resolveCover = (img) => {
   return `${apiUrl}/${img.startsWith('/') ? img.slice(1) : img}`;
 };
 
-// A date from the API (UTC: «2026-11-20 17:00:00») → the local time an
-// <input type="datetime-local"> shows. Reading it as local time moved the
-// workshop an hour or two earlier on every save.
-const toLocalInput = (d) => {
+// A date from the API (UTC: «2026-11-20 17:00:00») → the local day and time
+// the editor's «Fecha» (<input type="date">) and «Hora» (<input type="time">)
+// show. Reading it as local time moved the workshop an hour or two earlier on
+// every save. Two fields, not one datetime-local: with the day typed but not
+// the time, that one is simply empty and the date was lost without a word.
+const pad = (n) => String(n).padStart(2, '0');
+const toLocalDay = (d) => {
   const dt = serverDate(d);
-  if (!dt) return '';
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  return dt ? `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}` : '';
 };
+const toLocalTime = (d) => {
+  const dt = serverDate(d);
+  return dt ? `${pad(dt.getHours())}:${pad(dt.getMinutes())}` : '';
+};
+
+/** The day + time of the form as a Date (local), or null if either is missing. */
+export const formDate = (form) => (form.date_day && form.date_time ? new Date(`${form.date_day}T${form.date_time}`) : null);
 
 // New workshops start placed on the default location (Matiko, Uribarri); the
 // creator moves the pin if it's elsewhere.
@@ -35,7 +43,8 @@ export const toForm = (w) => ({
   title_workshop: w?.title_workshop || '',
   description_workshop: w?.description_workshop || '',
   location_workshop: w?.location_workshop || '',
-  date_workshop: toLocalInput(w?.date_workshop),
+  date_day: toLocalDay(w?.date_workshop),
+  date_time: toLocalTime(w?.date_workshop),
   capacity_workshop: w?.capacity_workshop ?? '',
   audience_workshop: w?.audience_workshop === 'infantil' ? 'infantil' : 'general',
   // Who books: false = socios/as and the team (the default), true = anyone signed in.
@@ -55,7 +64,7 @@ export const toPayload = (form, authors) => ({
   title_workshop: form.title_workshop.trim(),
   description_workshop: form.description_workshop.trim() || null,
   location_workshop: form.location_workshop.trim() || null,
-  date_workshop: form.date_workshop ? new Date(form.date_workshop).toISOString() : null,
+  date_workshop: formDate(form) ? formDate(form).toISOString() : null,
   capacity_workshop: form.capacity_workshop === '' ? null : Number(form.capacity_workshop),
   audience_workshop: form.audience_workshop,
   free_workshop: !!form.free_workshop,

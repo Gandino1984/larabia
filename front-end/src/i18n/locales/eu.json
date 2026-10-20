@@ -1448,5 +1448,12 @@
   "workshops.filters.access": "Sarbidea",
   "workshops.filters.anyAccess": "Guztiak",
   "workshops.filters.accessFree": "Doakoak",
-  "workshops.filters.accessMembers": "Bazkideentzat"
+  "workshops.filters.accessMembers": "Bazkideentzat",
+  "workshops.editor.day": "Data",
+  "workshops.editor.time": "Ordua",
+  "workshops.editor.dateHint": "Data eta ordua txartelean eta tailerraren orrian agertzen dira. Utzi hutsik oraindik erabaki ez badira.",
+  "workshops.editor.need.dayIncomplete": "Data osatu gabe dago: jarri eguna, hilabetea eta urtea",
+  "workshops.editor.need.timeIncomplete": "Ordua osatu gabe dago: jarri ordua eta minutuak",
+  "workshops.editor.need.time": "Jarri tailerraren ordua ere",
+  "workshops.editor.need.day": "Jarri tailerraren data ere"
 }

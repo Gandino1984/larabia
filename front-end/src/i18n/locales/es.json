@@ -1448,5 +1448,12 @@
   "workshops.filters.access": "Acceso",
   "workshops.filters.anyAccess": "Todos",
   "workshops.filters.accessFree": "Gratuitos",
-  "workshops.filters.accessMembers": "Para socios/as"
+  "workshops.filters.accessMembers": "Para socios/as",
+  "workshops.editor.day": "Fecha",
+  "workshops.editor.time": "Hora",
+  "workshops.editor.dateHint": "La fecha y la hora salen en la tarjeta y en la página del taller. Déjalas vacías si aún no están decididas.",
+  "workshops.editor.need.dayIncomplete": "La fecha está incompleta: pon el día, el mes y el año",
+  "workshops.editor.need.timeIncomplete": "La hora está incompleta: pon la hora y los minutos",
+  "workshops.editor.need.time": "Pon también la hora del taller",
+  "workshops.editor.need.day": "Pon también la fecha del taller"
 }
