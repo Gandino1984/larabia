@@ -233,7 +233,10 @@ async function completeGoogleRegistration(googleId, email, name, picture) {
             is_editor: promoteToSuperAdmin,
             is_admin: promoteToSuperAdmin,
             is_super_admin: promoteToSuperAdmin,
-            receives_newsletter: false
+            // New accounts get the recommendations (the newsletter): the
+            // sign-in page says so, and every email has a one-click link to
+            // stop them (routers/user_api_router.js).
+            receives_newsletter: true
         });
 
         if (promoteToSuperAdmin) {

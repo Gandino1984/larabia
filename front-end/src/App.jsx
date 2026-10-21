@@ -7,6 +7,7 @@ import { useMagazine } from './app_context/MagazineContext';
 import { useAuth } from './app_context/AuthContext';
 import { useWorkshop } from './app_context/WorkshopContext';
 import { usePreloader } from './hooks/usePreloader';
+import axiosInstance from './utils/axiosConfig';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import FloatingEditorButton from './components/layout/FloatingEditorButton';
@@ -38,10 +39,10 @@ import { useAuthor } from './app_context/AuthorContext';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, authorCardUser, closeAuthorCard } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, showSuccess, showError, authorCardUser, closeAuthorCard } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
-  const { currentUser, loading: authLoading } = useAuth();
+  const { currentUser, setUser, loading: authLoading } = useAuth();
   const { fetchWorkshopById, setFocusWorkshopId } = useWorkshop();
   const { isLoading, progress } = usePreloader();
   const { t } = useTranslation();
@@ -69,6 +70,26 @@ function App() {
     });
     setPendingArticleId(null);
   }, [pendingArticleId, authLoading, fetchArticleById, navigateToArticle]);
+
+  // «Darme de baja» from a newsletter email (?newsletter_unsubscribe=<token>):
+  // no sign-in needed. If it's the signed-in reader's, their copy follows.
+  const unsubscribeHandled = useRef(false);
+  useEffect(() => {
+    if (unsubscribeHandled.current || authLoading) return;
+    const token = new URLSearchParams(window.location.search).get('newsletter_unsubscribe');
+    if (!token) return;
+    unsubscribeHandled.current = true;
+    window.history.replaceState({}, '', '/');
+    axiosInstance.post(`/user/newsletter/unsubscribe/${encodeURIComponent(token)}`)
+      .then((res) => {
+        if (currentUser && res.data?.data?.id_user === currentUser.id_user) {
+          setUser({ ...currentUser, receives_newsletter: false });
+        }
+        showSuccess(t('newsletter.unsubscribedByLink', 'Te has dado de baja: ya no recibirás las recomendaciones por correo.'));
+      })
+      .catch((err) => showError(err.response?.data?.error || t('newsletter.error')));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading]);
 
   // A shared workshop link (?workshop=<id>, WorkshopOptions). Opening a
   // workshop needs an account: signed out, the reader lands on its card in

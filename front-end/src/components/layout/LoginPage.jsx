@@ -25,7 +25,8 @@ function LoginPage() {
     setUser(userData);
 
     if (code === 'account_created') {
-      showSuccess(t('messages.success.accountCreated', { name: userData.name_user }));
+      // New accounts get the recommendations (the newsletter) — say so.
+      showSuccess(t('messages.success.accountCreatedNewsletter', { name: userData.name_user }));
     } else if (code === 'account_linked' || code === 'already_linked') {
       showSuccess(t('messages.success.accountLinked'));
     } else {
@@ -116,6 +117,11 @@ function LoginPage() {
             onNeedsTypeSelection={handleNeedsTypeSelection}
             isRegisterMode={false}
           />
+          {/* New accounts get the recommendations by email (the server); one
+              click in any of them, or «Recomendaciones», stops them. */}
+          <p className="login-newsletter-note">
+            {t('auth.login.newsletterNote', 'Si aún no tienes cuenta, al crearla te apuntamos a las recomendaciones de la revista por correo. Puedes darte de baja cuando quieras, con un clic desde cualquier correo.')}
+          </p>
         </div>
 
         <div className="login-footer">

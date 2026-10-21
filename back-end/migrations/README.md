@@ -55,6 +55,7 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `021` | `reader_subscriptions.complimentary`, `complimentary_at` |
 | `022` | `magazine_workshops.free_workshop` |
 | `024` | `magazine_articles.featured_order` |
+| `025` | `user.newsletter_token` (unique) |
 
 The tables of `009`, `010`, `011`, `014`, `015`, `020` and `023` are created at boot with Sequelize `sync()` when missing. The SQL files stay the reference for a fresh database.
 
@@ -62,7 +63,7 @@ The tables of `009`, `010`, `011`, `014`, `015`, `020` and `023` are created at 
 
 | Table | Purpose |
 |---|---|
-| `user` | Accounts: roles (`is_editor`, `is_admin`, `is_super_admin`, `is_premium_reader`), Google link, author invitation status |
+| `user` | Accounts: roles (`is_editor`, `is_admin`, `is_super_admin`, `is_premium_reader`), Google link, author invitation status, newsletter (`receives_newsletter`, `newsletter_token`) |
 | `magazine_projects` | Projects that group publications (type, format, sections, translations) |
 | `magazine_articles` | Publications: cover and metadata; the content lives in `article_blocks` |
 | `article_blocks` | Ordered content blocks: `text` / `image` / `iframe` / `comic_panel` / `paisaje` (+ translations) |

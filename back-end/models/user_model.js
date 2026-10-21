@@ -93,6 +93,13 @@ const user_model = sequelize.define("user", {
         allowNull: false,
         defaultValue: false
     },
+    // The newsletter's one-click «Darme de baja» link (no sign-in needed);
+    // made when the first newsletter is sent. Never sent to the front-end.
+    newsletter_token: {
+        type: DataTypes.CHAR(32),
+        allowNull: true,
+        unique: true
+    },
     // Authors a super admin signed up before they had an account
     // (controllers/user/author_invitation_controller.js).
     author_invite_status: {

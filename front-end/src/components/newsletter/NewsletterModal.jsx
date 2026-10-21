@@ -25,8 +25,11 @@ const NewsletterModal = ({ onClose }) => {
     setStatus(null);
 
     try {
+      // The value we want, not a toggle: the stored user can be stale (e.g.
+      // after unsubscribing from an email).
       const response = await axiosInstance.post('/user/toggle-newsletter', {
-        id_user: currentUser.id_user
+        id_user: currentUser.id_user,
+        receives_newsletter: !isSubscribed
       });
 
       if (!response.data.error) {

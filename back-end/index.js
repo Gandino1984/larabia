@@ -148,6 +148,12 @@ Promise.all([
                 console.log(`>>> Added user.${col}`);
             }
         }
+        // The newsletter's one-click unsubscribe token (migration 025).
+        if (!users.newsletter_token) {
+            await qi.addColumn('user', 'newsletter_token', { type: DataTypes.CHAR(32), allowNull: true });
+            await qi.addIndex('user', ['newsletter_token'], { unique: true, name: 'uq_user_newsletter_token' });
+            console.log('>>> Added user.newsletter_token');
+        }
         // Complimentary subscriptions given by a super admin (migration 021).
         const subs = await qi.describeTable('reader_subscriptions');
         if (!subs.complimentary) {

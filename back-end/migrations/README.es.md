@@ -60,6 +60,7 @@ Desde la `012`, el back-end comprueba al arrancar (`back-end/index.js`) las colu
 | `021` | `reader_subscriptions.complimentary`, `complimentary_at` |
 | `022` | `magazine_workshops.free_workshop` |
 | `024` | `magazine_articles.featured_order` |
+| `025` | `user.newsletter_token` (único) |
 
 Las tablas de `009`, `010`, `011`, `014`, `015`, `020` y `023` se crean al arrancar con `sync()` de Sequelize si no existen. Los archivos SQL siguen siendo la referencia para una base nueva.
 
@@ -67,7 +68,7 @@ Las tablas de `009`, `010`, `011`, `014`, `015`, `020` y `023` se crean al arran
 
 | Tabla | Para qué |
 |---|---|
-| `user` | Cuentas: roles (`is_editor`, `is_admin`, `is_super_admin`, `is_premium_reader`), vínculo con Google, estado de la invitación de autoría |
+| `user` | Cuentas: roles (`is_editor`, `is_admin`, `is_super_admin`, `is_premium_reader`), vínculo con Google, estado de la invitación de autoría, newsletter (`receives_newsletter`, `newsletter_token`) |
 | `magazine_projects` | Proyectos que agrupan publicaciones (tipo, formato, secciones, traducciones) |
 | `magazine_articles` | Publicaciones: portada y datos; el contenido está en `article_blocks` |
 | `article_blocks` | Bloques de contenido ordenados: `text` / `image` / `iframe` / `comic_panel` / `paisaje` (+ traducciones) |

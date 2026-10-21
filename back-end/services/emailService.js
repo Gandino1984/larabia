@@ -329,7 +329,9 @@ export const sendOpenSpaceProposalEmail = async ({ senderName, senderEmail, titl
   }
 };
 
-export const sendNewsletterEmail = async (subscriberEmail, subscriberName, articles, introText) => {
+// unsubscribe: { unsubscribeUrl (a page of the magazine), oneClickUrl (the API,
+// for mail clients' own «unsubscribe» button) } — routers/user_api_router.js.
+export const sendNewsletterEmail = async (subscriberEmail, subscriberName, articles, introText, unsubscribe = {}) => {
   try {
     const transporter = createTransporter();
     const magazineUrl = config.urls.frontend;
@@ -366,7 +368,7 @@ export const sendNewsletterEmail = async (subscriberEmail, subscriberName, artic
           <div style="text-align:center; margin-top:40px; padding-top:24px; border-top:1px solid #e0e0e0;">
             <a href="${magazineUrl}" style="color:#111; font-size:13px;">Visitar ${BRAND}</a>
           </div>
-          <p style="text-align:center; margin-top:16px; font-size:11px; color:#aaa;">Recibiste este correo porque te suscribiste a las recomendaciones de ${BRAND}.<br>Para darte de baja, entra a tu perfil en la plataforma.</p>
+          <p style="text-align:center; margin-top:16px; font-size:11px; color:#aaa;">Recibes este correo porque tienes cuenta en ${BRAND} y recibes sus recomendaciones.<br>${unsubscribe.unsubscribeUrl ? `<a href="${unsubscribe.unsubscribeUrl}" style="color:#888;">Darme de baja</a> (con un clic, sin iniciar sesión).` : 'Para darte de baja, entra en «Recomendaciones» en la revista.'}</p>
         </div>
       </body></html>
     `;
@@ -376,7 +378,12 @@ export const sendNewsletterEmail = async (subscriberEmail, subscriberName, artic
       from: `"${BRAND}" <${process.env.EMAIL_USER}>`,
       to: subscriberEmail,
       subject: `Recomendaciones de ${BRAND}: ${articleTitles.substring(0, 60)}${articleTitles.length > 60 ? '...' : ''}`,
-      html: htmlContent
+      html: htmlContent,
+      // Mail clients' own «unsubscribe» button (one click, RFC 8058).
+      ...(unsubscribe.oneClickUrl ? {
+        list: { unsubscribe: { url: unsubscribe.oneClickUrl, comment: 'Darme de baja' } },
+        headers: { 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' }
+      } : {})
     });
 
     return { success: true };

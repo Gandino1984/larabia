@@ -3,12 +3,13 @@ import userApiController from "../controllers/user/user_api_controller.js";
 import userController from "../controllers/user/user_controller.js";
 import { handleProfileImageUpload } from "../middleware/ProfileUploadMiddleware.js";
 import { requireSuperAdmin, requireAdmin, getRequestUser, roleSnapshot } from "../utils/authHelper.js";
-import { isSuperAdminEmail } from "../config/environment.js";
+import config, { isSuperAdminEmail } from "../config/environment.js";
 import user_model from '../models/user_model.js';
 import magazine_article_model from '../models/magazine_article_model.js';
 import { sendNewsletterEmail } from '../services/emailService.js';
 import authorInvitation from '../controllers/user/author_invitation_controller.js';
 import { Op } from 'sequelize';
+import crypto from 'node:crypto';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -233,7 +234,9 @@ router.get('/image/:userName', userApiController.getUserImage);
 // Newsletter (kept under /user/* for back-compat with magazine-front)
 // ============================================================
 
-// Toggle subscription
+// Subscribe / unsubscribe. `receives_newsletter` says which (a plain toggle
+// flipped the wrong way when the page's copy of the user was stale — e.g.
+// after unsubscribing from an email); without it, it toggles.
 router.post('/toggle-newsletter', async (req, res) => {
     try {
         const { id_user } = req.body;
@@ -242,13 +245,32 @@ router.post('/toggle-newsletter', async (req, res) => {
         const user = await user_model.findByPk(id_user);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        const newValue = !user.receives_newsletter;
+        const wanted = req.body.receives_newsletter;
+        const newValue = typeof wanted === 'boolean' ? wanted : !user.receives_newsletter;
         await user.update({ receives_newsletter: newValue });
 
         res.json({ error: null, data: { receives_newsletter: newValue } });
     } catch (error) {
         console.error('Error toggling newsletter:', error);
         res.status(500).json({ error: 'Failed to toggle newsletter subscription', details: error.message });
+    }
+});
+
+// One-click unsubscribe, no sign-in: the «Darme de baja» link of every
+// newsletter (the front-end page posts here) and mail clients' own button
+// (List-Unsubscribe-Post, RFC 8058). The token is the person's own, random.
+router.post('/newsletter/unsubscribe/:token', async (req, res) => {
+    try {
+        const token = String(req.params.token || '');
+        const user = /^[a-f0-9]{32}$/.test(token)
+            ? await user_model.findOne({ where: { newsletter_token: token }, attributes: ['id_user', 'receives_newsletter'] })
+            : null;
+        if (!user) return res.status(404).json({ error: 'Este enlace para darse de baja no es válido', code: 'invalid_token' });
+        if (user.receives_newsletter) await user.update({ receives_newsletter: false });
+        res.json({ error: null, data: { unsubscribed: true, id_user: user.id_user } });
+    } catch (error) {
+        console.error('Error unsubscribing from the newsletter:', error);
+        res.status(500).json({ error: 'No se pudo cancelar la suscripción', details: error.message });
     }
 });
 
@@ -277,7 +299,7 @@ router.post('/send-newsletter', async (req, res) => {
 
         const subscribers = await user_model.findAll({
             where: { receives_newsletter: true },
-            attributes: ['email_user', 'name_user']
+            attributes: ['id_user', 'email_user', 'name_user', 'newsletter_token']
         });
 
         if (subscribers.length === 0) {
@@ -299,11 +321,20 @@ router.post('/send-newsletter', async (req, res) => {
         let sent = 0;
         let failed = 0;
         for (const subscriber of subscribers) {
+            // Their one-click «Darme de baja» link.
+            if (!subscriber.newsletter_token) {
+                await subscriber.update({ newsletter_token: crypto.randomBytes(16).toString('hex') });
+            }
+            const token = subscriber.newsletter_token;
             const result = await sendNewsletterEmail(
                 subscriber.email_user,
                 subscriber.name_user,
                 articles,
-                introText || ''
+                introText || '',
+                {
+                    unsubscribeUrl: `${config.urls.frontend.replace(/\/$/, '')}/?newsletter_unsubscribe=${token}`,
+                    oneClickUrl: `${config.urls.api.replace(/\/$/, '')}/user/newsletter/unsubscribe/${token}`
+                }
             );
             if (result.success) sent++;
             else failed++;
