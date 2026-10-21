@@ -97,10 +97,16 @@ async function requireWorkshopAccess(req, res, workshop) {
 }
 
 // Public: anyone can see the workshops.
+// Signed in, each card also says what this reader can do (personalize).
 async function getAll(req, res) {
     try {
         const { error, data } = await magazineWorkshopController.getAll();
-        res.json({ error, data });
+        if (error) return res.json({ error, data });
+        const user = await getRequestUser(req);
+        const list = user
+            ? await magazineWorkshopController.personalize(data, user.id_user, await hasActiveSubscription(user.id_user))
+            : data;
+        res.json({ error: null, data: list });
     } catch (err) {
         console.error("-> workshop api getAll() - Error =", err);
         res.status(500).json({ error: "Error al obtener los talleres", details: err.message });
@@ -137,10 +143,17 @@ async function getById(req, res) {
             booking_code: bookingCode,
             my_invitation: await magazineWorkshopController.myPendingInvitation(id_workshop, user.id_user),
             my_spot_request: await magazineWorkshopController.mySpotRequest(id_workshop, user.id_user),
-            // Socios/as can ask for an extra place when it's full.
+            // Socios/as — or anyone signed in, if it's free — can ask for an
+            // extra place when it's full.
             is_member: await hasActiveSubscription(user.id_user),
             can_manage: canManage
         };
+        out.can_request_spot = magazineWorkshopController.canRequestSpot(out, {
+            reserved: out.reserved_by_me,
+            blocked: bookingCode === 'blocked',
+            request: out.my_spot_request?.status || null,
+            isMember: out.is_member
+        });
         if (canManage) {
             out.spot_requests = await magazineWorkshopController.loadWorkshopSpotRequests(id_workshop);
             out.invitations = await magazineWorkshopController.loadWorkshopInvitations(id_workshop);
@@ -342,7 +355,9 @@ async function requestSpot(req, res) {
     try {
         const user = await getRequestUser(req);
         if (!user) return res.status(403).json({ error: 'Inicia sesión para pedir una plaza', code: 'login_required' });
-        if (!(await hasActiveSubscription(user.id_user))) {
+        // A free workshop: anyone signed in. Otherwise socios/as only.
+        const workshop = await magazine_workshop_model.findByPk(req.params.id_workshop, { attributes: ['id_workshop', 'free_workshop'] });
+        if (!workshop?.free_workshop && !(await hasActiveSubscription(user.id_user))) {
             return res.status(403).json({ error: 'Solo los socios/as de la revista pueden pedir una plaza extra', code: 'membership_required' });
         }
         const result = await magazineWorkshopController.requestSpot(req.params.id_workshop, user.id_user, req.body?.message);

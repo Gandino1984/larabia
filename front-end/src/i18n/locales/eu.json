@@ -1508,5 +1508,12 @@
   "admin.hero.addTitle": "Gehitu istorio bat",
   "admin.hero.searchPlaceholder": "Bilatu izenburuaren arabera…",
   "admin.hero.noResults": "Ez dago izenburu hori duen argitaratutako istoriorik azaletik kanpo.",
-  "admin.hero.add": "Gehitu"
+  "admin.hero.add": "Gehitu",
+  "workshops.extra.count_one": "Plaza-eskaera 1",
+  "workshops.extra.count_other": "{{count}} plaza-eskaera",
+  "workshops.extra.cardPending": "Plaza eskatuta",
+  "workshops.extra.cardAsk": "Eskatu plaza bat",
+  "workshops.extra.dialogTitle": "Eskatu plaza bat «{{title}}» tailerrean",
+  "workshops.extra.dialogText": "Tailerra beteta dago. Kudeatzen duenak erabakiko du plaza bat gehiago irekitzen duen; kanpaian jakinaraziko dizugu.",
+  "workshops.extra.hintAny": "Plaza bat gehiago irekitzeko eska dezakezu. Tailerra kudeatzen duenak erabakiko du."
 }

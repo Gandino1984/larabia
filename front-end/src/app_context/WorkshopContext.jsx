@@ -228,25 +228,27 @@ export const WorkshopProvider = ({ children }) => {
       const res = await axiosInstance.post(`/magazine-workshop/spot-requests/${id}`, { message }, authHeader());
       showSuccess(res.data?.success || i18n.t('messages.success.done', 'Hecho'));
       if (id === selectedIdRef.current) await fetchWorkshopById(id);
+      fetchWorkshops(); // the cards: their request and the count
       return { success: true };
     } catch (err) {
       const msg = err.response?.data?.error || i18n.t('workshops.extra.requestError', 'No se pudo enviar la solicitud');
       showError(msg);
       return { error: msg, code: err.response?.data?.code };
     }
-  }, [authHeader, showSuccess, showError, fetchWorkshopById]);
+  }, [authHeader, showSuccess, showError, fetchWorkshopById, fetchWorkshops]);
 
   const withdrawExtraSpot = useCallback(async (id) => {
     try {
       const res = await axiosInstance.delete(`/magazine-workshop/spot-requests/${id}`, authHeader());
       showSuccess(res.data?.success || i18n.t('messages.success.done', 'Hecho'));
       if (id === selectedIdRef.current) await fetchWorkshopById(id);
+      fetchWorkshops();
       return { success: true };
     } catch (err) {
       showError(err.response?.data?.error || i18n.t('workshops.extra.withdrawError', 'No se pudo retirar la solicitud'));
       return { error: true };
     }
-  }, [authHeader, showSuccess, showError, fetchWorkshopById]);
+  }, [authHeader, showSuccess, showError, fetchWorkshopById, fetchWorkshops]);
 
   // response: 'accept' (opens one more place and books it) | 'decline'.
   const respondExtraSpot = useCallback(async (workshopId, requesterId, response) => {

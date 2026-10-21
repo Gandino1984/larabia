@@ -1508,5 +1508,12 @@
   "admin.hero.addTitle": "Add a story",
   "admin.hero.searchPlaceholder": "Search by title…",
   "admin.hero.noResults": "No published stories with that title outside the front page.",
-  "admin.hero.add": "Add"
+  "admin.hero.add": "Add",
+  "workshops.extra.count_one": "1 request for a place",
+  "workshops.extra.count_other": "{{count}} requests for a place",
+  "workshops.extra.cardPending": "Place requested",
+  "workshops.extra.cardAsk": "Ask for a place",
+  "workshops.extra.dialogTitle": "Ask for a place in «{{title}}»",
+  "workshops.extra.dialogText": "The workshop is full. Whoever runs it will decide whether to open one more place; we’ll let you know in the bell.",
+  "workshops.extra.hintAny": "You can ask for one more place to be opened. Whoever runs the workshop will decide."
 }

@@ -168,11 +168,53 @@ async function decorate(workshop) {
     const authors = await loadWorkshopAuthors(workshop.id_workshop);
     const reservation_count = await workshop_reservation_model.count({ where: { workshop_id: workshop.id_workshop } });
     const pending = await countPendingInvitations(workshop.id_workshop);
+    // Requests for an extra place waiting for an answer (shown on the card).
+    const spot_request_count = await workshop_spot_request_model.count({ where: { workshop_id: workshop.id_workshop, status: 'pending' } });
     return {
         ...workshop.toJSON(),
         authors,
+        spot_request_count,
         ...spotsSummary(workshop, reservation_count, pending)
     };
+}
+
+// Who can ask for an extra place: the workshop is full (with a capacity),
+// they aren't in it, blocked or already waiting / turned down — and they're
+// a socio/a, or the workshop is free (then anyone signed in).
+function canRequestSpot(w, { reserved, blocked, request, isMember }) {
+    const open = !request || request === 'accepted';
+    return w.capacity_workshop != null && !!w.is_full && !reserved && !blocked && open
+        && (isMember || !!w.free_workshop);
+}
+
+// The signed-in reader's standing on each workshop of a list (cards):
+// reserved_by_me, my_spot_request ({ status }, as on the workshop page) and
+// can_request_spot.
+async function personalize(list, userId, isMember) {
+    if (!userId || list.length === 0) return list;
+    const ids = list.map((w) => w.id_workshop);
+    const [reservations, blocks, requests] = await Promise.all([
+        workshop_reservation_model.findAll({ where: { user_id: userId, workshop_id: ids }, attributes: ['workshop_id'] }),
+        workshop_block_model.findAll({ where: { user_id: userId, workshop_id: ids }, attributes: ['workshop_id'] }),
+        workshop_spot_request_model.findAll({ where: { user_id: userId, workshop_id: ids }, attributes: ['workshop_id', 'status'] })
+    ]);
+    const reserved = new Set(reservations.map((r) => r.workshop_id));
+    const blocked = new Set(blocks.map((b) => b.workshop_id));
+    const requestOf = new Map(requests.map((r) => [r.workshop_id, r.status]));
+    return list.map((w) => {
+        const mine = {
+            reserved: reserved.has(w.id_workshop),
+            blocked: blocked.has(w.id_workshop),
+            request: requestOf.get(w.id_workshop) || null,
+            isMember
+        };
+        return {
+            ...w,
+            reserved_by_me: mine.reserved,
+            my_spot_request: mine.request ? { status: mine.request } : null,
+            can_request_spot: canRequestSpot(w, mine)
+        };
+    });
 }
 
 async function getAll() {
@@ -768,6 +810,8 @@ export default {
     searchUsers,
     mySpotRequest,
     loadWorkshopSpotRequests,
+    canRequestSpot,
+    personalize,
     requestSpot,
     withdrawSpotRequest,
     respondSpotRequest,

@@ -1508,5 +1508,12 @@
   "admin.hero.addTitle": "Añadir una historia",
   "admin.hero.searchPlaceholder": "Busca por título…",
   "admin.hero.noResults": "No hay historias publicadas con ese título fuera de la portada.",
-  "admin.hero.add": "Añadir"
+  "admin.hero.add": "Añadir",
+  "workshops.extra.count_one": "1 solicitud de plaza",
+  "workshops.extra.count_other": "{{count}} solicitudes de plaza",
+  "workshops.extra.cardPending": "Plaza pedida",
+  "workshops.extra.cardAsk": "Pedir una plaza",
+  "workshops.extra.dialogTitle": "Pedir una plaza en «{{title}}»",
+  "workshops.extra.dialogText": "El taller está completo. Quien lo gestiona decidirá si abre una plaza más; te avisaremos en la campana.",
+  "workshops.extra.hintAny": "Puedes pedir que se abra una plaza más. Quien gestiona el taller lo decidirá."
 }

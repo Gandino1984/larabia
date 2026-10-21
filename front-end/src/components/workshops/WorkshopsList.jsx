@@ -2,13 +2,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { localDate } from '../../utils/locale';
-import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus, CalendarDays } from 'lucide-react';
+import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus, CalendarDays, Hourglass, HandHelping } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshopAccess, canManageWorkshop } from '../../app_context/useWorkshopAccess';
 import WorkshopOptions from './WorkshopOptions';
 import WorkshopAccessTag from './WorkshopAccessTag';
+import WorkshopSpotDialog from './WorkshopSpotDialog';
 import WorkshopFilters from './WorkshopFilters';
 import { EMPTY_WORKSHOP_FILTERS, applyWorkshopFilters, countActiveWorkshopFilters } from '../../utils/workshopFilters';
 import { useDragScroll } from '../../hooks/useDragScroll';
@@ -53,6 +54,8 @@ function WorkshopsList() {
   // talleristas on the team, like an article's authors.
   const { currentUser, isAdmin, isSuperAdmin, canCreateContent } = useAuth();
   const canCreateWorkshop = isAdmin || isSuperAdmin;
+  // The full workshop someone is asking a place in (WorkshopSpotDialog).
+  const [spotFor, setSpotFor] = useState(null);
   const managesAny = canCreateWorkshop
     || workshops.some((w) => canManageWorkshop(w, currentUser, { isSuperAdmin, canCreateContent }));
 
@@ -129,6 +132,12 @@ function WorkshopsList() {
               ? t('workshops.spots', { left: w.spots_left, total: w.capacity_workshop })
               : t('workshops.participants', { count: w.reservation_count })}
           </p>
+          {/* Requests for an extra place waiting for an answer. */}
+          {w.spot_request_count > 0 && (
+            <p className="workshop-meta workshop-meta--requests">
+              <Hourglass size={15} /> {t('workshops.extra.count', { count: w.spot_request_count })}
+            </p>
+          )}
           {/* Who teaches it: photo + name, opens the author's card. */}
           {w.authors?.length > 0 && (
             <div className="workshop-card-authors">
@@ -141,6 +150,20 @@ function WorkshopsList() {
         {/* ⋯ options: share (everyone), edit / delete (its managers). */}
         <div className="article-engagement-bar workshop-card-bar">
           <WorkshopOptions workshop={w} />
+          {/* Full: ask for an extra place (socios/as; anyone signed in if free). */}
+          {w.my_spot_request?.status === 'pending' ? (
+            <span className="workshop-card-request workshop-card-request--sent">
+              <Hourglass size={15} /> {t('workshops.extra.cardPending', 'Plaza pedida')}
+            </span>
+          ) : w.can_request_spot ? (
+            <button
+              type="button"
+              className="workshop-card-request"
+              onClick={(e) => { e.stopPropagation(); setSpotFor(w); }}
+            >
+              <HandHelping size={16} /> {t('workshops.extra.cardAsk', 'Pedir una plaza')}
+            </button>
+          ) : null}
         </div>
       </article>
     );
@@ -171,7 +194,9 @@ function WorkshopsList() {
         </header>
 
         <>
-            {/* Sections (general / children's) + grid/carousel toggle */}
+            {spotFor && <WorkshopSpotDialog workshop={spotFor} onClose={() => setSpotFor(null)} />}
+
+        {/* Sections (general / children's) + grid/carousel toggle */}
             <div className="workshops-toolbar">
             <div className="workshops-tabs" role="tablist" aria-label={t('workshops.tabsLabel', 'Tipo de taller')}>
               {AUDIENCE_TABS.map(key => (

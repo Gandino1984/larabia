@@ -1,9 +1,10 @@
 // magazine-front/src/components/workshops/WorkshopExtraSpot.jsx
 //
-// A FULL workshop's booking box: socios/as can ask its managers to open one
-// more place (a members' perk). Shows the request while it's pending (it can
-// be withdrawn) and says when it couldn't be opened. Anyone else just reads
-// that it's full. Server: /magazine-workshop/spot-requests.
+// A FULL workshop's booking box: whoever may (`can_request_spot`, the
+// server's rule: socios/as, or anyone signed in if the workshop is free) can
+// ask its managers to open one more place. Shows the request while it's
+// pending (it can be withdrawn) and says when it couldn't be opened. Anyone
+// else just reads that it's full. Server: /magazine-workshop/spot-requests.
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Send, Hourglass } from 'lucide-react';
@@ -48,11 +49,11 @@ function WorkshopExtraSpot({ workshop: w }) {
       </>
     );
   }
-  if (!w.is_member) {
+  if (!w.can_request_spot) {
     return (
       <>
         {full}
-        {subscription?.canJoin && (
+        {!w.free_workshop && !w.is_member && subscription?.canJoin && (
           <p className="workshop-booking-note">{t('workshops.extra.membersHint', 'Los socios/as de la revista pueden pedir que se abra una plaza más.')}</p>
         )}
       </>
@@ -71,7 +72,7 @@ function WorkshopExtraSpot({ workshop: w }) {
     <div className="workshop-extra">
       {full}
       <p className="workshop-booking-note">
-        {t('workshops.extra.hint', 'Como socio/a, puedes pedir que se abra una plaza más. Quien gestiona el taller lo decidirá.')}
+        {t('workshops.extra.hintAny', 'Puedes pedir que se abra una plaza más. Quien gestiona el taller lo decidirá.')}
       </p>
       {asking ? (
         <form className="workshop-extra__form" onSubmit={send}>
