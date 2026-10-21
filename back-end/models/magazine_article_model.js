@@ -91,6 +91,13 @@ const magazine_article_model = sequelize.define(
             defaultValue: false,
             comment: 'Featured articles appear prominently on homepage'
         },
+        // Position in the home hero, set by a super admin (Admin › Portada).
+        // NULL = featured without a position: after the ordered ones, newest
+        // first. Migration 024.
+        featured_order: {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
         is_premium: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

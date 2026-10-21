@@ -4,6 +4,7 @@ import article_block_model from "../../models/article_block_model.js";
 import article_author_model from "../../models/article_author_model.js";
 import user_model from "../../models/user_model.js";
 import magazine_project_model from "../../models/magazine_project_model.js";
+import sequelize from "../../config/sequelize.js";
 import { Op } from "sequelize";
 import engagementController from "../engagement/engagement_controller.js";
 import fs from 'fs';
@@ -396,15 +397,24 @@ async function getByCategory(category, roleCtx = EMPTY_ROLE_CTX) {
     }
 }
 
+// The hero's featured stories: by position (NULL last), then newest first.
+const HERO_ORDER = [
+    [sequelize.literal('featured_order IS NULL'), 'ASC'],
+    ['featured_order', 'ASC'],
+    ['date_published', 'DESC']
+];
+const HERO_FEATURED_MAX = 10;
+
 async function getFeatured(roleCtx = EMPTY_ROLE_CTX) {
     try {
-        // 1) Author-recommended (featured) articles.
+        // 1) Featured articles, in the order a super admin set (Admin ›
+        //    Portada); those without a position after them, newest first.
         const featuredWhere = await buildVisibilityWhere(roleCtx);
         featuredWhere.featured_article = true;
         const featuredArticles = await magazine_article_model.findAll({
             where: featuredWhere,
-            order: [['date_published', 'DESC']],
-            limit: 10
+            order: HERO_ORDER,
+            limit: HERO_FEATURED_MAX
         });
 
         // 2) The 10 most-liked articles (visible to this role), appended after the
@@ -490,6 +500,91 @@ async function getFeatured(roleCtx = EMPTY_ROLE_CTX) {
     } catch (err) {
         console.error("-> magazine_article_controller.js - getFeatured() - Error =", err);
         return { error: "Error al obtener artículos destacados" };
+    }
+}
+
+// ── Admin › Portada (super admins): the hero's featured stories ──
+
+const heroItem = (a, authorsMap, extra = {}) => ({
+    id_article: a.id_article,
+    title_article: a.title_article,
+    cover_image_article: a.cover_image_article,
+    category_article: a.category_article,
+    date_published: a.date_published,
+    featured_order: a.featured_order,
+    authors: (authorsMap.get(a.id_article) || []).map((u) => u.name_user),
+    author_name: a.author_name,
+    ...extra
+});
+
+// What readers see in the hero: the featured stories in order (the first
+// HERO_FEATURED_MAX are shown) and the most liked ones it adds after them.
+async function getHeroManage() {
+    try {
+        const publicWhere = { active_article: true, status_article: 'published', is_premium: false };
+        const featured = await magazine_article_model.findAll({
+            where: { ...publicWhere, featured_article: true },
+            order: HERO_ORDER
+        });
+        const topLiked = await engagementController.getTopLikedArticleIds(HERO_FEATURED_MAX);
+        const featuredIds = new Set(featured.map((a) => a.id_article));
+        const likedIds = topLiked.map((t) => t.article_id).filter((id) => !featuredIds.has(id));
+        const likedRows = likedIds.length
+            ? await magazine_article_model.findAll({ where: { ...publicWhere, id_article: likedIds } })
+            : [];
+        const likesOf = new Map(topLiked.map((t) => [t.article_id, t.likes]));
+        const likedById = new Map(likedRows.map((a) => [a.id_article, a]));
+        const liked = likedIds.map((id) => likedById.get(id)).filter(Boolean);
+        const authorsMap = await loadBatchArticleAuthors([...featured, ...liked].map((a) => a.id_article));
+        return {
+            data: {
+                max: HERO_FEATURED_MAX,
+                featured: featured.map((a) => heroItem(a, authorsMap)),
+                liked: liked.map((a) => heroItem(a, authorsMap, { likes: likesOf.get(a.id_article) || 0 }))
+            }
+        };
+    } catch (err) {
+        console.error("-> magazine_article_controller.js - getHeroManage() - Error =", err);
+        return { error: "Error al cargar la portada" };
+    }
+}
+
+// The new order of the featured stories: ids, first to last.
+async function setFeaturedOrder(ids) {
+    const list = (Array.isArray(ids) ? ids : []).map(Number).filter((n) => Number.isInteger(n) && n > 0);
+    if (list.length === 0) return { error: "Falta el orden de las historias" };
+    try {
+        await sequelize.transaction(async (transaction) => {
+            for (const [i, id] of list.entries()) {
+                await magazine_article_model.update(
+                    { featured_order: i + 1 },
+                    { where: { id_article: id, featured_article: true }, transaction }
+                );
+            }
+        });
+        return { success: "Orden de la portada guardado", data: { ids: list } };
+    } catch (err) {
+        console.error("-> magazine_article_controller.js - setFeaturedOrder() - Error =", err);
+        return { error: "Error al guardar el orden" };
+    }
+}
+
+// Put a published story in the hero (at the end) or take it out.
+async function setFeatured(id_article, featured) {
+    try {
+        const article = await magazine_article_model.findByPk(id_article);
+        if (!article || !article.active_article) return { error: "Artículo no encontrado" };
+        if (featured) {
+            if (article.status_article !== 'published') return { error: "Solo se pueden destacar historias publicadas" };
+            const last = await magazine_article_model.max('featured_order', { where: { featured_article: true } });
+            await article.update({ featured_article: true, featured_order: (Number(last) || 0) + 1 });
+            return { success: "Historia añadida a la portada", data: { id_article: article.id_article, featured: true } };
+        }
+        await article.update({ featured_article: false, featured_order: null });
+        return { success: "Historia quitada de la portada", data: { id_article: article.id_article, featured: false } };
+    } catch (err) {
+        console.error("-> magazine_article_controller.js - setFeatured() - Error =", err);
+        return { error: "Error al cambiar la portada" };
     }
 }
 
@@ -1109,5 +1204,8 @@ export default {
     approveArticle,
     rejectArticle,
     getPending,
-    setSections
+    setSections,
+    getHeroManage,
+    setFeaturedOrder,
+    setFeatured
 };

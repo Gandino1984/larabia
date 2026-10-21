@@ -158,6 +158,12 @@ Promise.all([
             await qi.addColumn('reader_subscriptions', 'complimentary_at', { type: DataTypes.DATE, allowNull: true });
             console.log('>>> Added reader_subscriptions.complimentary_at');
         }
+        // The hero's order of the featured stories (migration 024).
+        const articles = await qi.describeTable('magazine_articles');
+        if (!articles.featured_order) {
+            await qi.addColumn('magazine_articles', 'featured_order', { type: DataTypes.INTEGER, allowNull: true });
+            console.log('>>> Added magazine_articles.featured_order');
+        }
         // Magazine sections of articles and projects (migration 017) and
         // content in other languages (migration 019).
         for (const [table, cols] of [

@@ -111,6 +111,47 @@ async function getFeatured(req, res) {
     }
 }
 
+// ── Admin › Portada (super admins): order the hero's featured stories ──
+
+// GET /hero — the featured stories in order + the most liked ones added after.
+async function getHero(req, res) {
+    try {
+        if (!(await requireSuperAdmin(req, res))) return;
+        const result = await magazineArticleController.getHeroManage();
+        if (result.error) return res.status(500).json(result);
+        res.json({ error: null, data: result.data });
+    } catch (err) {
+        console.error("-> magazine_article_api_controller.js - getHero() - Error =", err);
+        res.status(500).json({ error: "Error al cargar la portada" });
+    }
+}
+
+// PATCH /hero/order { ids } — first to last.
+async function setHeroOrder(req, res) {
+    try {
+        if (!(await requireSuperAdmin(req, res))) return;
+        const result = await magazineArticleController.setFeaturedOrder(req.body?.ids);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error("-> magazine_article_api_controller.js - setHeroOrder() - Error =", err);
+        res.status(500).json({ error: "Error al guardar el orden" });
+    }
+}
+
+// PATCH /hero/:id_article { featured } — in the hero (at the end) or out.
+async function setHeroFeatured(req, res) {
+    try {
+        if (!(await requireSuperAdmin(req, res))) return;
+        const result = await magazineArticleController.setFeatured(req.params.id_article, req.body?.featured === true);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error("-> magazine_article_api_controller.js - setHeroFeatured() - Error =", err);
+        res.status(500).json({ error: "Error al cambiar la portada" });
+    }
+}
+
 async function create(req, res) {
     try {
         const {
@@ -696,5 +737,8 @@ export default {
     approveArticle,
     rejectArticle,
     getPending,
-    setSections
+    setSections,
+    getHero,
+    setHeroOrder,
+    setHeroFeatured
 };

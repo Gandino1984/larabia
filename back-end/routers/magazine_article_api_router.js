@@ -8,6 +8,7 @@ const router = Router();
 // GET routes
 router.get("/", magazineArticleApiController.getAll);
 router.get("/featured", magazineArticleApiController.getFeatured);
+router.get("/hero", magazineArticleApiController.getHero);                  // super-admin: the hero's stories (Admin › Portada)
 router.get("/pending", magazineArticleApiController.getPending);            // super-admin: approval queue
 router.get("/by-category/:category", magazineArticleApiController.getByCategory);
 router.get("/by-id/:id_article", magazineArticleApiController.getById);
@@ -26,6 +27,8 @@ router.post(
 );
 
 // PATCH routes
+router.patch("/hero/order", magazineArticleApiController.setHeroOrder);      // super-admin: order of the featured stories
+router.patch("/hero/:id_article", magazineArticleApiController.setHeroFeatured); // super-admin: in / out of the hero
 router.patch("/update/:id_article", magazineArticleApiController.update);
 router.patch("/revert-to-draft/:id_article", magazineArticleApiController.revertToDraft);  // author / super-admin
 router.patch("/approve/:id_article", magazineArticleApiController.approveArticle);   // super-admin

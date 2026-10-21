@@ -6,6 +6,7 @@ import { usePendingReview } from '../../../app_context/PendingReviewContext';
 import AdminUsersTab from './AdminUsersTab';
 import AdminPendingTab from './AdminPendingTab';
 import AdminProposalsTab from './AdminProposalsTab';
+import AdminHeroTab from './AdminHeroTab';
 import AdminMetadataTab from './AdminMetadataTab';
 import AdminAppearanceTab from './AdminAppearanceTab';
 import AdminNavTab from './AdminNavTab';
@@ -16,6 +17,7 @@ const TABS = [
   { key: 'users', label: 'Usuarios' },
   { key: 'pending', label: 'Pendientes de aprobación' },
   { key: 'proposals', label: 'Propuestas' },
+  { key: 'hero', label: 'Portada' },
   { key: 'metadata', label: 'Datos de la revista' },
   { key: 'workshops', label: 'Talleres' },
   { key: 'appearance', label: 'Apariencia' },
@@ -73,6 +75,7 @@ function AdminPage() {
         {activeTab === 'users' && <AdminUsersTab />}
         {activeTab === 'pending' && <AdminPendingTab />}
         {activeTab === 'proposals' && <AdminProposalsTab />}
+        {activeTab === 'hero' && <AdminHeroTab />}
         {activeTab === 'metadata' && <AdminMetadataTab />}
         {activeTab === 'workshops' && <AdminWorkshopsTab />}
         {activeTab === 'appearance' && <AdminAppearanceTab />}

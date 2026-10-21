@@ -63,6 +63,7 @@ Ver [Idiomas (i18n)](#idiomas-i18n).
 
 - usuarios y roles;
 - la cola de revisión (artículos, proyectos y cambios de sección);
+- la **portada**: el orden de las historias destacadas del hero (flechas o arrastrando), quitar una, fijar alguna de las más gustadas que el hero añade solo, añadir cualquier historia publicada (`magazine_articles.featured_order`);
 - las propuestas enviadas desde Espacio abierto (leerlas, aceptarlas o descartarlas, descargar el archivo, responder por email);
 - datos de la revista (nombre, eslogan, logos);
 - talleres;

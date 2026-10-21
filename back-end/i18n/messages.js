@@ -488,6 +488,15 @@ export const MESSAGES = {
     "Error al responder a la solicitud": { en: "The request couldn't be answered", eu: "Ezin izan zaio eskaerari erantzun" },
     "Inicia sesión para pedir una plaza": { en: "Sign in to ask for a place", eu: "Hasi saioa plaza bat eskatzeko" },
     "Solo los socios/as de la revista pueden pedir una plaza extra": { en: "Only the magazine’s members can ask for an extra place", eu: "Aldizkariko bazkideek bakarrik eska dezakete plaza gehigarri bat" },
+    // Admin › Portada (magazine_article controllers)
+    "Error al cargar la portada": { en: "The front page couldn't be loaded", eu: "Ezin izan da azala kargatu" },
+    "Falta el orden de las historias": { en: "The order of the stories is missing", eu: "Istorioen ordena falta da" },
+    "Orden de la portada guardado": { en: "Front page order saved", eu: "Azalaren ordena gordeta" },
+    "Error al guardar el orden": { en: "The order couldn't be saved", eu: "Ezin izan da ordena gorde" },
+    "Solo se pueden destacar historias publicadas": { en: "Only published stories can be featured", eu: "Argitaratutako istorioak bakarrik nabarmen daitezke" },
+    "Historia añadida a la portada": { en: "Story added to the front page", eu: "Istorioa azalera gehituta" },
+    "Historia quitada de la portada": { en: "Story removed from the front page", eu: "Istorioa azaletik kenduta" },
+    "Error al cambiar la portada": { en: "The front page couldn't be changed", eu: "Ezin izan da azala aldatu" },
 };
 
 // Messages with values: the value(s) are kept, in order ($1, $2…).
