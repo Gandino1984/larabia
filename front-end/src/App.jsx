@@ -6,7 +6,6 @@ import { useUI } from './app_context/UIContext';
 import { useMagazine } from './app_context/MagazineContext';
 import { useAuth } from './app_context/AuthContext';
 import { useWorkshop } from './app_context/WorkshopContext';
-import { useWorkshopAccess } from './app_context/useWorkshopAccess';
 import { usePreloader } from './hooks/usePreloader';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -43,8 +42,7 @@ function App() {
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { currentUser, loading: authLoading } = useAuth();
-  const { fetchWorkshopById } = useWorkshop();
-  const { guard: workshopGuard } = useWorkshopAccess();
+  const { fetchWorkshopById, setFocusWorkshopId } = useWorkshop();
   const { isLoading, progress } = usePreloader();
   const { t } = useTranslation();
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
@@ -73,22 +71,24 @@ function App() {
   }, [pendingArticleId, authLoading, fetchArticleById, navigateToArticle]);
 
   // A shared workshop link (?workshop=<id>, WorkshopOptions). Opening a
-  // workshop needs an account: signed out, the reader is sent to sign in
-  // (once) and the workshop opens as soon as they have.
+  // workshop needs an account: signed out, the reader lands on its card in
+  // Talleres (public — WorkshopsList finds and highlights it) with a note to
+  // sign in, and the workshop opens as soon as they have.
   const [pendingWorkshopId, setPendingWorkshopId] = useState(() => {
     const id = new URLSearchParams(window.location.search).get('workshop');
     return id ? parseInt(id, 10) : null;
   });
-  const askedLoginForWorkshop = useRef(false);
+  const showedSharedWorkshop = useRef(false);
   useEffect(() => {
     if (pendingWorkshopId == null || authLoading) return;
     if (new URLSearchParams(window.location.search).has('workshop')) {
       window.history.replaceState({}, '', '/');
     }
     if (!currentUser) {
-      if (!askedLoginForWorkshop.current) {
-        askedLoginForWorkshop.current = true;
-        workshopGuard('login');
+      if (!showedSharedWorkshop.current) {
+        showedSharedWorkshop.current = true;
+        setFocusWorkshopId(pendingWorkshopId);
+        navigateToTalleres();
       }
       return;
     }

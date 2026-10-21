@@ -44,8 +44,8 @@ const audienceOf = (w) => (w.audience_workshop === 'infantil' ? 'infantil' : 'ge
 
 function WorkshopsList() {
   const { t } = useTranslation();
-  const { navigateToWorkshopDetail, navigateToWorkshopEditor, navigateToMyWorkshops } = useUI();
-  const { workshops, loading, fetchWorkshops, setSelectedWorkshop } = useWorkshop();
+  const { navigateToWorkshopDetail, navigateToWorkshopEditor, navigateToMyWorkshops, showInfo } = useUI();
+  const { workshops, loading, fetchWorkshops, setSelectedWorkshop, focusWorkshopId, setFocusWorkshopId } = useWorkshop();
   const [audience, setAudience] = useState('general');
   // Search / when / month / instructor / spots / order (WorkshopFilters).
   const [filters, setFilters] = useState(EMPTY_WORKSHOP_FILTERS);
@@ -78,10 +78,34 @@ function WorkshopsList() {
   }, []);
   useDragScroll(carouselRef, viewMode === 'carousel');
 
+  // A shared link opened signed out (App.jsx): once the list is in, its card
+  // — in its tab, and with past workshops shown if it's over — scrolled into
+  // view and ringed, with a note to sign in (here, not in App: on a phone the
+  // loading screen still covered the page and hid it).
+  const [sharedId, setSharedId] = useState(null);
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetchWorkshops();
+    fetchWorkshops().then((res) => {
+      if (focusWorkshopId == null) return;
+      setFocusWorkshopId(null);
+      const w = (res?.data || []).find((x) => x.id_workshop === focusWorkshopId);
+      if (!w) return;
+      setAudience(audienceOf(w));
+      if (!applyWorkshopFilters([w], EMPTY_WORKSHOP_FILTERS).length) setFilters({ ...EMPTY_WORKSHOP_FILTERS, when: 'all' });
+      setSharedId(w.id_workshop);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchWorkshops]);
+  useEffect(() => {
+    if (sharedId == null) return;
+    const timer = setTimeout(() => {
+      document.querySelector(`.workshop-card[data-workshop-id="${sharedId}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      showInfo(t('workshops.sharedSignIn', 'Te han compartido este taller. Inicia sesión para abrirlo y reservar plaza.'));
+    }, 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sharedId]);
 
   // Anyone sees the list; opening a workshop needs a signed-in account
   // (booking it, a subscription — see WorkshopDetail).
@@ -107,7 +131,12 @@ function WorkshopsList() {
     const cover = resolveImg(w.cover_image_workshop);
     const dateStr = formatDate(w.date_workshop);
     return (
-      <article key={w.id_workshop} className="workshop-card" onClick={() => openWorkshop(w)}>
+      <article
+        key={w.id_workshop}
+        data-workshop-id={w.id_workshop}
+        className={`workshop-card ${sharedId === w.id_workshop ? 'is-shared' : ''}`}
+        onClick={() => openWorkshop(w)}
+      >
         <div className="workshop-card-image">
           {cover
             ? <img src={cover} alt={w.title_workshop} onError={(e) => { e.target.style.display = 'none'; }} />

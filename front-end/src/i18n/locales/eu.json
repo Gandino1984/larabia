@@ -712,6 +712,7 @@
   "loadFail.reload": "Kargatu orria berriro",
   "workshops.share": "Partekatu tailerra",
   "workshops.shareCopy": "Kopiatu tailerraren esteka:",
+  "workshops.sharedSignIn": "Tailer hau partekatu dizute. Hasi saioa irekitzeko eta plaza erreserbatzeko.",
   "workshops.delete": "Ezabatu tailerra",
   "hscroll.audioPanel.paisaje": "Bineta honek soinua du: sakatu play entzuteko.",
   "hscroll.audioPanel.interactive": "Bineta honek soinua du: sakatu entzuteko.",

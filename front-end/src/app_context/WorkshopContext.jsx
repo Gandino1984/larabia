@@ -26,6 +26,8 @@ export const WorkshopProvider = ({ children }) => {
   const { showSuccess, showError } = useUI();
   const [workshops, setWorkshops] = useState([]);
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
+  // The workshop of a shared link opened signed out: WorkshopsList shows its card.
+  const [focusWorkshopId, setFocusWorkshopId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [accessError, setAccessError] = useState(null);
   const [invitationFeed, setInvitationFeed] = useState(EMPTY_FEED);
@@ -330,6 +332,7 @@ export const WorkshopProvider = ({ children }) => {
 
   const value = {
     workshops, selectedWorkshop, setSelectedWorkshop, loading, accessError,
+    focusWorkshopId, setFocusWorkshopId,
     fetchWorkshops, fetchWorkshopById,
     createWorkshop, updateWorkshop, deleteWorkshop, uploadWorkshopCover,
     reserveWorkshop, cancelWorkshopReservation,
