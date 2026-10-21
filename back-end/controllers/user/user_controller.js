@@ -89,9 +89,17 @@ const validateUserData = (userData, isPartialUpdate = false) => {
     return { isValid: errors.length === 0, errors };
 };
 
+// Never sent back by the reads below: the password hash and the single-use
+// tokens (password reset, email verification, the newsletter's «Darme de
+// baja» link) — with them anyone could take over an account or unsubscribe it.
+const SECRET_FIELDS = [
+    'pass_user', 'password_reset_token', 'password_reset_token_expires',
+    'verification_token', 'verification_token_expires', 'newsletter_token'
+];
+
 async function getAll() {
     try {
-        const users = await user_model.findAll();
+        const users = await user_model.findAll({ attributes: { exclude: SECRET_FIELDS } });
         if (!users || users.length === 0) return { error: "No hay usuarios registrados" };
         return { data: users };
     } catch (err) {
@@ -103,7 +111,7 @@ async function getAll() {
 async function getById(id) {
     try {
         if (!id) return { error: "ID de usuario requerido" };
-        const user = await user_model.findByPk(id);
+        const user = await user_model.findByPk(id, { attributes: { exclude: SECRET_FIELDS } });
         if (!user) return { error: "Usuario no encontrado" };
         return { data: user };
     } catch (err) {
@@ -114,7 +122,7 @@ async function getById(id) {
 
 async function getByUserName(userName) {
     try {
-        const user = await user_model.findOne({ where: { name_user: userName } });
+        const user = await user_model.findOne({ where: { name_user: userName }, attributes: { exclude: SECRET_FIELDS } });
         if (user) return { data: user };
         return { error: "El usuario no existe" };
     } catch (err) {
@@ -572,7 +580,7 @@ async function getByEmail(email_user) {
         if (!email_user) return { error: "El email es obligatorio" };
         const user = await user_model.findOne({
             where: { email_user },
-            attributes: { exclude: ['pass_user'] }
+            attributes: { exclude: SECRET_FIELDS }
         });
         if (!user) return { error: "Usuario no encontrado con ese email" };
         return { data: user };
@@ -589,7 +597,7 @@ async function searchByName(name_user) {
         }
         const users = await user_model.findAll({
             where: { name_user: { [Op.like]: `%${name_user}%` } },
-            attributes: { exclude: ['pass_user'] },
+            attributes: { exclude: SECRET_FIELDS },
             limit: 10
         });
         if (!users || users.length === 0) return { error: "No se encontraron usuarios", data: [] };
