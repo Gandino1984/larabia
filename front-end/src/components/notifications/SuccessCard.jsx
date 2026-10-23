@@ -3,10 +3,12 @@ import { useUI } from '../../app_context/UIContext.jsx';
 import './SuccessCard.css';
 import CardCloseButton from './CardCloseButton.jsx';
 
-const SuccessCard = ({ onClose }) => {
+// content: this card's own message (CardDisplay); otherwise the shared state.
+const SuccessCard = ({ onClose, content }) => {
   const [latestSuccess, setLatestSuccess] = useState('');
 
-  const { success } = useUI();
+  const { success: shared } = useUI();
+  const success = content || shared;
 
   useEffect(() => {
     const successEntries = Object.entries(success).filter(([, value]) => value !== '');

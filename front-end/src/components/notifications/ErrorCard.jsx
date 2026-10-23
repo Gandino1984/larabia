@@ -3,10 +3,12 @@ import { useUI } from '../../app_context/UIContext.jsx';
 import './ErrorCard.css';
 import CardCloseButton from './CardCloseButton.jsx';
 
-const ErrorCard = ({ onClose }) => {
+// content: this card's own message (CardDisplay); otherwise the shared state.
+const ErrorCard = ({ onClose, content }) => {
   const [latestError, setLatestError] = useState('');
 
-  const { error } = useUI();
+  const { error: shared } = useUI();
+  const error = content || shared;
 
   useEffect(() => {
     const errorEntries = Object.entries(error).filter(([, value]) => value !== '');

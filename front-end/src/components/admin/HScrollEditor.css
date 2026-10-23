@@ -810,3 +810,43 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* An image going up into a panel: its percentage, then «Procesando…» while
+   the server converts it (HScrollEditor). Covers the panel's buttons too. */
+.panel-upload-progress {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.25rem;
+  background: rgba(10, 10, 10, 0.97);
+  color: #ffffff;
+  text-align: center;
+}
+.panel-upload-progress__pct {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.panel-upload-progress__track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+.panel-upload-progress__bar {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1e7e34, #2fa14e);
+  transition: width 0.2s ease;
+}
+.panel-upload-progress__label {
+  font-size: 0.85rem;
+  color: #d0d0d0;
+}

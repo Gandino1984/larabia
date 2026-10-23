@@ -1881,10 +1881,13 @@ function ArticleEditorBlocks() {
           <HScrollEditor
             panels={blocks.filter(b => b.block_type === 'comic_panel')}
             onPanelsChange={(newPanels) => {
-              setBlocks(newPanels);
+              // An array, or an update of the current panels (uploads).
+              setBlocks(prev => (typeof newPanels === 'function'
+                ? newPanels(prev.filter(b => b.block_type === 'comic_panel'))
+                : newPanels));
             }}
-            onUploadPanel={async (index, file) => {
-              const imageUrl = await uploadBlockImage(file);
+            onUploadPanel={async (index, file, onProgress) => {
+              const imageUrl = await uploadBlockImage(file, onProgress);
               return { image_url: imageUrl };
             }}
             onUploadAudio={uploadPanelAudio}

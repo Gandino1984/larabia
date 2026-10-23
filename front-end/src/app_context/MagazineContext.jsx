@@ -404,7 +404,8 @@ export const MagazineProvider = ({ children }) => {
   }, [showError]);
 
   // Upload block image
-  const uploadBlockImage = useCallback(async (imageFile) => {
+  // onProgress(pct): the upload's progress, 0–100 (the comic panels show it).
+  const uploadBlockImage = useCallback(async (imageFile, onProgress) => {
     try {
       // DEBUG: Log file being uploaded
       console.log('📤 MagazineContext.uploadBlockImage - Uploading file:', {
@@ -419,34 +420,42 @@ export const MagazineProvider = ({ children }) => {
       const response = await axiosInstance.post('/article-blocks/upload-image', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (e) => {
+          if (onProgress && e.total) onProgress(Math.round((e.loaded / e.total) * 100));
         }
       });
 
       if (!response.data.error) {
         const data = response.data.data;
 
-        // Show notification if image was converted
+        // Always confirm it (it used to say something only when the image
+        // was converted to WebP — a WebP, GIF… upload went by in silence).
         if (data.converted) {
           const savedKB = data.savedSpace;
           const savedPercent = Math.round((savedKB / data.originalSize) * 100);
           showSuccess(i18n.t('messages.success.imageConverted', {
             from: data.originalFormat, saved: savedKB, percent: savedPercent, size: data.finalSize,
-            defaultValue: 'Imagen convertida de {{from}} a WebP. Espacio ahorrado: {{saved}}KB ({{percent}}%) · Tamaño final: {{size}}KB'
+            defaultValue: 'Imagen subida y convertida de {{from}} a WebP. Espacio ahorrado: {{saved}}KB ({{percent}}%) · Tamaño final: {{size}}KB'
           }));
+        } else {
+          showSuccess(i18n.t('messages.success.imageUploaded', 'Imagen subida exitosamente'));
         }
 
         return data.image_url;
       } else {
         console.error('❌ Backend returned error:', response.data.error);
-        showError(response.data.error);
-        throw new Error(response.data.error);
+        throw Object.assign(new Error(response.data.error), { serverMessage: response.data.error });
       }
     } catch (err) {
       console.error('❌ Error uploading block image:', err);
       if (err.response) {
         console.error('Backend response:', err.response.data);
       }
-      showError(i18n.t('messages.error.uploadBlockImage', 'Error al subir imagen del bloque'));
+      // The server's reason when there is one (it was shown, then replaced
+      // by the generic message straight away).
+      showError(err.serverMessage || err.response?.data?.error
+        || i18n.t('messages.error.uploadBlockImage', 'Error al subir imagen del bloque'));
       throw err;
     }
   }, [showError, showSuccess]);

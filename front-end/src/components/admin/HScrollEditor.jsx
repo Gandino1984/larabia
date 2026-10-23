@@ -22,6 +22,8 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
   const [pendingPanelIndex, setPendingPanelIndex] = useState(null);
   const [uploadingAudio, setUploadingAudio] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
+  // Images on their way up: { [panel key]: 0–100 } (each panel shows its own).
+  const [imageUploads, setImageUploads] = useState({});
   const [audioStopPanel, setAudioStopPanel] = useState(null);
   const [audioMode, setAudioMode] = useState('once');
   const [showIframeModal, setShowIframeModal] = useState(false);
@@ -160,7 +162,17 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
     onPanelsChange(updatedPanels);
   };
 
-  const handleImageUpload = async (index, file) => {
+  // A panel's identity (its index changes when panels are moved).
+  const panelKey = (panel) => panel?.id_block || panel?.tempId;
+  const setImageUpload = (key, pct) => setImageUploads((u) => {
+    const next = { ...u };
+    if (pct == null) delete next[key]; else next[key] = pct;
+    return next;
+  });
+
+  const handleImageUpload = async (index, file, input) => {
+    // Let the same file be picked again (otherwise the input doesn't fire).
+    if (input) input.value = '';
     if (!file) {
       console.log('❌ No file provided to handleImageUpload');
       return;
@@ -190,21 +202,24 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
       return;
     }
 
+    const key = panelKey(panels[index]);
+    if (imageUploads[key] != null) return; // already uploading into this panel
     try {
-      console.log('📤 Uploading image file:', file.name);
-      const result = await onUploadPanel(index, file);
+      setImageUpload(key, 0);
+      const result = await onUploadPanel(index, file, (pct) => setImageUpload(key, pct));
       if (result && result.image_url) {
-        console.log('✅ Image uploaded successfully:', result.image_url);
-        const updatedPanels = [...panels];
-        updatedPanels[index] = {
-          ...updatedPanels[index],
-          image_url: result.image_url
-        };
-        onPanelsChange(updatedPanels);
+        // Into the panels as they are NOW (an update from the panels of
+        // before the upload undid what happened meanwhile — e.g. another
+        // panel's image uploaded at the same time).
+        onPanelsChange((current) => current.map((p) => (
+          panelKey(p) === key ? { ...p, image_url: result.image_url } : p
+        )));
       }
     } catch (error) {
       console.error('❌ Error uploading panel:', error);
-      alert(t('messages.error.uploadImage', 'Error al subir la imagen'));
+      // The error card already says why (MagazineContext.uploadBlockImage).
+    } finally {
+      setImageUpload(key, null);
     }
   };
 
@@ -320,6 +335,26 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
             {panels.map((panel, index) => (
               <div key={panel.id_block || panel.tempId} className={`hscroll-panel ${panel.is_interactive ? 'interactive' : ''}`}>
                 <div className="panel-number">{index + 1}</div>
+                {imageUploads[panelKey(panel)] != null && (
+                  <div
+                    className="panel-upload-progress"
+                    role="progressbar"
+                    aria-valuenow={imageUploads[panelKey(panel)]}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={t('hscroll.editor.uploadingImage', 'Subiendo la imagen')}
+                  >
+                    <span className="panel-upload-progress__pct">
+                      {imageUploads[panelKey(panel)] < 100
+                        ? `${imageUploads[panelKey(panel)]}%`
+                        : t('hscroll.editor.processingImage', 'Procesando…')}
+                    </span>
+                    <div className="panel-upload-progress__track">
+                      <div className="panel-upload-progress__bar" style={{ width: `${imageUploads[panelKey(panel)]}%` }} />
+                    </div>
+                    <span className="panel-upload-progress__label">{t('hscroll.editor.uploadingImage', 'Subiendo la imagen')}</span>
+                  </div>
+                )}
                 {panel.soundscape_data && (
                   <div className="panel-badge panel-badge--paisaje" title={t('paisaje.comic.panelBadge', 'Panel paisaje sonoro')}>
                     <AudioWaveform size={16} />
@@ -351,7 +386,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => handleImageUpload(index, e.target.files[0])}
+                        onChange={(e) => handleImageUpload(index, e.target.files[0], e.target)}
                         style={{ display: 'none' }}
                       />
                       <Upload size={40} />
@@ -430,7 +465,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => handleImageUpload(index, e.target.files[0])}
+                        onChange={(e) => handleImageUpload(index, e.target.files[0], e.target)}
                         style={{ display: 'none' }}
                       />
                       <Upload size={16} />

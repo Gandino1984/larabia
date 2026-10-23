@@ -29,7 +29,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 - **Secciones:** los botones de la barra superior (Artículos, Proyectos, Talleres, Más › Ficción, Internacional…). Cualquier artículo o proyecto puede aparecer también en otras secciones si un super admin lo aprueba.
 - **Las publicaciones** pueden pertenecer a un **proyecto** (una serie, un fanzine, un libro…) o ir sueltas. Cada una es de uno de estos tipos:
   - un **artículo** (texto, imágenes e incrustados, por bloques);
-  - un **cómic** (lector horizontal con paneles que pueden ser imagen, enlace, audio, incrustado o paisaje sonoro; navegación panel a panel, progreso de lectura guardado y pantalla completa);
+  - un **cómic** (lector horizontal con paneles que pueden ser imagen, enlace, audio, incrustado o paisaje sonoro; navegación panel a panel, progreso de lectura guardado y pantalla completa); en el creador, cada panel muestra el porcentaje de su imagen mientras se sube;
   - un **micro-perfil**;
   - un **paisaje sonoro** (un dibujo que se mueve con un sonido).
 - **Autoras/es:** el directorio de perfiles, en orden alfabético y con buscador (por nombre o especialidad, sin importar mayúsculas ni tildes), y las publicaciones de cada persona.

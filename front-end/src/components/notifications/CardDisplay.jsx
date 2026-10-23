@@ -25,22 +25,33 @@ function CardDisplay() {
     clearError,
     clearSuccess,
     clearInfo,
-    addToCardHistory
+    addToCardHistory,
+    infoIconType
   } = useUI();
 
   const hasAnyValue = (obj) => {
     return obj && Object.values(obj).some(value => value);
   };
 
-  const addCard = (type, content) => {
+  // The newest card of each type (removeCard only clears the message state
+  // for that one — clearing it for an older card erased the newer message).
+  const latestId = useRef({});
+
+  // A new message REPLACES the card of its type on screen (a fresh card, its
+  // timer from zero). Before, a message that came while one was showing — a
+  // second image uploaded within a few seconds — was dropped, or shown in
+  // the card on its way out and then cleared.
+  const addCard = (type, content, iconType = null) => {
     const newCard = {
       id: cardIdCounter.current++,
       type,
       content,
+      iconType,
       isVisible: false
     };
+    latestId.current[type] = newCard.id;
 
-    setActiveCards(prev => [...prev, newCard]);
+    setActiveCards(prev => [...prev.filter(card => card.type !== type), newCard]);
 
     addToCardHistory(type, content);
 
@@ -62,6 +73,7 @@ function CardDisplay() {
 
     setTimeout(() => {
       setActiveCards(prev => prev.filter(card => card.id !== cardId));
+      if (latestId.current[type] !== cardId) return; // a newer one is showing
 
       switch(type) {
         case 'error':
@@ -81,25 +93,23 @@ function CardDisplay() {
   };
 
   useEffect(() => {
-    if (error && hasAnyValue(error) && !activeCards.some(c => c.type === 'error')) {
+    if (error && hasAnyValue(error)) {
       setShowErrorCard(true);
       addCard('error', error);
     }
   }, [error]);
 
   useEffect(() => {
-    if (success && hasAnyValue(success) && !activeCards.some(c => c.type === 'success')) {
+    if (success && hasAnyValue(success)) {
       setShowSuccessCard(true);
       addCard('success', success);
     }
   }, [success]);
 
   useEffect(() => {
-    console.log('CardDisplay info effect triggered:', { info, hasValue: hasAnyValue(info), activeCards: activeCards.length });
-    if (info && hasAnyValue(info) && !activeCards.some(c => c.type === 'info')) {
-      console.log('Creating info card');
+    if (info && hasAnyValue(info)) {
       setShowInfoCard(true);
-      addCard('info', info);
+      addCard('info', info, infoIconType);
     }
   }, [info]);
 
@@ -211,13 +221,15 @@ const AnimatedCard = ({ card, onClose }) => {
   const getCardComponent = () => {
     const close = () => setIsDismissing(true);
 
+    // Each card shows its own message (card.content), not whatever the
+    // shared state holds by then.
     switch(card.type) {
       case 'error':
-        return <ErrorCard onClose={close} />;
+        return <ErrorCard onClose={close} content={card.content} />;
       case 'success':
-        return <SuccessCard onClose={close} />;
+        return <SuccessCard onClose={close} content={card.content} />;
       case 'info':
-        return <InfoCard onClose={close} />;
+        return <InfoCard onClose={close} content={card.content} iconType={card.iconType} />;
       default:
         return null;
     }
