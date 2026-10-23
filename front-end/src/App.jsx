@@ -16,6 +16,7 @@ import AnimatedView from './components/layout/AnimatedView';
 import HomePage from './components/magazine/HomePage';
 import ArticleDetail from './components/magazine/ArticleDetail';
 import ArticlesList from './components/magazine/ArticlesList';
+import ProjectsList from './components/magazine/ProjectsList';
 import ArticleEditorBlocks from './components/admin/ArticleEditorBlocks';
 import WorkshopEditor from './components/workshops/WorkshopEditor';
 import AuthorsList from './components/authors/AuthorsList';
@@ -39,7 +40,7 @@ import { useAuthor } from './app_context/AuthorContext';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, showSuccess, showError, authorCardUser, closeAuthorCard } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showProjectsList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, showSuccess, showError, authorCardUser, closeAuthorCard } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { currentUser, setUser, loading: authLoading } = useAuth();
@@ -160,6 +161,7 @@ function App() {
     if (showMicroPerfiles) return <CategorySectionPage category="micro-perfiles" sectionKey="microperfiles" titleKey="microperfiles.title" subtitleKey="microperfiles.subtitle" />;
     if (showWorkshopDetail) return <WorkshopDetail />;
     if (showTalleres) return <WorkshopsList />;
+    if (showProjectsList) return <ProjectsList />;
     if (showAbout) return <AboutRabia />;
     if (showArticleDetail) return <ArticleDetail previewMode={isPreview} />;
     if (showArticlesList) return <ArticlesList />;
@@ -186,6 +188,7 @@ function App() {
     (showMicroPerfiles && 'microperfiles') ||
     (showWorkshopDetail && 'workshopDetail') ||
     (showTalleres && 'talleres') ||
+    (showProjectsList && 'projectsList') ||
     (showAbout && 'about') ||
     (showArticleDetail && 'articleDetail') ||
     (showArticlesList && 'articlesList') ||

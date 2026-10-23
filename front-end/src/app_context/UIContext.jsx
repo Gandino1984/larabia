@@ -9,6 +9,8 @@ export const UIProvider = ({ children }) => {
   const [showHome, setShowHome] = useState(true);
   const [showArticleDetail, setShowArticleDetail] = useState(false);
   const [showArticlesList, setShowArticlesList] = useState(false);
+  // The projects page (ProjectsList) — the top bar's «Proyectos».
+  const [showProjectsList, setShowProjectsList] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -121,6 +123,7 @@ export const UIProvider = ({ children }) => {
     setShowHome(false);
     setShowArticleDetail(false);
     setShowArticlesList(false);
+    setShowProjectsList(false);
     setShowEditor(false);
     setShowLogin(false);
     setShowForgotPassword(false);
@@ -293,6 +296,7 @@ export const UIProvider = ({ children }) => {
     const origin =
       showArticleDetail ? 'articleDetail' :
       showArticlesList ? 'articlesList' :
+      showProjectsList ? 'projectsList' :
       showAuthors ? 'authors' :
       showAuthorProfile ? 'authorProfile' :
       showAuthorPublications ? 'authorPublications' :
@@ -313,6 +317,7 @@ export const UIProvider = ({ children }) => {
     resetAllViews();
     switch (projectBackView) {
       case 'articlesList': setShowArticlesList(true); break;
+      case 'projectsList': setShowProjectsList(true); break;
       case 'articleDetail': setShowArticleDetail(true); break;
       case 'authors': setShowAuthors(true); break;
       case 'authorProfile': setShowAuthorProfile(true); break;
@@ -325,6 +330,12 @@ export const UIProvider = ({ children }) => {
       case 'home':
       default: setShowHome(true); break;
     }
+  };
+
+  const navigateToProjectsList = () => {
+    setPreviousView('home');
+    resetAllViews();
+    setShowProjectsList(true);
   };
 
   const navigateToOpenMic = () => {
@@ -474,6 +485,8 @@ export const UIProvider = ({ children }) => {
     showMicroPerfiles,
     navigateToMicroPerfiles,
     showTalleres,
+    showProjectsList,
+    navigateToProjectsList,
     navigateToTalleres,
     showWorkshopDetail,
     navigateToWorkshopDetail,

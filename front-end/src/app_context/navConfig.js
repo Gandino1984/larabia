@@ -3,16 +3,17 @@
 // Built-in default top-bar navigation + metadata for the nav builder.
 //
 // DEFAULT_NAV mirrors today's bar exactly, so when the DB nav_config is null
-// (un-customized) the header looks unchanged. The dynamic "Proyectos" dropdown
-// is NOT part of this config — it's rendered as a fixed special element in the
-// header — and search / language / Admin / logout stay fixed system controls.
+// (un-customized) the header looks unchanged. "Proyectos" is a fixed special
+// item (it opens the projects page) — and search / language / Admin / logout
+// stay fixed system controls.
 
 export const DEFAULT_NAV = [
   { id: 'articles', kind: 'link', visible: true, min_role: 'all',
     label: { es: 'Artículos', en: 'Articles', eu: 'Artikuluak' },
     action: { type: 'section', value: 'articles' } },
-  // Special non-deletable item: renders the dynamic "all projects" dropdown.
-  // Reorderable + hideable + relabelable, but its behavior is fixed.
+  // Special non-deletable item: opens the projects page (ProjectsList; it
+  // used to be a dropdown of projects). Reorderable + hideable + relabelable,
+  // but its behavior is fixed.
   { id: 'projects', kind: 'projects', visible: true, min_role: 'all',
     label: { es: 'Proyectos', en: 'Projects', eu: 'Proiektuak' } },
   { id: 'talleres', kind: 'link', visible: true, min_role: 'all',
@@ -67,6 +68,7 @@ export const ACTION_TYPE_OPTIONS = [
 export const SECTION_OPTIONS = [
   { value: 'home', key: 'admin.nav.section.home', label: 'Inicio' },
   { value: 'articles', key: 'admin.nav.section.articles', label: 'Artículos' },
+  { value: 'projects', key: 'admin.nav.section.projects', label: 'Proyectos' },
   { value: 'authors', key: 'admin.nav.section.authors', label: 'Autoras/es' },
   { value: 'openmic', key: 'admin.nav.section.openmic', label: 'Espacio abierto' },
   { value: 'microperfiles', key: 'admin.nav.section.microperfiles', label: 'Micro-perfiles' },

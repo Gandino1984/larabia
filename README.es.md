@@ -27,6 +27,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 
 - **Portada:** un hero con las historias destacadas (su título, entradilla y proyecto siguen el idioma elegido en la cabecera) y, debajo, avances de las secciones.
 - **Secciones:** los botones de la barra superior (Artículos, Proyectos, Talleres, Más › Ficción, Internacional…). Cualquier artículo o proyecto puede aparecer también en otras secciones si un super admin lo aprueba.
+- **Página de proyectos:** «Proyectos» en la barra superior abre la página con todos los proyectos publicados, del más nuevo al más antiguo, con buscador (título, descripción o autora/or, sin importar mayúsculas ni tildes); cada tarjeta muestra sus autoras/es y cuántas publicaciones tiene.
 - **Las publicaciones** pueden pertenecer a un **proyecto** (una serie, un fanzine, un libro…) o ir sueltas. Cada una es de uno de estos tipos:
   - un **artículo** (texto, imágenes e incrustados, por bloques);
   - un **cómic** (lector horizontal con paneles que pueden ser imagen, enlace, audio, incrustado o paisaje sonoro; navegación panel a panel, progreso de lectura guardado y pantalla completa); en el creador, cada panel muestra el porcentaje de su imagen mientras se sube;

@@ -61,7 +61,7 @@ function Header({ ready = true }) {
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { totalAttention } = usePendingReview();
   const { notifications, count: notifCount, markAllSeen } = useNotifications();
-  const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, showRecommendationsModal, closeRecommendationsModal, navigateToAuthorProfile } = useUI();
+  const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, showProjectsList, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, showRecommendationsModal, closeRecommendationsModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
   const { metadata, resolveLogoUrl } = useMetadata();
@@ -123,25 +123,23 @@ function Header({ ready = true }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const [showProjectsDropdown, setShowProjectsDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showMobileProjectsDropdown, setShowMobileProjectsDropdown] = useState(false);
   const [expandedMobileGroup, setExpandedMobileGroup] = useState(null);
   const [expandedMobileSubGroup, setExpandedMobileSubGroup] = useState(null);
   const searchRef = useRef(null);
   const mobileSearchRef = useRef(null);
-  const projectsDropdownRef = useRef(null);
 
   // Configurable top-bar items the current user may see (visibility + role).
   const roleFlags = { isEditor, isAdmin, isSuperAdmin };
-  const visibleNavItems = (navConfig || []).filter(
-    (item) => item.visible !== false && canSeeNavItem(item, roleFlags)
-  );
+  // «Proyectos» (the fixed special item) opens the projects page, like any
+  // link — it used to open a dropdown of every project.
+  const visibleNavItems = (navConfig || [])
+    .filter((item) => item.visible !== false && canSeeNavItem(item, roleFlags))
+    .map((item) => (item.kind === 'projects' ? { ...item, action: { type: 'section', value: 'projects' } } : item));
   // Run a link item's action (also used for group children); close the mobile menu.
   const handleNavItemSelect = (item) => {
     runNavAction(item.action);
     setIsMobileMenuOpen(false);
-    setShowProjectsDropdown(false);
   };
 
   // Reset image load error and update timestamp when user changes
@@ -190,20 +188,9 @@ function Header({ ready = true }) {
     setIsMobileMenuOpen(false);
   };
 
-  const handleProyectosClick = () => {
-    if (projects.length === 0) fetchProjects();
-    setShowProjectsDropdown(prev => !prev);
-  };
-
-  const handleMobileProyectosClick = () => {
-    if (projects.length === 0) fetchProjects();
-    setShowMobileProjectsDropdown(prev => !prev);
-  };
-
   const handleProjectSelect = (project) => {
     setSelectedProject(project);
     navigateToProjectDetail();
-    setShowProjectsDropdown(false);
     setIsMobileMenuOpen(false);
   };
 
@@ -270,7 +257,7 @@ function Header({ ready = true }) {
   const handleHeaderBack = () => {
     if (showProjectDetail) { navigateBackFromProject(); return; }
     if (showWorkshopDetail) { navigateToTalleres(); return; }
-    if (showArticlesList || showTalleres) { navigateToHome(); return; }
+    if (showArticlesList || showTalleres || showProjectsList) { navigateToHome(); return; }
     navigateBack();
   };
 
@@ -420,9 +407,6 @@ function Header({ ready = true }) {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSearchResults(false);
-      }
-      if (projectsDropdownRef.current && !projectsDropdownRef.current.contains(event.target)) {
-        setShowProjectsDropdown(false);
       }
     };
 
@@ -688,34 +672,6 @@ function Header({ ready = true }) {
         {/* Desktop Navigation */}
         <nav className="header-nav desktop-nav">
           {visibleNavItems.map((item) => {
-            if (item.kind === 'projects') {
-              return (
-                <div className="projects-dropdown-wrapper" ref={projectsDropdownRef} key={item.id}>
-                  <button className="nav-link" onClick={handleProyectosClick}>
-                    <RollText text={navLabel(item, currentLanguage)} />
-                    <ChevronDown size={14} className={`chevron-icon ${showProjectsDropdown ? 'rotated' : ''}`} />
-                  </button>
-                  <SpringDropdown open={showProjectsDropdown} className="projects-dropdown-menu">
-                    {sortedProjects.length > 0 ? (
-                      sortedProjects.map(project => (
-                        <button
-                          key={project.id_project}
-                          className="projects-dropdown-item"
-                          onClick={() => handleProjectSelect(project)}
-                        >
-                          <span className="projects-dropdown-title">{projectTitle(project, lang)}</span>
-                          {project.cover_image_project && (
-                            <img className="projects-dropdown-thumb" src={resolveMediaUrl(project.cover_image_project)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                          )}
-                        </button>
-                      ))
-                    ) : (
-                      <span className="projects-dropdown-empty">{t('header.nav.noProjects')}</span>
-                    )}
-                  </SpringDropdown>
-                </div>
-              );
-            }
             if (item.kind === 'group') {
               return (
                 <NavGroupDropdown
@@ -884,36 +840,6 @@ function Header({ ready = true }) {
               </div>
 
             {visibleNavItems.map((item) => {
-              if (item.kind === 'projects') {
-                return (
-                  <div className="mobile-projects-section" key={item.id}>
-                    <button className="mobile-nav-link" onClick={handleMobileProyectosClick}>
-                      <span>{navLabel(item, currentLanguage)}</span>
-                      <ChevronDown size={14} className={`chevron-icon ${showMobileProjectsDropdown ? 'rotated' : ''}`} />
-                    </button>
-                    {showMobileProjectsDropdown && (
-                      <div className="mobile-projects-list">
-                        {sortedProjects.length > 0 ? (
-                          sortedProjects.map(project => (
-                            <button
-                              key={project.id_project}
-                              className="mobile-project-item"
-                              onClick={() => handleProjectSelect(project)}
-                            >
-                              <span className="projects-dropdown-title">{projectTitle(project, lang)}</span>
-                              {project.cover_image_project && (
-                                <img className="projects-dropdown-thumb" src={resolveMediaUrl(project.cover_image_project)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                              )}
-                            </button>
-                          ))
-                        ) : (
-                          <span className="projects-dropdown-empty">{t('header.nav.noProjects')}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
               if (item.kind === 'group') {
                 const groupChildren = (item.children || []).filter(
                   (c) => c.visible !== false && canSeeNavItem(c, roleFlags)

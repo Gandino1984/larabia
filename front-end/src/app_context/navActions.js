@@ -16,7 +16,7 @@ const SECTION_NAV = {
   microperfiles: 'navigateToMicroPerfiles',
   talleres: 'navigateToTalleres',
   about: 'navigateToAbout',
-  projects: 'navigateToProjectDetail'
+  projects: 'navigateToProjectsList'
 };
 
 export function useNavActions() {

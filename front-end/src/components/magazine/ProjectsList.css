@@ -1,0 +1,123 @@
+/* magazine-front/src/components/magazine/ProjectsList.css
+   The projects page: the workshops page's header (title + subtitle over a
+   rule) and the authors page's search bar. Mobile first. The cards are the
+   article cards (ProjectCard → ArticleCard.css). */
+
+.projects-page {
+  min-height: 100vh;
+  background: var(--surface-light, #ffffff);
+  padding: 9rem 1rem 2rem;
+}
+
+.projects-page__header,
+.projects-page__grid,
+.projects-page__empty {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.projects-page__header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--on-light, #000000);
+}
+
+.projects-page__header h1 {
+  margin: 0;
+  color: var(--on-light, #1a1a1a);
+  font-size: 1.5rem;
+}
+
+.projects-page__subtitle {
+  margin: 0.4rem 0 0;
+  color: var(--on-light-muted, #3a3a3a);
+}
+
+.projects-page__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 520px;
+  margin: 1.25rem 0 0;
+}
+
+.projects-page__search-icon {
+  position: absolute;
+  left: 0.9rem;
+  color: #777777;
+  pointer-events: none;
+}
+
+.projects-page__search-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 50px;
+  padding: 0.75rem 3rem 0.75rem 2.9rem;
+  border: 2px solid #cfcfcf;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 1rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.projects-page__search-input::placeholder { color: #888888; }
+.projects-page__search-input:focus { border-color: #1a1a1a; outline: none; }
+
+/* The browser's own clear button: we draw ours. */
+.projects-page__search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  display: none;
+}
+
+.projects-page__search-clear {
+  position: absolute;
+  right: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #ececec;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+
+.projects-page__search-clear:hover,
+.projects-page__search-clear:focus-visible {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+.projects-page__count {
+  margin: 0.75rem 0 0;
+  color: #555555;
+  font-size: 0.9rem;
+}
+
+.projects-page__empty {
+  padding: 2rem 0;
+  color: var(--on-light-muted, #555555);
+}
+
+.projects-page__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 700px) {
+  .projects-page__header h1 { font-size: 2rem; }
+  .projects-page__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1024px) {
+  .projects-page { padding: 9rem 0.75rem 2rem; }
+  .projects-page__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

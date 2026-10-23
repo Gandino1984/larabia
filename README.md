@@ -27,6 +27,7 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
 
 - **Home:** a hero slider of featured stories (its title, excerpt and project follow the language chosen in the header), followed by previews of the sections.
 - **Sections:** the top-bar buttons (Articles, Projects, Workshops, More › Fiction, International…). Any article or project can also appear in other sections, if a super admin approves it.
+- **Projects page:** «Projects» in the top bar opens the page of every published project, newest first, with a search bar (title, description or author, ignoring case and accents); each card shows its authors and how many publications it has.
 - **Publications** can belong to a **project** (a series, a zine, a book…) or stand on their own. Each one is one of these types:
   - an **article** (text, images and embeds, built from blocks);
   - a **comic** (a horizontal reader whose panels can be images, links, audio, embeds or soundscapes, with panel-by-panel navigation, saved reading progress and full screen); in the creator, each panel shows the percentage of its image while it uploads;

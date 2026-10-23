@@ -1402,65 +1402,6 @@
   }
 }
 
-/* Projects Dropdown */
-.projects-dropdown-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.projects-dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 8px;
-  background: #1a1a1a;
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  min-width: 200px;
-  max-width: 280px;
-  z-index: 1000;
-  overflow: hidden;
-}
-
-.projects-dropdown-item {
-  /* Holds text, not a button label: no site-wide button caps. */
-  text-transform: none;
-  display: block;
-  width: 100%;
-  padding: 12px 16px;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  color: var(--color-header-text, #ffffff);
-  cursor: pointer;
-  font-size: 14px;
-  text-align: left;
-  transition: background 0.2s ease;
-  min-height: 44px;
-}
-
-.projects-dropdown-item:last-child {
-  border-bottom: none;
-}
-
-.projects-dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.projects-dropdown-empty {
-  display: block;
-  padding: 12px 16px;
-  color: #888;
-  font-size: 13px;
-  font-style: italic;
-}
-
-/* Mobile projects section */
-.mobile-projects-section {
-  width: 100%;
-}
-
 /* Mobile more section */
 .mobile-more-section {
   width: 100%;
@@ -1472,7 +1413,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 .mobile-more-list,
-.mobile-projects-list,
 .mobile-subgroup-list {
   animation: mobile-submenu-in 0.28s ease both;
 }
@@ -1487,14 +1427,6 @@
 
 .mobile-menu-overlay.active .mobile-more-list {
   border-left-color: rgba(0, 0, 0, 0.1);
-}
-
-.mobile-projects-list {
-  display: flex;
-  flex-direction: column;
-  padding-left: 1rem;
-  border-left: 2px solid rgba(255, 255, 255, 0.15);
-  margin: 0.25rem 0 0.5rem 0.75rem;
 }
 
 .mobile-project-item {
@@ -1521,10 +1453,6 @@
 
 .mobile-menu-overlay.active .mobile-project-item:hover {
   color: var(--color-header-text-active, #000000);
-}
-
-.mobile-menu-overlay.active .projects-dropdown-empty {
-  color: #666666;
 }
 
 /* Nested subgroup inside a mobile menu group (e.g. "Barrio" inside "Más") */
@@ -1757,48 +1685,11 @@
   background: #222;
 }
 
-/* Projects dropdown: newest first, ~5 rows visible, the rest scroll inside. */
-.projects-dropdown-menu {
-  max-width: 320px;
-  max-height: 268px;
-  overflow-x: hidden;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #555 #1a1a1a;
-}
-.projects-dropdown-menu::-webkit-scrollbar { width: 6px; }
-.projects-dropdown-menu::-webkit-scrollbar-track { background: #1a1a1a; }
-.projects-dropdown-menu::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
-
-.projects-dropdown-item,
+/* Menu-group items on mobile. */
 .mobile-project-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
 }
-.projects-dropdown-item {
-  padding: 8px 12px;
-  min-height: 53px;
-}
-.projects-dropdown-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.projects-dropdown-thumb {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  object-fit: cover;
-  border-radius: 3px;
-  background: #222;
-}
 
-/* Mobile projects list: same 5-visible + inner scroll behaviour. */
-.mobile-projects-list {
-  max-height: 268px;
-  overflow-y: auto;
-}

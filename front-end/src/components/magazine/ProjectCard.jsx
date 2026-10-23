@@ -1,7 +1,8 @@
 // magazine-front/src/components/magazine/ProjectCard.jsx
 //
-// A project among the publications of a magazine section (utils/sections.js):
-// the article cards' look, with a «Proyecto» badge. Opens the project.
+// A project — on the projects page (ProjectsList) and among the publications
+// of a magazine section (utils/sections.js): the article cards' look, with a
+// «Proyecto» badge, its authors and how many publications it has. Opens it.
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
@@ -23,6 +24,9 @@ function ProjectCard({ project }) {
   const lang = i18n.language;
   const { setSelectedProject } = useMagazine();
   const { navigateToProjectDetail } = useUI();
+
+  const authors = (project.authors?.length ? project.authors.map((a) => a.name_user) : [project.author_name])
+    .filter(Boolean).join(', ');
 
   const open = () => {
     setSelectedProject(project);
@@ -54,6 +58,14 @@ function ProjectCard({ project }) {
         <h3 className="article-card-title">{projectTitle(project, lang)}</h3>
         {projectDescription(project, lang) && (
           <p className="article-card-excerpt">{projectDescription(project, lang)}</p>
+        )}
+        {(authors || project.article_count > 0) && (
+          <div className="article-card-meta">
+            {authors && <span className="meta-item">{authors}</span>}
+            {project.article_count > 0 && (
+              <span className="meta-item">{t('projects.card.publications', { count: project.article_count })}</span>
+            )}
+          </div>
         )}
       </div>
     </article>
