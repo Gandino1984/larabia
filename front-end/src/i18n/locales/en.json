@@ -792,6 +792,7 @@
   "authors.invitation.noProfileText": "They haven’t accepted the invitation yet. You can already create their profile.",
   "authors.invitation.pendingTitle": "Invitation pending",
   "authors.invitation.pendingText": "Sent to {{email}} on {{date}}. No answer yet: they will see the invitation when they sign in with that email.",
+  "authors.invitation.pendingTeamText": "Sent to {{email}} on {{date}}. They’re already in the team but haven’t signed in yet: they’ll get in with that Google email.",
   "authors.invitation.resend": "Resend email",
   "authors.invitation.notSent": "The invitation email to {{email}} isn’t recorded as sent. Press «Send email» to send it.",
   "authors.invitation.send": "Send email",

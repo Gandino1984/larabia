@@ -46,7 +46,9 @@ function invitationOf(user) {
         // recorded — «Enviar las invitaciones pendientes» in Autoras/es).
         author_invite_email_sent_at: user.author_invite_email_sent_at || null,
         // Signed in at least once: the address is theirs, it can't be corrected.
-        has_signed_in: !!(user.google_id || user.pass_user)
+        has_signed_in: !!(user.google_id || user.pass_user),
+        // Already in the team (a super admin made them editor): nothing to accept.
+        in_team: roleSnapshot(user).canCreateContent
     };
 }
 
@@ -88,19 +90,22 @@ async function passCreditsToMagazine(user) {
 // Sends the email and records when it went out (only if it did: before, the
 // profile said «Enviada» even when the email had failed).
 async function sendInvitation(user, inviter) {
-    const sent = await sendAuthorInvitationEmail(user.email_user, user.name_user, inviter?.name_user);
+    const sent = await sendAuthorInvitationEmail(user.email_user, user.name_user, inviter?.name_user, {
+        alreadyTeam: roleSnapshot(user).canCreateContent
+    });
     if (sent) await user.update({ author_invite_email_sent_at: new Date() });
     return sent;
 }
 
-// Pending invitations whose email isn't recorded as sent (the team excluded:
-// they're already in).
+// Pending invitations whose email isn't recorded as sent, of people who have
+// never signed in — also those a super admin already made editors: they
+// still don't know (excluding them hid Sidd Joag's and Eider Intxausti's).
 async function unsentInvitations() {
     const users = await user_model.findAll({
         where: { author_invite_status: 'pending', author_invite_email_sent_at: null },
         order: [['author_invited_at', 'ASC']]
     });
-    return users.filter((u) => !roleSnapshot(u).canCreateContent);
+    return users.filter((u) => !(u.google_id || u.pass_user));
 }
 
 /**
@@ -301,7 +306,13 @@ async function sendUnsent(req, res) {
 async function mine(req, res) {
     try {
         const user = await getRequestUser(req);
-        if (!user || user.author_invite_status !== 'pending' || roleSnapshot(user).canCreateContent) {
+        if (!user || user.author_invite_status !== 'pending') {
+            return res.json({ error: null, data: null });
+        }
+        // Made editor by a super admin before answering: they're in — the
+        // invitation is done (it used to stay «pending» for good).
+        if (roleSnapshot(user).canCreateContent) {
+            await user.update({ author_invite_status: 'accepted', email_verified: true });
             return res.json({ error: null, data: null });
         }
         const inviter = user.author_invited_by

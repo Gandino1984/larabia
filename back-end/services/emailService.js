@@ -159,7 +159,9 @@ export const sendWelcomeEmail = async (userEmail, userName) => {
 // A super admin signed this person up as an author («Autoras/es»): they
 // accept it the first time they sign in with this email. Returns whether the
 // email went out (the author is created either way).
-export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName) => {
+// alreadyTeam: a super admin already made them editor — nothing to accept,
+// they just sign in.
+export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName, { alreadyTeam = false } = {}) => {
   try {
     const transporter = createTransporter();
     const magazineUrl = config.urls.frontend;
@@ -174,8 +176,10 @@ export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName
           <div class="content">
             <h2>Hola, ${esc(userName)}</h2>
             <p>${inviterName ? `${esc(inviterName)} te ha dado de alta` : 'Te hemos dado de alta'} como autora o autor de ${BRAND}.</p>
-            <p>Para aceptarlo, inicia sesión en la revista con Google usando este email (<strong>${esc(userEmail)}</strong>). Al aceptar podrás editar tu perfil de autora o autor y publicar en la revista.</p>
-            <p>Si prefieres no formar parte, también podrás decirlo al iniciar sesión.</p>
+            ${alreadyTeam
+              ? `<p>Para entrar, inicia sesión en la revista con Google usando este email (<strong>${esc(userEmail)}</strong>). Podrás editar tu perfil de autora o autor y publicar en la revista.</p>`
+              : `<p>Para aceptarlo, inicia sesión en la revista con Google usando este email (<strong>${esc(userEmail)}</strong>). Al aceptar podrás editar tu perfil de autora o autor y publicar en la revista.</p>
+            <p>Si prefieres no formar parte, también podrás decirlo al iniciar sesión.</p>`}
             <div style="text-align: center;"><a href="${magazineUrl}" class="button">Ir a ${BRAND}</a></div>
           </div>
         </div>
@@ -188,10 +192,14 @@ export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName
       '',
       `${inviterName ? `${inviterName} te ha dado de alta` : 'Te hemos dado de alta'} como autora o autor de ${BRAND}.`,
       '',
-      `Para aceptarlo, inicia sesión en la revista con Google usando este email (${userEmail}). Al aceptar podrás editar tu perfil de autora o autor y publicar en la revista.`,
-      '',
-      'Si prefieres no formar parte, también podrás decirlo al iniciar sesión.',
-      '',
+      ...(alreadyTeam
+        ? [`Para entrar, inicia sesión en la revista con Google usando este email (${userEmail}). Podrás editar tu perfil de autora o autor y publicar en la revista.`, '']
+        : [
+          `Para aceptarlo, inicia sesión en la revista con Google usando este email (${userEmail}). Al aceptar podrás editar tu perfil de autora o autor y publicar en la revista.`,
+          '',
+          'Si prefieres no formar parte, también podrás decirlo al iniciar sesión.',
+          ''
+        ]),
       `${BRAND}: ${magazineUrl}`
     ].join('\n');
 

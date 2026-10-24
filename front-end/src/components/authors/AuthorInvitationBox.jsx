@@ -40,6 +40,8 @@ function AuthorInvitationBox({ userId }) {
   }, [userId, auth]);
 
   if (!invite || (invite.author_invite_status !== 'pending' && invite.author_invite_status !== 'declined')) return null;
+  // In the team and already signed in: they're in, nothing to send.
+  if (invite.author_invite_status === 'pending' && invite.in_team && invite.has_signed_in) return null;
 
   // When the email went out — not when the invitation was made: the box said
   // «Enviada» even when the email had failed.
@@ -115,7 +117,9 @@ function AuthorInvitationBox({ userId }) {
       <h2 className="author-invitation-box__title">{t('authors.invitation.pendingTitle', 'Invitación pendiente')}</h2>
       {sentWhen ? (
         <p className="author-invitation-box__text">
-          {t('authors.invitation.pendingText', { email: invite.email_user, date: sentWhen, defaultValue: 'Enviada a {{email}} el {{date}}. Aún no ha respondido: verá la invitación cuando inicie sesión con ese email.' })}
+          {invite.in_team
+            ? t('authors.invitation.pendingTeamText', { email: invite.email_user, date: sentWhen, defaultValue: 'Enviada a {{email}} el {{date}}. Ya está en el equipo, pero aún no ha iniciado sesión: entrará con ese email de Google.' })
+            : t('authors.invitation.pendingText', { email: invite.email_user, date: sentWhen, defaultValue: 'Enviada a {{email}} el {{date}}. Aún no ha respondido: verá la invitación cuando inicie sesión con ese email.' })}
         </p>
       ) : (
         <p className="author-invitation-box__text author-invitation-box__text--unsent" role="status">

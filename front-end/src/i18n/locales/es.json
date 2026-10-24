@@ -792,6 +792,7 @@
   "authors.invitation.noProfileText": "Aún no ha aceptado la invitación. Ya puedes crear su perfil.",
   "authors.invitation.pendingTitle": "Invitación pendiente",
   "authors.invitation.pendingText": "Enviada a {{email}} el {{date}}. Aún no ha respondido: verá la invitación cuando inicie sesión con ese email.",
+  "authors.invitation.pendingTeamText": "Enviada a {{email}} el {{date}}. Ya está en el equipo, pero aún no ha iniciado sesión: entrará con ese email de Google.",
   "authors.invitation.resend": "Reenviar email",
   "authors.invitation.notSent": "El email de invitación a {{email}} no consta como enviado. Pulsa «Enviar email» para enviarlo.",
   "authors.invitation.send": "Enviar email",

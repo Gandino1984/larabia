@@ -21,10 +21,12 @@ function AuthorProfileEditor() {
   const isCreatingForUser = isSuperAdmin && superAdminEditingProfile?._noProfile;
   const targetProfile = isCreatingForUser ? null : (isSuperAdmin && superAdminEditingProfile) ? superAdminEditingProfile : myProfile;
   const targetUser = (isSuperAdmin && superAdminEditingProfile) ? superAdminEditingProfile.user : currentUser;
-  // An author a super admin signed up (InviteAuthorModal) who hasn't accepted.
-  const inviteStatus = isSuperAdmin && superAdminEditingProfile && !isCreator(targetUser)
-    ? targetUser?.author_invite_status
-    : null;
+  // An author a super admin signed up (InviteAuthorModal) who hasn't answered
+  // — also one already made editor who hasn't signed in yet (hiding the box
+  // for the team left no way to resend their email; AuthorInvitationBox
+  // hides itself once they have signed in).
+  const invitedStatus = isSuperAdmin && superAdminEditingProfile ? targetUser?.author_invite_status : null;
+  const inviteStatus = invitedStatus === 'declined' && isCreator(targetUser) ? null : invitedStatus;
   const declined = inviteStatus === 'declined';
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 

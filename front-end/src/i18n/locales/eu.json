@@ -792,6 +792,7 @@
   "authors.invitation.noProfileText": "Oraindik ez du gonbidapena onartu. Bere profila sortu dezakezu dagoeneko.",
   "authors.invitation.pendingTitle": "Gonbidapena zain",
   "authors.invitation.pendingText": "{{email}} helbidera bidalia {{date}}(e)an. Oraindik ez du erantzun: email horrekin saioa hasten duenean ikusiko du gonbidapena.",
+  "authors.invitation.pendingTeamText": "{{email}} helbidera bidalita, {{date}}. Taldean dago jada, baina oraindik ez du saioa hasi: Google-ko helbide horrekin sartuko da.",
   "authors.invitation.resend": "Emaila berriz bidali",
   "authors.invitation.notSent": "{{email}} helbidera gonbidapen-mezua ez da bidali gisa ageri. Sakatu «Bidali mezua» bidaltzeko.",
   "authors.invitation.send": "Bidali mezua",
