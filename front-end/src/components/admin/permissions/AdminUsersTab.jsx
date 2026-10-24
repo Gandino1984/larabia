@@ -14,7 +14,7 @@ const ROLES = [
 
 function AdminUsersTab() {
   const { t } = useTranslation();
-  const { currentUser } = useAuth();
+  const { currentUser, setUser } = useAuth();
   const { showSuccess, showError } = useUI();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -106,6 +106,9 @@ function AdminUsersTab() {
             u.id_user === user.id_user ? { ...u, [role]: newValue } : u
           )
         );
+        // Your own account: your session gets the role at once (e.g.
+        // «Artista» → «Mi galería» shows without signing in again).
+        if (user.id_user === currentUser?.id_user) setUser({ ...currentUser, [role]: newValue });
         showSuccess(res.data.success || t('admin.users.roleUpdated', 'Rol actualizado'));
       }
     } catch (err) {

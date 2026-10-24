@@ -109,7 +109,15 @@ const byPosition = (a, b) => (a.position_work - b.position_work) || (a.id_work -
 
 async function exhibitionOfArtist(userId, { create = false } = {}) {
     let ex = await gallery_exhibition_model.findOne({ where: { user_id: userId } });
-    if (!ex && create) ex = await gallery_exhibition_model.create({ user_id: userId });
+    if (!ex && create) {
+        try {
+            ex = await gallery_exhibition_model.create({ user_id: userId });
+        } catch (err) {
+            // Two requests at once (a page loading twice): the other one made it.
+            if (err.name !== 'SequelizeUniqueConstraintError') throw err;
+            ex = await gallery_exhibition_model.findOne({ where: { user_id: userId } });
+        }
+    }
     return ex;
 }
 

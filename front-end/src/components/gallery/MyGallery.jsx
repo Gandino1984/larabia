@@ -98,6 +98,7 @@ function MyGallery() {
   const photoOf = useAuthorPhoto();
   const [tab, setTab] = useState(galleryView.tab || 'works');
   const [data, setData] = useState(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [title, setTitle] = useState('');
   const [statement, setStatement] = useState('');
   const [busy, setBusy] = useState(false);
@@ -117,9 +118,13 @@ function MyGallery() {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!isArtist) return;
+    setLoadFailed(false);
     axiosInstance.get('/gallery/mine', auth())
       .then((res) => apply(res.data?.data))
-      .catch((err) => showError(err.response?.data?.error || t('gallery.mine.loadError', 'No se pudo cargar tu exposición')));
+      .catch((err) => {
+        setLoadFailed(true);
+        showError(err.response?.data?.error || t('gallery.mine.loadError', 'No se pudo cargar tu exposición'));
+      });
   }, [isArtist, auth, apply, showError, t]);
 
   // Opening «Mi galería» = having seen the reviews.
@@ -242,7 +247,9 @@ function MyGallery() {
       </nav>
 
       {tab === 'works' && (!data ? (
-        <p className="gallery-page__empty">{t('common.states.loading', 'Cargando…')}</p>
+        <p className="gallery-page__empty">
+          {loadFailed ? t('gallery.mine.loadError', 'No se pudo cargar tu exposición') : t('common.states.loading', 'Cargando…')}
+        </p>
       ) : (
         <>
           <form className="gallery-form" onSubmit={saveText}>

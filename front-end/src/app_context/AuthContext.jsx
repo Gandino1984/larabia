@@ -5,6 +5,11 @@ import axiosInstance from '../utils/axiosConfig';
 
 const AuthContext = createContext();
 
+// What the session takes from the server when it refreshes (roles, name, photo).
+const SESSION_FIELDS = ['is_editor', 'is_admin', 'is_super_admin', 'is_premium_reader', 'is_artist', 'receives_newsletter', 'name_user', 'image_user'];
+// Flags come as true/false or 1/0.
+const sameValue = (field, a, b) => (field.startsWith('is_') || field === 'receives_newsletter' ? !!a === !!b : a === b);
+
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,6 +28,34 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
   }, []);
+
+  // The session copy (localStorage) is the user as they were at sign-in:
+  // roles given since (Admin › Usuarios — «Artista», «Editor»…) didn't show
+  // until signing in again. Refreshed from the server on load and when the
+  // tab gets focus.
+  useEffect(() => {
+    const id = currentUser?.id_user;
+    if (!id) return undefined;
+    const refresh = async () => {
+      try {
+        const res = await axiosInstance.post('/user/byId', { id_user: id });
+        const fresh = res.data?.data;
+        if (!fresh || fresh.id_user !== id) return;
+        setCurrentUser((prev) => {
+          if (!prev || prev.id_user !== id) return prev;
+          const changed = SESSION_FIELDS.some((f) => fresh[f] !== undefined && sameValue(f, fresh[f], prev[f]) === false);
+          if (!changed) return prev;
+          const next = { ...prev };
+          for (const f of SESSION_FIELDS) if (fresh[f] !== undefined) next[f] = fresh[f];
+          try { localStorage.setItem('currentUser', JSON.stringify(next)); } catch { /* ignore */ }
+          return next;
+        });
+      } catch { /* keep the session as it is */ }
+    };
+    refresh();
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, [currentUser?.id_user]);
 
   const login = async (username, password) => {
     try {
