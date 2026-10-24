@@ -417,24 +417,11 @@ async function getFeatured(roleCtx = EMPTY_ROLE_CTX) {
             limit: HERO_FEATURED_MAX
         });
 
-        // 2) The 10 most-liked articles (visible to this role), appended after the
-        //    author-recommended ones. This is what turns popular stories into hero
-        //    features.
-        const topLiked = await engagementController.getTopLikedArticleIds(10);
-        const featuredIdSet = new Set(featuredArticles.map(a => a.id_article));
-        const extraIds = topLiked.map(t => t.article_id).filter(id => !featuredIdSet.has(id));
-
-        let extraArticles = [];
-        if (extraIds.length > 0) {
-            const extraWhere = await buildVisibilityWhere(roleCtx);
-            extraWhere.id_article = { [Op.in]: extraIds };
-            const found = await magazine_article_model.findAll({ where: extraWhere });
-            // Keep them ordered by like count (as returned by topLiked).
-            const byId = new Map(found.map(a => [a.id_article, a]));
-            extraArticles = extraIds.map(id => byId.get(id)).filter(Boolean);
-        }
-
-        const articles = [...featuredArticles, ...extraArticles];
+        // Only those: the hero used to add the 10 most-liked articles after
+        // them, so any story with a single like showed up there without being
+        // featured. The most liked are now only suggestions in Admin ›
+        // Portada (getHeroManage), to feature with one click.
+        const articles = featuredArticles;
 
         if (!articles || articles.length === 0) {
             return { data: [], message: "No hay artículos destacados" };
@@ -517,8 +504,9 @@ const heroItem = (a, authorsMap, extra = {}) => ({
     ...extra
 });
 
-// What readers see in the hero: the featured stories in order (the first
-// HERO_FEATURED_MAX are shown) and the most liked ones it adds after them.
+// Admin › Portada: what readers see in the hero — the featured stories in
+// order (the first HERO_FEATURED_MAX are shown) — and the most liked ones
+// that aren't featured, as suggestions (they're not in the hero).
 async function getHeroManage() {
     try {
         const publicWhere = { active_article: true, status_article: 'published', is_premium: false };

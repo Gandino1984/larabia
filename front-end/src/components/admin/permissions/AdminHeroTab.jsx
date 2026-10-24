@@ -1,7 +1,8 @@
 // Admin → Portada (super admins): the order of the featured stories in the
-// home hero. Arrows (or dragging, on a computer) and «Guardar el orden»; take
-// a story out; pin one of the most liked ones the hero adds by itself; add any
-// published story. Server: /magazine-article/hero.
+// home hero — the hero shows only these. Arrows (or dragging, on a computer)
+// and «Guardar el orden»; take a story out; feature one of the most liked
+// (suggestions, not in the hero); add any published story. Server:
+// /magazine-article/hero.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowUp, ArrowDown, X, Pin, Plus, Search, Heart, GripVertical, Save, Undo2, ExternalLink } from 'lucide-react';
@@ -190,9 +191,9 @@ function AdminHeroTab() {
 
       {data.liked.length > 0 && (
         <div className="admin-hero__section">
-          <h3>{t('admin.hero.likedTitle', 'Se añaden solas: las más gustadas')}</h3>
+          <h3>{t('admin.hero.likedTitle', 'Las más gustadas (no salen en la portada)')}</h3>
           <p className="admin-hero__hint">
-            {t('admin.hero.likedHint', 'Después de las destacadas, la portada muestra las historias con más «me gusta». Fija una para poder colocarla donde quieras.')}
+            {t('admin.hero.likedHint', 'En la portada solo salen las destacadas. Estas son las historias con más «me gusta» que no lo están: destaca una para añadirla.')}
           </p>
           <ul className="admin-hero__list admin-hero__list--plain">
             {data.liked.map((a) => (
@@ -204,7 +205,7 @@ function AdminHeroTab() {
                 </span>
                 <span className="admin-hero__actions">
                   <button type="button" className="admin-hero__btn" onClick={() => setFeatured(a, true)} disabled={busy}>
-                    <Pin size={15} /> {t('admin.hero.pin', 'Fijar')}
+                    <Pin size={15} /> {t('admin.hero.pin', 'Destacar')}
                   </button>
                 </span>
               </li>

@@ -67,7 +67,7 @@ See [Languages (i18n)](#languages-i18n).
 
 - users and roles;
 - the review queue (articles, projects and section changes);
-- the **front page** (*Portada*): the order of the hero's featured stories (arrows or drag and drop), taking one out, pinning one of the most liked stories the hero adds by itself, adding any published story (`magazine_articles.featured_order`);
+- the **front page** (*Portada*): the order of the hero's featured stories (arrows or drag and drop), taking one out, adding any published story (`magazine_articles.featured_order`). The hero shows only the featured stories; the most liked ones that aren't featured are listed as suggestions, to feature with one click;
 - the proposals sent from Espacio abierto (read them, accept or decline them, download the file, reply by e-mail);
 - magazine details (name, slogan, logos);
 - workshops;
