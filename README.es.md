@@ -160,7 +160,7 @@ Los roles son marcas independientes en `user`; una cuenta puede tener varias.
    - **Aceptar** → pasa a editora.
    - **Rechazar** → sigue como lectora, su perfil se oculta y lo que nadie más firma pasa a firmarse «La Rabia».
    - Si un super admin ya la hizo editora → no tiene nada que responder: al entrar la invitación cuenta como aceptada (su email dice «inicia sesión», no «acepta»).
-4. El email de invitación (HTML + texto plano; las respuestas van a `CONTACT_EMAIL`) guarda cuándo salió (`user.author_invite_email_sent_at`). El editor del perfil dice cuándo se envió, o que no consta como enviado, con «Enviar email». En «Autoras/es», los super admins ven las invitaciones pendientes que no constan como enviadas — también de quien ya hicieron editora y aún no ha entrado — y las envían todas con un botón (`GET /user/invite-author/unsent`, `POST /user/invite-author/send-unsent`).
+4. El email de invitación (en español y en inglés, uno detrás del otro; HTML + texto plano; las respuestas van a `CONTACT_EMAIL`) guarda cuándo salió (`user.author_invite_email_sent_at`). El editor del perfil dice cuándo se envió, o que no consta como enviado, con «Enviar email». En «Autoras/es», los super admins ven las invitaciones pendientes que no constan como enviadas — también de quien ya hicieron editora y aún no ha entrado — y las envían todas con un botón (`GET /user/invite-author/unsent`, `POST /user/invite-author/send-unsent`).
 
 **Propuestas de Espacio abierto** (`back-end/controllers/open_space/`, `front-end/src/components/openmic/`):
 

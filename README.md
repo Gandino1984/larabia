@@ -160,7 +160,7 @@ Roles are independent flags on `user`. One account can hold several.
    - **Accept** → they become an editor.
    - **Decline** → they stay a reader, their profile is hidden, and what nobody else signs is signed «La Rabia».
    - Already made editor by a super admin → nothing to answer: on that first sign-in the invitation counts as accepted (its email says «sign in», not «accept»).
-4. The invitation email (HTML + plain text; replies go to `CONTACT_EMAIL`) records when it went out (`user.author_invite_email_sent_at`). The profile editor says when it was sent, or that it isn't recorded as sent, with «Enviar email». In «Autoras/es», super admins see the pending invitations not recorded as sent — also of people already made editors who haven't signed in yet — and send them all with one button (`GET /user/invite-author/unsent`, `POST /user/invite-author/send-unsent`).
+4. The invitation email (in Spanish and English, one after the other; HTML + plain text; replies go to `CONTACT_EMAIL`) records when it went out (`user.author_invite_email_sent_at`). The profile editor says when it was sent, or that it isn't recorded as sent, with «Enviar email». In «Autoras/es», super admins see the pending invitations not recorded as sent — also of people already made editors who haven't signed in yet — and send them all with one button (`GET /user/invite-author/unsent`, `POST /user/invite-author/send-unsent`).
 
 **Espacio abierto proposals** (`back-end/controllers/open_space/`, `front-end/src/components/openmic/`):
 

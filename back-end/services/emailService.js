@@ -159,8 +159,8 @@ export const sendWelcomeEmail = async (userEmail, userName) => {
 // A super admin signed this person up as an author («Autoras/es»): they
 // accept it the first time they sign in with this email. Returns whether the
 // email went out (the author is created either way).
-// alreadyTeam: a super admin already made them editor — nothing to accept,
-// they just sign in.
+// In Spanish and English (in that order, one email). alreadyTeam: a super
+// admin already made them editor — nothing to accept, they just sign in.
 export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName, { alreadyTeam = false } = {}) => {
   try {
     const transporter = createTransporter();
@@ -169,18 +169,52 @@ export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName
     // Names typed by a super admin: keep them as text in the HTML.
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+    // Each language's paragraphs; EMAIL marks where the address goes (bold
+    // in the HTML).
+    const EMAIL = '\u0000';
+    const copy = {
+      es: {
+        hello: `Hola, ${userName}:`,
+        paragraphs: [
+          `${inviterName ? `${inviterName} te ha dado de alta` : 'Te hemos dado de alta'} como autora o autor de ${BRAND}.`,
+          ...(alreadyTeam
+            ? [`Para entrar, inicia sesión en la revista con Google usando este email (${EMAIL}). Podrás editar tu perfil de autora o autor y publicar en la revista.`]
+            : [
+              `Para aceptarlo, inicia sesión en la revista con Google usando este email (${EMAIL}). Al aceptar podrás editar tu perfil de autora o autor y publicar en la revista.`,
+              'Si prefieres no formar parte, también podrás decirlo al iniciar sesión.'
+            ])
+        ]
+      },
+      en: {
+        hello: `Hi, ${userName},`,
+        paragraphs: [
+          `${inviterName ? `${inviterName} has signed you up` : 'We have signed you up'} as an author of ${BRAND}.`,
+          ...(alreadyTeam
+            ? [`To get in, sign in to the magazine with Google using this email (${EMAIL}). You will be able to edit your author profile and publish in the magazine.`]
+            : [
+              `To accept, sign in to the magazine with Google using this email (${EMAIL}). Once you accept, you will be able to edit your author profile and publish in the magazine.`,
+              'If you would rather not take part, you can also say so when you sign in.'
+            ])
+        ]
+      }
+    };
+    const htmlSection = (lang) => `
+            <div lang="${lang}">
+              <h2>${esc(copy[lang].hello)}</h2>
+              ${copy[lang].paragraphs.map((p) => `<p>${esc(p).replace(EMAIL, `<strong>${esc(userEmail)}</strong>`)}</p>`).join('\n              ')}
+            </div>`;
+    const textSection = (lang) => [copy[lang].hello, '', ...copy[lang].paragraphs.flatMap((p) => [p.replace(EMAIL, userEmail), ''])];
+
     const htmlContent = `
       <!DOCTYPE html><html><head><style>${baseStyles}</style></head><body>
         <div class="container">
           <div class="header">${BRAND}</div>
           <div class="content">
-            <h2>Hola, ${esc(userName)}</h2>
-            <p>${inviterName ? `${esc(inviterName)} te ha dado de alta` : 'Te hemos dado de alta'} como autora o autor de ${BRAND}.</p>
-            ${alreadyTeam
-              ? `<p>Para entrar, inicia sesión en la revista con Google usando este email (<strong>${esc(userEmail)}</strong>). Podrás editar tu perfil de autora o autor y publicar en la revista.</p>`
-              : `<p>Para aceptarlo, inicia sesión en la revista con Google usando este email (<strong>${esc(userEmail)}</strong>). Al aceptar podrás editar tu perfil de autora o autor y publicar en la revista.</p>
-            <p>Si prefieres no formar parte, también podrás decirlo al iniciar sesión.</p>`}
-            <div style="text-align: center;"><a href="${magazineUrl}" class="button">Ir a ${BRAND}</a></div>
+            ${htmlSection('es')}
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 28px 0 8px;">
+            <p style="margin: 0 0 4px; color: #888; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">English</p>
+            ${htmlSection('en')}
+            <div style="text-align: center;"><a href="${magazineUrl}" class="button">Ir a ${BRAND} · Go to ${BRAND}</a></div>
           </div>
         </div>
       </body></html>
@@ -188,18 +222,10 @@ export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName
     // A plain-text version too (an HTML-only email is likelier to end up in
     // spam), and replies go to the magazine.
     const textContent = [
-      `Hola, ${userName}:`,
+      ...textSection('es'),
+      '———',
       '',
-      `${inviterName ? `${inviterName} te ha dado de alta` : 'Te hemos dado de alta'} como autora o autor de ${BRAND}.`,
-      '',
-      ...(alreadyTeam
-        ? [`Para entrar, inicia sesión en la revista con Google usando este email (${userEmail}). Podrás editar tu perfil de autora o autor y publicar en la revista.`, '']
-        : [
-          `Para aceptarlo, inicia sesión en la revista con Google usando este email (${userEmail}). Al aceptar podrás editar tu perfil de autora o autor y publicar en la revista.`,
-          '',
-          'Si prefieres no formar parte, también podrás decirlo al iniciar sesión.',
-          ''
-        ]),
+      ...textSection('en'),
       `${BRAND}: ${magazineUrl}`
     ].join('\n');
 
@@ -207,7 +233,7 @@ export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName
       from: `"${BRAND}" <${process.env.EMAIL_USER}>`,
       to: userEmail,
       replyTo: process.env.CONTACT_EMAIL || process.env.EMAIL_USER,
-      subject: `${BRAND} te ha dado de alta como autora o autor`,
+      subject: `${BRAND} te ha dado de alta como autora o autor · ${BRAND} has signed you up as an author`,
       text: textContent,
       html: htmlContent
     });
