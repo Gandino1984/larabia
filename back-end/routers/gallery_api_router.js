@@ -16,6 +16,16 @@ router.post("/mine/works", gallery.artistOnly, gallery.upload, gallery.addWork);
 router.patch("/mine/works/:id", gallery.artistOnly, gallery.upload, gallery.updateWork);
 router.delete("/mine/works/:id", gallery.artistOnly, gallery.removeWork);
 
+// Super admins: the gallery of someone invited, prepared on their behalf until
+// they accept it (onBehalf, then the artist's own handlers for that person).
+router.post("/for/:userId", gallery.prepareFor);
+router.get("/for/:userId", gallery.onBehalf, gallery.mine);
+router.patch("/for/:userId", gallery.onBehalf, gallery.updateMine);
+router.patch("/for/:userId/order", gallery.onBehalf, gallery.reorderWorks);
+router.post("/for/:userId/works", gallery.onBehalf, gallery.upload, gallery.addWork);
+router.patch("/for/:userId/works/:id", gallery.onBehalf, gallery.upload, gallery.updateWork);
+router.delete("/for/:userId/works/:id", gallery.onBehalf, gallery.removeWork);
+
 // Super admins: review the works.
 router.get("/review", gallery.reviewList);
 router.get("/review/count", gallery.reviewCount);

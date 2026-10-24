@@ -212,15 +212,23 @@ export const NotificationProvider = ({ children }) => {
     }
 
     // Invited to the Galería as a visual artist, waiting for an answer.
+    // With a gallery a super admin prepared for them.
     if (currentUser && gallery.invitation) {
       const inviter = gallery.invitation.inviter?.name_user;
+      const prepared = !!gallery.invitation.gallery;
       list.push({
         id: 'gallery-invite',
         type: 'gallery-invite',
-        title: t('notifications.galleryInvite.title', 'Te invitan a exponer en la Galería'),
-        message: inviter
-          ? t('notifications.galleryInvite.message', { name: inviter, defaultValue: '{{name}} te invita a exponer tu obra como artista visual.' })
-          : t('notifications.galleryInvite.messageNoName', 'Te invitan a exponer tu obra como artista visual.'),
+        title: prepared
+          ? t('notifications.galleryInvite.preparedTitle', 'Te han preparado una galería')
+          : t('notifications.galleryInvite.title', 'Te invitan a exponer en la Galería'),
+        message: prepared
+          ? (inviter
+            ? t('notifications.galleryInvite.preparedMessage', { name: inviter, defaultValue: '{{name}} te ha preparado una galería: acéptala para gestionarla tú.' })
+            : t('notifications.galleryInvite.preparedMessageNoName', 'Te han preparado una galería: acéptala para gestionarla tú.'))
+          : inviter
+            ? t('notifications.galleryInvite.message', { name: inviter, defaultValue: '{{name}} te invita a exponer tu obra como artista visual.' })
+            : t('notifications.galleryInvite.messageNoName', 'Te invitan a exponer tu obra como artista visual.'),
         onClick: () => gallery.openInviteModal(),
         actions: [
           { key: 'accept', variant: 'primary', label: t('notifications.authorInvite.accept', 'Aceptar'), onClick: () => gallery.respond('accept') },

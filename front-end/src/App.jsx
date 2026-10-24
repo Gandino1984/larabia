@@ -168,7 +168,7 @@ function App() {
     if (showProjectsList) return <ProjectsList />;
     if (showGallery) return <GalleryPage />;
     if (showExhibition) return <ExhibitionPage key={galleryView.exhibitionId} />;
-    if (showMyGallery) return <MyGallery key={`${galleryView.tab}-${galleryView.conversationId}`} />;
+    if (showMyGallery) return <MyGallery key={`${galleryView.tab}-${galleryView.conversationId}-${galleryView.forUser?.id_user || ''}`} />;
     if (showAbout) return <AboutRabia />;
     if (showArticleDetail) return <ArticleDetail previewMode={isPreview} />;
     if (showArticlesList) return <ArticlesList />;

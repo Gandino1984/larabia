@@ -6,6 +6,9 @@
 // that email. The server emails the invitation (Spanish and English) and the
 // person answers when they sign in (GalleryInvitationModal). Same look as the
 // author invitation (AuthorInvitationModal.css).
+// withGallery: «Crear una galería» — the same invitation, plus a gallery the
+// super admin prepares on their behalf (the caller opens it); someone already
+// invited just gets the gallery.
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +21,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FIELD_OF = { invalid_name: 'name', name_taken: 'name', invalid_email: 'email', already_artist: 'email', already_invited: 'email' };
 
 // onInvited(response): the server's { data, emailSent, success }.
-function InviteArtistModal({ onClose, onInvited }) {
+function InviteArtistModal({ onClose, onInvited, withGallery = false }) {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
   const [name, setName] = useState('');
@@ -45,7 +48,7 @@ function InviteArtistModal({ onClose, onInvited }) {
     setBusy(true);
     setError(null);
     try {
-      const res = await axiosInstance.post('/gallery/invite', { name: cleanName, email: cleanEmail }, { headers: { 'x-user-id': currentUser?.id_user } });
+      const res = await axiosInstance.post('/gallery/invite', { name: cleanName, email: cleanEmail, gallery: withGallery }, { headers: { 'x-user-id': currentUser?.id_user } });
       onInvited(res.data);
     } catch (err) {
       const data = err.response?.data;
@@ -64,9 +67,11 @@ function InviteArtistModal({ onClose, onInvited }) {
           <X size={22} />
         </button>
         <span className="author-invite-modal__icon" aria-hidden="true"><Palette size={26} /></span>
-        <h2 id="invite-artist-title">{t('gallery.invite.title', 'Invitar artista')}</h2>
+        <h2 id="invite-artist-title">{withGallery ? t('gallery.create.title', 'Crear una galería') : t('gallery.invite.title', 'Invitar artista')}</h2>
         <p className="author-invite-modal__text">
-          {t('gallery.invite.lead', 'Le enviaremos un email (en castellano e inglés). Cuando inicie sesión con ese email, podrá aceptar y montar su exposición en la galería: un título, un texto breve y hasta quince obras.')}
+          {withGallery
+            ? t('gallery.create.lead', 'Prepara la galería de una o un artista en su nombre. Le enviaremos un email (en castellano e inglés) para que la acepte al iniciar sesión con ese email; entonces pasará a gestionarla. Hasta que la acepte, no se ve en la web.')
+            : t('gallery.invite.lead', 'Le enviaremos un email (en castellano e inglés). Cuando inicie sesión con ese email, podrá aceptar y montar su exposición en la galería: un título, un texto breve y hasta quince obras.')}
         </p>
         <form className="author-invite-form" onSubmit={submit} noValidate>
           <div className="author-invite-form__field">
@@ -90,7 +95,9 @@ function InviteArtistModal({ onClose, onInvited }) {
           </p>
           <div className="author-invite-modal__actions">
             <button type="submit" className="author-invite-modal__btn author-invite-modal__btn--primary" disabled={busy}>
-              {busy ? t('authors.invite.sending', 'Enviando…') : t('gallery.invite.submit', 'Enviar la invitación')}
+              {busy
+                ? t('authors.invite.sending', 'Enviando…')
+                : withGallery ? t('gallery.create.submit', 'Crear y enviar la invitación') : t('gallery.invite.submit', 'Enviar la invitación')}
             </button>
             <button type="button" className="author-invite-modal__btn" onClick={onClose} disabled={busy}>
               {t('common.buttons.cancel', 'Cancelar')}

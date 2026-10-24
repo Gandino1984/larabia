@@ -77,9 +77,14 @@ export const GalleryProvider = ({ children }) => {
 
   const openInviteModal = useCallback(() => setInviteModalOpen(true), []);
 
-  // response: 'accept' | 'decline'. Accepting makes the user an artist at once.
+  // response: 'accept' | 'decline'. Accepting makes the user an artist at once;
+  // declining a gallery prepared for them deletes it (asked first).
   const respond = useCallback(async (response) => {
     if (!userId) return { error: 'login_required' };
+    if (response === 'decline' && invitation?.gallery
+      && !window.confirm(t('gallery.invitation.confirmDecline', 'Si la rechazas, se borrará la galería que te han preparado, con sus obras. ¿La rechazas?'))) {
+      return { cancelled: true };
+    }
     setBusy(true);
     try {
       const res = await axiosInstance.post('/gallery/invitation/respond', { response }, auth());
@@ -99,7 +104,7 @@ export const GalleryProvider = ({ children }) => {
     } finally {
       setBusy(false);
     }
-  }, [userId, auth, currentUser, setUser, showSuccess, showError, t]);
+  }, [userId, auth, currentUser, setUser, showSuccess, showError, t, invitation]);
 
   // The artist has seen their reviews (opening «Mi galería» or the bell).
   const markReviewsSeen = useCallback(async () => {

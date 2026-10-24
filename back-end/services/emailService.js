@@ -258,12 +258,30 @@ export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName
 
 // Visual artist invitation for the Galería (gallery_api_controller), in
 // Spanish and English.
-export const sendArtistInvitationEmail = async (userEmail, userName, inviterName) => {
+// gallery: a super admin has prepared a gallery for them (theirs once they accept).
+export const sendArtistInvitationEmail = async (userEmail, userName, inviterName, { gallery = false } = {}) => {
   try {
     const magazineUrl = config.urls.frontend;
     const { name: BRAND } = await getBrand();
     const EMAIL = EMAIL_MARK;
-    const copy = {
+    const copy = gallery ? {
+      es: {
+        hello: `Hola, ${userName}:`,
+        paragraphs: [
+          `${inviterName ? `${inviterName} te ha preparado` : 'Te hemos preparado'} una galería en ${BRAND}, para que expongas tu obra como artista visual.`,
+          `Para aceptarla, inicia sesión en la revista con Google usando este email (${EMAIL}). Al aceptarla pasarás a gestionarla tú: su título, su texto y sus obras (hasta 15).`,
+          'No se verá en la revista hasta que la aceptes. Si prefieres no participar, podrás decirlo al iniciar sesión, y la borraremos.'
+        ]
+      },
+      en: {
+        hello: `Hi, ${userName},`,
+        paragraphs: [
+          `${inviterName ? `${inviterName} has prepared` : 'We have prepared'} a gallery for you in ${BRAND}, to show your work as a visual artist.`,
+          `To accept it, sign in to the magazine with Google using this email (${EMAIL}). Once you accept it, you will manage it yourself: its title, its text and its works (up to 15).`,
+          'It will not be shown in the magazine until you accept it. If you would rather not take part, you can say so when you sign in, and we will delete it.'
+        ]
+      }
+    } : {
       es: {
         hello: `Hola, ${userName}:`,
         paragraphs: [
@@ -284,7 +302,9 @@ export const sendArtistInvitationEmail = async (userEmail, userName, inviterName
     const { html, text } = bilingualEmail({ copy, userEmail, BRAND, magazineUrl });
     return await sendInvitationEmail({
       kind: 'Artist', userEmail, html, text, BRAND,
-      subject: `${BRAND} te invita a exponer en su Galería · ${BRAND} invites you to show your work in its Gallery`
+      subject: gallery
+        ? `${BRAND} te ha preparado una galería · ${BRAND} has prepared a gallery for you`
+        : `${BRAND} te invita a exponer en su Galería · ${BRAND} invites you to show your work in its Gallery`
     });
   } catch (error) {
     console.error('Error sending artist invitation email:', error);

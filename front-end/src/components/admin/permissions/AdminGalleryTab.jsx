@@ -2,11 +2,12 @@
 // shows in the gallery only once approved; reject (with a reason the artist
 // sees) or withdraw one already published. And the artists: who's in, the
 // invitations (when each email went out — resend, or send the unsent ones),
-// and «Invitar artista». A thumbnail opens the work large (WorkViewer, with
+// «Invitar artista», and «Crear una galería»: one prepared on the behalf of
+// someone invited (MyGallery with forUser), theirs when they accept. A thumbnail opens the work large (WorkViewer, with
 // the others of the list). Server: /gallery/review*, /gallery/invitations*.
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, X, Undo2, Send, UserPlus, ExternalLink } from 'lucide-react';
+import { Check, X, Undo2, Send, UserPlus, ExternalLink, ImagePlus, Pencil } from 'lucide-react';
 import axiosInstance from '../../../utils/axiosConfig';
 import { useAuth } from '../../../app_context/AuthContext';
 import { useUI } from '../../../app_context/UIContext';
@@ -32,6 +33,9 @@ function ReviewItem({ work, onOpen, onDecide, busy }) {
       <div className="admin-gallery__info">
         <strong>{workTitle(work, t)}</strong>
         <span>{[work.artist?.name_user, work.exhibition?.title, workSize(work, t)].filter(Boolean).join(' · ')}</span>
+        {work.artist_accepted === false && (
+          <span className="admin-gallery__prepared">{t('admin.gallery.notAccepted', 'Galería preparada en su nombre: no se ve hasta que la acepte')}</span>
+        )}
         {work.status_work === 'rejected' && work.rejection_reason && (
           <span className="admin-gallery__reason">{t('gallery.status.reason', { reason: work.rejection_reason, defaultValue: 'Motivo: {{reason}}' })}</span>
         )}
@@ -73,7 +77,7 @@ function ReviewItem({ work, onOpen, onDecide, busy }) {
 function AdminGalleryTab() {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
-  const { showSuccess, showError, showInfo, navigateToGallery } = useUI();
+  const { showSuccess, showError, showInfo, navigateToGallery, navigateToMyGallery } = useUI();
   const { refresh: refreshPending } = usePendingReview();
   const { refreshFeed } = useGallery();
   const [status, setStatus] = useState('pending');
@@ -82,6 +86,7 @@ function AdminGalleryTab() {
   const [artists, setArtists] = useState(null);
   const [busy, setBusy] = useState(false);
   const [inviting, setInviting] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [viewing, setViewing] = useState(null);
   const auth = useCallback(() => ({ headers: { 'x-user-id': currentUser?.id_user } }), [currentUser?.id_user]);
 
@@ -151,6 +156,28 @@ function AdminGalleryTab() {
     loadArtists();
   };
 
+  // Their gallery, prepared on their behalf (created — and announced — first).
+  const openGallery = (person) => navigateToMyGallery({ forUser: { id_user: person.id_user, name_user: person.name_user } });
+  const onCreated = (res) => {
+    setCreating(false);
+    if (res?.emailSent === false) showInfo(res.success);
+    else if (res?.success) showSuccess(res.success);
+    if (res?.data) openGallery(res.data);
+  };
+  const prepare = async (person) => {
+    if (person.gallery) { openGallery(person); return; }
+    setBusy(true);
+    try {
+      const res = await axiosInstance.post(`/gallery/for/${person.id_user}`, {}, auth());
+      onCreated(res.data);
+    } catch (err) {
+      showError(err.response?.data?.error || t('admin.gallery.createError', 'No se pudo crear la galería'));
+      loadArtists();
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const unsent = (artists || []).filter((a) => a.artist_invite_status === 'pending' && !a.artist_invite_email_sent_at && !a.has_signed_in);
   const day = (d) => localDate(d, { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -197,10 +224,18 @@ function AdminGalleryTab() {
 
       <div className="admin-gallery__head admin-gallery__head--artists">
         <h3>{t('admin.gallery.artistsTitle', 'Artistas')}</h3>
-        <button type="button" className="admin-gallery__btn admin-gallery__btn--primary" onClick={() => setInviting(true)}>
-          <UserPlus size={15} aria-hidden="true" /> {t('gallery.invite.button', 'Invitar artista')}
-        </button>
+        <div className="admin-gallery__buttons">
+          <button type="button" className="admin-gallery__btn admin-gallery__btn--primary" onClick={() => setInviting(true)}>
+            <UserPlus size={15} aria-hidden="true" /> {t('gallery.invite.button', 'Invitar artista')}
+          </button>
+          <button type="button" className="admin-gallery__btn" onClick={() => setCreating(true)}>
+            <ImagePlus size={15} aria-hidden="true" /> {t('gallery.create.button', 'Crear una galería')}
+          </button>
+        </div>
       </div>
+      <p className="admin-gallery__hint">
+        {t('admin.gallery.createHint', '«Crear una galería»: la preparas en nombre de una o un artista (sus obras no pasan por revisión) y le enviamos la invitación. Se ve en la web cuando la acepta, y desde entonces la gestiona ella o él; si la rechaza, se borra.')}
+      </p>
       {unsent.length > 0 && (
         <div className="admin-gallery__unsent" role="status">
           <p>{t('admin.gallery.unsent', { count: unsent.length, defaultValue: '{{count}} invitaciones no constan como enviadas.' })}</p>
@@ -230,9 +265,19 @@ function AdminGalleryTab() {
                         : t('admin.gallery.notSent', 'El email no consta como enviado')}
                     </span>
                   )}
+                  {a.gallery && !a.is_artist && (
+                    <span className="admin-gallery__prepared">
+                      {t('admin.gallery.preparedCount', { count: a.gallery.works_count, defaultValue: 'Galería preparada: {{count}} obras' })}
+                    </span>
+                  )}
                 </div>
                 {a.artist_invite_status === 'pending' && !a.is_artist && (
                   <div className="admin-gallery__buttons">
+                    <button type="button" className="admin-gallery__btn" onClick={() => prepare(a)} disabled={busy}>
+                      {a.gallery
+                        ? <><Pencil size={15} aria-hidden="true" /> {t('admin.gallery.editTheirs', 'Editar su galería')}</>
+                        : <><ImagePlus size={15} aria-hidden="true" /> {t('admin.gallery.createTheirs', 'Crear su galería')}</>}
+                    </button>
                     <button type="button" className="admin-gallery__btn" onClick={() => resend(a)} disabled={busy}>
                       <Send size={15} aria-hidden="true" />
                       {a.artist_invite_email_sent_at ? t('authors.invitation.resend', 'Reenviar email') : t('authors.invitation.send', 'Enviar email')}
@@ -246,6 +291,7 @@ function AdminGalleryTab() {
       )}
 
       {inviting && <InviteArtistModal onClose={() => setInviting(false)} onInvited={onInvited} />}
+      {creating && <InviteArtistModal withGallery onClose={() => setCreating(false)} onInvited={onCreated} />}
     </section>
   );
 }

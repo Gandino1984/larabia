@@ -18,7 +18,10 @@ export const gallery_exhibition_model = sequelize.define("gallery_exhibition", {
     user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, unique: 'uq_exhibition_user' },
     // NULL: the artist's name.
     title: { type: DataTypes.STRING(120), allowNull: true },
-    statement: { type: DataTypes.TEXT, allowNull: true }
+    statement: { type: DataTypes.TEXT, allowNull: true },
+    // The super admin who prepared it on the artist's behalf, until they
+    // accept it (then NULL: it's theirs). Declining deletes a prepared one.
+    prepared_by: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true }
 }, { tableName: "gallery_exhibitions", ...timestamps });
 
 export const gallery_work_model = sequelize.define("gallery_work", {
@@ -84,6 +87,12 @@ gallery_message_model.belongsTo(gallery_conversation_model, { foreignKey: 'conve
 /** Creates the tables that don't exist yet, in dependency order. */
 export async function syncGalleryTables() {
     await gallery_exhibition_model.sync();
+    // Added after the table existed in production (migration 028).
+    const qi = sequelize.getQueryInterface();
+    if (!(await qi.describeTable('gallery_exhibitions')).prepared_by) {
+        await qi.addColumn('gallery_exhibitions', 'prepared_by', { type: DataTypes.INTEGER.UNSIGNED, allowNull: true });
+        console.log('>>> Added gallery_exhibitions.prepared_by');
+    }
     await gallery_work_model.sync();
     await gallery_conversation_model.sync();
     await gallery_message_model.sync();

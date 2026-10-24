@@ -8,6 +8,9 @@
 // work goes to the team's review before it shows in the gallery; each one
 // says where it stands (and why, if it wasn't published). «Mensajes»: the
 // conversations visitors opened with them, answered in the chat.
+// With galleryView.forUser, a super admin prepares the gallery of someone
+// invited, on their behalf (/gallery/for/:id): no review, no messages, not
+// public until that person accepts it and takes it over.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Upload, Save, Eye, MessageCircle, ImagePlus, RefreshCw } from 'lucide-react';
@@ -27,14 +30,16 @@ const WORK_TITLE_MAX = 150;
 const IMAGE_MAX_MB = 20;
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif', 'image/tiff'];
 
-function StatusChip({ work }) {
+function StatusChip({ work, onBehalf }) {
   const { t } = useTranslation();
-  if (work.status_work === 'approved') return <span className="gallery-status gallery-status--approved">{t('gallery.status.approved', 'En la galería')}</span>;
+  if (work.status_work === 'approved') {
+    return <span className="gallery-status gallery-status--approved">{onBehalf ? t('gallery.status.ready', 'Lista para exponer') : t('gallery.status.approved', 'En la galería')}</span>;
+  }
   if (work.status_work === 'rejected') return <span className="gallery-status gallery-status--rejected">{t('gallery.status.rejected', 'No publicada')}</span>;
   return <span className="gallery-status gallery-status--pending">{t('gallery.status.pending', 'Pendiente de revisión')}</span>;
 }
 
-function WorkRow({ work, index, total, busy, onSaveTitle, onDraft, onReplace, onMove, onDelete, progress }) {
+function WorkRow({ work, index, total, busy, onBehalf, onSaveTitle, onDraft, onReplace, onMove, onDelete, progress }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState(work.title_work || '');
   useEffect(() => { setTitle(work.title_work || ''); }, [work.title_work]);
@@ -53,7 +58,7 @@ function WorkRow({ work, index, total, busy, onSaveTitle, onDraft, onReplace, on
       </div>
       <div className="my-work__body">
         <div className="my-work__top">
-          <StatusChip work={work} />
+          <StatusChip work={work} onBehalf={onBehalf} />
           {workSize(work, t) && <span className="my-work__size">{workSize(work, t)}</span>}
         </div>
         {work.status_work === 'rejected' && work.rejection_reason && (
@@ -94,13 +99,17 @@ function WorkRow({ work, index, total, busy, onSaveTitle, onDraft, onReplace, on
 
 function MyGallery() {
   const { t } = useTranslation();
-  const { galleryView, navigateToGallery, navigateToExhibition, showSuccess, showError } = useUI();
-  const { currentUser } = useAuth();
+  const { galleryView, navigateToGallery, navigateToExhibition, navigateToAdmin, showSuccess, showError } = useUI();
+  const { currentUser, isSuperAdmin } = useAuth();
   const { isArtist, feed, markReviewsSeen, refreshFeed } = useGallery();
+  // A super admin preparing the gallery of someone invited (on their behalf).
+  const forUser = galleryView.forUser || null;
+  const base = forUser ? `/gallery/for/${forUser.id_user}` : '/gallery/mine';
+  const allowed = forUser ? isSuperAdmin : isArtist;
   const photoOf = useAuthorPhoto();
   const [tab, setTab] = useState(galleryView.tab || 'works');
   const [data, setData] = useState(null);
-  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [title, setTitle] = useState('');
   const [statement, setStatement] = useState('');
   const [busy, setBusy] = useState(false);
@@ -112,26 +121,30 @@ function MyGallery() {
   const [openConversation, setOpenConversation] = useState(galleryView.conversationId || null);
   const auth = useCallback(() => ({ headers: { 'x-user-id': currentUser?.id_user } }), [currentUser?.id_user]);
 
-  const apply = useCallback((d) => {
+  // texts: also take the exhibition's title and text (on loading and saving
+  // them) — not after a work changes, which would drop what's being typed.
+  const apply = useCallback((d, { texts = false } = {}) => {
     setData(d);
-    setTitle(d?.title || '');
-    setStatement(d?.statement || '');
+    if (texts) {
+      setTitle(d?.title || '');
+      setStatement(d?.statement || '');
+    }
   }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (!isArtist) return;
-    setLoadFailed(false);
-    axiosInstance.get('/gallery/mine', auth())
-      .then((res) => apply(res.data?.data))
+    if (!allowed) return;
+    setLoadError(null);
+    axiosInstance.get(base, auth())
+      .then((res) => apply(res.data?.data, { texts: true }))
       .catch((err) => {
-        setLoadFailed(true);
-        showError(err.response?.data?.error || t('gallery.mine.loadError', 'No se pudo cargar tu exposición'));
+        // e.g. on behalf: «… ya gestiona su galería» (they accepted it).
+        setLoadError(err.response?.data?.error || t('gallery.mine.loadError', 'No se pudo cargar tu exposición'));
       });
-  }, [isArtist, auth, apply, showError, t]);
+  }, [allowed, base, auth, apply, t]);
 
   // Opening «Mi galería» = having seen the reviews.
-  useEffect(() => { if (feed.reviews.length) markReviewsSeen(); }, [feed.reviews.length, markReviewsSeen]);
+  useEffect(() => { if (!forUser && feed.reviews.length) markReviewsSeen(); }, [forUser, feed.reviews.length, markReviewsSeen]);
 
   const loadConversations = useCallback(() => {
     axiosInstance.get('/gallery/conversations', auth())
@@ -164,10 +177,10 @@ function MyGallery() {
     });
     setBusy(true);
     try {
-      let res = await axiosInstance.patch('/gallery/mine', { title, statement }, auth());
-      apply(res.data?.data);
+      let res = await axiosInstance.patch(base, { title, statement }, auth());
+      apply(res.data?.data, { texts: true });
       for (const w of titled) {
-        res = await axiosInstance.patch(`/gallery/mine/works/${w.id_work}`, { title: titleDrafts.current[w.id_work] }, auth());
+        res = await axiosInstance.patch(`${base}/works/${w.id_work}`, { title: titleDrafts.current[w.id_work] }, auth());
         apply(res.data?.data);
       }
       if (res.data?.success) showSuccess(res.data.success);
@@ -206,26 +219,27 @@ function MyGallery() {
 
   const addWork = async (file) => {
     if (!checkFile(file)) return;
-    if (await sendImage('new', '/gallery/mine/works', 'post', file, { title: newTitle.trim() })) setNewTitle('');
+    if (await sendImage('new', `${base}/works`, 'post', file, { title: newTitle.trim() })) setNewTitle('');
   };
 
-  const replace = (work, file) => { if (checkFile(file)) sendImage(work.id_work, `/gallery/mine/works/${work.id_work}`, 'patch', file, {}); };
-  const saveTitle = (work, value) => run(() => axiosInstance.patch(`/gallery/mine/works/${work.id_work}`, { title: value }, auth()));
+  const replace = (work, file) => { if (checkFile(file)) sendImage(work.id_work, `${base}/works/${work.id_work}`, 'patch', file, {}); };
+  const saveTitle = (work, value) => run(() => axiosInstance.patch(`${base}/works/${work.id_work}`, { title: value }, auth()));
   const remove = (work) => {
     if (!window.confirm(t('gallery.mine.confirmDelete', { title: workTitle(work, t), defaultValue: '¿Quitar «{{title}}» de tu exposición? No se puede deshacer.' }))) return;
-    run(() => axiosInstance.delete(`/gallery/mine/works/${work.id_work}`, auth()));
+    run(() => axiosInstance.delete(`${base}/works/${work.id_work}`, auth()));
   };
   const move = (index, d) => {
     const ids = data.works.map((w) => w.id_work);
     [ids[index], ids[index + d]] = [ids[index + d], ids[index]];
-    run(() => axiosInstance.patch('/gallery/mine/order', { ids }, auth()), { quiet: true });
+    run(() => axiosInstance.patch(`${base}/order`, { ids }, auth()), { quiet: true });
   };
 
   const unread = useMemo(() => (conversations || []).reduce((n, c) => n + c.unread, 0), [conversations]);
   const feedUnread = feed.messages.reduce((n, c) => n + c.unread, 0);
-  const hasPublished = data?.works?.some((w) => w.status_work === 'approved');
+  const hasPublished = !forUser && data?.works?.some((w) => w.status_work === 'approved');
+  const artistName = forUser?.name_user || data?.artist?.name_user || '';
 
-  if (!isArtist) {
+  if (!allowed) {
     return (
       <div className="gallery-page">
         <button type="button" className="gallery-back" onClick={navigateToGallery}><ArrowLeft size={18} /> {t('gallery.back', 'Volver a la galería')}</button>
@@ -238,14 +252,22 @@ function MyGallery() {
 
   return (
     <div className="gallery-page my-gallery">
-      <button type="button" className="gallery-back" onClick={navigateToGallery}>
-        <ArrowLeft size={18} aria-hidden="true" /> {t('gallery.back', 'Volver a la galería')}
-      </button>
+      {forUser ? (
+        <button type="button" className="gallery-back" onClick={() => navigateToAdmin('gallery')}>
+          <ArrowLeft size={18} aria-hidden="true" /> {t('gallery.forUser.back', 'Volver a Admin › Galería')}
+        </button>
+      ) : (
+        <button type="button" className="gallery-back" onClick={navigateToGallery}>
+          <ArrowLeft size={18} aria-hidden="true" /> {t('gallery.back', 'Volver a la galería')}
+        </button>
+      )}
       <header className="gallery-page__header">
         <div>
-          <h1>{t('gallery.mine.title', 'Mi galería')}</h1>
+          <h1>{forUser ? t('gallery.forUser.title', { name: artistName, defaultValue: 'Galería de {{name}}' }) : t('gallery.mine.title', 'Mi galería')}</h1>
           <p className="gallery-page__subtitle">
-            {t('gallery.mine.subtitle', 'Tu exposición en la Galería: un título, un texto breve y hasta quince obras.')}
+            {forUser
+              ? t('gallery.forUser.subtitle', 'La preparas en su nombre: un título, un texto breve y hasta quince obras, que no pasan por revisión.')
+              : t('gallery.mine.subtitle', 'Tu exposición en la Galería: un título, un texto breve y hasta quince obras.')}
           </p>
         </div>
         {hasPublished && (
@@ -257,7 +279,13 @@ function MyGallery() {
         )}
       </header>
 
-      <nav className="gallery-tabs" role="tablist">
+      {forUser && (
+        <p className="my-gallery__behalf" role="note">
+          {t('gallery.forUser.notice', { name: artistName, defaultValue: 'No se verá en la galería hasta que {{name}} acepte la invitación: entonces pasará a gestionarla. Si la rechaza, se borrará con sus obras.' })}
+        </p>
+      )}
+
+      {!forUser && <nav className="gallery-tabs" role="tablist">
         <button type="button" role="tab" aria-selected={tab === 'works'} className={`gallery-tab ${tab === 'works' ? 'is-active' : ''}`} onClick={() => setTab('works')}>
           {t('gallery.mine.tabWorks', 'Mi exposición')}
         </button>
@@ -265,20 +293,22 @@ function MyGallery() {
           <MessageCircle size={16} aria-hidden="true" /> {t('gallery.mine.tabMessages', 'Mensajes')}
           {(conversations ? unread : feedUnread) > 0 && <span className="gallery-badge">{conversations ? unread : feedUnread}</span>}
         </button>
-      </nav>
+      </nav>}
 
       {tab === 'works' && (!data ? (
-        <p className="gallery-page__empty">
-          {loadFailed ? t('gallery.mine.loadError', 'No se pudo cargar tu exposición') : t('common.states.loading', 'Cargando…')}
-        </p>
+        <p className="gallery-page__empty">{loadError || t('common.states.loading', 'Cargando…')}</p>
       ) : (
         <>
           <form id="exhibition-form" className="gallery-form" onSubmit={saveAll}>
             <div className="gallery-form__field">
               <label htmlFor="exhibition-title">{t('gallery.mine.exhibitionTitle', 'Título de la exposición')}</label>
               <input id="exhibition-title" type="text" value={title} maxLength={TITLE_MAX}
-                placeholder={currentUser?.name_user} onChange={(e) => setTitle(e.target.value)} />
-              <p className="gallery-form__hint">{t('gallery.mine.exhibitionTitleHint', 'Si lo dejas vacío, se llamará como tú.')}</p>
+                placeholder={forUser ? artistName : currentUser?.name_user} onChange={(e) => setTitle(e.target.value)} />
+              <p className="gallery-form__hint">
+                {forUser
+                  ? t('gallery.forUser.titleHint', { name: artistName, defaultValue: 'Si lo dejas vacío, se llamará como la o el artista: {{name}}.' })
+                  : t('gallery.mine.exhibitionTitleHint', 'Si lo dejas vacío, se llamará como tú.')}
+              </p>
             </div>
             <div className="gallery-form__field">
               <label htmlFor="exhibition-statement">{t('gallery.mine.statement', 'Texto de presentación')}</label>
@@ -303,7 +333,11 @@ function MyGallery() {
               <input ref={newFileRef} type="file" accept={IMAGE_TYPES.join(',')} className="gallery-sr" tabIndex={-1}
                 onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) addWork(f); }} />
               <p className="gallery-form__hint">{t('gallery.mine.fileHint', { max: IMAGE_MAX_MB, defaultValue: 'JPG, PNG, WebP, AVIF, GIF o TIFF, hasta {{max}} MB. Se guarda en formato WebP, a su tamaño en píxeles.' })}</p>
-              <p className="gallery-form__hint">{t('gallery.mine.reviewNote', 'Cada obra nueva o cambiada pasa por la revisión del equipo antes de verse en la galería.')}</p>
+              <p className="gallery-form__hint">
+                {forUser
+                  ? t('gallery.forUser.reviewNote', 'Las obras que subes tú no pasan por revisión.')
+                  : t('gallery.mine.reviewNote', 'Cada obra nueva o cambiada pasa por la revisión del equipo antes de verse en la galería.')}
+              </p>
             </div>
           ) : (
             <p className="my-work-new my-work-new--full">{t('gallery.mine.full', { max: data.works_max, defaultValue: 'Tu exposición ya tiene {{max}} obras: quita una para subir otra.' })}</p>
@@ -315,7 +349,7 @@ function MyGallery() {
                 <h2>{t('gallery.mine.works', 'Obras')}</h2>
                 <ul className="my-works__list">
                   {data.works.map((w, i) => (
-                    <WorkRow key={w.id_work} work={w} index={i} total={data.works.length} busy={busy} progress={uploads[w.id_work]}
+                    <WorkRow key={w.id_work} work={w} index={i} total={data.works.length} busy={busy} onBehalf={!!forUser} progress={uploads[w.id_work]}
                       onSaveTitle={saveTitle} onDraft={(id, value) => { titleDrafts.current[id] = value; }} onReplace={replace} onMove={move} onDelete={remove} />
                   ))}
                 </ul>
@@ -329,7 +363,7 @@ function MyGallery() {
         </>
       ))}
 
-      {tab === 'messages' && (
+      {tab === 'messages' && !forUser && (
         <section className="my-messages">
           {conversations === null ? (
             <p className="gallery-page__empty">{t('common.states.loading', 'Cargando…')}</p>

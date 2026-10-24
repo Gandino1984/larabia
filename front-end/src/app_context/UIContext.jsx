@@ -24,11 +24,13 @@ export const UIProvider = ({ children }) => {
   const [showTalleres, setShowTalleres] = useState(false);
   // The Galería: the exhibitions, one exhibition (galleryView.exhibitionId;
   // chat: open the chat with its artist), and the artist's own «Mi galería»
-  // (galleryView.tab: 'works' | 'messages', conversationId: one to open).
+  // (galleryView.tab: 'works' | 'messages', conversationId: one to open;
+  // forUser: { id_user, name_user } — a super admin preparing the gallery of
+  // someone invited, on their behalf).
   const [showGallery, setShowGallery] = useState(false);
   const [showExhibition, setShowExhibition] = useState(false);
   const [showMyGallery, setShowMyGallery] = useState(false);
-  const [galleryView, setGalleryView] = useState({ exhibitionId: null, chat: false, tab: 'works', conversationId: null });
+  const [galleryView, setGalleryView] = useState({ exhibitionId: null, chat: false, tab: 'works', conversationId: null, forUser: null });
   const [showWorkshopDetail, setShowWorkshopDetail] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
@@ -378,8 +380,8 @@ export const UIProvider = ({ children }) => {
     setShowExhibition(true);
   };
 
-  const navigateToMyGallery = ({ tab = 'works', conversationId = null } = {}) => {
-    setGalleryView((v) => ({ ...v, tab, conversationId }));
+  const navigateToMyGallery = ({ tab = 'works', conversationId = null, forUser = null } = {}) => {
+    setGalleryView((v) => ({ ...v, tab, conversationId, forUser }));
     resetAllViews();
     setShowMyGallery(true);
   };

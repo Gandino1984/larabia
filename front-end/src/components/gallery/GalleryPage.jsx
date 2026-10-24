@@ -2,11 +2,12 @@
 //
 // The Galería: the exhibitions of the neighbourhood's visual artists, each
 // with its works approved by the team (anyone sees them). Artists get «Mi
-// galería»; super admins invite artists and review the works (Admin ›
-// Galería, with the count of works waiting).
+// galería»; super admins invite artists, create galleries on an artist's
+// behalf (theirs once they accept) and review the works (Admin › Galería,
+// with the count of works waiting).
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Images, UserPlus, ClipboardCheck } from 'lucide-react';
+import { Images, UserPlus, ClipboardCheck, ImagePlus } from 'lucide-react';
 import axiosInstance from '../../utils/axiosConfig';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -24,6 +25,7 @@ function GalleryPage() {
   const photoOf = useAuthorPhoto();
   const [exhibitions, setExhibitions] = useState(null);
   const [inviting, setInviting] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -36,6 +38,12 @@ function GalleryPage() {
     setInviting(false);
     if (res?.emailSent === false) showInfo(res.success);
     else showSuccess(res?.success);
+  };
+  // A gallery prepared on the artist's behalf: open it to hang the works.
+  const onCreated = (res) => {
+    onInvited(res);
+    setCreating(false);
+    if (res?.data) navigateToMyGallery({ forUser: { id_user: res.data.id_user, name_user: res.data.name_user } });
   };
 
   return (
@@ -61,6 +69,10 @@ function GalleryPage() {
                 <button type="button" className="gallery-btn" onClick={() => setInviting(true)}>
                   <UserPlus size={18} aria-hidden="true" />
                   {t('gallery.invite.button', 'Invitar artista')}
+                </button>
+                <button type="button" className="gallery-btn" onClick={() => setCreating(true)}>
+                  <ImagePlus size={18} aria-hidden="true" />
+                  {t('gallery.create.button', 'Crear una galería')}
                 </button>
                 <button type="button" className="gallery-btn" onClick={() => navigateToAdmin('gallery')}>
                   <ClipboardCheck size={18} aria-hidden="true" />
@@ -109,6 +121,7 @@ function GalleryPage() {
       )}
 
       {inviting && <InviteArtistModal onClose={() => setInviting(false)} onInvited={onInvited} />}
+      {creating && <InviteArtistModal withGallery onClose={() => setCreating(false)} onInvited={onCreated} />}
     </div>
   );
 }
