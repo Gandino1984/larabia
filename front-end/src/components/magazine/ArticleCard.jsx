@@ -12,18 +12,12 @@ import { projectTypeLabel } from '../../utils/projectKinds';
 import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
 import { localDate } from '../../utils/locale';
 import './ArticleCard.css';
-
-// Resolve a user's avatar: Google users store a full URL, local uploads a filename.
-const resolveAuthorImage = (img) => {
-  if (!img) return null;
-  if (img.startsWith('http://') || img.startsWith('https://')) return img;
-  const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
-  return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
-};
+import { useAuthorPhoto } from '../../app_context/AuthorContext';
 
 function CardAuthorAvatar({ author }) {
   const [err, setErr] = useState(false);
-  const url = resolveAuthorImage(author?.image_user);
+  // Their author profile's photo first (as in «Autoras/es»), else the account image.
+  const url = useAuthorPhoto()(author);
   const avatar = (!url || err)
     ? <span className="card-author-avatar card-author-avatar--fallback">{author?.name_user?.charAt(0)?.toUpperCase() || '?'}</span>
     : <img src={url} alt={author.name_user} className="card-author-avatar" onError={() => setErr(true)} />;

@@ -18,10 +18,11 @@ import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useMagazine } from '../../app_context/MagazineContext';
+import { useAuthorPhoto } from '../../app_context/AuthorContext';
 import { canManageWorkshop } from '../../app_context/useWorkshopAccess';
 import LocationPicker from '../maps/LocationPicker';
 import { localDate, serverDate } from '../../utils/locale';
-import { toForm, toAuthors, toPayload, formDate, resolveAvatar, resolveCover } from './workshopForm';
+import { toForm, toAuthors, toPayload, formDate, resolveCover } from './workshopForm';
 import WorkshopAccessTag from './WorkshopAccessTag';
 import '../admin/ArticleEditorBlocks.css';
 import './WorkshopEditor.css';
@@ -36,6 +37,8 @@ const whenOf = (w) => {
 
 function WorkshopEditor() {
   const { t } = useTranslation();
+  // Talleristas' photos: their author profile's first (as in «Autoras/es»).
+  const photoOf = useAuthorPhoto();
   const {
     workshopEditor, navigateToTalleres, navigateToWorkshopDetail, navigateToAdmin
   } = useUI();
@@ -446,7 +449,7 @@ function WorkshopEditor() {
           {authors.length === 0 && <span className="pub-step-hint">{t('workshops.editor.noHosts', 'Sin talleristas todavía.')}</span>}
           {authors.map((a) => (
             <span key={a.id_user} className="workshop-editor__host">
-              {resolveAvatar(a.image_user) ? <img src={resolveAvatar(a.image_user)} alt="" /> : <User size={14} />}
+              {photoOf(a) ? <img src={photoOf(a)} alt="" /> : <User size={14} />}
               <span>{a.name_user}</span>
               <button type="button" onClick={() => removeAuthor(a.id_user)} aria-label={t('workshops.form.removeHost', 'Quitar')} title={t('workshops.form.removeHost', 'Quitar')}>
                 <X size={14} />

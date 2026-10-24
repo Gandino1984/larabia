@@ -14,6 +14,7 @@ import { categoryLabel } from '../../utils/articleFilters';
 import { localDate } from '../../utils/locale';
 import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
 import './HomePage.css';
+import { useAuthorPhoto } from '../../app_context/AuthorContext';
 
 function AuthorAvatar({ author, getUrl }) {
   const [imgError, setImgError] = useState(false);
@@ -316,13 +317,8 @@ function HomePage({ ready = true }) {
     });
   };
 
-  const getAuthorImageUrl = (author) => {
-    const img = author?.image_user;
-    if (!img) return null;
-    if (img.startsWith('http://') || img.startsWith('https://')) return img;
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
-    return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
-  };
+  // Their author profile's photo first (as in «Autoras/es»), else the account image.
+  const getAuthorImageUrl = useAuthorPhoto();
 
   const getCoverImageUrl = (article) => {
     const cover = article?.cover_image_article;

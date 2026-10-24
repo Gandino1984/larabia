@@ -33,7 +33,7 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
   - a **comic** (a horizontal reader whose panels can be images, links, audio, embeds or soundscapes, with panel-by-panel navigation, saved reading progress and full screen); in the creator, each panel shows the percentage of its image while it uploads;
   - a **micro-profile**;
   - a **soundscape** (*paisaje sonoro*, a drawing that moves with a sound).
-- **Authors:** the directory of author profiles, in alphabetical order with a search bar (by name or specialty, ignoring case and accents), and each author's publications.
+- **Authors:** the directory of author profiles, in alphabetical order with a search bar (by name or specialty, ignoring case and accents), and each author's publications. An author's photo is their profile's own photo (else their account image) everywhere: the directory, the avatars next to their name and their card.
 - **Workshops:**
   - The cards are public.
   - **Sharing:** anyone, with or without an account, can copy a workshop's link from its ⋯ menu («Compartir»), as with articles. The link opens the workshop page for someone signed in; signed out, it shows that workshop's card in Talleres (ringed in gold, in its tab, past workshops included) with a note to sign in, and the page opens once they have.

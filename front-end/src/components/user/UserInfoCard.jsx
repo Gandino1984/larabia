@@ -10,7 +10,9 @@ import { useSubscription } from '../../app_context/SubscriptionContext';
 import '../common/SubscriberMark.css';
 import './UserInfoCard.css';
 
-const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
+// imageUrl: the photo to show instead of the account image (an author's
+// profile photo — App, the author card).
+const UserInfoCard = ({ user, imageUrl: photoUrl, bioText, onClose, isOwner, onLogout }) => {
   const { t } = useTranslation();
   const [showActionsPopup, setShowActionsPopup] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -53,7 +55,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
   const handleImageClick = () => {
     if (isOwner) {
       setShowActionsPopup(!showActionsPopup);
-    } else if (user?.image_user) {
+    } else if (displayImageUrl) {
       setShowImageModal(true);
     }
   };
@@ -68,7 +70,7 @@ const UserInfoCard = ({ user, bioText, onClose, isOwner, onLogout }) => {
     fileInputRef.current?.click();
   };
 
-  const imageUrl = getImageUrl(user?.image_user);
+  const imageUrl = photoUrl || getImageUrl(user?.image_user);
   const displayImageUrl = localImageUrl || imageUrl;
 
   return createPortal(

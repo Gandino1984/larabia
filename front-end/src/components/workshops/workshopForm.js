@@ -7,12 +7,6 @@ import { serverDate } from '../../utils/locale';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
-export const resolveAvatar = (img) => {
-  if (!img) return null;
-  if (img.startsWith('http://') || img.startsWith('https://')) return img;
-  return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
-};
-
 export const resolveCover = (img) => {
   if (!img) return null;
   if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('blob:')) return img;

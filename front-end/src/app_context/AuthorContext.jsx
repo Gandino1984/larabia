@@ -1,9 +1,11 @@
 // magazine-front/src/app_context/AuthorContext.jsx
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import i18n from '../i18n/config';
 import axiosInstance from '../utils/axiosConfig';
 import { useUI } from './UIContext';
 import { useAuth } from './AuthContext';
+
+const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
 const AuthorContext = createContext();
 
@@ -278,8 +280,41 @@ export const AuthorProvider = ({ children }) => {
     }
   }, [showSuccess, showError, fetchAllProfiles]);
 
+  // An author's photo, the one «Autoras/es» shows: their profile's own photo
+  // (uploaded in the profile editor), else their account image. Avatars next
+  // to names and the author card used only the account image, so an author
+  // whose photo is only on the profile (Sidd Joag) showed none there.
+  // The published profiles from the start, quietly (no error card): the
+  // avatars next to names use their photos — they used to load only when a
+  // page asked for them (Autoras/es, a search, the author card).
+  useEffect(() => {
+    axiosInstance.get('/author-profile')
+      .then((res) => {
+        if (!res.data?.error) setAuthorProfiles((prev) => (prev.length ? prev : res.data.data || []));
+      })
+      .catch(() => { /* the avatars fall back to the account images */ });
+  }, []);
+
+  const profilePhotoByUser = useMemo(() => {
+    const byUser = new Map();
+    for (const p of authorProfiles) {
+      if (p.profile_image) byUser.set(String(p.user_id), `${apiUrl}/uploads/author-profiles/${encodeURIComponent(p.profile_image)}`);
+    }
+    return byUser;
+  }, [authorProfiles]);
+  const authorPhotoOf = useCallback((person) => {
+    if (!person) return null;
+    const own = person.id_user != null ? profilePhotoByUser.get(String(person.id_user)) : null;
+    if (own) return own;
+    const img = person.image_user;
+    if (!img) return null;
+    if (img.startsWith('http://') || img.startsWith('https://')) return img;
+    return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
+  }, [profilePhotoByUser]);
+
   const value = {
     authorProfiles,
+    authorPhotoOf,
     allProfilesAdmin,
     editorUsers,
     featuredProfiles,
@@ -312,5 +347,8 @@ export const useAuthor = () => {
   }
   return context;
 };
+
+// The photo to show for a person credited as author (see authorPhotoOf).
+export const useAuthorPhoto = () => useAuthor().authorPhotoOf;
 
 export default AuthorContext;

@@ -33,7 +33,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
   - un **cómic** (lector horizontal con paneles que pueden ser imagen, enlace, audio, incrustado o paisaje sonoro; navegación panel a panel, progreso de lectura guardado y pantalla completa); en el creador, cada panel muestra el porcentaje de su imagen mientras se sube;
   - un **micro-perfil**;
   - un **paisaje sonoro** (un dibujo que se mueve con un sonido).
-- **Autoras/es:** el directorio de perfiles, en orden alfabético y con buscador (por nombre o especialidad, sin importar mayúsculas ni tildes), y las publicaciones de cada persona.
+- **Autoras/es:** el directorio de perfiles, en orden alfabético y con buscador (por nombre o especialidad, sin importar mayúsculas ni tildes), y las publicaciones de cada persona. La foto de una autora o autor es la de su perfil (si no tiene, la de su cuenta) en todas partes: el directorio, el avatar junto a su nombre y su tarjeta.
 - **Talleres:**
   - Las tarjetas son públicas.
   - **Compartir:** cualquiera, con cuenta o sin ella, copia el enlace de un taller desde su menú ⋯ («Compartir»), como con los artículos. El enlace abre la página del taller a quien tiene la sesión iniciada; sin sesión, muestra la tarjeta de ese taller en Talleres (con un borde dorado, en su pestaña, aunque ya haya pasado) y una nota para iniciar sesión, y la página se abre en cuanto la inicia.

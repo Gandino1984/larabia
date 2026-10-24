@@ -7,6 +7,7 @@
 // fallback to light or dark backgrounds; the name inherits the text color.
 import { useState } from 'react';
 import { useUI } from '../../app_context/UIContext';
+import { useAuthorPhoto } from '../../app_context/AuthorContext';
 import './AuthorChip.css';
 import SubscriberMark from './SubscriberMark';
 
@@ -23,7 +24,8 @@ function AuthorChip({ author, name, clickable = true, tone = 'light' }) {
   const { openAuthorCard } = useUI();
   const [imgError, setImgError] = useState(false);
   const displayName = author?.name_user || name || '';
-  const url = getAuthorImageUrl(author);
+  // Their author profile's photo first (as in «Autoras/es»), else the account image.
+  const url = useAuthorPhoto()(author);
   const canOpen = clickable && !!author?.id_user;
 
   const open = (e) => {

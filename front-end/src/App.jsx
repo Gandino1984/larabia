@@ -42,7 +42,7 @@ import './App.css';
 function App() {
   const { showHome, showArticleDetail, showArticlesList, showProjectsList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, showSuccess, showError, authorCardUser, closeAuthorCard } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
-  const { authorProfiles, fetchAllProfiles } = useAuthor();
+  const { authorProfiles, fetchAllProfiles, authorPhotoOf } = useAuthor();
   const { currentUser, setUser, loading: authLoading } = useAuth();
   const { fetchWorkshopById, setFocusWorkshopId } = useWorkshop();
   const { isLoading, progress } = usePreloader();
@@ -266,6 +266,7 @@ function App() {
       {authorCardUser && (
         <UserInfoCard
           user={authorCardResolvedUser}
+          imageUrl={authorPhotoOf(authorCardResolvedUser)}
           bioText={authorCardBio}
           onClose={closeAuthorCard}
           isOwner={false}

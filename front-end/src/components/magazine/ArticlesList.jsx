@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
+import { useAuthorPhoto } from '../../app_context/AuthorContext';
 import { Calendar, User, ArrowLeft, ChevronLeft, ChevronRight, LayoutGrid, GalleryHorizontal, Library, Search, X } from 'lucide-react';
 import ArticleEngagementBar from './ArticleEngagementBar';
 import { useDragScroll } from '../../hooks/useDragScroll';
@@ -24,16 +25,10 @@ const ARTICLES_PER_PAGE = 9;
 
 const normalize = (s) => s?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') ?? '';
 
-function getAuthorImageUrl(author) {
-  const img = author?.image_user;
-  if (!img) return null;
-  if (img.startsWith('http://') || img.startsWith('https://')) return img;
-  return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
-}
-
 function AuthorAvatar({ author }) {
   const [imgError, setImgError] = useState(false);
-  const url = getAuthorImageUrl(author);
+  // Their author profile's photo first (as in «Autoras/es»), else the account image.
+  const url = useAuthorPhoto()(author);
   const avatar = (!url || imgError) ? (
     <span className="list-author-avatar list-author-avatar--fallback">
       {author.name_user?.charAt(0)?.toUpperCase() || '?'}
