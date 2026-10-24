@@ -143,8 +143,8 @@ function HomePage({ ready = true }) {
       scrollOverlayShown = true;
       setScrollOverlay(true);
       const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-      // On screen 3 s on a computer, 3.5 s on a phone.
-      hideT = setTimeout(hideOverlay, isDesktop ? 3000 : 3500);
+      // On screen 2.5 s on a computer, 3 s on a phone.
+      hideT = setTimeout(hideOverlay, isDesktop ? 2500 : 3000);
     }, 1500);
     const dismiss = () => { clearTimeout(hideT); hideOverlay(); };
     window.addEventListener('wheel', dismiss, { passive: true });
