@@ -44,6 +44,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 - **Espacio abierto:** las propuestas literarias que publica la revista. Cualquier persona con cuenta (no hace falta ser socio/a) puede enviar la suya con un formulario y seguir allí su estado.
 - **Interacción:** me gusta, favoritos, comentarios y seguir proyectos.
 - **Avisos** en la campana de la cabecera: contenido nuevo, invitaciones, respuestas y hacerse socio/a.
+- **Barra superior:** la campana va justo después de la foto de perfil; «Publica» (editoras/es en adelante) es lo último de la barra (en el móvil, un icono a la izquierda del menú). El selector de idioma está fuera de la barra, arriba a la derecha, así que se ve incluso donde la barra se oculta (un artículo); en el móvil está en el menú.
 - **Formulario de contacto** y **newsletter** («Recomendaciones»):
   - Las cuentas nuevas (al entrar con Google por primera vez) la reciben; la página de inicio de sesión lo avisa. Cualquiera la activa o la quita desde «Recomendaciones».
   - Cada newsletter lleva un enlace «Darme de baja» de un clic que funciona sin iniciar sesión, y una cabecera `List-Unsubscribe` para el botón propio del programa de correo (un token aleatorio por persona, `user.newsletter_token`, que nunca llega al front-end).

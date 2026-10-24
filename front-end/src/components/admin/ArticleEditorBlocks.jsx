@@ -246,7 +246,7 @@ function ArticleEditorBlocks() {
 
   // Load selected article for editing when editor opens via Edit button from ArticleDetail
   // openEditorToEdit flag ensures this only triggers when coming from an explicit Edit action,
-  // not when the editor is opened to create a new article (FloatingEditorButton, Header, etc.)
+  // not when the editor is opened to create a new article (the header's «Publica», etc.)
   useEffect(() => {
     if (showEditor && selectedArticle && !editingArticle && openEditorToEdit) {
       setEditingArticle(selectedArticle);

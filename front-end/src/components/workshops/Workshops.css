@@ -760,3 +760,10 @@
 @media (prefers-reduced-motion: reduce) {
   .workshop-card.is-shared { animation: none; }
 }
+
+/* From tablets up the language picker sits just below the header bar's
+   right end (FloatingLanguage): start a little lower so it never covers the
+   page's own buttons on the right («Crear taller», the ⋯ options). */
+@media (min-width: 768px) {
+  .workshops-page { padding-top: 10.5rem; }
+}

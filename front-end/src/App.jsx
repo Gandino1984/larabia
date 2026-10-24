@@ -10,7 +10,7 @@ import { usePreloader } from './hooks/usePreloader';
 import axiosInstance from './utils/axiosConfig';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import FloatingEditorButton from './components/layout/FloatingEditorButton';
+import FloatingLanguage from './components/layout/FloatingLanguage';
 import SubscribeButton from './components/layout/SubscribeButton';
 import AnimatedView from './components/layout/AnimatedView';
 import HomePage from './components/magazine/HomePage';
@@ -250,7 +250,11 @@ function App() {
 
       <div className={appClassName}>
         {!isPreview && !showEditor && !showAuthorEditor && !showWorkshopEditor && !isFullscreen && <Header ready={appReady} />}
-        {!isPreview && <FloatingEditorButton ready={appReady} />}
+        {/* The language picker, outside the bar (computers and tablets) — also
+            on an article, where the bar hides. */}
+        {!isPreview && !showEditor && !showAuthorEditor && !showWorkshopEditor && !isFullscreen && (
+          <FloatingLanguage ready={appReady} cornered={showArticleDetail} />
+        )}
         {!isPreview && <SubscribeButton ready={appReady} />}
         {!isPreview && <CardDisplay />}
         <main className="main-content">

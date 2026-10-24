@@ -15,9 +15,8 @@ import { usePendingReview } from '../../app_context/PendingReviewContext';
 import { useNotifications } from '../../app_context/NotificationContext';
 import { useNavActions } from '../../app_context/navActions';
 import { navLabel, canSeeNavItem } from '../../app_context/navConfig';
-import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, Globe, Shield, Bell, ArrowLeft } from 'lucide-react';
+import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, Globe, Shield, Bell, ArrowLeft, Edit } from 'lucide-react';
 import UserInfoCard from '../user/UserInfoCard';
-import LanguageSelector from './LanguageSelector';
 import NavGroupDropdown from './NavGroupDropdown';
 import SpringDropdown from './SpringDropdown';
 import RollText from '../common/RollText';
@@ -417,8 +416,10 @@ function Header({ ready = true }) {
   // The notifications bell + dropdown. Rendered in two spots (only one visible
   // per breakpoint via CSS): next to the burger on mobile, and inside the
   // desktop nav (between "Más" and the language selector) on desktop.
-  const renderNotifBell = (variant) => currentUser && (
-    <div className={`notif-wrapper notif-wrapper--${variant}`}>
+  // The bell: right after the profile photo, on phones too (it used to sit
+  // by the burger there).
+  const renderNotifBell = () => currentUser && (
+    <div className="notif-wrapper">
       <button
         className="notif-bell-btn"
         onClick={() => { if (showNotifications) markAllSeen(); setShowNotifications(v => !v); }}
@@ -514,7 +515,6 @@ function Header({ ready = true }) {
           </div>
 
           <div className="header-user-section">
-            {renderNotifBell('mobile')}
             {currentUser ? (
               <button className="user-info-btn" onClick={handleUserClick} title={currentUser.name_user}>
                 {userImageUrl && !imageLoadError ? (
@@ -535,7 +535,7 @@ function Header({ ready = true }) {
                 <User size={20} />
               </button>
             )}
-            {renderNotifBell('desktop')}
+            {renderNotifBell()}
           </div>
         </div>
 
@@ -701,12 +701,35 @@ function Header({ ready = true }) {
             </button>
           )}
 
-          <LanguageSelector />
+          {/* Publish (editors and up) — where the language picker was; that
+              one is now outside the bar (FloatingLanguage, App.jsx). */}
+          {canCreateContent && (
+            <button
+              type="button"
+              className="nav-publish-btn"
+              onClick={navigateToEditor}
+              title={t('header.user.createArticle')}
+            >
+              <Edit size={17} aria-hidden="true" />
+              <RollText text={t('floatingEditor.label', 'Publica')} />
+            </button>
+          )}
 
         </nav>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation: publish (editors and up), then the burger. */}
         <div className="mobile-nav">
+          {canCreateContent && (
+            <button
+              type="button"
+              className="mobile-publish-btn"
+              onClick={() => { setIsMobileMenuOpen(false); navigateToEditor(); }}
+              title={t('header.user.createArticle')}
+              aria-label={t('floatingEditor.label', 'Publica')}
+            >
+              <Edit size={20} aria-hidden="true" />
+            </button>
+          )}
           <button
             className={`burger-menu-btn ${isMobileMenuOpen ? 'is-open' : ''}`}
             onClick={toggleMobileMenu}

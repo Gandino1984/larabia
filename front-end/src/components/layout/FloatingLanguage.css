@@ -1,0 +1,70 @@
+/* The language picker outside the header bar (FloatingLanguage). Phones: not
+   shown (it's in the burger menu). From 768px it's a light pill lined up with
+   the bar — 95% wide (max 1200px), centered, 1.25rem from the top, its height
+   in --header-bar-h (measured in Header.jsx):
+   - up to 1409px: just below the bar, at its right end (mirroring the red
+     «Hazte socio/a» button on the left, SubscribeButton.css);
+   - from 1410px: beside the bar on the right, centered on its axis;
+   - bar hidden (an article): in the top-right corner of the screen.
+   Below the header (1000) so the bar's own dropdowns open over it. */
+.floating-lang {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .floating-lang {
+    display: block;
+    position: fixed;
+    top: calc(1.25rem + var(--header-bar-h, var(--header-h)) + 0.5rem);
+    right: max(1%, calc((100% - 1200px) / 2));
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.45s ease, top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .floating-lang.is-in {
+    opacity: 1;
+  }
+
+  .floating-lang--corner {
+    top: 1.25rem;
+    right: 1rem;
+  }
+
+  .floating-lang .language-selector-btn {
+    min-height: 48px;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: lightgray;
+    color: #1a1a1a;
+    font-weight: 700;
+  }
+
+  .floating-lang .language-selector-btn:hover,
+  .floating-lang .language-selector-btn:focus-visible {
+    background: #000000;
+    color: #ffffff;
+  }
+}
+
+@media (min-width: 1410px) {
+  .floating-lang:not(.floating-lang--corner) {
+    top: calc(1.25rem + var(--header-bar-h, var(--header-h)) / 2);
+    right: auto;
+    left: calc(50% + 600px + 1rem);
+    transform: translateY(-50%);
+  }
+
+  /* Beside the bar, its menu opens to the right (to the left it would go
+     under the bar). */
+  .floating-lang:not(.floating-lang--corner) .language-dropdown {
+    right: auto;
+    left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-lang {
+    transition: none;
+  }
+}

@@ -40,7 +40,8 @@
 @media (prefers-reduced-motion: reduce) {
   .roll__line { transition: none; }
   .nav-link:hover .roll__line,
-  .more-dropdown-btn:hover .roll__line { transform: none; }
+  .more-dropdown-btn:hover .roll__line,
+  .nav-publish-btn:hover .roll__line { transform: none; }
 }
 
 /* Floating Header Container - Mobile Base */
@@ -375,6 +376,67 @@
 .burger-menu-btn:hover {
   background: #000000;
   color: #ffffff;
+}
+
+/* «Publica» on phones: an icon button just left of the burger, same look. */
+.mobile-publish-btn {
+  background: none;
+  border: none;
+  color: var(--color-header-text, #ffffff);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  min-width: 44px;
+}
+.header-bar.active .mobile-publish-btn {
+  color: var(--color-header-text-active, #000000);
+}
+.mobile-publish-btn:hover,
+.header-bar.active .mobile-publish-btn:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+/* «Publica» on computers: the last item of the bar's menu, a pill that stands
+   out from the links (light on the dark bar, dark on the light one). */
+.nav-publish-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0.4rem 0.95rem;
+  border: 2px solid var(--color-header-text, #ffffff);
+  border-radius: 999px;
+  background: var(--color-header-text, #ffffff);
+  color: var(--color-header-bg, #000000);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+.nav-publish-btn:hover,
+.nav-publish-btn:focus-visible {
+  background: transparent;
+  color: var(--color-header-text, #ffffff);
+}
+.header-bar.active .nav-publish-btn {
+  border-color: var(--color-header-text-active, #000000);
+  background: var(--color-header-text-active, #000000);
+  color: var(--color-header-bg-active, #ffffff);
+}
+.header-bar.active .nav-publish-btn:hover,
+.header-bar.active .nav-publish-btn:focus-visible {
+  background: transparent;
+  color: var(--color-header-text-active, #000000);
+}
+.nav-publish-btn:hover .roll__line {
+  transform: translateY(-100%);
 }
 
 .header-bar.active .burger-menu-btn:hover {
@@ -1520,14 +1582,8 @@
 }
 
 /* ---- Notification bell + dropdown ---- */
+/* Right after the profile photo, at every width. */
 .notif-wrapper { position: relative; display: inline-flex; align-items: center; }
-/* The desktop bell (in the nav) is hidden on mobile; the mobile bell (next to
-   the burger) is hidden on desktop. */
-.notif-wrapper--desktop { display: none; }
-@media (min-width: 768px) {
-  .notif-wrapper--mobile { display: none; }
-  .notif-wrapper--desktop { display: inline-flex; }
-}
 /* Mirror .user-info-btn so the bell adapts to the header's active (white) state. */
 .notif-bell-btn {
   position: relative;
@@ -1548,20 +1604,6 @@
 .header-bar.active .notif-bell-btn { color: var(--color-header-text-active, #000000); }
 .header-bar.active .notif-bell-btn:hover { background: #000000; color: #ffffff; }
 
-/* Mobile: move the bell to the right side, just left of the burger button. */
-@media (max-width: 767px) {
-  .header-bar { position: relative; }
-  /* Center vertically with margin (not transform) — a transformed ancestor
-     would make the fixed dropdown position relative to the bell instead of the
-     viewport, causing it to overflow off-screen. */
-  .header-user-section .notif-wrapper {
-    position: absolute;
-    top: 50%;
-    margin-top: -22px;
-    right: calc(44px + 0.5rem);
-    z-index: 6;
-  }
-}
 .notif-badge {
   position: absolute;
   top: -2px;
@@ -1595,8 +1637,8 @@
   overflow: hidden;
 }
 
-/* On mobile the bell sits on the right, so pin the dropdown to the viewport
-   across the whole mobile range so it never overflows the edges. */
+/* On phones the dropdown is pinned to the viewport (full width) so it never
+   overflows the edges. */
 @media (max-width: 767px) {
   .notif-dropdown {
     position: fixed;
