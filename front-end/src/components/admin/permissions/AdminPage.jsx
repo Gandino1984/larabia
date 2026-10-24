@@ -11,6 +11,7 @@ import AdminMetadataTab from './AdminMetadataTab';
 import AdminAppearanceTab from './AdminAppearanceTab';
 import AdminNavTab from './AdminNavTab';
 import AdminWorkshopsTab from './AdminWorkshopsTab';
+import AdminGalleryTab from './AdminGalleryTab';
 import './AdminPage.css';
 
 const TABS = [
@@ -20,6 +21,7 @@ const TABS = [
   { key: 'hero', label: 'Portada' },
   { key: 'metadata', label: 'Datos de la revista' },
   { key: 'workshops', label: 'Talleres' },
+  { key: 'gallery', label: 'Galería' },
   { key: 'appearance', label: 'Apariencia' },
   { key: 'navigation', label: 'Navegación' }
   // labels: admin.tabs.<key> (Spanish here as the default)
@@ -29,7 +31,7 @@ function AdminPage() {
   const { t } = useTranslation();
   const { isSuperAdmin } = useAuth();
   const { navigateToHome, adminTab } = useUI();
-  const { totalPending, newProposals } = usePendingReview();
+  const { totalPending, newProposals, galleryPending } = usePendingReview();
   const [activeTab, setActiveTab] = useState(adminTab || 'users');
 
   if (!isSuperAdmin) {
@@ -67,6 +69,9 @@ function AdminPage() {
             {tab.key === 'proposals' && newProposals > 0 && (
               <span className="admin-page__tab-badge">{newProposals}</span>
             )}
+            {tab.key === 'gallery' && galleryPending > 0 && (
+              <span className="admin-page__tab-badge">{galleryPending}</span>
+            )}
           </button>
         ))}
       </nav>
@@ -78,6 +83,7 @@ function AdminPage() {
         {activeTab === 'hero' && <AdminHeroTab />}
         {activeTab === 'metadata' && <AdminMetadataTab />}
         {activeTab === 'workshops' && <AdminWorkshopsTab />}
+        {activeTab === 'gallery' && <AdminGalleryTab />}
         {activeTab === 'appearance' && <AdminAppearanceTab />}
         {activeTab === 'navigation' && <AdminNavTab />}
       </main>

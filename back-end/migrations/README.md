@@ -57,8 +57,9 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `024` | `magazine_articles.featured_order` |
 | `025` | `user.newsletter_token` (unique) |
 | `026` | `user.author_invite_email_sent_at` |
+| `027` | `user.is_artist`, `artist_invite_status`, `artist_invited_by`, `artist_invited_at`, `artist_invite_email_sent_at` |
 
-The tables of `009`, `010`, `011`, `014`, `015`, `020` and `023` are created at boot with Sequelize `sync()` when missing. The SQL files stay the reference for a fresh database.
+The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are created at boot with Sequelize `sync()` when missing (the gallery's in order, as they reference each other). The SQL files stay the reference for a fresh database.
 
 ## Tables
 
@@ -85,6 +86,10 @@ The tables of `009`, `010`, `011`, `014`, `015`, `020` and `023` are created at 
 | `project_subscriptions` | Readers following a project |
 | `reader_subscriptions` | Paid subscriptions (Stripe customer and subscription) |
 | `open_space_proposals` | Literary proposals sent from Espacio abierto (text or a private file in `uploads/proposals/`, status) |
+| `gallery_exhibitions` | The Galería: one exhibition per visual artist (title, short text) |
+| `gallery_works` | Its works (≤ 7): image in `uploads/gallery/`, title, size in pixels, order, review status |
+| `gallery_conversations` | Artist ↔ visitor conversations (each side's last read) |
+| `gallery_messages` | Their messages |
 
 ## Differences from uribarri.online
 

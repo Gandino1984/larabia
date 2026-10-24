@@ -8,6 +8,7 @@ import './AdminUsersTab.css';
 const ROLES = [
   { key: 'is_editor', i18n: 'editor', label: 'Editor', help: 'Puede crear artículos y enviarlos para aprobación.' },
   { key: 'is_premium_reader', i18n: 'premium', label: 'Premium', help: 'Puede leer artículos marcados como premium.' },
+  { key: 'is_artist', i18n: 'artist', label: 'Artista', help: 'Monta su exposición en la Galería (también por invitación, desde la Galería).' },
   { key: 'is_super_admin', i18n: 'superAdmin', label: 'Super admin', help: 'Control total. Concede con cuidado.' }
 ];
 

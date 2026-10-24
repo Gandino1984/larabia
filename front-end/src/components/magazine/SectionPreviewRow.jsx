@@ -25,7 +25,9 @@ function PreviewCard({ item, onClick }) {
             ? t('sectionPreviews.project')
             : item.kind === 'workshop'
               ? t('sectionPreviews.workshop')
-              : t('sectionPreviews.article')}
+              : item.kind === 'exhibition'
+                ? t('sectionPreviews.exhibition', 'Exposición')
+                : t('sectionPreviews.article')}
         </span>
       </div>
 

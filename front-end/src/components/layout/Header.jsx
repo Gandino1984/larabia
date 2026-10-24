@@ -60,7 +60,7 @@ function Header({ ready = true }) {
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { totalAttention } = usePendingReview();
   const { notifications, count: notifCount, markAllSeen } = useNotifications();
-  const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, showProjectsList, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, showRecommendationsModal, closeRecommendationsModal, navigateToAuthorProfile } = useUI();
+  const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, showProjectsList, showGallery, showExhibition, showMyGallery, navigateToGallery, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, showRecommendationsModal, closeRecommendationsModal, navigateToAuthorProfile } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
   const { metadata, resolveLogoUrl } = useMetadata();
@@ -256,7 +256,8 @@ function Header({ ready = true }) {
   const handleHeaderBack = () => {
     if (showProjectDetail) { navigateBackFromProject(); return; }
     if (showWorkshopDetail) { navigateToTalleres(); return; }
-    if (showArticlesList || showTalleres || showProjectsList) { navigateToHome(); return; }
+    if (showArticlesList || showTalleres || showProjectsList || showGallery) { navigateToHome(); return; }
+    if (showExhibition || showMyGallery) { navigateToGallery(); return; }
     navigateBack();
   };
 

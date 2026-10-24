@@ -34,7 +34,7 @@ export const DEFAULT_NAV = [
           { id: 'microabierto', kind: 'link', visible: true, min_role: 'all',
             label: { es: 'Espacio abierto', en: 'Open space', eu: 'Gune irekia' }, action: { type: 'section', value: 'openmic' } },
           { id: 'galeria', kind: 'link', visible: true, min_role: 'all',
-            label: { es: 'Galería', en: 'Gallery', eu: 'Galeria' }, action: { type: 'category', value: 'galeria' } },
+            label: { es: 'Galería', en: 'Gallery', eu: 'Galeria' }, action: { type: 'section', value: 'gallery' } },
           { id: 'infantil', kind: 'link', visible: true, min_role: 'all',
             label: { es: 'Infantil', en: 'Kids', eu: 'Haurrak' }, action: { type: 'category', value: 'infantil' } }
         ] },
@@ -73,6 +73,7 @@ export const SECTION_OPTIONS = [
   { value: 'openmic', key: 'admin.nav.section.openmic', label: 'Espacio abierto' },
   { value: 'microperfiles', key: 'admin.nav.section.microperfiles', label: 'Micro-perfiles' },
   { value: 'talleres', key: 'admin.nav.section.talleres', label: 'Talleres' },
+  { value: 'gallery', key: 'admin.nav.section.gallery', label: 'Galería' },
   { value: 'about', key: 'admin.nav.section.about', label: 'Sobre La Rabia' }
 ];
 

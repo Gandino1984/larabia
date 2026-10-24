@@ -17,6 +17,7 @@ import { WorkshopProvider } from './app_context/WorkshopContext.jsx';
 import { EngagementProvider } from './app_context/EngagementContext.jsx';
 import { SubscriptionProvider } from './app_context/SubscriptionContext.jsx';
 import { AuthorInvitationProvider } from './app_context/AuthorInvitationContext.jsx';
+import { GalleryProvider } from './app_context/GalleryContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -32,9 +33,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                       <EngagementProvider>
                         <SubscriptionProvider>
                           <AuthorInvitationProvider>
-                            <NotificationProvider>
-                              <App />
-                            </NotificationProvider>
+                            <GalleryProvider>
+                              <NotificationProvider>
+                                <App />
+                              </NotificationProvider>
+                            </GalleryProvider>
                           </AuthorInvitationProvider>
                         </SubscriptionProvider>
                       </EngagementProvider>

@@ -120,6 +120,30 @@ const user_model = sequelize.define("user", {
     author_invite_email_sent_at: {
         type: DataTypes.DATE,
         allowNull: true
+    },
+    // Visual artist (the Galería, migration 027): hangs an exhibition. Granted
+    // by a super admin's invitation (gallery_api_controller), like authors.
+    is_artist: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    artist_invite_status: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+        comment: 'pending | accepted | declined — null: never invited'
+    },
+    artist_invited_by: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: true
+    },
+    artist_invited_at: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    artist_invite_email_sent_at: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
 }, {
     timestamps: false,

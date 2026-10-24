@@ -8,12 +8,14 @@
 // a single tag/type or combines several (e.g. "Barrio").
 //
 // Extensible: add more entries to PREVIEW_SECTIONS as we build out the buttons.
-import { useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useMemo, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useUI } from '../../app_context/UIContext';
 import SectionPreviewRow from './SectionPreviewRow';
+import axiosInstance from '../../utils/axiosConfig';
+import { exhibitionTitle } from '../gallery/galleryUtils';
 import { inSection } from '../../utils/sections';
 import './SectionPreviews.css';
 
@@ -47,6 +49,8 @@ const PREVIEW_SECTIONS = [
     matchProject: (p) => inAnySection(p, BARRIO_SECTIONS),
     matchArticle: (a) => BARRIO_CATEGORIES.includes(norm(a.category_article)) || inAnySection(a, BARRIO_SECTIONS),
     includeWorkshops: true,
+    // The Galería's exhibitions (Galería is under Barrio in the menu).
+    includeExhibitions: true,
   },
   {
     id: 'no-ficcion',
@@ -61,12 +65,14 @@ function SectionPreviews() {
   const { t } = useTranslation();
   const { projects, allArticles, fetchProjects, setSelectedArticle, fetchArticleById, setSelectedProject } = useMagazine();
   const { workshops, fetchWorkshops, setSelectedWorkshop } = useWorkshop();
-  const { navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail } = useUI();
+  const { navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToExhibition } = useUI();
+  const [exhibitions, setExhibitions] = useState([]);
 
   // Projects and workshops aren't loaded by default on the home page; fetch once.
   useEffect(() => {
     fetchProjects();
     fetchWorkshops();
+    axiosInstance.get('/gallery').then((res) => setExhibitions(res.data?.data || [])).catch(() => setExhibitions([]));
   }, [fetchProjects, fetchWorkshops]);
 
   const handleItemClick = useCallback(async (item) => {
@@ -80,13 +86,17 @@ function SectionPreviews() {
       navigateToWorkshopDetail();
       return;
     }
+    if (item.kind === 'exhibition') {
+      navigateToExhibition(item.raw.id_exhibition);
+      return;
+    }
     // Article: mirror the hero/card open path so the detail has full data.
     setSelectedArticle(item.raw);
     if (item.raw?.id_article && fetchArticleById) {
       await fetchArticleById(item.raw.id_article);
     }
     navigateToArticle();
-  }, [setSelectedProject, navigateToProjectDetail, setSelectedWorkshop, navigateToWorkshopDetail, setSelectedArticle, fetchArticleById, navigateToArticle]);
+  }, [setSelectedProject, navigateToProjectDetail, setSelectedWorkshop, navigateToWorkshopDetail, navigateToExhibition, setSelectedArticle, fetchArticleById, navigateToArticle]);
 
   const sections = useMemo(() => {
     return PREVIEW_SECTIONS.map((sec) => {
@@ -123,9 +133,20 @@ function SectionPreviews() {
           }))
         : [];
 
-      return { id: sec.id, title: t(sec.titleKey), items: [...projectItems, ...articleItems, ...workshopItems] };
+      const exhibitionItems = sec.includeExhibitions
+        ? exhibitions.map((ex) => ({
+            key: `exhibition-${ex.id_exhibition}`,
+            kind: 'exhibition',
+            title: exhibitionTitle(ex),
+            description: ex.statement,
+            image: resolveImage(ex.cover?.image),
+            raw: ex,
+          }))
+        : [];
+
+      return { id: sec.id, title: t(sec.titleKey), items: [...projectItems, ...articleItems, ...workshopItems, ...exhibitionItems] };
     });
-  }, [projects, allArticles, workshops, t]);
+  }, [projects, allArticles, workshops, exhibitions, t]);
 
   const visibleSections = sections.filter((s) => s.items.length > 0);
   if (visibleSections.length === 0) return null;

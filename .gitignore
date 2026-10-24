@@ -15,6 +15,7 @@ back-end/uploads/magazine-metadata/*
 back-end/uploads/paisaje/
 # Espacio abierto proposals: private files (created at boot)
 back-end/uploads/proposals/
+back-end/uploads/gallery/
 # Workshop covers uploaded at runtime (bind-mounted in production)
 back-end/assets/images/magazine/
 !back-end/uploads/magazine/.gitkeep

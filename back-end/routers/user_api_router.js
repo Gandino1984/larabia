@@ -88,7 +88,7 @@ router.get('/list', async (req, res) => {
             where,
             attributes: [
                 'id_user', 'name_user', 'email_user', 'image_user',
-                'is_editor', 'is_admin', 'is_super_admin', 'is_premium_reader',
+                'is_editor', 'is_admin', 'is_super_admin', 'is_premium_reader', 'is_artist',
                 'receives_newsletter', 'email_verified', 'auth_provider'
             ],
             order: [['id_user', 'ASC']],
@@ -103,7 +103,7 @@ router.get('/list', async (req, res) => {
 });
 
 // Grant or revoke a role on a user. Body: { id_user, role, value }
-// role ∈ { 'is_editor', 'is_super_admin', 'is_premium_reader' }
+// role ∈ { 'is_editor', 'is_admin', 'is_super_admin', 'is_premium_reader', 'is_artist' }
 // Safety rules:
 //   - Cannot modify your own super_admin status (no self-demotion footgun)
 //   - Cannot revoke is_super_admin from any account whose email is in SUPER_ADMIN_EMAILS
@@ -114,7 +114,7 @@ router.patch('/grant-role', async (req, res) => {
         if (!admin) return;
 
         const { id_user, role, value } = req.body || {};
-        const ALLOWED_ROLES = ['is_editor', 'is_admin', 'is_super_admin', 'is_premium_reader'];
+        const ALLOWED_ROLES = ['is_editor', 'is_admin', 'is_super_admin', 'is_premium_reader', 'is_artist'];
 
         if (!id_user || !role || typeof value === 'undefined') {
             return res.status(400).json({ error: 'Faltan campos: id_user, role, value' });
@@ -149,7 +149,8 @@ router.patch('/grant-role', async (req, res) => {
                 is_editor: target.is_editor,
                 is_admin: target.is_admin,
                 is_super_admin: target.is_super_admin,
-                is_premium_reader: target.is_premium_reader
+                is_premium_reader: target.is_premium_reader,
+                is_artist: target.is_artist
             }
         });
     } catch (err) {

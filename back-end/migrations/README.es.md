@@ -62,8 +62,9 @@ Desde la `012`, el back-end comprueba al arrancar (`back-end/index.js`) las colu
 | `024` | `magazine_articles.featured_order` |
 | `025` | `user.newsletter_token` (único) |
 | `026` | `user.author_invite_email_sent_at` |
+| `027` | `user.is_artist`, `artist_invite_status`, `artist_invited_by`, `artist_invited_at`, `artist_invite_email_sent_at` |
 
-Las tablas de `009`, `010`, `011`, `014`, `015`, `020` y `023` se crean al arrancar con `sync()` de Sequelize si no existen. Los archivos SQL siguen siendo la referencia para una base nueva.
+Las tablas de `009`, `010`, `011`, `014`, `015`, `020`, `023` y `027` se crean al arrancar con `sync()` de Sequelize si no existen (las de la galería en orden, porque se referencian entre sí). Los archivos SQL siguen siendo la referencia para una base nueva.
 
 ## Tablas
 
@@ -90,6 +91,10 @@ Las tablas de `009`, `010`, `011`, `014`, `015`, `020` y `023` se crean al arran
 | `project_subscriptions` | Lectoras/es que siguen un proyecto |
 | `reader_subscriptions` | Suscripciones de pago (cliente y suscripción de Stripe) |
 | `open_space_proposals` | Propuestas literarias enviadas desde Espacio abierto (texto o archivo privado en `uploads/proposals/`, estado) |
+| `gallery_exhibitions` | La Galería: una exposición por artista visual (título, texto breve) |
+| `gallery_works` | Sus obras (≤ 7): imagen en `uploads/gallery/`, título, tamaño en píxeles, orden, estado de revisión |
+| `gallery_conversations` | Conversaciones artista ↔ visitante (la última lectura de cada parte) |
+| `gallery_messages` | Sus mensajes |
 
 ## Diferencias con uribarri.online
 

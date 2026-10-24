@@ -22,6 +22,13 @@ export const UIProvider = ({ children }) => {
   const [showOpenMic, setShowOpenMic] = useState(false);
   const [showMicroPerfiles, setShowMicroPerfiles] = useState(false);
   const [showTalleres, setShowTalleres] = useState(false);
+  // The Galería: the exhibitions, one exhibition (galleryView.exhibitionId;
+  // chat: open the chat with its artist), and the artist's own «Mi galería»
+  // (galleryView.tab: 'works' | 'messages', conversationId: one to open).
+  const [showGallery, setShowGallery] = useState(false);
+  const [showExhibition, setShowExhibition] = useState(false);
+  const [showMyGallery, setShowMyGallery] = useState(false);
+  const [galleryView, setGalleryView] = useState({ exhibitionId: null, chat: false, tab: 'works', conversationId: null });
   const [showWorkshopDetail, setShowWorkshopDetail] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
@@ -136,6 +143,9 @@ export const UIProvider = ({ children }) => {
     setShowMicroPerfiles(false);
     setShowTalleres(false);
     setShowWorkshopDetail(false);
+    setShowGallery(false);
+    setShowExhibition(false);
+    setShowMyGallery(false);
     setShowAbout(false);
     setShowAdmin(false);
     setShowWorkshopEditor(false);
@@ -356,6 +366,24 @@ export const UIProvider = ({ children }) => {
     setShowTalleres(true);
   };
 
+  const navigateToGallery = () => {
+    setPreviousView('home');
+    resetAllViews();
+    setShowGallery(true);
+  };
+
+  const navigateToExhibition = (exhibitionId, { chat = false } = {}) => {
+    setGalleryView((v) => ({ ...v, exhibitionId, chat }));
+    resetAllViews();
+    setShowExhibition(true);
+  };
+
+  const navigateToMyGallery = ({ tab = 'works', conversationId = null } = {}) => {
+    setGalleryView((v) => ({ ...v, tab, conversationId }));
+    resetAllViews();
+    setShowMyGallery(true);
+  };
+
   const navigateToWorkshopDetail = () => {
     setPreviousView('talleres');
     resetAllViews();
@@ -486,6 +514,13 @@ export const UIProvider = ({ children }) => {
     navigateToMicroPerfiles,
     showTalleres,
     showProjectsList,
+    showGallery,
+    showExhibition,
+    showMyGallery,
+    galleryView,
+    navigateToGallery,
+    navigateToExhibition,
+    navigateToMyGallery,
     navigateToProjectsList,
     navigateToTalleres,
     showWorkshopDetail,

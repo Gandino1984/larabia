@@ -42,6 +42,9 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
   - Quien lo gestiona — los super admins y, como con las autoras/es de un artículo, quien lo creó o lo imparte desde el equipo (sus talleristas) — lo edita, invita (la invitación reserva plaza), quita participantes o los bloquea.
   - Cada taller tiene su ubicación en un mapa (Leaflet/OpenStreetMap). No hay enlace a Google Maps: la gente se ubica en el propio mapa.
 - **Espacio abierto:** las propuestas literarias que publica la revista. Cualquier persona con cuenta (no hace falta ser socio/a) puede enviar la suya con un formulario y seguir allí su estado.
+- **Galería** (Más › Barrio › Galería): las exposiciones de las y los artistas visuales del barrio, abiertas a todo el mundo. Cada una tiene un título, un texto breve y hasta 7 obras (una imagen, un título —«Sin título» si no lo tiene— y su tamaño en píxeles), y sale también en la fila Barrio de la portada.
+  - **Artistas visuales:** un rol que un super admin concede por invitación, como a las autoras/es; se suma a lo que la persona ya sea. En «Mi galería» montan su exposición; cada obra nueva o cambiada la revisa un super admin antes de verse.
+  - **Mensajes:** cualquiera con cuenta puede escribir a una o un artista desde su exposición. Cada pareja visitante ↔ artista es una conversación, que se guarda y se responde en el chat de la galería; la campana avisa a cada parte de los mensajes sin leer.
 - **Interacción:** me gusta, favoritos, comentarios y seguir proyectos.
 - **Avisos** en la campana de la cabecera: contenido nuevo, invitaciones, respuestas y hacerse socio/a.
 - **Barra superior:** la campana va justo después de la foto de perfil; «Publica» (editoras/es en adelante) es lo último de la barra (en el móvil, un icono a la izquierda del menú). El selector de idioma es una pequeña píldora fuera de la barra, arriba a la izquierda (el botón rojo «Hazte socio/a» va debajo), así que se ve incluso donde la barra se oculta (un artículo); en el móvil está en el menú.
@@ -132,7 +135,8 @@ Los roles son marcas independientes en `user`; una cuenta puede tener varias.
 | Lector/a premium (`is_premium_reader`) | Además, leer los artículos marcados como premium |
 | Editor/a (`is_editor`) | Crear publicaciones y perfiles de autoría; todo pasa por revisión. Editar los talleres que imparte |
 | Admin (`is_admin`) | Como editor/a, más crear talleres y las recomendaciones de la newsletter |
-| Super admin (`is_super_admin`) | Todo; publica directamente; revisa lo de los demás; panel de Admin; invita autoras/es |
+| Super admin (`is_super_admin`) | Todo; publica directamente; revisa lo de los demás; panel de Admin; invita autoras/es y artistas |
+| Artista visual (`is_artist`, combinable con cualquier rol) | Su exposición en la Galería y sus mensajes — nada más |
 
 - `canCreateContent` = editor/a, admin o super admin. `canPublishDirectly` = solo super admin.
 - El servidor comprueba el rol en cada petición: lee la cabecera `x-user-id` y busca al usuario (`back-end/utils/authHelper.js`).
@@ -162,6 +166,14 @@ Los roles son marcas independientes en `user`; una cuenta puede tener varias.
    - **Rechazar** → sigue como lectora, su perfil se oculta y lo que nadie más firma pasa a firmarse «La Rabia».
    - Si un super admin ya la hizo editora → no tiene nada que responder: al entrar la invitación cuenta como aceptada (su email dice «inicia sesión», no «acepta»).
 4. El email de invitación (en español y en inglés, uno detrás del otro; HTML + texto plano; las respuestas van a `CONTACT_EMAIL`) guarda cuándo salió (`user.author_invite_email_sent_at`). El editor del perfil dice cuándo se envió, o que no consta como enviado, con «Enviar email». En «Autoras/es», los super admins ven las invitaciones pendientes que no constan como enviadas — también de quien ya hicieron editora y aún no ha entrado — y las envían todas con un botón (`GET /user/invite-author/unsent`, `POST /user/invite-author/send-unsent`).
+
+**Galería** (`back-end/controllers/gallery/`, `front-end/src/components/gallery/`, migración `027`):
+
+- Tablas: `gallery_exhibitions` (una por artista: título, texto), `gallery_works` (imagen en `uploads/gallery/` en WebP a su tamaño, título, `width_px` × `height_px` leídos del archivo tras aplicar su giro EXIF, posición, `status_work` pending → approved / rejected con motivo), `gallery_conversations` (artista ↔ visitante, la última lectura de cada parte) y `gallery_messages`.
+- Público: `GET /gallery` (exposiciones con al menos una obra aprobada) y `GET /gallery/exhibition/:id` (solo obras aprobadas).
+- Artistas: `GET|PATCH /gallery/mine`, `POST /gallery/mine/works` (multipart, ≤ 20 MB, como mucho 7), `PATCH|DELETE /gallery/mine/works/:id` (cualquier cambio devuelve la obra a revisión), `PATCH /gallery/mine/order`.
+- Super admins: `GET /gallery/review?status=`, `POST /gallery/review/:id` {approve | reject, motivo}, `GET /gallery/review/count` (en el aviso de Admin); invitaciones en `POST /gallery/invite`, `GET /gallery/invitations`, `POST /gallery/invitations/:id/resend`, `POST /gallery/invitations/send-unsent` (email bilingüe, envío guardado en `user.artist_invite_email_sent_at`). La persona invitada responde con `GET /gallery/invitation` + `POST /gallery/invitation/respond`.
+- Mensajes (con sesión): `POST /gallery/exhibition/:id/messages`, `GET /gallery/conversations`, `GET /gallery/conversations/:id` (la marca leída), `POST /gallery/conversations/:id/messages`; ≤ 2.000 caracteres, como mucho 60 por hora. `GET /gallery/feed` alimenta la campana (conversaciones sin leer, las revisiones de la o el artista, obras pendientes).
 
 **Propuestas de Espacio abierto** (`back-end/controllers/open_space/`, `front-end/src/components/openmic/`):
 

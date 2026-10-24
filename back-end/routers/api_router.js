@@ -14,6 +14,7 @@ import engagementApiRouter from "./engagement_api_router.js";
 import subscriptionApiRouter from "./subscription_api_router.js";
 import paisajeApiRouter from "./paisaje_api_router.js";
 import openSpaceApiRouter from "./open_space_api_router.js";
+import galleryApiRouter from "./gallery_api_router.js";
 
 const router = Router();
 
@@ -30,6 +31,7 @@ router.use("/engagement", engagementApiRouter);
 router.use("/subscription", subscriptionApiRouter);
 router.use("/paisaje", paisajeApiRouter);
 router.use("/open-space", openSpaceApiRouter);
+router.use("/gallery", galleryApiRouter);
 
 // Author profile routes are defined with their full prefix (/author-profile/*) inside the router
 router.use("/", authorProfileApiRouter);

@@ -36,6 +36,8 @@ export function roleSnapshot(user) {
             isAdmin: false,
             isSuperAdmin: false,
             isPremiumReader: false,
+            // Visual artist: hangs an exhibition in the Galería (nothing else).
+            isArtist: false,
             // Convenience: can create content (editor, admin, or super admin).
             canCreateContent: false,
             // Convenience: can publish without approval. Super admin only —
@@ -53,6 +55,7 @@ export function roleSnapshot(user) {
         isAdmin,
         isSuperAdmin,
         isPremiumReader: truthy(user.is_premium_reader),
+        isArtist: truthy(user.is_artist),
         canCreateContent: isEditor || isAdmin || isSuperAdmin,
         // Only super admins publish without review. Editors AND admins must
         // submit content for super-admin validation before it goes public.

@@ -34,6 +34,7 @@ import workshopBlockModel from './models/workshop_block_model.js';
 import workshopInvitationModel from './models/workshop_invitation_model.js';
 import openSpaceProposalModel from './models/open_space_proposal_model.js';
 import workshopSpotRequestModel from './models/workshop_spot_request_model.js';
+import { syncGalleryTables } from './models/gallery_models.js';
 import subscriptionApiController from './controllers/subscription/subscription_api_controller.js';
 import { PAISAJE_DIR, ensureDirs as ensurePaisajeDirs, cleanupOrphans as cleanupPaisajeOrphans } from './controllers/paisaje/paisaje_store.js';
 import { isPrivateUploadPath } from './controllers/open_space/proposal_store.js';
@@ -95,7 +96,9 @@ Promise.all([
     openSpaceProposalModel.sync(),
     workshopSpotRequestModel.sync()
 ])
-    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks + invitations + spot requests/open space proposals)'))
+    // The Galería's tables reference each other: created one after another.
+    .then(() => syncGalleryTables())
+    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks + invitations + spot requests/open space proposals/gallery)'))
     .catch((err) => console.error('Error syncing engagement tables:', err.message));
 
 // Columns added to tables that already exist in production (idempotent: each
@@ -155,6 +158,22 @@ Promise.all([
             await qi.addColumn('user', 'newsletter_token', { type: DataTypes.CHAR(32), allowNull: true });
             await qi.addIndex('user', ['newsletter_token'], { unique: true, name: 'uq_user_newsletter_token' });
             console.log('>>> Added user.newsletter_token');
+        }
+        // Visual artists for the Galería, and their invitation (migration 027).
+        if (!users.is_artist) {
+            await qi.addColumn('user', 'is_artist', { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false });
+            console.log('>>> Added user.is_artist');
+        }
+        for (const [col, type] of [
+            ['artist_invite_status', DataTypes.STRING(20)],
+            ['artist_invited_by', DataTypes.INTEGER.UNSIGNED],
+            ['artist_invited_at', DataTypes.DATE],
+            ['artist_invite_email_sent_at', DataTypes.DATE]
+        ]) {
+            if (!users[col]) {
+                await qi.addColumn('user', col, { type, allowNull: true });
+                console.log(`>>> Added user.${col}`);
+            }
         }
         // Complimentary subscriptions given by a super admin (migration 021).
         const subs = await qi.describeTable('reader_subscriptions');

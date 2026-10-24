@@ -21,6 +21,14 @@
 //    bell is opened).
 //  - author-invite:  a super admin signed the user up as an author
 //    (AuthorInvitationContext) — Aceptar / Rechazar; stays until answered.
+//  - gallery-invite:  invited to the Galería as a visual artist
+//    (GalleryContext) — Aceptar / Rechazar; stays until answered.
+//  - gallery-message:  a conversation of the Galería with unread messages —
+//    for the artist, a visitor wrote; for the visitor, the artist answered.
+//    Until it's opened.
+//  - gallery-review:  the team approved or didn't publish one of the
+//    artist's works (until the bell is opened).
+//  - gallery-pending:  super admins — works waiting for review.
 //
 // "New content" notifications accumulate (persist as unread) until the user
 // opens the bell — the last-seen timestamp is stored per user in localStorage,
@@ -36,6 +44,7 @@ import { useEngagement } from './EngagementContext';
 import { useSubscription } from './SubscriptionContext';
 import { useWorkshop } from './WorkshopContext';
 import { useAuthorInvitation } from './AuthorInvitationContext';
+import { useGallery } from './GalleryContext';
 import { useMetadata } from './MetadataContext';
 import { localDate, serverDate } from '../utils/locale';
 
@@ -48,7 +57,7 @@ export const NotificationProvider = ({ children }) => {
   const { t } = useTranslation();
   const { currentUser, canCreateContent } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
-  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail } = useUI();
+  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToExhibition, navigateToAdmin } = useUI();
   const {
     invitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen, setSelectedWorkshop,
     respondExtraSpot, markSpotAnswersSeen
@@ -58,6 +67,7 @@ export const NotificationProvider = ({ children }) => {
   const subscription = useSubscription();
   const membership = subscription?.mine;
   const authorInvite = useAuthorInvitation();
+  const gallery = useGallery();
   const brand = useMetadata()?.metadata?.name || 'La Rabia';
 
   const [publishedArticles, setPublishedArticles] = useState([]);
@@ -154,7 +164,8 @@ export const NotificationProvider = ({ children }) => {
     if (answered.length > 0) markInvitationResponsesSeen(answered);
     const spotAnswered = (invitationFeed?.spot_answers || []).map(a => a.id_spot_request);
     if (spotAnswered.length > 0) markSpotAnswersSeen(spotAnswered);
-  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, invitationFeed?.spot_answers, markInvitationResponsesSeen, markSpotAnswersSeen]);
+    gallery.markReviewsSeen();
+  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, invitationFeed?.spot_answers, markInvitationResponsesSeen, markSpotAnswersSeen, gallery]);
 
   const notifications = useMemo(() => {
     const list = [];
@@ -198,6 +209,69 @@ export const NotificationProvider = ({ children }) => {
           }
         ]
       });
+    }
+
+    // Invited to the Galería as a visual artist, waiting for an answer.
+    if (currentUser && gallery.invitation) {
+      const inviter = gallery.invitation.inviter?.name_user;
+      list.push({
+        id: 'gallery-invite',
+        type: 'gallery-invite',
+        title: t('notifications.galleryInvite.title', 'Te invitan a exponer en la Galería'),
+        message: inviter
+          ? t('notifications.galleryInvite.message', { name: inviter, defaultValue: '{{name}} te invita a exponer tu obra como artista visual.' })
+          : t('notifications.galleryInvite.messageNoName', 'Te invitan a exponer tu obra como artista visual.'),
+        onClick: () => gallery.openInviteModal(),
+        actions: [
+          { key: 'accept', variant: 'primary', label: t('notifications.authorInvite.accept', 'Aceptar'), onClick: () => gallery.respond('accept') },
+          { key: 'decline', variant: 'secondary', label: t('notifications.authorInvite.decline', 'Rechazar'), onClick: () => gallery.respond('decline') }
+        ]
+      });
+    }
+
+    // The Galería: unread messages (as artist or as visitor).
+    if (currentUser) {
+      for (const c of gallery.feed.messages || []) {
+        const name = c.other?.name_user || '';
+        const body = c.last_message?.body || '';
+        list.push({
+          id: `gallery-message-${c.id_conversation}-${c.last_message?.id_message || 0}`,
+          type: 'gallery-message',
+          title: c.role === 'artist'
+            ? t('notifications.galleryMessage.title', { name, defaultValue: 'Mensaje de {{name}} en tu galería' })
+            : t('notifications.galleryReply.title', { name, defaultValue: '{{name}} te ha respondido' }),
+          message: body.length > 120 ? `${body.slice(0, 117)}…` : body,
+          onClick: () => (c.role === 'artist'
+            ? navigateToMyGallery({ tab: 'messages', conversationId: c.id_conversation })
+            : c.exhibition && navigateToExhibition(c.exhibition.id_exhibition, { chat: true }))
+        });
+      }
+      // The team's review of the artist's works.
+      for (const w of gallery.feed.reviews || []) {
+        const title = w.title_work || t('gallery.untitled', 'Sin título');
+        const approved = w.status_work === 'approved';
+        list.push({
+          id: `gallery-review-${w.id_work}-${w.status_work}`,
+          type: 'gallery-review',
+          title: approved
+            ? t('notifications.galleryApproved.title', 'Tu obra ya está en la galería')
+            : t('notifications.galleryRejected.title', 'Una obra tuya no se ha publicado'),
+          message: approved || !w.rejection_reason
+            ? `«${title}»`
+            : t('notifications.galleryRejected.message', { title, reason: w.rejection_reason, defaultValue: '«{{title}}»: {{reason}}' }),
+          onClick: () => navigateToMyGallery()
+        });
+      }
+      // Super admins: works waiting for review.
+      if (gallery.feed.pending_review > 0) {
+        list.push({
+          id: `gallery-pending-${gallery.feed.pending_review}`,
+          type: 'gallery-pending',
+          title: t('notifications.galleryPending.title', { count: gallery.feed.pending_review }),
+          message: t('notifications.galleryPending.message', 'Revísalas en Admin › Galería.'),
+          onClick: () => navigateToAdmin('gallery')
+        });
+      }
     }
 
     // Invitations to a workshop, waiting for an answer.
@@ -384,6 +458,7 @@ export const NotificationProvider = ({ children }) => {
     profilesReady, currentUser, canCreateContent, authorProfiles, lastSeen,
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
     invitationFeed, openWorkshop, answerInvitation, respondExtraSpot, authorInvite, brand,
+    gallery, navigateToMyGallery, navigateToExhibition, navigateToAdmin,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

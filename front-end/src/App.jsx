@@ -29,6 +29,10 @@ import CategorySectionPage from './components/magazine/CategorySectionPage';
 import AboutRabia from './components/magazine/AboutRabia';
 import WorkshopsList from './components/workshops/WorkshopsList';
 import WorkshopDetail from './components/workshops/WorkshopDetail';
+import GalleryPage from './components/gallery/GalleryPage';
+import ExhibitionPage from './components/gallery/ExhibitionPage';
+import MyGallery from './components/gallery/MyGallery';
+import GalleryInvitationModal from './components/gallery/GalleryInvitationModal';
 import AdminPage from './components/admin/permissions/AdminPage';
 import LoginPage from './components/layout/LoginPage';
 import ForgotPasswordPage from './components/layout/ForgotPasswordPage';
@@ -40,7 +44,7 @@ import { useAuthor } from './app_context/AuthorContext';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showProjectsList, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, showSuccess, showError, authorCardUser, closeAuthorCard } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showProjectsList, showGallery, showExhibition, showMyGallery, galleryView, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, showSuccess, showError, authorCardUser, closeAuthorCard } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { authorProfiles, fetchAllProfiles, authorPhotoOf } = useAuthor();
   const { currentUser, setUser, loading: authLoading } = useAuth();
@@ -162,6 +166,9 @@ function App() {
     if (showWorkshopDetail) return <WorkshopDetail />;
     if (showTalleres) return <WorkshopsList />;
     if (showProjectsList) return <ProjectsList />;
+    if (showGallery) return <GalleryPage />;
+    if (showExhibition) return <ExhibitionPage key={galleryView.exhibitionId} />;
+    if (showMyGallery) return <MyGallery key={`${galleryView.tab}-${galleryView.conversationId}`} />;
     if (showAbout) return <AboutRabia />;
     if (showArticleDetail) return <ArticleDetail previewMode={isPreview} />;
     if (showArticlesList) return <ArticlesList />;
@@ -189,6 +196,9 @@ function App() {
     (showWorkshopDetail && 'workshopDetail') ||
     (showTalleres && 'talleres') ||
     (showProjectsList && 'projectsList') ||
+    (showGallery && 'gallery') ||
+    (showExhibition && `exhibition-${galleryView.exhibitionId}`) ||
+    (showMyGallery && 'myGallery') ||
     (showAbout && 'about') ||
     (showArticleDetail && 'articleDetail') ||
     (showArticlesList && 'articlesList') ||
@@ -266,6 +276,7 @@ function App() {
       </div>
 
       {!isPreview && <AuthorInvitationModal />}
+      {!isPreview && <GalleryInvitationModal />}
 
       {authorCardUser && (
         <UserInfoCard

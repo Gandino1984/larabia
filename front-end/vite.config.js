@@ -30,6 +30,7 @@ export default defineConfig(({ mode }) => {
     '/paisaje',
     '/paisaje-files',
     '/open-space',
+    '/gallery',
     '/health'
   ];
   const proxy = Object.fromEntries(

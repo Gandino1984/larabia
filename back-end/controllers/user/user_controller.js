@@ -194,6 +194,7 @@ async function login(userData) {
             is_admin: user.is_admin,
             is_super_admin: user.is_super_admin,
             is_premium_reader: user.is_premium_reader,
+            is_artist: user.is_artist,
             receives_newsletter: user.receives_newsletter,
             auth_provider: user.auth_provider,
             has_password: !!user.pass_user
@@ -510,6 +511,7 @@ async function update(id, userData) {
             is_admin: user.is_admin,
             is_super_admin: user.is_super_admin,
             is_premium_reader: user.is_premium_reader,
+            is_artist: user.is_artist,
             receives_newsletter: user.receives_newsletter,
             auth_provider: user.auth_provider,
             has_password: !!user.pass_user,

@@ -159,19 +159,66 @@ export const sendWelcomeEmail = async (userEmail, userName) => {
 // A super admin signed this person up as an author («Autoras/es»): they
 // accept it the first time they sign in with this email. Returns whether the
 // email went out (the author is created either way).
-// In Spanish and English (in that order, one email). alreadyTeam: a super
-// admin already made them editor — nothing to accept, they just sign in.
+// A bilingual email (Spanish, then English) for an invitation: `copy` has
+// { es, en } × { hello, paragraphs }; EMAIL in a paragraph is replaced by the
+// address (bold in the HTML). Returns { html, text }.
+const EMAIL_MARK = '\u0000';
+const bilingualEmail = ({ copy, userEmail, BRAND, magazineUrl }) => {
+  // Names typed by a super admin: keep them as text in the HTML.
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const htmlSection = (lang) => `
+            <div lang="${lang}">
+              <h2>${esc(copy[lang].hello)}</h2>
+              ${copy[lang].paragraphs.map((p) => `<p>${esc(p).replace(EMAIL_MARK, `<strong>${esc(userEmail)}</strong>`)}</p>`).join('\n              ')}
+            </div>`;
+  const textSection = (lang) => [copy[lang].hello, '', ...copy[lang].paragraphs.flatMap((p) => [p.replace(EMAIL_MARK, userEmail), ''])];
+  const html = `
+      <!DOCTYPE html><html><head><style>${baseStyles}</style></head><body>
+        <div class="container">
+          <div class="header">${BRAND}</div>
+          <div class="content">
+            ${htmlSection('es')}
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 28px 0 8px;">
+            <p style="margin: 0 0 4px; color: #888; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">English</p>
+            ${htmlSection('en')}
+            <div style="text-align: center;"><a href="${magazineUrl}" class="button">Ir a ${BRAND} · Go to ${BRAND}</a></div>
+          </div>
+        </div>
+      </body></html>
+    `;
+  // A plain-text version too (an HTML-only email is likelier to end up in spam).
+  const text = [...textSection('es'), '———', '', ...textSection('en'), `${BRAND}: ${magazineUrl}`].join('\n');
+  return { html, text };
+};
+
+// Sends an invitation email; false if it couldn't go out (or the server
+// refused the address). Replies go to the magazine.
+const sendInvitationEmail = async ({ kind, userEmail, subject, html, text, BRAND }) => {
+  const transporter = createTransporter();
+  const info = await transporter.sendMail({
+    from: `"${BRAND}" <${process.env.EMAIL_USER}>`,
+    to: userEmail,
+    replyTo: process.env.CONTACT_EMAIL || process.env.EMAIL_USER,
+    subject,
+    text,
+    html
+  });
+  if (info?.rejected?.length) {
+    console.error(`${kind} invitation email rejected by the server:`, info.response);
+    return false;
+  }
+  console.log(`${kind} invitation email sent:`, info?.messageId, info?.response);
+  return true;
+};
+
+// Author invitation (author_invitation_controller), in Spanish and English.
+// alreadyTeam: a super admin already made them editor — nothing to accept,
+// they just sign in.
 export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName, { alreadyTeam = false } = {}) => {
   try {
-    const transporter = createTransporter();
     const magazineUrl = config.urls.frontend;
     const { name: BRAND } = await getBrand();
-    // Names typed by a super admin: keep them as text in the HTML.
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-    // Each language's paragraphs; EMAIL marks where the address goes (bold
-    // in the HTML).
-    const EMAIL = '\u0000';
+    const EMAIL = EMAIL_MARK;
     const copy = {
       es: {
         hello: `Hola, ${userName}:`,
@@ -198,54 +245,49 @@ export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName
         ]
       }
     };
-    const htmlSection = (lang) => `
-            <div lang="${lang}">
-              <h2>${esc(copy[lang].hello)}</h2>
-              ${copy[lang].paragraphs.map((p) => `<p>${esc(p).replace(EMAIL, `<strong>${esc(userEmail)}</strong>`)}</p>`).join('\n              ')}
-            </div>`;
-    const textSection = (lang) => [copy[lang].hello, '', ...copy[lang].paragraphs.flatMap((p) => [p.replace(EMAIL, userEmail), ''])];
-
-    const htmlContent = `
-      <!DOCTYPE html><html><head><style>${baseStyles}</style></head><body>
-        <div class="container">
-          <div class="header">${BRAND}</div>
-          <div class="content">
-            ${htmlSection('es')}
-            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 28px 0 8px;">
-            <p style="margin: 0 0 4px; color: #888; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">English</p>
-            ${htmlSection('en')}
-            <div style="text-align: center;"><a href="${magazineUrl}" class="button">Ir a ${BRAND} · Go to ${BRAND}</a></div>
-          </div>
-        </div>
-      </body></html>
-    `;
-    // A plain-text version too (an HTML-only email is likelier to end up in
-    // spam), and replies go to the magazine.
-    const textContent = [
-      ...textSection('es'),
-      '———',
-      '',
-      ...textSection('en'),
-      `${BRAND}: ${magazineUrl}`
-    ].join('\n');
-
-    const info = await transporter.sendMail({
-      from: `"${BRAND}" <${process.env.EMAIL_USER}>`,
-      to: userEmail,
-      replyTo: process.env.CONTACT_EMAIL || process.env.EMAIL_USER,
-      subject: `${BRAND} te ha dado de alta como autora o autor · ${BRAND} has signed you up as an author`,
-      text: textContent,
-      html: htmlContent
+    const { html, text } = bilingualEmail({ copy, userEmail, BRAND, magazineUrl });
+    return await sendInvitationEmail({
+      kind: 'Author', userEmail, html, text, BRAND,
+      subject: `${BRAND} te ha dado de alta como autora o autor · ${BRAND} has signed you up as an author`
     });
-    // The server refused the address: not sent.
-    if (info?.rejected?.length) {
-      console.error('Author invitation email rejected by the server:', info.response);
-      return false;
-    }
-    console.log('Author invitation email sent:', info?.messageId, info?.response);
-    return true;
   } catch (error) {
     console.error('Error sending author invitation email:', error);
+    return false;
+  }
+};
+
+// Visual artist invitation for the Galería (gallery_api_controller), in
+// Spanish and English.
+export const sendArtistInvitationEmail = async (userEmail, userName, inviterName) => {
+  try {
+    const magazineUrl = config.urls.frontend;
+    const { name: BRAND } = await getBrand();
+    const EMAIL = EMAIL_MARK;
+    const copy = {
+      es: {
+        hello: `Hola, ${userName}:`,
+        paragraphs: [
+          `${inviterName ? `${inviterName} te ha invitado` : 'Te hemos invitado'} a exponer tu obra en la Galería de ${BRAND}, como artista visual.`,
+          `Para aceptarlo, inicia sesión en la revista con Google usando este email (${EMAIL}). Al aceptar podrás montar tu exposición: un título, un texto breve y hasta 7 obras.`,
+          'Si prefieres no participar, también podrás decirlo al iniciar sesión.'
+        ]
+      },
+      en: {
+        hello: `Hi, ${userName},`,
+        paragraphs: [
+          `${inviterName ? `${inviterName} has invited you` : 'We have invited you'} to show your work in the ${BRAND} Gallery, as a visual artist.`,
+          `To accept, sign in to the magazine with Google using this email (${EMAIL}). Once you accept, you will be able to set up your exhibition: a title, a short text and up to 7 works.`,
+          'If you would rather not take part, you can also say so when you sign in.'
+        ]
+      }
+    };
+    const { html, text } = bilingualEmail({ copy, userEmail, BRAND, magazineUrl });
+    return await sendInvitationEmail({
+      kind: 'Artist', userEmail, html, text, BRAND,
+      subject: `${BRAND} te invita a exponer en su Galería · ${BRAND} invites you to show your work in its Gallery`
+    });
+  } catch (error) {
+    console.error('Error sending artist invitation email:', error);
     return false;
   }
 };

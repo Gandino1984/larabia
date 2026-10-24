@@ -20,6 +20,8 @@ export const PendingReviewProvider = ({ children }) => {
   const [sectionRequestProjects, setSectionRequestProjects] = useState([]);
   // «Espacio abierto» proposals nobody has opened yet.
   const [newProposals, setNewProposals] = useState(0);
+  // Works the artists hung, waiting for review (Admin › Galería).
+  const [galleryPending, setGalleryPending] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -29,15 +31,17 @@ export const PendingReviewProvider = ({ children }) => {
       setSectionRequestArticles([]);
       setSectionRequestProjects([]);
       setNewProposals(0);
+      setGalleryPending(0);
       return;
     }
     setLoading(true);
     const authHeader = { headers: { 'x-user-id': currentUser.id_user } };
     try {
-      const [articlesRes, projectsRes, proposalsRes] = await Promise.allSettled([
+      const [articlesRes, projectsRes, proposalsRes, galleryRes] = await Promise.allSettled([
         axiosInstance.get('/magazine-article/pending', authHeader),
         axiosInstance.get('/magazine-project/pending', authHeader),
-        axiosInstance.get('/open-space/proposals/count', authHeader)
+        axiosInstance.get('/open-space/proposals/count', authHeader),
+        axiosInstance.get('/gallery/review/count', authHeader)
       ]);
       if (articlesRes.status === 'fulfilled' && !articlesRes.value.data.error) {
         setPendingArticles(articlesRes.value.data.data || []);
@@ -49,6 +53,9 @@ export const PendingReviewProvider = ({ children }) => {
       }
       if (proposalsRes.status === 'fulfilled') {
         setNewProposals(proposalsRes.value.data?.data?.new || 0);
+      }
+      if (galleryRes.status === 'fulfilled') {
+        setGalleryPending(galleryRes.value.data?.data?.pending || 0);
       }
     } catch (err) {
       console.error('Error fetching pending review queue:', err);
@@ -65,7 +72,7 @@ export const PendingReviewProvider = ({ children }) => {
   const totalPending = pendingArticles.length + pendingProjects.length
     + sectionRequestArticles.length + sectionRequestProjects.length;
   // Everything waiting for the super admin (the Admin badge in the header).
-  const totalAttention = totalPending + newProposals;
+  const totalAttention = totalPending + newProposals + galleryPending;
 
   const value = {
     pendingArticles,
@@ -74,6 +81,7 @@ export const PendingReviewProvider = ({ children }) => {
     sectionRequestProjects,
     totalPending,
     newProposals,
+    galleryPending,
     totalAttention,
     loading,
     refresh,

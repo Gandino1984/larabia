@@ -42,6 +42,9 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
   - Managers — super admins, and the team members who created or teach a workshop (its *talleristas*), like an article's authors — edit it, invite people (an invitation holds a place), remove participants or block them.
   - Each workshop has a location on a map (Leaflet/OpenStreetMap). There's no link out to Google Maps: people find their way on the map itself.
 - **Espacio abierto** (open space): the literary proposals the magazine publishes. Anyone with an account (no need to be a member) can send one through a form, then follow its status there.
+- **Galería** (Más › Barrio › Galería): the exhibitions of the neighbourhood's visual artists, open to everyone. Each one has a title, a short text and up to 7 works (an image, a title — «Sin título» if none — and its size in pixels), and appears in the home Barrio row too.
+  - **Visual artists** are a role a super admin grants by invitation, like authors; it adds to whatever the person already is. In «Mi galería» they set up their exhibition; every new or changed work is reviewed by a super admin before it shows.
+  - **Messages:** anyone with an account can write to an artist from their exhibition. Each visitor ↔ artist pair is one conversation, kept and answered in the gallery's chat; the bell tells each side about unread messages.
 - **Engagement:** likes, favourites, comments and following projects.
 - **Notifications** in the header bell: new content, invitations, answers and membership.
 - **Top bar:** the bell sits right after the profile photo; «Publica» (editors and up) is the last item of the bar (on phones, an icon left of the burger). The language picker is a small pill outside the bar, top left (the red «Hazte socio/a» button goes under it), so it's there even where the bar hides (an article); on phones it's in the burger menu.
@@ -132,7 +135,8 @@ Roles are independent flags on `user`. One account can hold several.
 | Premium reader (`is_premium_reader`) | Also read articles marked premium |
 | Editor (`is_editor`) | Create publications and author profiles; everything goes through review. Edit the workshops they teach |
 | Admin (`is_admin`) | Like an editor, plus creating workshops and newsletter recommendations |
-| Super admin (`is_super_admin`) | Everything; publishes directly; reviews others' work; Admin panel; invites authors |
+| Super admin (`is_super_admin`) | Everything; publishes directly; reviews others' work; Admin panel; invites authors and artists |
+| Visual artist (`is_artist`, combinable with any role) | Their exhibition in the Galería and its messages — nothing else |
 
 - `canCreateContent` = editor, admin or super admin. `canPublishDirectly` = super admin only.
 - The server checks the role on each request: it reads the `x-user-id` header and looks the user up (`back-end/utils/authHelper.js`).
@@ -162,6 +166,14 @@ Roles are independent flags on `user`. One account can hold several.
    - **Decline** → they stay a reader, their profile is hidden, and what nobody else signs is signed «La Rabia».
    - Already made editor by a super admin → nothing to answer: on that first sign-in the invitation counts as accepted (its email says «sign in», not «accept»).
 4. The invitation email (in Spanish and English, one after the other; HTML + plain text; replies go to `CONTACT_EMAIL`) records when it went out (`user.author_invite_email_sent_at`). The profile editor says when it was sent, or that it isn't recorded as sent, with «Enviar email». In «Autoras/es», super admins see the pending invitations not recorded as sent — also of people already made editors who haven't signed in yet — and send them all with one button (`GET /user/invite-author/unsent`, `POST /user/invite-author/send-unsent`).
+
+**Galería** (`back-end/controllers/gallery/`, `front-end/src/components/gallery/`, migration `027`):
+
+- Tables: `gallery_exhibitions` (one per artist: title, statement), `gallery_works` (image in `uploads/gallery/` as WebP at its own size, title, `width_px` × `height_px` read from the file after its EXIF rotation, position, `status_work` pending → approved / rejected with a reason), `gallery_conversations` (artist ↔ visitor, each side's last read) and `gallery_messages`.
+- Public: `GET /gallery` (exhibitions with at least one approved work) and `GET /gallery/exhibition/:id` (approved works only).
+- Artists: `GET|PATCH /gallery/mine`, `POST /gallery/mine/works` (multipart, ≤ 20 MB, at most 7), `PATCH|DELETE /gallery/mine/works/:id` (any change sends the work back to review), `PATCH /gallery/mine/order`.
+- Super admins: `GET /gallery/review?status=`, `POST /gallery/review/:id` {approve | reject, reason}, `GET /gallery/review/count` (in the Admin badge); invitations at `POST /gallery/invite`, `GET /gallery/invitations`, `POST /gallery/invitations/:id/resend`, `POST /gallery/invitations/send-unsent` (bilingual email, send recorded in `user.artist_invite_email_sent_at`). The invited person answers with `GET /gallery/invitation` + `POST /gallery/invitation/respond`.
+- Messages (signed in): `POST /gallery/exhibition/:id/messages`, `GET /gallery/conversations`, `GET /gallery/conversations/:id` (marks it read), `POST /gallery/conversations/:id/messages`; ≤ 2,000 characters, at most 60 per hour. `GET /gallery/feed` feeds the bell (unread conversations, the artist's reviews, works waiting).
 
 **Espacio abierto proposals** (`back-end/controllers/open_space/`, `front-end/src/components/openmic/`):
 

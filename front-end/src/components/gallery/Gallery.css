@@ -1,0 +1,470 @@
+/* The Galería (GalleryPage, ExhibitionPage, MyGallery, GalleryChat). Mobile
+   first; a light page like Talleres, starting low enough to clear the header
+   bar and the small language picker below it. */
+.gallery-page {
+  min-height: 100vh;
+  /* Full width, its content at most 1100px (centered). */
+  padding: 9rem max(1rem, calc((100% - 1100px) / 2)) 3rem;
+  background: var(--surface-light, #ffffff);
+  color: var(--on-light, #1a1a1a);
+}
+
+.gallery-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--on-light, #000000);
+}
+.gallery-page__header h1 { margin: 0; font-size: 1.6rem; color: var(--on-light, #1a1a1a); }
+.gallery-page__subtitle { margin: 0.4rem 0 0; color: var(--on-light-muted, #3a3a3a); }
+.gallery-page__actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.gallery-page__empty { padding: 2rem 0; color: var(--on-light-muted, #555555); }
+
+.gallery-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Buttons */
+.gallery-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.55rem 1rem;
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.gallery-btn:hover:not(:disabled),
+.gallery-btn:focus-visible { background: #1a1a1a; color: #ffffff; }
+.gallery-btn--primary { background: #1a1a1a; color: #ffffff; }
+.gallery-btn--primary:hover:not(:disabled),
+.gallery-btn--primary:focus-visible { background: #ffffff; color: #1a1a1a; }
+.gallery-btn--danger { border-color: #a72020; color: #a72020; }
+.gallery-btn--danger:hover:not(:disabled) { background: #a72020; color: #ffffff; }
+.gallery-btn--small { min-height: 38px; padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+.gallery-btn:disabled { opacity: 0.5; cursor: default; }
+
+.gallery-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #333333;
+  cursor: pointer;
+}
+.gallery-icon-btn:disabled { opacity: 0.35; cursor: default; }
+
+.gallery-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.gallery-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+  padding: 0.4rem 0;
+  border: none;
+  background: none;
+  color: var(--on-light, #1a1a1a);
+  font-weight: 700;
+  text-transform: none;
+  cursor: pointer;
+}
+.gallery-back--inline { margin: 0; }
+
+/* The artist: photo + name */
+.gallery-artist { display: inline-flex; align-items: center; gap: 0.55rem; min-width: 0; }
+.gallery-artist__photo {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #e6e6e6;
+}
+.gallery-artist__photo--initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1a1a;
+  font-weight: 700;
+}
+.gallery-artist__name { font-weight: 700; overflow-wrap: anywhere; }
+.gallery-artist--large .gallery-artist__photo { width: 46px; height: 46px; }
+
+/* The exhibitions */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+.gallery-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e3e3e3;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.gallery-card:hover,
+.gallery-card:focus-visible { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12); }
+.gallery-card__image { position: relative; aspect-ratio: 4 / 3; background: #f0f0f0; }
+.gallery-card__image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gallery-card__count {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.gallery-card__body { display: flex; flex-direction: column; gap: 0.6rem; padding: 1rem; }
+.gallery-card__title { margin: 0; font-size: 1.15rem; color: #1a1a1a; }
+
+/* One exhibition */
+.exhibition-page__header { margin-bottom: 2rem; }
+.exhibition-page__header h1 { margin: 0 0 0.8rem; font-size: 1.8rem; line-height: 1.15; color: var(--on-light, #1a1a1a); }
+.exhibition-page__statement { max-width: 68ch; margin: 1rem 0 0; color: #333333; line-height: 1.65; }
+.exhibition-page__statement p { margin: 0 0 0.8rem; white-space: pre-line; }
+.exhibition-page__actions { margin-top: 1.25rem; }
+
+/* The works: hung like a wall, each in a white frame with its caption. */
+.exhibition-works { columns: 1; column-gap: 1.75rem; }
+.exhibition-work { break-inside: avoid; margin: 0 0 1.75rem; }
+.exhibition-work__frame {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 12px 28px rgba(0, 0, 0, 0.12);
+  cursor: zoom-in;
+}
+.exhibition-work__frame img { display: block; width: 100%; height: auto; background: #f0f0f0; }
+.exhibition-work figcaption,
+.work-viewer figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+}
+.exhibition-work figcaption strong { color: #1a1a1a; }
+.exhibition-work figcaption span { color: #666666; font-size: 0.8rem; }
+
+/* The viewer */
+.work-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 0.75rem 1rem;
+  background: rgba(10, 10, 10, 0.94);
+  color: #ffffff;
+}
+.work-viewer__figure { display: flex; flex-direction: column; align-items: center; max-width: 100%; max-height: 100%; margin: 0; }
+.work-viewer__figure img { max-width: 100%; max-height: calc(100dvh - 8rem); object-fit: contain; }
+.work-viewer figcaption { justify-content: center; color: #ffffff; }
+.work-viewer figcaption span { color: #cfcfcf; font-size: 0.8rem; }
+.work-viewer__count { opacity: 0.8; }
+.work-viewer__close,
+.work-viewer__nav {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  cursor: pointer;
+}
+.work-viewer__close { top: 0.75rem; right: 0.75rem; }
+.work-viewer__nav { top: 50%; transform: translateY(-50%); }
+.work-viewer__nav--prev { left: 0.5rem; }
+.work-viewer__nav--next { right: 0.5rem; }
+.work-viewer__close:hover,
+.work-viewer__nav:hover { background: rgba(255, 255, 255, 0.3); }
+
+/* The chat (a side panel on an exhibition; inside «Mi galería») */
+.gallery-chat-panel {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 8000;
+  display: flex;
+  flex-direction: column;
+  height: min(82dvh, 620px);
+  border-radius: 16px 16px 0 0;
+  background: #ffffff;
+  color: #1a1a1a;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.25);
+}
+.gallery-chat-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #ececec;
+}
+.gallery-chat-panel__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+.gallery-chat { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.gallery-chat__messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1rem;
+}
+.gallery-chat__empty { margin: auto 0; color: #666666; text-align: center; line-height: 1.5; }
+.gallery-chat__message { display: flex; flex-direction: column; align-items: flex-start; max-width: 85%; }
+.gallery-chat__message.is-mine { align-self: flex-end; align-items: flex-end; }
+.gallery-chat__bubble {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 14px 14px 14px 4px;
+  background: #f0f0f0;
+  color: #1a1a1a;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.gallery-chat__message.is-mine .gallery-chat__bubble { border-radius: 14px 14px 4px 14px; background: #1a1a1a; color: #ffffff; }
+.gallery-chat__meta { margin-top: 0.25rem; color: #777777; font-size: 0.72rem; }
+.gallery-chat__composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid #ececec;
+}
+.gallery-chat__composer textarea {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  max-height: 140px;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid #d6d6d6;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  resize: vertical;
+}
+.gallery-chat__composer textarea:focus { border-color: #1a1a1a; outline: none; }
+.gallery-chat__send { flex-shrink: 0; }
+
+/* «Mi galería» */
+.gallery-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+.gallery-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 2px solid #d6d6d6;
+  border-radius: 999px;
+  background: #f4f4f4;
+  color: #1a1a1a;
+  font-weight: 700;
+  cursor: pointer;
+}
+.gallery-tab.is-active { border-color: #1a1a1a; background: #1a1a1a; color: #ffffff; }
+
+.gallery-form { display: flex; flex-direction: column; gap: 1rem; max-width: 720px; margin-bottom: 2.5rem; }
+.gallery-form__field { display: flex; flex-direction: column; gap: 0.35rem; }
+.gallery-form__field label,
+.my-work__title label { font-weight: 700; font-size: 0.9rem; }
+.gallery-form__field input,
+.gallery-form__field textarea,
+.my-work__title input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0.65rem 0.8rem;
+  border: 2px solid #d6d6d6;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+}
+.gallery-form__field textarea { resize: vertical; }
+.gallery-form__field input:focus,
+.gallery-form__field textarea:focus,
+.my-work__title input:focus { border-color: #1a1a1a; outline: none; }
+.gallery-form__hint { margin: 0; color: #666666; font-size: 0.82rem; line-height: 1.45; }
+.gallery-form .gallery-btn { align-self: flex-start; }
+
+.my-works h2 { display: flex; align-items: baseline; gap: 0.75rem; margin: 0 0 0.4rem; font-size: 1.25rem; }
+.my-works__count { color: #666666; font-size: 0.9rem; font-weight: 600; }
+.my-works__list { display: flex; flex-direction: column; gap: 1rem; margin: 1rem 0; padding: 0; list-style: none; }
+.my-work {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.9rem;
+  border: 1px solid #e3e3e3;
+  border-radius: 12px;
+  background: #ffffff;
+}
+.my-work__image { position: relative; flex-shrink: 0; width: 100%; aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden; background: #f0f0f0; }
+.my-work__image img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.my-work__progress {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.8);
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.my-work__body { display: flex; flex-direction: column; gap: 0.6rem; flex: 1; min-width: 0; }
+.my-work__top { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
+.my-work__size { color: #666666; font-size: 0.8rem; }
+.my-work__reason { margin: 0; color: #a72020; font-size: 0.85rem; }
+.my-work__title { display: flex; flex-direction: column; gap: 0.35rem; }
+.my-work__title-row { display: flex; gap: 0.5rem; }
+.my-work__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.gallery-status { padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+.gallery-status--pending { background: #fef3c7; color: #92400e; }
+.gallery-status--approved { background: #dcfce7; color: #166534; }
+.gallery-status--rejected { background: #fee2e2; color: #991b1b; }
+
+.my-work-new {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 720px;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 2px dashed #cccccc;
+  border-radius: 12px;
+}
+.my-work-new .gallery-btn { align-self: flex-start; }
+
+.my-messages__list { display: flex; flex-direction: column; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.my-messages__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1a1a1a;
+  text-align: left;
+  text-transform: none;
+  cursor: pointer;
+}
+.my-messages__item.is-open { border-color: #1a1a1a; box-shadow: 0 0 0 2px #1a1a1a inset; }
+.my-messages__text { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; }
+.my-messages__preview { overflow: hidden; color: #666666; font-size: 0.85rem; text-overflow: ellipsis; white-space: nowrap; }
+.my-messages__side { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; flex-shrink: 0; }
+.my-messages__when { color: #777777; font-size: 0.75rem; }
+.my-messages__chat {
+  display: flex;
+  flex-direction: column;
+  height: min(70dvh, 560px);
+  margin-top: 1rem;
+  border: 1px solid #e3e3e3;
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
+}
+.my-messages__chat-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #ececec;
+}
+/* Phones: the open conversation takes the place of the list. */
+.my-messages__layout.has-open .my-messages__list { display: none; }
+
+@media (min-width: 640px) {
+  .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .exhibition-works { columns: 2; }
+  .my-work { flex-direction: row; }
+  .my-work__image { width: 220px; }
+}
+
+@media (min-width: 768px) {
+  .gallery-page { padding-top: 10.5rem; }
+  .gallery-page__header h1 { font-size: 2rem; }
+  .exhibition-page__header h1 { font-size: 2.4rem; }
+  .gallery-chat-panel {
+    inset: auto 1.5rem 1.5rem auto;
+    width: 400px;
+    height: min(70dvh, 600px);
+    border-radius: 16px;
+  }
+  .my-messages__layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 1rem; align-items: start; }
+  .my-messages__layout.has-open .my-messages__list { display: flex; }
+  .my-messages__chat { margin-top: 0; }
+  .my-messages__chat-head .gallery-back { display: none; }
+}
+
+@media (min-width: 1024px) {
+  .gallery-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .exhibition-works { columns: 3; }
+}
