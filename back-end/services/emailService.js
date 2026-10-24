@@ -181,13 +181,34 @@ export const sendAuthorInvitationEmail = async (userEmail, userName, inviterName
         </div>
       </body></html>
     `;
+    // A plain-text version too (an HTML-only email is likelier to end up in
+    // spam), and replies go to the magazine.
+    const textContent = [
+      `Hola, ${userName}:`,
+      '',
+      `${inviterName ? `${inviterName} te ha dado de alta` : 'Te hemos dado de alta'} como autora o autor de ${BRAND}.`,
+      '',
+      `Para aceptarlo, inicia sesión en la revista con Google usando este email (${userEmail}). Al aceptar podrás editar tu perfil de autora o autor y publicar en la revista.`,
+      '',
+      'Si prefieres no formar parte, también podrás decirlo al iniciar sesión.',
+      '',
+      `${BRAND}: ${magazineUrl}`
+    ].join('\n');
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"${BRAND}" <${process.env.EMAIL_USER}>`,
       to: userEmail,
+      replyTo: process.env.CONTACT_EMAIL || process.env.EMAIL_USER,
       subject: `${BRAND} te ha dado de alta como autora o autor`,
+      text: textContent,
       html: htmlContent
     });
+    // The server refused the address: not sent.
+    if (info?.rejected?.length) {
+      console.error('Author invitation email rejected by the server:', info.response);
+      return false;
+    }
+    console.log('Author invitation email sent:', info?.messageId, info?.response);
     return true;
   } catch (error) {
     console.error('Error sending author invitation email:', error);

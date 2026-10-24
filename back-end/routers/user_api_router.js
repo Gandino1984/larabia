@@ -55,6 +55,9 @@ router.get('/editors', async (req, res) => {
 // (controllers/user/author_invitation_controller.js)
 // ============================================================
 router.post('/invite-author', authorInvitation.invite);
+// Before /:id_user (they'd be taken for one).
+router.get('/invite-author/unsent', authorInvitation.unsent);
+router.post('/invite-author/send-unsent', authorInvitation.sendUnsent);
 router.get('/invite-author/:id_user', authorInvitation.details);
 router.post('/invite-author/:id_user/resend', authorInvitation.resend);
 router.get('/author-invitation', authorInvitation.mine);

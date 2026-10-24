@@ -1,8 +1,9 @@
 // magazine-front/src/components/authors/AuthorInvitationBox.jsx
 //
 // In the profile editor, for super admins: where the invitation of an author
-// they signed up stands (InviteAuthorModal). Pending: resend the email, or
-// correct the address while the person hasn't signed in. Declined: their
+// they signed up stands (InviteAuthorModal). Pending: when its email went out
+// (or that it isn't recorded as sent), resend it, or correct the address
+// while the person hasn't signed in. Declined: their
 // profile can't be published and their publications are signed by the
 // magazine; invite them again.
 import { useCallback, useEffect, useState } from 'react';
@@ -40,8 +41,10 @@ function AuthorInvitationBox({ userId }) {
 
   if (!invite || (invite.author_invite_status !== 'pending' && invite.author_invite_status !== 'declined')) return null;
 
-  const invitedAt = serverDate(invite.author_invited_at);
-  const when = invitedAt ? localDate(invitedAt, { day: 'numeric', month: 'long', year: 'numeric' }) : null;
+  // When the email went out — not when the invitation was made: the box said
+  // «Enviada» even when the email had failed.
+  const sentAt = serverDate(invite.author_invite_email_sent_at);
+  const sentWhen = sentAt ? localDate(sentAt, { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
   const resend = async (newEmail) => {
     setBusy(true);
@@ -110,11 +113,15 @@ function AuthorInvitationBox({ userId }) {
   return (
     <section className="author-invitation-box" aria-live="polite">
       <h2 className="author-invitation-box__title">{t('authors.invitation.pendingTitle', 'Invitación pendiente')}</h2>
-      <p className="author-invitation-box__text">
-        {when
-          ? t('authors.invitation.pendingText', { email: invite.email_user, date: when, defaultValue: 'Enviada a {{email}} el {{date}}. Aún no ha respondido: verá la invitación cuando inicie sesión con ese email.' })
-          : t('authors.invitation.pendingTextNoDate', { email: invite.email_user, defaultValue: 'Enviada a {{email}}. Aún no ha respondido: verá la invitación cuando inicie sesión con ese email.' })}
-      </p>
+      {sentWhen ? (
+        <p className="author-invitation-box__text">
+          {t('authors.invitation.pendingText', { email: invite.email_user, date: sentWhen, defaultValue: 'Enviada a {{email}} el {{date}}. Aún no ha respondido: verá la invitación cuando inicie sesión con ese email.' })}
+        </p>
+      ) : (
+        <p className="author-invitation-box__text author-invitation-box__text--unsent" role="status">
+          {t('authors.invitation.notSent', { email: invite.email_user, defaultValue: 'El email de invitación a {{email}} no consta como enviado. Pulsa «Enviar email» para enviarlo.' })}
+        </p>
+      )}
 
       {editingEmail ? (
         <form className="author-invitation-box__email" onSubmit={saveEmail} noValidate>
@@ -142,7 +149,7 @@ function AuthorInvitationBox({ userId }) {
       ) : (
         <div className="author-invitation-box__actions">
           <button type="button" className="author-invitation-box__btn" onClick={() => resend(null)} disabled={busy}>
-            {t('authors.invitation.resend', 'Reenviar email')}
+            {sentWhen ? t('authors.invitation.resend', 'Reenviar email') : t('authors.invitation.send', 'Enviar email')}
           </button>
           {!invite.has_signed_in && (
             <button

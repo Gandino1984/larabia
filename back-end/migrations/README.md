@@ -56,6 +56,7 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `022` | `magazine_workshops.free_workshop` |
 | `024` | `magazine_articles.featured_order` |
 | `025` | `user.newsletter_token` (unique) |
+| `026` | `user.author_invite_email_sent_at` |
 
 The tables of `009`, `010`, `011`, `014`, `015`, `020` and `023` are created at boot with Sequelize `sync()` when missing. The SQL files stay the reference for a fresh database.
 

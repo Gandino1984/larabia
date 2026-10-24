@@ -114,6 +114,12 @@ const user_model = sequelize.define("user", {
     author_invited_at: {
         type: DataTypes.DATE,
         allowNull: true
+    },
+    // When the invitation email was last sent successfully (NULL: not sent,
+    // or sent before this was recorded) — author_invitation_controller.
+    author_invite_email_sent_at: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
 }, {
     timestamps: false,

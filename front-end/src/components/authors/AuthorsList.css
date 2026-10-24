@@ -123,6 +123,48 @@
 }
 
 /* Search bar (filters by name and specialty tags) */
+/* Super admins: author invitations whose email isn't recorded as sent. */
+.authors-unsent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem 0.9rem;
+  max-width: 720px;
+  margin: 1.5rem auto 0;
+  padding: 0.85rem 1rem;
+  border: 2px solid #dc2626;
+  border-radius: 10px;
+  background: #fff5f5;
+  color: #7f1d1d;
+  text-align: left;
+}
+
+.authors-unsent__icon { flex-shrink: 0; }
+
+.authors-unsent__text {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.authors-unsent__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.6rem 1.1rem;
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.authors-unsent__btn:disabled { opacity: 0.6; cursor: default; }
+
 .authors-search {
   position: relative;
   display: flex;

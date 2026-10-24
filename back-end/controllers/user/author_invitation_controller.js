@@ -42,6 +42,9 @@ function invitationOf(user) {
         image_user: user.image_user,
         author_invite_status: user.author_invite_status,
         author_invited_at: user.author_invited_at,
+        // When the email last went out (null: not sent, or before this was
+        // recorded — «Enviar las invitaciones pendientes» in Autoras/es).
+        author_invite_email_sent_at: user.author_invite_email_sent_at || null,
         // Signed in at least once: the address is theirs, it can't be corrected.
         has_signed_in: !!(user.google_id || user.pass_user)
     };
@@ -82,8 +85,22 @@ async function passCreditsToMagazine(user) {
     }
 }
 
+// Sends the email and records when it went out (only if it did: before, the
+// profile said «Enviada» even when the email had failed).
 async function sendInvitation(user, inviter) {
-    return sendAuthorInvitationEmail(user.email_user, user.name_user, inviter?.name_user);
+    const sent = await sendAuthorInvitationEmail(user.email_user, user.name_user, inviter?.name_user);
+    if (sent) await user.update({ author_invite_email_sent_at: new Date() });
+    return sent;
+}
+
+// Pending invitations whose email isn't recorded as sent (the team excluded:
+// they're already in).
+async function unsentInvitations() {
+    const users = await user_model.findAll({
+        where: { author_invite_status: 'pending', author_invite_email_sent_at: null },
+        order: [['author_invited_at', 'ASC']]
+    });
+    return users.filter((u) => !roleSnapshot(u).canCreateContent);
 }
 
 /**
@@ -125,7 +142,8 @@ async function invite(req, res) {
             await user.update({
                 author_invite_status: 'pending',
                 author_invited_by: admin.id_user,
-                author_invited_at: new Date()
+                author_invited_at: new Date(),
+                author_invite_email_sent_at: null
             });
         } else {
             const sameName = await user_model.findOne({ where: { name_user: name } });
@@ -231,6 +249,52 @@ async function resend(req, res) {
 }
 
 /**
+ * GET /user/invite-author/unsent — super admins: the pending invitations whose
+ * email isn't recorded as sent.
+ */
+async function unsent(req, res) {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return;
+        const users = await unsentInvitations();
+        res.json({ error: null, data: users.map(invitationOf) });
+    } catch (err) {
+        console.error('author_invitation_controller - unsent:', err);
+        res.status(500).json({ error: 'Error al obtener las invitaciones', details: err.message });
+    }
+}
+
+/**
+ * POST /user/invite-author/send-unsent — super admins: sends those emails.
+ * data: { sent: [...], failed: [...] } (each an invitation).
+ */
+async function sendUnsent(req, res) {
+    try {
+        const admin = await requireSuperAdmin(req, res);
+        if (!admin) return;
+        const users = await unsentInvitations();
+        const sent = [];
+        const failed = [];
+        for (const user of users) {
+            const inviter = user.author_invited_by
+                ? await user_model.findByPk(user.author_invited_by, { attributes: ['id_user', 'name_user'] })
+                : admin;
+            (await sendInvitation(user, inviter || admin) ? sent : failed).push(invitationOf(user));
+        }
+        res.json({
+            error: null,
+            data: { sent, failed },
+            success: failed.length
+                ? `Enviadas: ${sent.length}. No se pudieron enviar: ${failed.length}`
+                : `Invitaciones enviadas: ${sent.length}`
+        });
+    } catch (err) {
+        console.error('author_invitation_controller - sendUnsent:', err);
+        res.status(500).json({ error: 'Error al enviar las invitaciones', details: err.message });
+    }
+}
+
+/**
  * GET /user/author-invitation — the signed-in user's pending invitation, or
  * data: null (also when signed out: never a 401, the front-end would log out).
  */
@@ -291,6 +355,6 @@ async function respond(req, res) {
     }
 }
 
-export { invite, details, resend, mine, respond };
+export { invite, details, resend, unsent, sendUnsent, mine, respond };
 
-export default { invite, details, resend, mine, respond };
+export default { invite, details, resend, unsent, sendUnsent, mine, respond };

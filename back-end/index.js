@@ -141,7 +141,9 @@ Promise.all([
         for (const [col, type] of [
             ['author_invite_status', DataTypes.STRING(20)],
             ['author_invited_by', DataTypes.INTEGER.UNSIGNED],
-            ['author_invited_at', DataTypes.DATE]
+            ['author_invited_at', DataTypes.DATE],
+            // When the invitation email last went out (migration 026).
+            ['author_invite_email_sent_at', DataTypes.DATE]
         ]) {
             if (!users[col]) {
                 await qi.addColumn('user', col, { type, allowNull: true });

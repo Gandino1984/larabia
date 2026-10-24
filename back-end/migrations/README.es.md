@@ -61,6 +61,7 @@ Desde la `012`, el back-end comprueba al arrancar (`back-end/index.js`) las colu
 | `022` | `magazine_workshops.free_workshop` |
 | `024` | `magazine_articles.featured_order` |
 | `025` | `user.newsletter_token` (único) |
+| `026` | `user.author_invite_email_sent_at` |
 
 Las tablas de `009`, `010`, `011`, `014`, `015`, `020` y `023` se crean al arrancar con `sync()` de Sequelize si no existen. Los archivos SQL siguen siendo la referencia para una base nueva.
 

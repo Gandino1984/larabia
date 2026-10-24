@@ -1,5 +1,5 @@
 // magazine-front/src/components/authors/AuthorsList.jsx
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthor } from '../../app_context/AuthorContext';
 import { useUI } from '../../app_context/UIContext';
@@ -7,7 +7,8 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import AuthorCard from './AuthorCard';
 import InviteAuthorModal from './InviteAuthorModal';
-import { Plus, UserPlus, Search, X } from 'lucide-react';
+import axiosInstance from '../../utils/axiosConfig';
+import { Plus, UserPlus, Search, X, MailWarning, Send } from 'lucide-react';
 import './AuthorsList.css';
 
 // For searching and sorting: no case, no accents («maria» finds «María»).
@@ -21,11 +22,40 @@ function AuthorsList() {
   } = useAuthor();
   const {
     navigateToAuthorEditor, navigateToAuthorEditorForUser, navigateToAuthorEditorForProfile,
-    showAuthors, showSuccess, showInfo
+    showAuthors, showSuccess, showInfo, showError
   } = useUI();
   const { canCreateContent, isSuperAdmin, currentUser } = useAuth();
   const { fetchEditors } = useMagazine();
   const [inviting, setInviting] = useState(false);
+
+  // Super admins: pending invitations whose email isn't recorded as sent
+  // (it failed, or went out before sends were recorded) — send them here.
+  const [unsent, setUnsent] = useState([]);
+  const [sendingUnsent, setSendingUnsent] = useState(false);
+  const loadUnsent = useCallback(() => {
+    if (!isSuperAdmin) { setUnsent([]); return; }
+    axiosInstance.get('/user/invite-author/unsent', { headers: { 'x-user-id': currentUser?.id_user } })
+      .then((res) => setUnsent(res.data?.data || []))
+      .catch(() => setUnsent([]));
+  }, [isSuperAdmin, currentUser?.id_user]);
+  useEffect(() => { if (showAuthors) loadUnsent(); }, [showAuthors, loadUnsent]);
+  const sendUnsent = async () => {
+    setSendingUnsent(true);
+    try {
+      const res = await axiosInstance.post('/user/invite-author/send-unsent', {}, { headers: { 'x-user-id': currentUser?.id_user } });
+      if (res.data?.data?.failed?.length) showError(res.data.success);
+      else showSuccess(res.data?.success);
+    } catch (err) {
+      showError(err.response?.data?.error || t('authors.unsent.error', 'No se pudieron enviar las invitaciones'));
+    } finally {
+      setSendingUnsent(false);
+      loadUnsent();
+    }
+  };
+  const listNames = (names) => {
+    try { return new Intl.ListFormat(i18n.language, { type: 'conjunction' }).format(names); }
+    catch { return names.join(', '); }
+  };
 
   // Re-fetch whenever the authors list becomes visible (e.g. after editing a profile)
   useEffect(() => {
@@ -79,6 +109,7 @@ function AuthorsList() {
   // the one they already have, e.g. someone invited again).
   const handleInvited = async (response, typedName) => {
     setInviting(false);
+    loadUnsent();
     const invited = response?.data;
     if (response?.emailSent === false) showInfo(response.success);
     else showSuccess(response?.success);
@@ -117,6 +148,21 @@ function AuthorsList() {
             <UserPlus size={20} />
             <span>{t('authors.invite.button', 'Nueva autora o autor')}</span>
           </button>
+        )}
+
+        {isSuperAdmin && unsent.length > 0 && (
+          <div className="authors-unsent" role="status">
+            <MailWarning size={20} className="authors-unsent__icon" aria-hidden="true" />
+            <p className="authors-unsent__text">
+              {t('authors.unsent.text', { count: unsent.length, names: listNames(unsent.map((u) => u.name_user)) })}
+            </p>
+            <button type="button" className="authors-unsent__btn" onClick={sendUnsent} disabled={sendingUnsent}>
+              <Send size={16} />
+              {sendingUnsent
+                ? t('authors.unsent.sending', 'Enviando…')
+                : t('authors.unsent.send', { count: unsent.length })}
+            </button>
+          </div>
         )}
 
         {!isEmpty && (
