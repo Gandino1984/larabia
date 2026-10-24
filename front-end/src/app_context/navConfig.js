@@ -34,9 +34,7 @@ export const DEFAULT_NAV = [
           { id: 'microabierto', kind: 'link', visible: true, min_role: 'all',
             label: { es: 'Espacio abierto', en: 'Open space', eu: 'Gune irekia' }, action: { type: 'section', value: 'openmic' } },
           { id: 'galeria', kind: 'link', visible: true, min_role: 'all',
-            label: { es: 'Galería', en: 'Gallery', eu: 'Galeria' }, action: { type: 'section', value: 'gallery' } },
-          { id: 'infantil', kind: 'link', visible: true, min_role: 'all',
-            label: { es: 'Infantil', en: 'Kids', eu: 'Haurrak' }, action: { type: 'category', value: 'infantil' } }
+            label: { es: 'Galería', en: 'Gallery', eu: 'Galeria' }, action: { type: 'section', value: 'gallery' } }
         ] },
       { id: 'internacional', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Internacional', en: 'International', eu: 'Nazioartea' }, action: { type: 'category', value: 'internacional' } },

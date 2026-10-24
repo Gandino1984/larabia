@@ -33,11 +33,11 @@ const resolveImage = (path) => {
 };
 
 // Article categories that make up the "Barrio" section (neighbourhood content:
-// micro-perfiles, espacio abierto, talleres, infantil).
-const BARRIO_CATEGORIES = ['micro-perfiles', 'terrenito en pluton', 'micro abierto', 'talleres', 'infantil'];
+// micro-perfiles, espacio abierto, talleres).
+const BARRIO_CATEGORIES = ['micro-perfiles', 'terrenito en pluton', 'micro abierto', 'talleres'];
 // …and the publications placed in the sections under «Barrio» in the menu
 // (utils/sections.js), projects included.
-const BARRIO_SECTIONS = ['microperfiles', 'openmic', 'galeria', 'infantil'];
+const BARRIO_SECTIONS = ['microperfiles', 'openmic', 'galeria'];
 const inAnySection = (pub, keys) => keys.some((key) => inSection(pub, key));
 
 // Each section declares which projects/articles belong to it, and whether it
