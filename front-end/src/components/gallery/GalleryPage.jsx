@@ -44,7 +44,7 @@ function GalleryPage() {
         <div>
           <h1>{t('gallery.title', 'Galería')}</h1>
           <p className="gallery-page__subtitle">
-            {t('gallery.subtitle', 'La obra de las y los artistas del barrio: cada exposición, con hasta siete obras.')}
+            {t('gallery.subtitle', 'Bienvenida/o a la galería de obras digitales de La Rabia. Aquí puedes explorar la actividad creativa de las/los artistas del barrio. Para convertirte en un artista visual en nuestra plataforma debes tener tu cuenta en la revista (Google Mail) y hacerte socia/o.')}
           </p>
         </div>
         {(isArtist || isSuperAdmin) && (
