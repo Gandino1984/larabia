@@ -4,8 +4,9 @@
 // - Anyone sees the exhibitions: an artist's title, short text and their
 //   APPROVED works (a super admin reviews each one before it's shown).
 // - Visual artists (user.is_artist) manage their own exhibition: its text and
-//   up to 7 works (an image, a title — none: «Sin título» — and its size in
-//   pixels, read from the file). Any change to a work sends it back to review.
+//   up to WORKS_MAX (15) works (an image, a title — none: «Sin título» — and
+//   its size in pixels, read from the file). Any change to a work sends it
+//   back to review.
 // - Visitors with an account write to an artist; each visitor ↔ artist pair is
 //   one conversation, kept, and answered in the gallery's chat. The bell feed
 //   tells each side about unread messages, and artists about their reviews.

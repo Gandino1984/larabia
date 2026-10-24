@@ -8,7 +8,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/sequelize.js";
 import user_model from "./user_model.js";
 
-export const WORKS_MAX = 7;
+export const WORKS_MAX = 15;
 export const WORK_STATUSES = ['pending', 'approved', 'rejected'];
 
 const timestamps = { timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' };

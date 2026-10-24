@@ -87,7 +87,7 @@ The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are crea
 | `reader_subscriptions` | Paid subscriptions (Stripe customer and subscription) |
 | `open_space_proposals` | Literary proposals sent from Espacio abierto (text or a private file in `uploads/proposals/`, status) |
 | `gallery_exhibitions` | The Galería: one exhibition per visual artist (title, short text) |
-| `gallery_works` | Its works (≤ 7): image in `uploads/gallery/`, title, size in pixels, order, review status |
+| `gallery_works` | Its works (≤ 15, `WORKS_MAX`): WebP image in `uploads/gallery/`, title, size in pixels, order, review status |
 | `gallery_conversations` | Artist ↔ visitor conversations (each side's last read) |
 | `gallery_messages` | Their messages |
 

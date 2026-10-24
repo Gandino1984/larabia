@@ -268,7 +268,7 @@ export const sendArtistInvitationEmail = async (userEmail, userName, inviterName
         hello: `Hola, ${userName}:`,
         paragraphs: [
           `${inviterName ? `${inviterName} te ha invitado` : 'Te hemos invitado'} a exponer tu obra en la Galería de ${BRAND}, como artista visual.`,
-          `Para aceptarlo, inicia sesión en la revista con Google usando este email (${EMAIL}). Al aceptar podrás montar tu exposición: un título, un texto breve y hasta 7 obras.`,
+          `Para aceptarlo, inicia sesión en la revista con Google usando este email (${EMAIL}). Al aceptar podrás montar tu exposición: un título, un texto breve y hasta 15 obras.`,
           'Si prefieres no participar, también podrás decirlo al iniciar sesión.'
         ]
       },
@@ -276,7 +276,7 @@ export const sendArtistInvitationEmail = async (userEmail, userName, inviterName
         hello: `Hi, ${userName},`,
         paragraphs: [
           `${inviterName ? `${inviterName} has invited you` : 'We have invited you'} to show your work in the ${BRAND} Gallery, as a visual artist.`,
-          `To accept, sign in to the magazine with Google using this email (${EMAIL}). Once you accept, you will be able to set up your exhibition: a title, a short text and up to 7 works.`,
+          `To accept, sign in to the magazine with Google using this email (${EMAIL}). Once you accept, you will be able to set up your exhibition: a title, a short text and up to 15 works.`,
           'If you would rather not take part, you can also say so when you sign in.'
         ]
       }

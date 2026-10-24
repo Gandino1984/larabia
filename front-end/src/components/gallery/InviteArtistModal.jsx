@@ -66,7 +66,7 @@ function InviteArtistModal({ onClose, onInvited }) {
         <span className="author-invite-modal__icon" aria-hidden="true"><Palette size={26} /></span>
         <h2 id="invite-artist-title">{t('gallery.invite.title', 'Invitar artista')}</h2>
         <p className="author-invite-modal__text">
-          {t('gallery.invite.lead', 'Le enviaremos un email (en castellano e inglés). Cuando inicie sesión con ese email, podrá aceptar y montar su exposición en la galería: un título, un texto breve y hasta siete obras.')}
+          {t('gallery.invite.lead', 'Le enviaremos un email (en castellano e inglés). Cuando inicie sesión con ese email, podrá aceptar y montar su exposición en la galería: un título, un texto breve y hasta quince obras.')}
         </p>
         <form className="author-invite-form" onSubmit={submit} noValidate>
           <div className="author-invite-form__field">

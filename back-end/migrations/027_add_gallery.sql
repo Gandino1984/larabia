@@ -1,8 +1,9 @@
 -- 027: the Galería — visual artists (a role a super admin grants by
 -- invitation, like authors) hang a small virtual exhibition: a title, a short
--- text and up to 7 works (images), each reviewed by a super admin before it's
--- shown. Visitors with an account write to the artist; the messages are kept
--- as conversations (artist ↔ visitor) and answered in the gallery's chat.
+-- text and up to WORKS_MAX works (models/gallery_models.js; 15), each
+-- reviewed by a super admin before it's shown. Visitors with an account write
+-- to the artist; the messages are kept as conversations (artist ↔ visitor)
+-- and answered in the gallery's chat.
 -- The back-end also adds the user columns and creates the tables at boot.
 
 ALTER TABLE user

@@ -92,7 +92,7 @@ Las tablas de `009`, `010`, `011`, `014`, `015`, `020`, `023` y `027` se crean a
 | `reader_subscriptions` | Suscripciones de pago (cliente y suscripción de Stripe) |
 | `open_space_proposals` | Propuestas literarias enviadas desde Espacio abierto (texto o archivo privado en `uploads/proposals/`, estado) |
 | `gallery_exhibitions` | La Galería: una exposición por artista visual (título, texto breve) |
-| `gallery_works` | Sus obras (≤ 7): imagen en `uploads/gallery/`, título, tamaño en píxeles, orden, estado de revisión |
+| `gallery_works` | Sus obras (≤ 15, `WORKS_MAX`): imagen WebP en `uploads/gallery/`, título, tamaño en píxeles, orden, estado de revisión |
 | `gallery_conversations` | Conversaciones artista ↔ visitante (la última lectura de cada parte) |
 | `gallery_messages` | Sus mensajes |
 

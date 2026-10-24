@@ -49,7 +49,7 @@ function GalleryInvitationModal() {
             : t('gallery.invitation.lead', 'Te invitan a exponer tu obra en la Galería de la revista, como artista visual.')}
         </p>
         <p className="author-invite-modal__text">
-          {t('gallery.invitation.info', 'Si aceptas, podrás montar tu exposición: un título, un texto breve y hasta siete obras, que el equipo revisa antes de mostrarlas. Quien visite la galería podrá escribirte, y le responderás desde tu galería.')}
+          {t('gallery.invitation.info', 'Si aceptas, podrás montar tu exposición: un título, un texto breve y hasta quince obras, que el equipo revisa antes de mostrarlas. Quien visite la galería podrá escribirte, y le responderás desde tu galería.')}
         </p>
         <div className="author-invite-modal__actions">
           <button type="button" className="author-invite-modal__btn author-invite-modal__btn--primary" onClick={accept} disabled={busy}>

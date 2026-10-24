@@ -1,8 +1,10 @@
 // magazine-front/src/components/gallery/MyGallery.jsx
 //
 // «Mi galería», for visual artists: their exhibition — its title (none: their
-// name) and short text — and up to 7 works: an image, a title (none: «Sin
-// título») and its size in pixels, read from the file. Every new or changed
+// name) and short text — and up to 15 works: an image (kept as WebP), a title
+// (none: «Sin título») and its size in pixels, read from the file. Top to
+// bottom: the texts, the upload box, the works, «Guardar la exposición» (the
+// texts and any work title left unsaved) and the count. Every new or changed
 // work goes to the team's review before it shows in the gallery; each one
 // says where it stands (and why, if it wasn't published). «Mensajes»: the
 // conversations visitors opened with them, answered in the chat.
@@ -32,7 +34,7 @@ function StatusChip({ work }) {
   return <span className="gallery-status gallery-status--pending">{t('gallery.status.pending', 'Pendiente de revisión')}</span>;
 }
 
-function WorkRow({ work, index, total, busy, onSaveTitle, onReplace, onMove, onDelete, progress }) {
+function WorkRow({ work, index, total, busy, onSaveTitle, onDraft, onReplace, onMove, onDelete, progress }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState(work.title_work || '');
   useEffect(() => { setTitle(work.title_work || ''); }, [work.title_work]);
@@ -66,7 +68,7 @@ function WorkRow({ work, index, total, busy, onSaveTitle, onReplace, onMove, onD
               value={title}
               maxLength={WORK_TITLE_MAX}
               placeholder={t('gallery.untitled', 'Sin título')}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => { setTitle(e.target.value); onDraft(work.id_work, e.target.value); }}
             />
             <button type="submit" className="gallery-btn gallery-btn--small" disabled={!changed || busy}>
               <Save size={15} aria-hidden="true" /> {t('common.buttons.save', 'Guardar')}
@@ -105,6 +107,7 @@ function MyGallery() {
   const [uploads, setUploads] = useState({}); // { [id_work | 'new']: 0–100 }
   const [newTitle, setNewTitle] = useState('');
   const newFileRef = useRef(null);
+  const titleDrafts = useRef({}); // { [id_work]: the title being typed }
   const [conversations, setConversations] = useState(null);
   const [openConversation, setOpenConversation] = useState(galleryView.conversationId || null);
   const auth = useCallback(() => ({ headers: { 'x-user-id': currentUser?.id_user } }), [currentUser?.id_user]);
@@ -152,9 +155,27 @@ function MyGallery() {
     }
   };
 
-  const saveText = (e) => {
+  // «Guardar la exposición»: the texts, and the work titles typed but not saved.
+  const saveAll = async (e) => {
     e.preventDefault();
-    run(() => axiosInstance.patch('/gallery/mine', { title, statement }, auth()));
+    const titled = data.works.filter((w) => {
+      const draft = titleDrafts.current[w.id_work];
+      return draft != null && draft.trim() !== (w.title_work || '');
+    });
+    setBusy(true);
+    try {
+      let res = await axiosInstance.patch('/gallery/mine', { title, statement }, auth());
+      apply(res.data?.data);
+      for (const w of titled) {
+        res = await axiosInstance.patch(`/gallery/mine/works/${w.id_work}`, { title: titleDrafts.current[w.id_work] }, auth());
+        apply(res.data?.data);
+      }
+      if (res.data?.success) showSuccess(res.data.success);
+    } catch (err) {
+      showError(err.response?.data?.error || t('gallery.mine.error', 'No se pudo guardar'));
+    } finally {
+      setBusy(false);
+    }
   };
 
   const checkFile = (file) => {
@@ -224,7 +245,7 @@ function MyGallery() {
         <div>
           <h1>{t('gallery.mine.title', 'Mi galería')}</h1>
           <p className="gallery-page__subtitle">
-            {t('gallery.mine.subtitle', 'Tu exposición en la Galería: un título, un texto breve y hasta siete obras.')}
+            {t('gallery.mine.subtitle', 'Tu exposición en la Galería: un título, un texto breve y hasta quince obras.')}
           </p>
         </div>
         {hasPublished && (
@@ -252,7 +273,7 @@ function MyGallery() {
         </p>
       ) : (
         <>
-          <form className="gallery-form" onSubmit={saveText}>
+          <form id="exhibition-form" className="gallery-form" onSubmit={saveAll}>
             <div className="gallery-form__field">
               <label htmlFor="exhibition-title">{t('gallery.mine.exhibitionTitle', 'Título de la exposición')}</label>
               <input id="exhibition-title" type="text" value={title} maxLength={TITLE_MAX}
@@ -265,46 +286,45 @@ function MyGallery() {
                 onChange={(e) => setStatement(e.target.value)} />
               <p className="gallery-form__hint">{statement.length}/{STATEMENT_MAX}</p>
             </div>
-            <button type="submit" className="gallery-btn gallery-btn--primary" disabled={busy}>
-              <Save size={16} aria-hidden="true" /> {t('gallery.mine.saveText', 'Guardar la exposición')}
-            </button>
           </form>
 
-          <section className="my-works">
-            <h2>
-              {t('gallery.mine.works', 'Obras')}
-              <span className="my-works__count">{t('gallery.mine.worksCount', { count: data.works.length, max: data.works_max, defaultValue: '{{count}} de {{max}}' })}</span>
-            </h2>
-            <p className="gallery-form__hint">
-              {t('gallery.mine.reviewNote', 'Cada obra nueva o cambiada pasa por la revisión del equipo antes de verse en la galería.')}
-            </p>
-            {data.works.length > 0 && (
-              <ul className="my-works__list">
-                {data.works.map((w, i) => (
-                  <WorkRow key={w.id_work} work={w} index={i} total={data.works.length} busy={busy}
-                    progress={uploads[w.id_work]} onSaveTitle={saveTitle} onReplace={replace} onMove={move} onDelete={remove} />
-                ))}
-              </ul>
-            )}
-            {data.works.length < data.works_max ? (
-              <div className="my-work-new">
-                <div className="gallery-form__field">
-                  <label htmlFor="new-work-title">{t('gallery.mine.newTitle', 'Título de la nueva obra (opcional)')}</label>
-                  <input id="new-work-title" type="text" value={newTitle} maxLength={WORK_TITLE_MAX}
-                    placeholder={t('gallery.untitled', 'Sin título')} onChange={(e) => setNewTitle(e.target.value)} />
-                </div>
-                <button type="button" className="gallery-btn gallery-btn--primary" onClick={() => newFileRef.current?.click()} disabled={busy}>
-                  {uploads.new != null
-                    ? <><Upload size={16} aria-hidden="true" /> {uploads.new < 100 ? `${uploads.new}%` : t('hscroll.editor.processingImage', 'Procesando…')}</>
-                    : <><ImagePlus size={16} aria-hidden="true" /> {t('gallery.mine.add', 'Subir una obra')}</>}
-                </button>
-                <input ref={newFileRef} type="file" accept={IMAGE_TYPES.join(',')} className="gallery-sr" tabIndex={-1}
-                  onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) addWork(f); }} />
-                <p className="gallery-form__hint">{t('gallery.mine.fileHint', { max: IMAGE_MAX_MB, defaultValue: 'JPG, PNG, WebP, AVIF, GIF o TIFF, hasta {{max}} MB. Se guarda a su tamaño, en píxeles.' })}</p>
+          {data.works.length < data.works_max ? (
+            <div className="my-work-new">
+              <div className="gallery-form__field">
+                <label htmlFor="new-work-title">{t('gallery.mine.newTitle', 'Título de la nueva obra (opcional)')}</label>
+                <input id="new-work-title" type="text" value={newTitle} maxLength={WORK_TITLE_MAX}
+                  placeholder={t('gallery.untitled', 'Sin título')} onChange={(e) => setNewTitle(e.target.value)} />
               </div>
-            ) : (
-              <p className="gallery-form__hint">{t('gallery.mine.full', { max: data.works_max, defaultValue: 'Tu exposición ya tiene {{max}} obras: quita una para subir otra.' })}</p>
+              <button type="button" className="gallery-btn gallery-btn--primary" onClick={() => newFileRef.current?.click()} disabled={busy}>
+                {uploads.new != null
+                  ? <><Upload size={16} aria-hidden="true" /> {uploads.new < 100 ? `${uploads.new}%` : t('hscroll.editor.processingImage', 'Procesando…')}</>
+                  : <><ImagePlus size={16} aria-hidden="true" /> {t('gallery.mine.add', 'Subir una obra')}</>}
+              </button>
+              <input ref={newFileRef} type="file" accept={IMAGE_TYPES.join(',')} className="gallery-sr" tabIndex={-1}
+                onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) addWork(f); }} />
+              <p className="gallery-form__hint">{t('gallery.mine.fileHint', { max: IMAGE_MAX_MB, defaultValue: 'JPG, PNG, WebP, AVIF, GIF o TIFF, hasta {{max}} MB. Se guarda en formato WebP, a su tamaño en píxeles.' })}</p>
+              <p className="gallery-form__hint">{t('gallery.mine.reviewNote', 'Cada obra nueva o cambiada pasa por la revisión del equipo antes de verse en la galería.')}</p>
+            </div>
+          ) : (
+            <p className="my-work-new my-work-new--full">{t('gallery.mine.full', { max: data.works_max, defaultValue: 'Tu exposición ya tiene {{max}} obras: quita una para subir otra.' })}</p>
+          )}
+
+          <section className="my-works">
+            {data.works.length > 0 && (
+              <>
+                <h2>{t('gallery.mine.works', 'Obras')}</h2>
+                <ul className="my-works__list">
+                  {data.works.map((w, i) => (
+                    <WorkRow key={w.id_work} work={w} index={i} total={data.works.length} busy={busy} progress={uploads[w.id_work]}
+                      onSaveTitle={saveTitle} onDraft={(id, value) => { titleDrafts.current[id] = value; }} onReplace={replace} onMove={move} onDelete={remove} />
+                  ))}
+                </ul>
+              </>
             )}
+            <button type="submit" form="exhibition-form" className="gallery-btn gallery-btn--primary my-works__save" disabled={busy}>
+              <Save size={16} aria-hidden="true" /> {t('gallery.mine.saveText', 'Guardar la exposición')}
+            </button>
+            <p className="my-works__count">{t('gallery.mine.worksCount', { count: data.works.length, max: data.works_max, defaultValue: 'Obras subidas: {{count}} de {{max}}' })}</p>
           </section>
         </>
       ))}
