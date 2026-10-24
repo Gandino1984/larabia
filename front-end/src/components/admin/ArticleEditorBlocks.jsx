@@ -696,13 +696,17 @@ function ArticleEditorBlocks() {
     });
   };
 
+  // The same block: saved ones have an id_block (and no tempId), new ones a
+  // tempId (and no id_block). Comparing the bare fields matched every other
+  // block of the same kind (undefined === undefined): deleting a saved image
+  // deleted all the saved text blocks too.
+  const sameBlock = (a, b) => (a.id_block != null && a.id_block === b.id_block)
+    || (a.tempId != null && a.tempId === b.tempId);
+
   const handleBlockUpdate = (updatedBlock) => {
     setBlocks(prevBlocks => {
       return prevBlocks.map(block => {
-        const isMatch = (block.id_block && block.id_block === updatedBlock.id_block) ||
-                       (block.tempId && block.tempId === updatedBlock.tempId);
-
-        if (isMatch) {
+        if (sameBlock(block, updatedBlock)) {
           return { ...block, ...updatedBlock };
         }
         return block;
@@ -715,9 +719,7 @@ function ArticleEditorBlocks() {
       return;
     }
 
-    setBlocks(prevBlocks => prevBlocks.filter(block =>
-      !(block.id_block === blockToDelete.id_block || block.tempId === blockToDelete.tempId)
-    ));
+    setBlocks(prevBlocks => prevBlocks.filter(block => !sameBlock(block, blockToDelete)));
   };
 
   const moveBlockUp = (index) => {
