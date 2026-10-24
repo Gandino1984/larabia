@@ -143,6 +143,15 @@ function ProjectDetail() {
       icon: <Download size={18} />,
     });
   }
+  if (canEdit) {
+    projectActions.push({
+      key: 'edit',
+      onClick: () => navigateToProjectEdit(selectedProject),
+      title: t('project.detail.edit', 'Editar proyecto'),
+      label: t('engagement.label.edit', 'Editar'),
+      icon: <Pencil size={18} />,
+    });
+  }
 
   return (
     <div className="project-detail-page">
@@ -167,9 +176,9 @@ function ProjectDetail() {
         )}
 
         <div className="project-detail-info">
-          {/* Top row: the ⋯ button grouping follow (logged-in users) and download
-              files (editors+) on the left, revealing rightward; the type/format
-              badges on the right. */}
+          {/* Top row: the ⋯ button grouping follow (logged-in users), download
+              files (editors+) and edit (its authors, super admins) on the left,
+              revealing rightward; the type/format badges on the right. */}
           {(selectedProject.type_project || selectedProject.format_project || projectActions.length > 0) && (
             <div className="project-detail-top-row">
               <OptionsReveal actions={projectActions} className="project-options" />
@@ -205,13 +214,6 @@ function ProjectDetail() {
               </div>
             )}
           </div>
-
-          {canEdit && (
-            <button type="button" className="project-detail-edit-btn" onClick={() => navigateToProjectEdit(selectedProject)}>
-              <Pencil size={16} aria-hidden="true" />
-              {t('project.detail.edit', 'Editar proyecto')}
-            </button>
-          )}
         </div>
       </div>
 
