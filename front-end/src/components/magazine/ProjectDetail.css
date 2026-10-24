@@ -240,6 +240,31 @@
   font-weight: 400;
 }
 
+/* «Editar proyecto» (its authors and super admins). */
+.project-detail-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: fit-content;
+  min-height: 40px;
+  margin: 1.25rem auto 0;
+  padding: 0.5rem 1rem;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.project-detail-edit-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+@media (hover: hover) {
+  .project-detail-edit-btn:hover { background: rgba(255, 255, 255, 0.12); }
+}
+
 /* Row holding the collaborators */
 .project-detail-meta-row {
   display: flex;

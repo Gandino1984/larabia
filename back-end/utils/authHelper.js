@@ -91,9 +91,40 @@ export async function requireAdmin(req, res) {
     return user;
 }
 
+/**
+ * Reject the request unless the caller is a super admin or `isOwner(user)`
+ * says what's being changed is theirs (their publication, their profile…).
+ * Sends the 403 itself (with a `code`); returns the user iff it may proceed.
+ */
+export async function requireOwnerOrSuperAdmin(req, res, isOwner, error = 'Solo puedes editar tus propias publicaciones') {
+    const user = await getRequestUser(req);
+    if (!user) {
+        res.status(403).json({ error: 'Inicia sesión para continuar', code: 'login_required' });
+        return null;
+    }
+    if (roleSnapshot(user).isSuperAdmin || await isOwner(user)) return user;
+    res.status(403).json({ error, code: 'not_owner' });
+    return null;
+}
+
+/**
+ * Reject the request unless the caller is on the magazine team (editor, admin
+ * or super admin). Sends the 403 itself; returns the user iff it may proceed.
+ */
+export async function requireCreator(req, res) {
+    const user = await getRequestUser(req);
+    if (!user || !roleSnapshot(user).canCreateContent) {
+        res.status(403).json({ error: 'Solo el equipo de la revista puede hacer esto', code: 'creator_required' });
+        return null;
+    }
+    return user;
+}
+
 export default {
     getRequestUser,
     roleSnapshot,
     requireSuperAdmin,
-    requireAdmin
+    requireAdmin,
+    requireOwnerOrSuperAdmin,
+    requireCreator
 };

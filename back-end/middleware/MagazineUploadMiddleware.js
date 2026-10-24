@@ -564,13 +564,18 @@ const cleanExistingAuthorProfileImages = async (dirPath, userId) => {
   }
 };
 
+// Whose author profile the photo is for: x-profile-user-id (a super admin
+// editing someone's profile), else the sender (x-user-id). The router checks
+// first that the sender may (their own, or a super admin).
+const profileOwnerId = (req) => req.headers['x-profile-user-id'] || req.headers['x-user-id'];
+
 // Multer storage configuration for author profile images
 const authorProfileImageStorage = multer.diskStorage({
   destination: async function (req, file, cb) {
     console.log('=== Author Profile Image Upload - Setting Destination ===');
     console.log('Processing file:', file.fieldname, file.originalname);
 
-    const userId = req.headers['x-user-id'];
+    const userId = profileOwnerId(req);
 
     console.log('User ID:', userId);
 
@@ -609,7 +614,7 @@ const authorProfileImageStorage = multer.diskStorage({
     }
   },
   filename: function (req, file, cb) {
-    const userId = req.headers['x-user-id'];
+    const userId = profileOwnerId(req);
     const tempFileName = userId
       ? `temp_author_${userId}_${Date.now()}${path.extname(file.originalname)}`
       : `temp_author_new_${Date.now()}${path.extname(file.originalname)}`;
@@ -631,7 +636,7 @@ const uploadAuthorProfileImage = multer({
 const handleAuthorProfileImageUpload = async (req, res, next) => {
   console.log('=== Starting Author Profile Image Upload Handler ===');
   console.log('Request content type:', req.headers['content-type']);
-  console.log('Request headers:', { 'x-user-id': req.headers['x-user-id'] });
+  console.log('Request headers:', { 'x-user-id': req.headers['x-user-id'], 'x-profile-user-id': req.headers['x-profile-user-id'] });
 
   uploadAuthorProfileImage(req, res, async function (err) {
     if (err instanceof multer.MulterError) {
@@ -698,7 +703,7 @@ const handleAuthorProfileImageUpload = async (req, res, next) => {
             size: Math.round(processedFile.size / 1024) + 'KB'
           });
 
-          const userId = req.headers['x-user-id'];
+          const userId = profileOwnerId(req);
           if (userId) {
             const finalFilename = `author_${userId}.webp`;
             const finalPath = path.join(path.dirname(processedFile.path), finalFilename);

@@ -221,6 +221,11 @@ const handleUpload = async (req, res) => {
                 details: !req.file ? 'No file uploaded' : 'Missing x-user-name header'
             });
         }
+        // Only your own photo (or a super admin's change).
+        const caller = await getRequestUser(req);
+        if (!caller || (caller.name_user !== userName && !roleSnapshot(caller).isSuperAdmin)) {
+            return res.status(403).json({ error: 'Solo puedes editar tu propio perfil', code: 'not_owner' });
+        }
         const result = await userApiController.updateProfileImage(userName);
         if (result.error) return res.status(400).json(result);
         return res.json({ ...result, data: { ...result.data, image_user: userName } });

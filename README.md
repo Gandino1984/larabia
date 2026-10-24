@@ -140,6 +140,7 @@ Roles are independent flags on `user`. One account can hold several.
 | Visual artist (`is_artist`, combinable with any role) | Their exhibition in the Galería and its messages — nothing else |
 
 - `canCreateContent` = editor, admin or super admin. `canPublishDirectly` = super admin only.
+- **Only your own:** outside super admins, people change only what's theirs — articles and projects they sign (and their blocks, covers…), their author profile and photo, their account, their exhibition. Creating needs the magazine team and their own signature (super admins publish on others' behalf). Checked on the server (`requireOwnerOrSuperAdmin` / `requireCreator` in `utils/authHelper.js`, authorship in `utils/ownership.js`); roles change only through `/user/grant-role`. The front-end sends `x-user-id` on every write (`utils/axiosConfig.js`), and only shows «Editar» where it's allowed — e.g. «Editar proyecto» on a project's page, which opens its form in the creator and comes back.
 - The server checks the role on each request: it reads the `x-user-id` header and looks the user up (`back-end/utils/authHelper.js`).
 - When access is refused, the server answers 403 with a `code`, never 401: the front-end logs the user out on 401.
 - E-mails listed in `SUPER_ADMIN_EMAILS` become super admins when they sign in.

@@ -230,10 +230,12 @@ export const AuthorProvider = ({ children }) => {
       const formData = new FormData();
       formData.append('image', imageFile);
 
+      // x-profile-user-id: whose profile (a super admin may edit someone's);
+      // who is sending it goes in x-user-id (utils/axiosConfig.js).
       const response = await axiosInstance.post('/author-profile/upload-image', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'x-user-id': userId
+          'x-profile-user-id': userId
         }
       });
 

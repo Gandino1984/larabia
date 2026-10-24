@@ -16,6 +16,7 @@ router.get('/author-profile/by-user/:userId', controller.getByUserId);
 router.post('/author-profile/create', controller.create);
 router.patch('/author-profile/update/:id', controller.update);
 router.delete('/author-profile/remove-by-id/:id', controller.deleteProfile);
-router.post('/author-profile/upload-image', handleAuthorProfileImageUpload, controller.uploadProfileImage);
+// ownPhotoOnly runs BEFORE the upload (which replaces author_<id>.webp on disk).
+router.post('/author-profile/upload-image', controller.ownPhotoOnly, handleAuthorProfileImageUpload, controller.uploadProfileImage);
 
 export default router;

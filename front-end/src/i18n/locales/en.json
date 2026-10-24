@@ -1678,5 +1678,6 @@
   "gallery.invitation.confirmDecline": "If you decline, the gallery prepared for you will be deleted, with its works. Decline it?",
   "notifications.galleryInvite.preparedTitle": "A gallery has been prepared for you",
   "notifications.galleryInvite.preparedMessage": "{{name}} has prepared a gallery for you: accept it to manage it yourself.",
-  "notifications.galleryInvite.preparedMessageNoName": "A gallery has been prepared for you: accept it to manage it yourself."
+  "notifications.galleryInvite.preparedMessageNoName": "A gallery has been prepared for you: accept it to manage it yourself.",
+  "project.detail.edit": "Edit project"
 }

@@ -1,5 +1,5 @@
 // magazine-front/src/components/admin/ArticleEditorBlocks.jsx
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../app_context/AuthContext';
@@ -82,11 +82,14 @@ function ArticleEditorBlocks() {
     uploadPanelAudio,
     submitForApproval,
     revertToDraft,
-    fetchArticleById
+    fetchArticleById,
+    // The project shown on its page (refreshed after editing it from there).
+    setSelectedProject: setPageProject
   } = useMagazine();
   const {
     showSuccess, showError, showInfo, navigateToHome, navigateToArticlesList, navigateToArticle, showEditor,
-    openEditorToEdit, setOpenEditorToEdit, editorInitialView, editorReturnTo
+    openEditorToEdit, setOpenEditorToEdit, editorInitialView, editorReturnTo,
+    editorProjectToEdit, setEditorProjectToEdit, returnToProjectDetail
   } = useUI();
   const { t } = useTranslation();
 
@@ -506,9 +509,39 @@ function ArticleEditorBlocks() {
     }
   };
 
+  // Opened from the project's page («Editar proyecto»): its form at once, and
+  // closing it goes back to that page, with the project as saved.
+  const projectFormFromPage = useRef(null);
+  useEffect(() => {
+    if (!showEditor || !editorProjectToEdit) return;
+    projectFormFromPage.current = editorProjectToEdit.id_project;
+    openEditProjectModal(editorProjectToEdit);
+    setEditorProjectToEdit(null);
+  }, [showEditor, editorProjectToEdit]);
+
+  const backToProjectPage = async (projectId) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
+      const res = await axios.get(`${apiUrl}/magazine-project/by-id/${projectId}`, { headers: { 'x-user-id': currentUser?.id_user } });
+      if (res.data?.data) setPageProject(res.data.data);
+    } catch (error) {
+      console.error('Error reloading the project:', error);
+    }
+    resetForm();
+    returnToProjectDetail();
+  };
+
+  const closeProjectModal = () => {
+    const fromPage = projectFormFromPage.current;
+    projectFormFromPage.current = null;
+    resetProjectModal();
+    if (fromPage) backToProjectPage(fromPage);
+  };
+
   // Jump from the project modal into editing one of its articles (loads its
   // blocks/panels in the article creator's edit mode).
   const handleEditProjectArticle = (article) => {
+    projectFormFromPage.current = null;
     resetProjectModal();
     handleEdit(article);
   };
@@ -556,7 +589,7 @@ function ArticleEditorBlocks() {
 
       await fetchProjects();
       setFormData(prev => ({ ...prev, project_id: id }));
-      resetProjectModal();
+      closeProjectModal();
     } catch (error) {
       console.error('Error submitting project:', error);
       showError(error.response?.data?.error || t('messages.error.createProject'));
@@ -1075,6 +1108,7 @@ function ArticleEditorBlocks() {
     }
     resetForm();
     if (editorReturnTo === 'articlesList') navigateToArticlesList();
+    else if (editorReturnTo === 'project') returnToProjectDetail();
     else navigateToHome();
   };
 
@@ -2374,13 +2408,13 @@ function ArticleEditorBlocks() {
 
       {/* Create Project Modal — rendered via portal to escape overflow/transform ancestors */}
       {showProjectModal && createPortal(
-        <div className="modal-overlay" onClick={resetProjectModal}>
+        <div className="modal-overlay" onClick={closeProjectModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{editingProjectId ? t('editor.project.editTitle') : t('editor.project.createNew')}</h2>
               <button
                 className="modal-close"
-                onClick={resetProjectModal}
+                onClick={closeProjectModal}
                 aria-label={t('common.buttons.close')}
               >
                 ×
@@ -2578,7 +2612,7 @@ function ArticleEditorBlocks() {
               <button
                 type="button"
                 className="btn-cancel"
-                onClick={resetProjectModal}
+                onClick={closeProjectModal}
               >
                 {t('common.buttons.cancel')}
               </button>

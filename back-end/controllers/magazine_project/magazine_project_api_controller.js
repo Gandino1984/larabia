@@ -3,7 +3,12 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import magazineProjectController from "./magazine_project_controller.js";
-import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
+import { getRequestUser, roleSnapshot, requireSuperAdmin, requireOwnerOrSuperAdmin, requireCreator } from "../../utils/authHelper.js";
+import { isProjectAuthor, signsIt } from "../../utils/ownership.js";
+
+// Only a super admin or one of its authors changes a project (sends the 403).
+const ownProjectOnly = (req, res, projectId) =>
+    requireOwnerOrSuperAdmin(req, res, (user) => isProjectAuthor(projectId, user.id_user));
 import { normalizeTranslations } from "../../utils/translations.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -168,7 +173,13 @@ async function create(req, res) {
             translations_project: normalizeTranslations('project', translations_project) ?? null
         };
 
-        const callerUser = await getRequestUser(req);
+        // The magazine team creates; outside super admins (who publish on
+        // others' behalf), only projects they sign themselves.
+        const callerUser = await requireCreator(req, res);
+        if (!callerUser) return;
+        if (!roleSnapshot(callerUser).isSuperAdmin && !signsIt(projectData, callerUser.id_user)) {
+            return res.status(403).json({ error: 'Solo puedes crear publicaciones que firmes tú', code: 'not_owner' });
+        }
         const { error, data, success } = await magazineProjectController.create(projectData, roleSnapshot(callerUser));
 
         if (error) {
@@ -194,6 +205,7 @@ async function update(req, res) {
                 error: 'El ID del proyecto es obligatorio'
             });
         }
+        if (!(await ownProjectOnly(req, res, id_project))) return;
 
         const {
             title_project,
@@ -298,6 +310,7 @@ async function uploadCoverImage(req, res) {
                 error: 'El ID del proyecto es obligatorio'
             });
         }
+        if (!(await ownProjectOnly(req, res, id_project))) return;
 
         if (!req.file) {
             return res.status(400).json({
@@ -326,6 +339,7 @@ async function uploadCoverImage(req, res) {
 async function removeCoverImage(req, res) {
     try {
         const { id_project } = req.params;
+        if (id_project && !(await ownProjectOnly(req, res, id_project))) return;
 
         if (!id_project) {
             return res.status(400).json({
@@ -352,6 +366,7 @@ async function removeCoverImage(req, res) {
 async function deactivate(req, res) {
     try {
         const { id_project } = req.params;
+        if (id_project && !(await ownProjectOnly(req, res, id_project))) return;
 
         if (!id_project) {
             return res.status(400).json({

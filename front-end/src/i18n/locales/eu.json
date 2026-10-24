@@ -1678,5 +1678,6 @@
   "gallery.invitation.confirmDecline": "Baztertzen baduzu, prestatu dizuten galeria ezabatu egingo da, bere lanekin. Baztertu nahi duzu?",
   "notifications.galleryInvite.preparedTitle": "Galeria bat prestatu dizute",
   "notifications.galleryInvite.preparedMessage": "{{name}}(e)k galeria bat prestatu dizu: onartu zuk kudeatzeko.",
-  "notifications.galleryInvite.preparedMessageNoName": "Galeria bat prestatu dizute: onartu zuk kudeatzeko."
+  "notifications.galleryInvite.preparedMessageNoName": "Galeria bat prestatu dizute: onartu zuk kudeatzeko.",
+  "project.detail.edit": "Editatu proiektua"
 }

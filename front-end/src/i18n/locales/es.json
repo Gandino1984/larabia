@@ -1678,5 +1678,6 @@
   "gallery.invitation.confirmDecline": "Si la rechazas, se borrará la galería que te han preparado, con sus obras. ¿La rechazas?",
   "notifications.galleryInvite.preparedTitle": "Te han preparado una galería",
   "notifications.galleryInvite.preparedMessage": "{{name}} te ha preparado una galería: acéptala para gestionarla tú.",
-  "notifications.galleryInvite.preparedMessageNoName": "Te han preparado una galería: acéptala para gestionarla tú."
+  "notifications.galleryInvite.preparedMessageNoName": "Te han preparado una galería: acéptala para gestionarla tú.",
+  "project.detail.edit": "Editar proyecto"
 }

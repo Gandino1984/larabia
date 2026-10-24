@@ -1,6 +1,14 @@
 // back-end/controllers/article_blocks/article_blocks_api_controller.js
 import articleBlocksController from "./article_blocks_controller.js";
+import article_block_model from "../../models/article_block_model.js";
 import multer from 'multer';
+import { requireOwnerOrSuperAdmin, requireCreator } from "../../utils/authHelper.js";
+import { isArticleAuthor } from "../../utils/ownership.js";
+
+// A block is changed only by a super admin or an author of its article (sends the 403).
+const ownArticleOnly = (req, res, articleId) =>
+    requireOwnerOrSuperAdmin(req, res, (user) => isArticleAuthor(articleId, user.id_user));
+const articleOfBlock = async (id_block) => (await article_block_model.findByPk(id_block, { attributes: ['article_id'] }))?.article_id;
 
 // Configure multer for memory storage with 50MB limit for large comic panels
 const storage = multer.memoryStorage();
@@ -66,6 +74,7 @@ async function getById(req, res) {
 async function create(req, res) {
     try {
         const blockData = req.body;
+        if (!(await ownArticleOnly(req, res, blockData?.article_id))) return;
 
         const { error, data } = await articleBlocksController.create(blockData);
 
@@ -86,13 +95,17 @@ async function create(req, res) {
 async function update(req, res) {
     try {
         const { id_block } = req.params;
-        const blockData = req.body;
+        // A block stays in its article (moving it would write into someone else's).
+        const { article_id: _ignored, id_block: _id, ...blockData } = req.body || {};
 
         if (!id_block) {
             return res.status(400).json({
                 error: 'El ID del bloque es obligatorio'
             });
         }
+        const articleId = await articleOfBlock(id_block);
+        if (!articleId) return res.status(404).json({ error: 'Bloque no encontrado' });
+        if (!(await ownArticleOnly(req, res, articleId))) return;
 
         const { error, data } = await articleBlocksController.update(id_block, blockData);
 
@@ -119,6 +132,9 @@ async function deleteBlock(req, res) {
                 error: 'El ID del bloque es obligatorio'
             });
         }
+        const articleId = await articleOfBlock(id_block);
+        if (!articleId) return res.status(404).json({ error: 'Bloque no encontrado' });
+        if (!(await ownArticleOnly(req, res, articleId))) return;
 
         const { error, data } = await articleBlocksController.deleteBlock(id_block);
 
@@ -152,6 +168,7 @@ async function reorderBlocks(req, res) {
                 error: 'Se requiere un array de bloques con sus nuevos órdenes'
             });
         }
+        if (!(await ownArticleOnly(req, res, article_id))) return;
 
         const { error, data } = await articleBlocksController.reorderBlocks(article_id, blocks);
 
@@ -171,6 +188,7 @@ async function reorderBlocks(req, res) {
 
 async function uploadImage(req, res) {
     try {
+        if (!(await requireCreator(req, res))) return;
         if (!req.file) {
             return res.status(400).json({
                 error: 'No se proporcionó ningún archivo'
@@ -195,6 +213,7 @@ async function uploadImage(req, res) {
 
 async function uploadAudio(req, res) {
     try {
+        if (!(await requireCreator(req, res))) return;
         if (!req.file) {
             return res.status(400).json({
                 error: 'No se proporcionó ningún archivo de audio'

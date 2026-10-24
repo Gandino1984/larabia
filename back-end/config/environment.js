@@ -66,6 +66,9 @@ const config = {
             // Workshop cover upload (was missing: browsers blocked the upload)
             'X-Workshop-ID',
             'x-workshop-id',
+            // Author photo: whose profile (x-user-id = who's sending it)
+            'X-Profile-User-ID',
+            'x-profile-user-id',
             'Content-Disposition'
         ],
         exposedHeaders: ['Content-Disposition'],

@@ -5,6 +5,11 @@ import path from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 import googleOAuthController from "./google_oauth_controller.js";
+import { getRequestUser, roleSnapshot, requireSuperAdmin, requireOwnerOrSuperAdmin } from "../../utils/authHelper.js";
+
+// An account is changed only by its person or a super admin (sends the 403).
+const ownAccountOnly = (req, res, id_user) =>
+    requireOwnerOrSuperAdmin(req, res, (user) => Number(user.id_user) === Number(id_user), 'Solo puedes editar tu propio perfil');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -65,7 +70,9 @@ async function register(req, res) {
     }
 }
 
+// Accounts with any role: super admins only (people sign up with Google / register).
 async function create(req, res) {
+    if (!(await requireSuperAdmin(req, res))) return;
     const { name_user, pass_user, email_user, location_user, image_user, age_user, is_editor, is_super_admin } = req.body;
     const result = await userController.create({
         name_user, pass_user, email_user, location_user, image_user, age_user, is_editor, is_super_admin
@@ -79,6 +86,10 @@ async function update(req, res) {
         email_verified, verification_token, verification_token_expires,
         is_editor, is_admin, is_super_admin, is_premium_reader, receives_newsletter
     } = req.body;
+    const caller = await ownAccountOnly(req, res, id_user);
+    if (!caller) return;
+    // Roles and verification: super admins only (roles normally via /user/grant-role).
+    const superAdmin = roleSnapshot(caller).isSuperAdmin;
 
     let hashedPassword = pass_user;
     if (pass_user) {
@@ -91,9 +102,11 @@ async function update(req, res) {
     }
 
     const result = await userController.update(id_user, {
-        name_user, email_user, pass_user: hashedPassword, location_user, image_user, age_user,
-        email_verified, verification_token, verification_token_expires,
-        is_editor, is_admin, is_super_admin, is_premium_reader, receives_newsletter
+        name_user, email_user, pass_user: hashedPassword, location_user, image_user, age_user, receives_newsletter,
+        ...(superAdmin ? {
+            email_verified, verification_token, verification_token_expires,
+            is_editor, is_admin, is_super_admin, is_premium_reader
+        } : {})
     });
 
     res.json(result);
@@ -101,6 +114,7 @@ async function update(req, res) {
 
 async function removeById(req, res) {
     try {
+        if (!(await requireSuperAdmin(req, res))) return;
         const id_user = req.params.id_user;
         if (!id_user) return res.status(400).json({ error: 'El ID del usuario es obligatorio' });
         const result = await userController.removeById(id_user);
@@ -215,6 +229,11 @@ async function changePassword(req, res) {
         const { id_user, oldPassword, newPassword } = req.body;
         if (!id_user || !oldPassword || !newPassword) {
             return res.status(400).json({ error: 'ID de usuario, contraseña actual y nueva contraseña son obligatorios' });
+        }
+        // Only your own password.
+        const caller = await getRequestUser(req);
+        if (!caller || Number(caller.id_user) !== Number(id_user)) {
+            return res.status(403).json({ error: 'Solo puedes cambiar tu propia contraseña', code: 'not_owner' });
         }
         const result = await userController.changePassword(id_user, oldPassword, newPassword);
         if (result.error) return res.status(400).json(result);

@@ -4,20 +4,13 @@ import article_author_model from "../../models/article_author_model.js";
 import magazine_article_model from "../../models/magazine_article_model.js";
 import article_author_invitation_model from "../../models/article_author_invitation_model.js";
 import user_model from "../../models/user_model.js";
-import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
+import { getRequestUser, roleSnapshot, requireSuperAdmin, requireOwnerOrSuperAdmin, requireCreator } from "../../utils/authHelper.js";
+import { isArticleAuthor, signsIt } from "../../utils/ownership.js";
 import { normalizeTranslations } from "../../utils/translations.js";
 
-// Returns true if userId is an author of the given article (checks junction table + legacy author_id)
-async function isArticleAuthor(articleId, userId) {
-    if (!userId) return false;
-    const entry = await article_author_model.findOne({
-        where: { article_id: articleId, user_id: userId }
-    });
-    if (entry) return true;
-    // Fall back to legacy author_id field
-    const article = await magazine_article_model.findByPk(articleId, { attributes: ['author_id'] });
-    return article && article.author_id == userId;
-}
+// Only a super admin or one of its authors changes an article (sends the 403).
+const ownArticleOnly = (req, res, articleId) =>
+    requireOwnerOrSuperAdmin(req, res, (user) => isArticleAuthor(articleId, user.id_user));
 
 // Returns true if userId is a magazine super-admin (can edit/delete any article)
 async function isUserSuperAdmin(userId) {
@@ -204,7 +197,13 @@ async function create(req, res) {
             translations_article: normalizeTranslations('article', translations_article) ?? null
         };
 
-        const callerUser = await getRequestUser(req);
+        // The magazine team creates; outside super admins (who publish on
+        // others' behalf), only publications they sign themselves.
+        const callerUser = await requireCreator(req, res);
+        if (!callerUser) return;
+        if (!roleSnapshot(callerUser).isSuperAdmin && !signsIt(articleData, callerUser.id_user)) {
+            return res.status(403).json({ error: 'Solo puedes crear publicaciones que firmes tú', code: 'not_owner' });
+        }
         const { error, data, success } = await magazineArticleController.create(articleData, roleSnapshot(callerUser));
 
         if (error) {
@@ -334,6 +333,7 @@ async function uploadCoverImage(req, res) {
                 error: 'El ID del artículo es obligatorio'
             });
         }
+        if (!(await ownArticleOnly(req, res, articleId))) return;
 
         if (!req.file) {
             return res.status(400).json({
@@ -388,6 +388,7 @@ async function uploadCoverImage(req, res) {
 async function removeCoverImage(req, res) {
     try {
         const { id_article } = req.params;
+        if (id_article && !(await ownArticleOnly(req, res, id_article))) return;
 
         if (!id_article) {
             return res.status(400).json({
@@ -414,6 +415,7 @@ async function removeCoverImage(req, res) {
 async function deactivate(req, res) {
     try {
         const { id_article } = req.params;
+        if (id_article && !(await ownArticleOnly(req, res, id_article))) return;
 
         if (!id_article) {
             return res.status(400).json({

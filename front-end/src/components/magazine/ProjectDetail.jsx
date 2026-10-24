@@ -1,7 +1,7 @@
 // magazine-front/src/components/magazine/ProjectDetail.jsx
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Bell, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { ArrowLeft, Bell, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Download, Pencil } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -22,9 +22,9 @@ function ProjectDetail() {
   const { t, i18n } = useTranslation();
   // Title and description in the header's language (or the original).
   const lang = i18n.language;
-  const { navigateBackFromProject } = useUI();
+  const { navigateBackFromProject, navigateToProjectEdit } = useUI();
   const { selectedProject } = useMagazine();
-  const { currentUser, canCreateContent } = useAuth();
+  const { currentUser, canCreateContent, isSuperAdmin } = useAuth();
   const { isSubscribed, toggleSubscribe } = useEngagement();
   const [showFilesPanel, setShowFilesPanel] = useState(false);
   const [showCoverViewer, setShowCoverViewer] = useState(false);
@@ -115,6 +115,12 @@ function ProjectDetail() {
 
   const coverUrl = getCoverImageUrl();
 
+  // «Editar proyecto»: super admins, and its own authors (the server checks too).
+  const canEdit = !!currentUser && (isSuperAdmin || (canCreateContent && (
+    selectedProject.author_id === currentUser.id_user
+    || selectedProject.authors?.some((a) => a.id_user === currentUser.id_user)
+  )));
+
   const projectActions = [];
   if (currentUser) {
     const subscribed = isSubscribed(selectedProject.id_project);
@@ -199,6 +205,13 @@ function ProjectDetail() {
               </div>
             )}
           </div>
+
+          {canEdit && (
+            <button type="button" className="project-detail-edit-btn" onClick={() => navigateToProjectEdit(selectedProject)}>
+              <Pencil size={16} aria-hidden="true" />
+              {t('project.detail.edit', 'Editar proyecto')}
+            </button>
+          )}
         </div>
       </div>
 

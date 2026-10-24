@@ -46,6 +46,9 @@ export const UIProvider = ({ children }) => {
   // creator, 'mine' = "Mis publicaciones"), and where its close button returns
   // ('home' | 'articlesList').
   const [editorInitialView, setEditorInitialView] = useState('wizard');
+  // A project to open in the creator's project form (its page's «Editar
+  // proyecto»); closing that form returns to the project's page.
+  const [editorProjectToEdit, setEditorProjectToEdit] = useState(null);
   const [editorReturnTo, setEditorReturnTo] = useState('home');
 
   // Selected data for views
@@ -236,6 +239,16 @@ export const UIProvider = ({ children }) => {
     setShowEditor(true);
   };
 
+  // «Editar proyecto» on a project's page: the creator, with that project's form.
+  const navigateToProjectEdit = (project) => {
+    resetAllViews();
+    setOpenEditorToEdit(false);
+    setEditorInitialView('mine');
+    setEditorReturnTo('project');
+    setEditorProjectToEdit(project);
+    setShowEditor(true);
+  };
+
   // Open the creator on "Mis publicaciones" (the author's own list). `from`
   // is where its close button should return.
   const navigateToMyPublications = (from = 'home') => {
@@ -320,6 +333,13 @@ export const UIProvider = ({ children }) => {
       'home';
     setProjectBackView(origin);
     setPreviousView('home');
+    resetAllViews();
+    setShowProjectDetail(true);
+  };
+
+  // Back to the project's page after editing it (its «Volver» keeps leading
+  // where it did before).
+  const returnToProjectDetail = () => {
     resetAllViews();
     setShowProjectDetail(true);
   };
@@ -495,6 +515,10 @@ export const UIProvider = ({ children }) => {
     navigateToEditorForEdit,
     navigateToMyPublications,
     editorInitialView,
+    editorProjectToEdit,
+    setEditorProjectToEdit,
+    navigateToProjectEdit,
+    returnToProjectDetail,
     editorReturnTo,
     openEditorToEdit,
     setOpenEditorToEdit,

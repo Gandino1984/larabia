@@ -28,6 +28,13 @@ axiosInstance.interceptors.request.use(
         if (user.token) {
           config.headers.Authorization = `Bearer ${user.token}`;
         }
+        // Who is changing something: the server lets each person change only
+        // what's theirs (super admins, anything). Only on writes — on reads
+        // it would change what lists show (an author's own drafts…).
+        const method = String(config.method || 'get').toLowerCase();
+        if (method !== 'get' && user.id_user && !config.headers['x-user-id']) {
+          config.headers['x-user-id'] = user.id_user;
+        }
       } catch (err) {
         console.error('Error parsing user from localStorage:', err);
       }

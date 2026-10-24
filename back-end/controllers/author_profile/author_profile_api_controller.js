@@ -1,6 +1,16 @@
 // back-end/controllers/author_profile/author_profile_api_controller.js
 import authorProfileController from "./author_profile_controller.js";
 import author_profile_model from "../../models/author_profile_model.js";
+import { requireOwnerOrSuperAdmin, roleSnapshot } from "../../utils/authHelper.js";
+
+// A profile is created / changed only by its person or a super admin (sends the 403).
+const MINE_ONLY = 'Solo puedes editar tu propio perfil';
+const ownUserOnly = (req, res, userId) =>
+    requireOwnerOrSuperAdmin(req, res, (user) => Number(user.id_user) === Number(userId), MINE_ONLY);
+const ownProfileOnly = (req, res, profileId) => requireOwnerOrSuperAdmin(req, res, async (user) => {
+    const profile = await author_profile_model.findByPk(profileId, { attributes: ['user_id'] });
+    return !!profile && Number(profile.user_id) === Number(user.id_user);
+}, MINE_ONLY);
 
 async function getAll(req, res) {
     try {
@@ -113,6 +123,9 @@ async function create(req, res) {
             });
         }
 
+        const caller = await ownUserOnly(req, res, user_id);
+        if (!caller) return;
+
         const profileData = {
             user_id,
             display_name,
@@ -122,7 +135,8 @@ async function create(req, res) {
             twitter_handle: twitter_handle || null,
             instagram_handle: instagram_handle || null,
             status_profile: status_profile || 'draft',
-            featured_profile: featured_profile || false
+            // Featuring an author is the super admins' call.
+            featured_profile: roleSnapshot(caller).isSuperAdmin ? (featured_profile || false) : false
         };
 
         const { error, data, success } = await authorProfileController.create(profileData);
@@ -150,6 +164,8 @@ async function update(req, res) {
                 error: 'El ID del perfil es obligatorio'
             });
         }
+        const caller = await ownProfileOnly(req, res, id);
+        if (!caller) return;
 
         const {
             display_name,
@@ -170,7 +186,7 @@ async function update(req, res) {
         if (twitter_handle !== undefined) updateData.twitter_handle = twitter_handle;
         if (instagram_handle !== undefined) updateData.instagram_handle = instagram_handle;
         if (status_profile !== undefined) updateData.status_profile = status_profile;
-        if (featured_profile !== undefined) updateData.featured_profile = featured_profile;
+        if (featured_profile !== undefined && roleSnapshot(caller).isSuperAdmin) updateData.featured_profile = featured_profile;
 
         const { error, data, success } = await authorProfileController.update(id, updateData);
 
@@ -197,6 +213,7 @@ async function deleteProfile(req, res) {
                 error: 'El ID del perfil es obligatorio'
             });
         }
+        if (!(await ownProfileOnly(req, res, id))) return;
 
         const { error, data, success } = await authorProfileController.deleteProfile(id);
 
@@ -214,9 +231,20 @@ async function deleteProfile(req, res) {
     }
 }
 
+// Before the upload: the sender may change this profile's photo (their own, or a super admin).
+async function ownPhotoOnly(req, res, next) {
+    try {
+        const owner = req.headers['x-profile-user-id'] || req.headers['x-user-id'];
+        if (await ownUserOnly(req, res, owner)) next();
+    } catch (err) {
+        console.error("-> author_profile_api_controller.js - ownPhotoOnly() - Error =", err);
+        res.status(500).json({ error: "Error al subir la imagen de perfil" });
+    }
+}
+
 async function uploadProfileImage(req, res) {
     try {
-        const userId = req.headers['x-user-id'];
+        const userId = req.headers['x-profile-user-id'] || req.headers['x-user-id'];
 
         if (!userId) {
             return res.status(400).json({ error: 'El ID del usuario es obligatorio' });
@@ -257,5 +285,6 @@ export {
     create,
     update,
     deleteProfile,
+    ownPhotoOnly,
     uploadProfileImage
 };
