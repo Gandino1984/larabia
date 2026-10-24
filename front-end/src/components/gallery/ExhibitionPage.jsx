@@ -2,65 +2,21 @@
 //
 // One exhibition of the Galería: its title (the artist's name when it has
 // none), the artist, the short text and the approved works — each with its
-// title («Sin título») and size in pixels, opened large in a viewer. Anyone
+// title («Sin título») and size in pixels, opened large in WorkViewer. Anyone
 // with an account can write to the artist (GalleryChat, in a side panel);
 // signed out, writing asks to sign in first.
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ChevronLeft, ChevronRight, MessageCircle, X, Images } from 'lucide-react';
+import { ArrowLeft, MessageCircle, X, Images } from 'lucide-react';
 import axiosInstance from '../../utils/axiosConfig';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useAuthorPhoto } from '../../app_context/AuthorContext';
 import GalleryChat from './GalleryChat';
+import WorkViewer from './WorkViewer';
 import { workImageUrl, workTitle, workSize, exhibitionTitle } from './galleryUtils';
 import './Gallery.css';
-
-function WorkViewer({ works, index, onIndex, onClose }) {
-  const { t } = useTranslation();
-  const work = works[index];
-  const go = useCallback((d) => onIndex((index + d + works.length) % works.length), [index, works.length, onIndex]);
-
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowRight') go(1);
-      if (e.key === 'ArrowLeft') go(-1);
-    };
-    document.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
-  }, [go, onClose]);
-
-  return createPortal(
-    <div className="work-viewer" role="dialog" aria-modal="true" aria-label={workTitle(work, t)} onClick={onClose}>
-      <button type="button" className="work-viewer__close" onClick={onClose} aria-label={t('common.buttons.close', 'Cerrar')} title={t('common.buttons.close', 'Cerrar')}>
-        <X size={24} />
-      </button>
-      <figure className="work-viewer__figure" onClick={(e) => e.stopPropagation()}>
-        <img src={workImageUrl(work.image)} alt={workTitle(work, t)} />
-        <figcaption>
-          <strong>{workTitle(work, t)}</strong>
-          {workSize(work, t) && <span>{workSize(work, t)}</span>}
-          <span className="work-viewer__count">{index + 1} / {works.length}</span>
-        </figcaption>
-      </figure>
-      {works.length > 1 && (
-        <>
-          <button type="button" className="work-viewer__nav work-viewer__nav--prev" onClick={(e) => { e.stopPropagation(); go(-1); }} aria-label={t('gallery.viewer.prev', 'Obra anterior')}>
-            <ChevronLeft size={28} />
-          </button>
-          <button type="button" className="work-viewer__nav work-viewer__nav--next" onClick={(e) => { e.stopPropagation(); go(1); }} aria-label={t('gallery.viewer.next', 'Obra siguiente')}>
-            <ChevronRight size={28} />
-          </button>
-        </>
-      )}
-    </div>,
-    document.body
-  );
-}
 
 function ExhibitionPage() {
   const { t } = useTranslation();

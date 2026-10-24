@@ -1623,7 +1623,6 @@
   "admin.gallery.filterRejected": "No publicadas",
   "admin.gallery.noPending": "No hay obras esperando revisión.",
   "admin.gallery.none": "No hay obras aquí.",
-  "admin.gallery.openImage": "Abrir la imagen",
   "admin.gallery.reasonLabel": "Motivo (lo verá la o el artista, opcional)",
   "admin.gallery.confirmReject": "Rechazar",
   "admin.gallery.confirmWithdraw": "Retirar de la galería",

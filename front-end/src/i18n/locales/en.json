@@ -1623,7 +1623,6 @@
   "admin.gallery.filterRejected": "Not published",
   "admin.gallery.noPending": "No works are waiting for review.",
   "admin.gallery.none": "There are no works here.",
-  "admin.gallery.openImage": "Open the image",
   "admin.gallery.reasonLabel": "Reason (the artist will see it, optional)",
   "admin.gallery.confirmReject": "Reject",
   "admin.gallery.confirmWithdraw": "Withdraw from the gallery",

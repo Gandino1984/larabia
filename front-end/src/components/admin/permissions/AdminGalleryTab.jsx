@@ -2,7 +2,8 @@
 // shows in the gallery only once approved; reject (with a reason the artist
 // sees) or withdraw one already published. And the artists: who's in, the
 // invitations (when each email went out — resend, or send the unsent ones),
-// and «Invitar artista». Server: /gallery/review*, /gallery/invitations*.
+// and «Invitar artista». A thumbnail opens the work large (WorkViewer, with
+// the others of the list). Server: /gallery/review*, /gallery/invitations*.
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, Undo2, Send, UserPlus, ExternalLink } from 'lucide-react';
@@ -13,20 +14,21 @@ import { usePendingReview } from '../../../app_context/PendingReviewContext';
 import { useGallery } from '../../../app_context/GalleryContext';
 import { localDate } from '../../../utils/locale';
 import InviteArtistModal from '../../gallery/InviteArtistModal';
+import WorkViewer from '../../gallery/WorkViewer';
 import { workImageUrl, workTitle, workSize } from '../../gallery/galleryUtils';
 import './AdminGalleryTab.css';
 
 const STATUSES = ['pending', 'approved', 'rejected'];
 
-function ReviewItem({ work, onDecide, busy }) {
+function ReviewItem({ work, onOpen, onDecide, busy }) {
   const { t } = useTranslation();
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState('');
   return (
     <li className="admin-gallery__work">
-      <a href={workImageUrl(work.image)} target="_blank" rel="noreferrer" className="admin-gallery__thumb" title={t('admin.gallery.openImage', 'Abrir la imagen')}>
-        <img src={workImageUrl(work.image)} alt={workTitle(work, t)} loading="lazy" />
-      </a>
+      <button type="button" className="admin-gallery__thumb" onClick={onOpen} aria-label={t('gallery.viewer.open', { title: workTitle(work, t), defaultValue: 'Ver «{{title}}» en grande' })}>
+        <img src={workImageUrl(work.image)} alt="" loading="lazy" />
+      </button>
       <div className="admin-gallery__info">
         <strong>{workTitle(work, t)}</strong>
         <span>{[work.artist?.name_user, work.exhibition?.title, workSize(work, t)].filter(Boolean).join(' · ')}</span>
@@ -80,6 +82,7 @@ function AdminGalleryTab() {
   const [artists, setArtists] = useState(null);
   const [busy, setBusy] = useState(false);
   const [inviting, setInviting] = useState(false);
+  const [viewing, setViewing] = useState(null);
   const auth = useCallback(() => ({ headers: { 'x-user-id': currentUser?.id_user } }), [currentUser?.id_user]);
 
   const loadWorks = useCallback(() => {
@@ -96,7 +99,7 @@ function AdminGalleryTab() {
       .catch(() => setArtists([]));
   }, [auth]);
 
-  useEffect(() => { setWorks(null); loadWorks(); }, [loadWorks]);
+  useEffect(() => { setViewing(null); setWorks(null); loadWorks(); }, [loadWorks]);
   useEffect(() => { loadArtists(); }, [loadArtists]);
 
   const decide = async (work, decision, reason = '') => {
@@ -185,8 +188,11 @@ function AdminGalleryTab() {
         </p>
       ) : (
         <ul className="admin-gallery__works">
-          {works.map((w) => <ReviewItem key={w.id_work} work={w} onDecide={decide} busy={busy} />)}
+          {works.map((w, i) => <ReviewItem key={w.id_work} work={w} onOpen={() => setViewing(i)} onDecide={decide} busy={busy} />)}
         </ul>
+      )}
+      {viewing !== null && works?.[viewing] && (
+        <WorkViewer works={works} index={viewing} onIndex={setViewing} onClose={() => setViewing(null)} />
       )}
 
       <div className="admin-gallery__head admin-gallery__head--artists">
