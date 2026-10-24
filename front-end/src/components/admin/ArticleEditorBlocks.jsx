@@ -25,7 +25,7 @@ import ArticleFilters from '../common/ArticleFilters';
 import SectionPicker from '../common/SectionPicker';
 import { useSectionCatalog } from '../../app_context/useSectionCatalog';
 import { sectionsOf, requestedSectionsOf, sameKey, sectionList } from '../../utils/sections';
-import { CATEGORIES, EMPTY_ARTICLE_FILTERS, applyArticleFilters, categoryLabelKey } from '../../utils/articleFilters';
+import { CATEGORIES, EMPTY_ARTICLE_FILTERS, applyArticleFilters, categoryLabelKey, categoryLabel as categoryName } from '../../utils/articleFilters';
 import axios from 'axios';
 import './ArticleEditorBlocks.css';
 
@@ -2321,7 +2321,7 @@ function ArticleEditorBlocks() {
                       <h4>{article.title_article}</h4>
                       <p className="article-meta">
                         <span className={`status status-${article.status_article}`}>{statusLabel(article.status_article)}</span>
-                        <span className="category-badge">{article.category_article}</span>
+                        <span className="category-badge">{categoryName(article.category_article, t)}</span>
                       </p>
                       <p className="article-author">
                         {t('article.detail.by')} {article.authors?.map(a => a.name_user).join(', ') || article.author_name || t('editor.author.unknownAuthor')}

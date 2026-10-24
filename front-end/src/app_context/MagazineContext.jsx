@@ -300,6 +300,11 @@ export const MagazineProvider = ({ children }) => {
 
       if (!response.data.error) {
         showSuccess(response.data.message || i18n.t('messages.success.imageUploaded', 'Imagen subida exitosamente'));
+        // The lists that show covers — the home sections (Barrio…), the hero,
+        // the articles page — were refreshed by createArticle / updateArticle,
+        // before the cover existed: the new article kept the default image
+        // until the page was reloaded.
+        await Promise.all([fetchAllArticles(), fetchArticles(), fetchFeaturedArticles()]);
         return { success: true, data: response.data.data };
       } else {
         showError(response.data.error);
@@ -311,7 +316,7 @@ export const MagazineProvider = ({ children }) => {
       showError(msg);
       return { error: msg };
     }
-  }, [showSuccess, showError]);
+  }, [showSuccess, showError, fetchAllArticles, fetchArticles, fetchFeaturedArticles]);
 
   // Article Blocks API Functions
 
