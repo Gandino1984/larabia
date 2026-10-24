@@ -82,6 +82,30 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* Hover (or keyboard focus): a white line grows along the option's left
+   edge. Only with a mouse — on touch screens it would stay after a tap. */
+.language-option {
+  position: relative;
+}
+.language-option::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: #ffffff;
+  transform: scaleY(0);
+  transition: transform 0.22s ease;
+}
+@media (hover: hover) {
+  .language-option:hover::before { transform: scaleY(1); }
+}
+.language-option:focus-visible::before { transform: scaleY(1); }
+@media (prefers-reduced-motion: reduce) {
+  .language-option::before { transition: none; }
+}
+
 .language-option.active {
   background: rgba(255, 255, 255, 0.15);
   font-weight: 600;
