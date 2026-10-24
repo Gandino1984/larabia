@@ -1,11 +1,11 @@
-/* "Suscríbete" — red button flanking the header bar on the LEFT, mirroring
-   the language picker (FloatingLanguage.css) on the right: below the bar
-   (left edges flush) up to 1409px, beside it — centered on its axis — from
+/* "Suscríbete" — red button flanking the header bar on the LEFT, right under
+   the small language picker (FloatingLanguage.css — --floating-lang-space,
+   only from 768px): below the bar (left edges flush) up to 1409px, beside it from
    1410px. A circle at rest that widens into a pill showing its word on hover,
    with a soft pulse ring to draw the eye. */
 .subscribe-btn {
   position: fixed;
-  top: calc(1.25rem + var(--header-bar-h, var(--header-h)) + 0.5rem);
+  top: calc(1.25rem + var(--header-bar-h, var(--header-h)) + 0.5rem + var(--floating-lang-space, 0px));
   left: max(1%, calc((100% - 1200px) / 2));
   z-index: 999;
   display: flex;
@@ -100,26 +100,14 @@
   }
 }
 
-/* Wide screens: beside the bar on the left (its left edge − 1rem), centered on
-   its axis; anchored by its right edge so the label grows away from the bar. */
+/* Wide screens: beside the bar on the left (its left edge − 1rem), under the
+   language picker; anchored by its right edge so the label grows away from
+   the bar. */
 @media (min-width: 1410px) {
   .subscribe-btn {
-    top: calc(1.25rem + var(--header-bar-h, var(--header-h)) / 2);
+    top: calc(1rem + var(--floating-lang-space, 0px));
     left: auto;
     right: calc(50% + 600px + 1rem);
-    transform: translateY(-50%) translateX(-150px);
-  }
-  .subscribe-btn.is-in {
-    transform: translateY(-50%) translateX(0);
-  }
-  .subscribe-btn:hover {
-    transform: translateY(-50%) scale(1.03);
-  }
-  .subscribe-btn:active {
-    transform: translateY(-50%) scale(0.96);
-  }
-  .subscribe-btn.hidden {
-    transform: translateY(-50%) scale(0.8);
   }
 }
 

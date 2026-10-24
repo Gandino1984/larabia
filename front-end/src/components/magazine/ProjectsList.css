@@ -121,3 +121,10 @@
   .projects-page { padding: 9rem 0.75rem 2rem; }
   .projects-page__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+/* From tablets up the small language picker sits just below the header bar's
+   left end (FloatingLanguage): start a little lower so it never covers the
+   title. */
+@media (min-width: 768px) {
+  .projects-page { padding-top: 10.5rem; }
+}

@@ -38,7 +38,7 @@ function LanguageSelector() {
   };
 
   return (
-    <div className="language-selector" ref={dropdownRef}>
+    <div className={`language-selector ${isOpen ? 'is-open' : ''}`} ref={dropdownRef}>
       <button
         className="language-selector-btn"
         onClick={() => setIsOpen(!isOpen)}

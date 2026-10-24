@@ -1,25 +1,38 @@
-/* The language picker outside the header bar (FloatingLanguage). Phones: not
-   shown (it's in the burger menu). From 768px it's a light pill lined up with
-   the bar — 95% wide (max 1200px), centered, 1.25rem from the top, its height
-   in --header-bar-h (measured in Header.jsx):
-   - up to 1409px: just below the bar, at its right end (mirroring the red
-     «Hazte socio/a» button on the left, SubscribeButton.css);
-   - from 1410px: beside the bar on the right, centered on its axis;
-   - bar hidden (an article): in the top-right corner of the screen.
-   Below the header (1000) so the bar's own dropdowns open over it. */
+/* The language picker outside the header bar (FloatingLanguage): a small pill
+   at the top left. Phones: not shown (it's in the burger menu). From 768px
+   it's lined up with the bar — 95% wide (max 1200px), centered, its height in
+   --header-bar-h (measured in Header.jsx):
+   - up to 1409px: just below the bar, left edges flush;
+   - from 1410px: beside the bar on the left, level with its top;
+   - bar hidden (an article): in the top-left corner of the screen.
+   The red «Hazte socio/a» button, when shown, goes right under it
+   (SubscribeButton.css, with --floating-lang-space). */
 .floating-lang {
   display: none;
 }
 
 @media (min-width: 768px) {
+  :root {
+    --floating-lang-h: 34px;
+    /* What the red button below it moves down by. */
+    --floating-lang-space: calc(var(--floating-lang-h) + 0.5rem);
+  }
+
   .floating-lang {
     display: block;
     position: fixed;
     top: calc(1.25rem + var(--header-bar-h, var(--header-h)) + 0.5rem);
-    right: max(1%, calc((100% - 1200px) / 2));
+    left: max(1%, calc((100% - 1200px) / 2));
+    /* Below the header (1000) so the bar's own dropdowns open over it… */
     z-index: 999;
     opacity: 0;
     transition: opacity 0.45s ease, top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* …but its own menu, while open, over the bar and the red button (a class,
+     not :focus-within: a click doesn't always focus the button — Safari). */
+  .floating-lang:has(.language-selector.is-open) {
+    z-index: 1001;
   }
 
   .floating-lang.is-in {
@@ -27,17 +40,25 @@
   }
 
   .floating-lang--corner {
-    top: 1.25rem;
-    right: 1rem;
+    top: 1rem;
+    left: 1rem;
   }
 
   .floating-lang .language-selector-btn {
-    min-height: 48px;
-    padding: 0 16px;
+    min-height: var(--floating-lang-h);
+    height: var(--floating-lang-h);
+    padding: 0 10px;
+    gap: 4px;
     border-radius: 999px;
     background: lightgray;
     color: #1a1a1a;
+    font-size: 12px;
     font-weight: 700;
+  }
+
+  .floating-lang .language-selector-btn svg {
+    width: 15px;
+    height: 15px;
   }
 
   .floating-lang .language-selector-btn:hover,
@@ -45,21 +66,19 @@
     background: #000000;
     color: #ffffff;
   }
+
+  /* It's at the left edge: the menu opens to the right. */
+  .floating-lang .language-dropdown {
+    right: auto;
+    left: 0;
+  }
 }
 
 @media (min-width: 1410px) {
   .floating-lang:not(.floating-lang--corner) {
-    top: calc(1.25rem + var(--header-bar-h, var(--header-h)) / 2);
-    right: auto;
-    left: calc(50% + 600px + 1rem);
-    transform: translateY(-50%);
-  }
-
-  /* Beside the bar, its menu opens to the right (to the left it would go
-     under the bar). */
-  .floating-lang:not(.floating-lang--corner) .language-dropdown {
-    right: auto;
-    left: 0;
+    top: 1rem;
+    left: auto;
+    right: calc(50% + 600px + 1rem);
   }
 }
 

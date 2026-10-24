@@ -250,8 +250,8 @@ function App() {
 
       <div className={appClassName}>
         {!isPreview && !showEditor && !showAuthorEditor && !showWorkshopEditor && !isFullscreen && <Header ready={appReady} />}
-        {/* The language picker, outside the bar (computers and tablets) — also
-            on an article, where the bar hides. */}
+        {/* The language picker, outside the bar at the top left (computers and
+            tablets) — also on an article, where the bar hides. */}
         {!isPreview && !showEditor && !showAuthorEditor && !showWorkshopEditor && !isFullscreen && (
           <FloatingLanguage ready={appReady} cornered={showArticleDetail} />
         )}

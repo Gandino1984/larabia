@@ -44,7 +44,7 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
 - **Espacio abierto** (open space): the literary proposals the magazine publishes. Anyone with an account (no need to be a member) can send one through a form, then follow its status there.
 - **Engagement:** likes, favourites, comments and following projects.
 - **Notifications** in the header bell: new content, invitations, answers and membership.
-- **Top bar:** the bell sits right after the profile photo; «Publica» (editors and up) is the last item of the bar (on phones, an icon left of the burger). The language picker is outside the bar, top right, so it's there even where the bar hides (an article); on phones it's in the burger menu.
+- **Top bar:** the bell sits right after the profile photo; «Publica» (editors and up) is the last item of the bar (on phones, an icon left of the burger). The language picker is a small pill outside the bar, top left (the red «Hazte socio/a» button goes under it), so it's there even where the bar hides (an article); on phones it's in the burger menu.
 - **Contact form** and **newsletter** («Recomendaciones»):
   - New accounts (signing in with Google for the first time) get it; the sign-in page says so. Anyone turns it on or off from «Recomendaciones».
   - Every newsletter has a one-click «Darme de baja» link that works without signing in, and a `List-Unsubscribe` header for the mail client's own button (a random token per person, `user.newsletter_token`, never sent to the front-end).
