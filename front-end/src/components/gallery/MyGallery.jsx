@@ -6,21 +6,19 @@
 // bottom: the texts, the upload box, the works, «Guardar la exposición» (the
 // texts and any work title left unsaved) and the count. Every new or changed
 // work goes to the team's review before it shows in the gallery; each one
-// says where it stands (and why, if it wasn't published). «Mensajes»: the
-// conversations visitors opened with them, answered in the chat.
+// says where it stands (and why, if it wasn't published). «Mis charlas»: the
+// magazine's chat (ChatPanel), where socios/as who asked to chat are.
 // With galleryView.forUser, a super admin prepares the gallery of someone
 // invited, on their behalf (/gallery/for/:id): no review, no messages, not
 // public until that person accepts it and takes it over.
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Upload, Save, Eye, MessageCircle, ImagePlus, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Upload, Save, Eye, MessagesSquare, ImagePlus, RefreshCw } from 'lucide-react';
 import axiosInstance from '../../utils/axiosConfig';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useGallery } from '../../app_context/GalleryContext';
-import { useAuthorPhoto } from '../../app_context/AuthorContext';
-import { localDate } from '../../utils/locale';
-import GalleryChat from './GalleryChat';
+import { useChat } from '../../app_context/ChatContext';
 import { workImageUrl, workTitle, workSize } from './galleryUtils';
 import './Gallery.css';
 
@@ -101,13 +99,12 @@ function MyGallery() {
   const { t } = useTranslation();
   const { galleryView, navigateToGallery, navigateToExhibition, navigateToAdmin, showSuccess, showError } = useUI();
   const { currentUser, isSuperAdmin } = useAuth();
-  const { isArtist, feed, markReviewsSeen, refreshFeed } = useGallery();
+  const { isArtist, feed, markReviewsSeen } = useGallery();
+  const chat = useChat();
   // A super admin preparing the gallery of someone invited (on their behalf).
   const forUser = galleryView.forUser || null;
   const base = forUser ? `/gallery/for/${forUser.id_user}` : '/gallery/mine';
   const allowed = forUser ? isSuperAdmin : isArtist;
-  const photoOf = useAuthorPhoto();
-  const [tab, setTab] = useState(galleryView.tab || 'works');
   const [data, setData] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [title, setTitle] = useState('');
@@ -117,8 +114,6 @@ function MyGallery() {
   const [newTitle, setNewTitle] = useState('');
   const newFileRef = useRef(null);
   const titleDrafts = useRef({}); // { [id_work]: the title being typed }
-  const [conversations, setConversations] = useState(null);
-  const [openConversation, setOpenConversation] = useState(galleryView.conversationId || null);
   const auth = useCallback(() => ({ headers: { 'x-user-id': currentUser?.id_user } }), [currentUser?.id_user]);
 
   // texts: also take the exhibition's title and text (on loading and saving
@@ -146,12 +141,6 @@ function MyGallery() {
   // Opening «Mi galería» = having seen the reviews.
   useEffect(() => { if (!forUser && feed.reviews.length) markReviewsSeen(); }, [forUser, feed.reviews.length, markReviewsSeen]);
 
-  const loadConversations = useCallback(() => {
-    axiosInstance.get('/gallery/conversations', auth())
-      .then((res) => setConversations(res.data?.data || []))
-      .catch(() => setConversations([]));
-  }, [auth]);
-  useEffect(() => { if (tab === 'messages') loadConversations(); }, [tab, loadConversations, feed.messages]);
 
   const run = async (request, { quiet = false } = {}) => {
     setBusy(true);
@@ -234,8 +223,6 @@ function MyGallery() {
     run(() => axiosInstance.patch(`${base}/order`, { ids }, auth()), { quiet: true });
   };
 
-  const unread = useMemo(() => (conversations || []).reduce((n, c) => n + c.unread, 0), [conversations]);
-  const feedUnread = feed.messages.reduce((n, c) => n + c.unread, 0);
   const hasPublished = !forUser && data?.works?.some((w) => w.status_work === 'approved');
   const artistName = forUser?.name_user || data?.artist?.name_user || '';
 
@@ -248,7 +235,6 @@ function MyGallery() {
     );
   }
 
-  const current = (conversations || []).find((c) => c.id_conversation === openConversation);
 
   return (
     <div className="gallery-page my-gallery">
@@ -270,10 +256,16 @@ function MyGallery() {
               : t('gallery.mine.subtitle', 'Tu exposición en la Galería: un título, un texto breve y hasta quince obras.')}
           </p>
         </div>
-        {hasPublished && (
+        {!forUser && (
           <div className="gallery-page__actions">
-            <button type="button" className="gallery-btn" onClick={() => navigateToExhibition(data.id_exhibition)}>
-              <Eye size={18} aria-hidden="true" /> {t('gallery.mine.view', 'Ver mi exposición')}
+            {hasPublished && (
+              <button type="button" className="gallery-btn" onClick={() => navigateToExhibition(data.id_exhibition)}>
+                <Eye size={18} aria-hidden="true" /> {t('gallery.mine.view', 'Ver mi exposición')}
+              </button>
+            )}
+            <button type="button" className="gallery-btn" onClick={() => chat?.openChats()}>
+              <MessagesSquare size={18} aria-hidden="true" /> {t('chat.title', 'Mis charlas')}
+              {chat?.unreadTotal > 0 && <span className="gallery-badge">{chat.unreadTotal}</span>}
             </button>
           </div>
         )}
@@ -285,17 +277,8 @@ function MyGallery() {
         </p>
       )}
 
-      {!forUser && <nav className="gallery-tabs" role="tablist">
-        <button type="button" role="tab" aria-selected={tab === 'works'} className={`gallery-tab ${tab === 'works' ? 'is-active' : ''}`} onClick={() => setTab('works')}>
-          {t('gallery.mine.tabWorks', 'Mi exposición')}
-        </button>
-        <button type="button" role="tab" aria-selected={tab === 'messages'} className={`gallery-tab ${tab === 'messages' ? 'is-active' : ''}`} onClick={() => setTab('messages')}>
-          <MessageCircle size={16} aria-hidden="true" /> {t('gallery.mine.tabMessages', 'Mensajes')}
-          {(conversations ? unread : feedUnread) > 0 && <span className="gallery-badge">{conversations ? unread : feedUnread}</span>}
-        </button>
-      </nav>}
 
-      {tab === 'works' && (!data ? (
+      {!data ? (
         <p className="gallery-page__empty">{loadError || t('common.states.loading', 'Cargando…')}</p>
       ) : (
         <>
@@ -361,51 +344,8 @@ function MyGallery() {
             <p className="my-works__count">{t('gallery.mine.worksCount', { count: data.works.length, max: data.works_max, defaultValue: 'Obras subidas: {{count}} de {{max}}' })}</p>
           </section>
         </>
-      ))}
-
-      {tab === 'messages' && !forUser && (
-        <section className="my-messages">
-          {conversations === null ? (
-            <p className="gallery-page__empty">{t('common.states.loading', 'Cargando…')}</p>
-          ) : conversations.length === 0 ? (
-            <p className="gallery-page__empty">{t('gallery.mine.noMessages', 'Todavía no tienes mensajes. Cuando alguien te escriba desde tu exposición, aparecerá aquí.')}</p>
-          ) : (
-            <div className={`my-messages__layout ${current ? 'has-open' : ''}`}>
-              <ul className="my-messages__list">
-                {conversations.map((c) => (
-                  <li key={c.id_conversation}>
-                    <button type="button" className={`my-messages__item ${c.id_conversation === openConversation ? 'is-open' : ''}`}
-                      onClick={() => setOpenConversation(c.id_conversation)}>
-                      {photoOf(c.other)
-                        ? <img src={photoOf(c.other)} alt="" className="gallery-artist__photo" />
-                        : <span className="gallery-artist__photo gallery-artist__photo--initial" aria-hidden="true">{c.other?.name_user?.charAt(0)?.toUpperCase()}</span>}
-                      <span className="my-messages__text">
-                        <strong>{c.other?.name_user}</strong>
-                        {c.last_message && <span className="my-messages__preview">{c.last_message.body}</span>}
-                      </span>
-                      <span className="my-messages__side">
-                        {c.last_message_at && <span className="my-messages__when">{localDate(c.last_message_at, { day: 'numeric', month: 'short' })}</span>}
-                        {c.unread > 0 && <span className="gallery-badge">{c.unread}</span>}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              {current && (
-                <div className="my-messages__chat">
-                  <div className="my-messages__chat-head">
-                    <button type="button" className="gallery-back gallery-back--inline" onClick={() => { setOpenConversation(null); loadConversations(); refreshFeed(); }}>
-                      <ArrowLeft size={16} aria-hidden="true" /> {t('gallery.mine.allMessages', 'Todas las conversaciones')}
-                    </button>
-                    <strong>{current.other?.name_user}</strong>
-                  </div>
-                  <GalleryChat conversationId={current.id_conversation} other={current.other} />
-                </div>
-              )}
-            </div>
-          )}
-        </section>
       )}
+
     </div>
   );
 }

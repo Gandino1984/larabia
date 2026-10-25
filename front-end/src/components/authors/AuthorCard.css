@@ -232,6 +232,29 @@
   width: 100%;
 }
 
+/* «Charlar»: under «Ver publicaciones», outlined. */
+.btn-chat-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-chat-card.is-asked { border-style: dashed; color: #555555; }
+.btn-chat-card:disabled { opacity: 0.6; cursor: default; }
+@media (hover: hover) {
+  .btn-chat-card:hover:not(:disabled) { background: #000000; color: #ffffff; }
+}
+
 .btn-view-publications-card:hover {
   background: #333333;
   transform: translateY(-2px);

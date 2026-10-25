@@ -35,6 +35,7 @@ import workshopInvitationModel from './models/workshop_invitation_model.js';
 import openSpaceProposalModel from './models/open_space_proposal_model.js';
 import workshopSpotRequestModel from './models/workshop_spot_request_model.js';
 import { syncGalleryTables } from './models/gallery_models.js';
+import { syncChatTables } from './models/chat_models.js';
 import subscriptionApiController from './controllers/subscription/subscription_api_controller.js';
 import { PAISAJE_DIR, ensureDirs as ensurePaisajeDirs, cleanupOrphans as cleanupPaisajeOrphans } from './controllers/paisaje/paisaje_store.js';
 import { isPrivateUploadPath } from './controllers/open_space/proposal_store.js';
@@ -98,7 +99,9 @@ Promise.all([
 ])
     // The Galería's tables reference each other: created one after another.
     .then(() => syncGalleryTables())
-    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks + invitations + spot requests/open space proposals/gallery)'))
+    // The chat (after the Galería's tables: its first sync copies their conversations).
+    .then(() => syncChatTables())
+    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks + invitations + spot requests/open space proposals/gallery/chat)'))
     .catch((err) => console.error('Error syncing engagement tables:', err.message));
 
 // Columns added to tables that already exist in production (idempotent: each

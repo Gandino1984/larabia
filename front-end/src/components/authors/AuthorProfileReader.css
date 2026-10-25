@@ -168,6 +168,27 @@
   transform: translateX(4px);
 }
 
+/* «Charlar» (socios/as ask the author to chat): under «Ver publicaciones». */
+.btn-chat-profile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.65rem 1.5rem;
+  border: 2px solid var(--on-light, #000);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--on-light, #000);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-chat-profile.is-asked { border-style: dashed; }
+.btn-chat-profile:disabled { opacity: 0.6; cursor: default; }
+
 .btn-view-publications {
   display: inline-flex;
   align-items: center;
@@ -283,7 +304,8 @@
     align-items: flex-start;
   }
 
-  .btn-view-publications {
+  .btn-view-publications,
+  .btn-chat-profile {
     width: fit-content;
   }
 }

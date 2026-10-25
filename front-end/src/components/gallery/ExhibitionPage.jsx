@@ -2,32 +2,29 @@
 //
 // One exhibition of the Galería: its title (the artist's name when it has
 // none), the artist, the short text and the approved works — each with its
-// title («Sin título») and size in pixels, opened large in WorkViewer. Anyone
-// with an account can write to the artist (GalleryChat, in a side panel);
-// signed out, writing asks to sign in first.
+// title («Sin título») and size in pixels, opened large in WorkViewer.
+// «Charlar»: socios/as ask the artist to chat (the magazine's chat,
+// ChatButton / ChatPanel).
 import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, MessageCircle, X, Images } from 'lucide-react';
+import { ArrowLeft, Images } from 'lucide-react';
 import axiosInstance from '../../utils/axiosConfig';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useAuthorPhoto } from '../../app_context/AuthorContext';
-import GalleryChat from './GalleryChat';
+import ChatButton from '../chat/ChatButton';
 import WorkViewer from './WorkViewer';
 import { workImageUrl, workTitle, workSize, exhibitionTitle } from './galleryUtils';
 import './Gallery.css';
 
 function ExhibitionPage() {
   const { t } = useTranslation();
-  const { galleryView, navigateToGallery, navigateToMyGallery, navigateToLogin, showInfo } = useUI();
+  const { galleryView, navigateToGallery, navigateToMyGallery } = useUI();
   const { currentUser } = useAuth();
   const photoOf = useAuthorPhoto();
   const [exhibition, setExhibition] = useState(null);
   const [missing, setMissing] = useState(false);
   const [viewing, setViewing] = useState(null);
-  const [chatOpen, setChatOpen] = useState(!!galleryView.chat);
-  const [conversationId, setConversationId] = useState(null);
   const id = galleryView.exhibitionId;
 
   useEffect(() => {
@@ -41,26 +38,6 @@ function ExhibitionPage() {
 
   const artist = exhibition?.artist;
   const own = currentUser && artist && currentUser.id_user === artist.id_user;
-
-  // An existing conversation with this artist opens where it left off.
-  useEffect(() => {
-    if (!chatOpen || !currentUser || !artist || own) return;
-    axiosInstance.get('/gallery/conversations', { headers: { 'x-user-id': currentUser.id_user } })
-      .then((res) => {
-        const c = (res.data?.data || []).find((x) => x.role === 'visitor' && x.other?.id_user === artist.id_user);
-        setConversationId(c?.id_conversation || null);
-      })
-      .catch(() => {});
-  }, [chatOpen, currentUser, artist, own]);
-
-  const openChat = () => {
-    if (!currentUser) {
-      showInfo(t('gallery.chat.loginRequired', 'Inicia sesión para escribir a la o el artista'));
-      navigateToLogin();
-      return;
-    }
-    setChatOpen(true);
-  };
 
   if (missing) {
     return (
@@ -97,10 +74,7 @@ function ExhibitionPage() {
               <Images size={18} aria-hidden="true" /> {t('gallery.exhibition.yours', 'Es tu exposición: editarla en «Mi galería»')}
             </button>
           ) : (
-            <button type="button" className="gallery-btn gallery-btn--primary" onClick={openChat}>
-              <MessageCircle size={18} aria-hidden="true" />
-              {t('gallery.exhibition.write', { name: artist?.name_user, defaultValue: 'Escribir a {{name}}' })}
-            </button>
+            <ChatButton host={artist} origin="gallery" className="gallery-btn gallery-btn--primary" />
           )}
         </div>
       </header>
@@ -128,28 +102,6 @@ function ExhibitionPage() {
         <WorkViewer works={exhibition.works} index={viewing} onIndex={setViewing} onClose={() => setViewing(null)} />
       )}
 
-      {chatOpen && currentUser && !own && createPortal(
-        <div className="gallery-chat-panel" role="dialog" aria-modal="false" aria-label={t('gallery.exhibition.write', { name: artist?.name_user, defaultValue: 'Escribir a {{name}}' })}>
-          <div className="gallery-chat-panel__head">
-            <span className="gallery-artist">
-              {photoOf(artist)
-                ? <img src={photoOf(artist)} alt="" className="gallery-artist__photo" />
-                : <span className="gallery-artist__photo gallery-artist__photo--initial" aria-hidden="true">{artist?.name_user?.charAt(0)?.toUpperCase()}</span>}
-              <span className="gallery-artist__name">{artist?.name_user}</span>
-            </span>
-            <button type="button" className="gallery-chat-panel__close" onClick={() => setChatOpen(false)} aria-label={t('common.buttons.close', 'Cerrar')} title={t('common.buttons.close', 'Cerrar')}>
-              <X size={20} />
-            </button>
-          </div>
-          <GalleryChat
-            conversationId={conversationId}
-            exhibitionId={exhibition.id_exhibition}
-            other={artist}
-            onStarted={setConversationId}
-          />
-        </div>,
-        document.body
-      )}
     </div>
   );
 }

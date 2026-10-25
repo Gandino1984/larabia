@@ -575,6 +575,37 @@
 }
 .user-card-logout:hover { background: #c62828; color: #fff; }
 
+/* «Charlar» (someone else's card) / «Mis charlas» (one's own). */
+.user-card-chat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.7rem 1rem;
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.user-card-chat.is-asked,
+.user-card-chat--mine { background: #fff; color: #1a1a1a; }
+.user-card-chat:disabled { opacity: 0.6; cursor: default; }
+.user-card-chat__badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.72rem;
+  line-height: 20px;
+}
+
 /* Paid-subscriber badge (gold, with a medal) + "Gestionar suscripción"
    (Stripe customer portal). */
 /* Next to the name: a label, not a button — a soft gold pill. */

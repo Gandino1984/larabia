@@ -1,9 +1,10 @@
 // back-end/models/gallery_models.js
 //
 // The Galería (migration 027): one exhibition per visual artist (user.is_artist)
-// with up to 7 works, each reviewed by a super admin before it's shown; and
-// the conversations visitors with an account open with an artist, with their
-// messages. Synced at boot in this order (each references the one before).
+// with up to WORKS_MAX works, each reviewed by a super admin before it's
+// shown. Synced at boot in this order (the works reference the exhibition).
+// Talking to an artist is the magazine's chat now (models/chat_models.js); the
+// old gallery_conversations / gallery_messages tables are no longer used.
 import { DataTypes } from "sequelize";
 import sequelize from "../config/sequelize.js";
 import user_model from "./user_model.js";
@@ -49,40 +50,10 @@ export const gallery_work_model = sequelize.define("gallery_work", {
     ]
 });
 
-export const gallery_conversation_model = sequelize.define("gallery_conversation", {
-    id_conversation: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
-    artist_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    visitor_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    last_message_at: { type: DataTypes.DATE, allowNull: true },
-    // When each side last read it (their unread = messages from the other after it).
-    artist_read_at: { type: DataTypes.DATE, allowNull: true },
-    visitor_read_at: { type: DataTypes.DATE, allowNull: true }
-}, {
-    tableName: "gallery_conversations", ...timestamps,
-    indexes: [
-        { unique: true, fields: ['artist_id', 'visitor_id'], name: 'uq_conversation' },
-        { fields: ['visitor_id'], name: 'idx_conversation_visitor' }
-    ]
-});
-
-export const gallery_message_model = sequelize.define("gallery_message", {
-    id_message: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
-    conversation_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    sender_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    body: { type: DataTypes.TEXT, allowNull: false }
-}, {
-    tableName: "gallery_messages", ...timestamps,
-    indexes: [{ fields: ['conversation_id'], name: 'idx_message_conversation' }]
-});
-
 user_model.hasOne(gallery_exhibition_model, { foreignKey: 'user_id', as: 'exhibition', onDelete: 'CASCADE' });
 gallery_exhibition_model.belongsTo(user_model, { foreignKey: 'user_id', as: 'artist', onDelete: 'CASCADE' });
 gallery_exhibition_model.hasMany(gallery_work_model, { foreignKey: 'exhibition_id', as: 'works', onDelete: 'CASCADE' });
 gallery_work_model.belongsTo(gallery_exhibition_model, { foreignKey: 'exhibition_id', as: 'exhibition', onDelete: 'CASCADE' });
-gallery_conversation_model.belongsTo(user_model, { foreignKey: 'artist_id', as: 'artist', onDelete: 'CASCADE' });
-gallery_conversation_model.belongsTo(user_model, { foreignKey: 'visitor_id', as: 'visitor', onDelete: 'CASCADE' });
-gallery_conversation_model.hasMany(gallery_message_model, { foreignKey: 'conversation_id', as: 'messages', onDelete: 'CASCADE' });
-gallery_message_model.belongsTo(gallery_conversation_model, { foreignKey: 'conversation_id', as: 'conversation', onDelete: 'CASCADE' });
 
 /** Creates the tables that don't exist yet, in dependency order. */
 export async function syncGalleryTables() {
@@ -94,6 +65,4 @@ export async function syncGalleryTables() {
         console.log('>>> Added gallery_exhibitions.prepared_by');
     }
     await gallery_work_model.sync();
-    await gallery_conversation_model.sync();
-    await gallery_message_model.sync();
 }

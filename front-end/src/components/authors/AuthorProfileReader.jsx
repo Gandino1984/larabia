@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { Globe, Twitter, Instagram, ArrowLeft, BookOpen, Edit } from 'lucide-react';
+import ChatButton from '../chat/ChatButton';
 import './AuthorProfileReader.css';
 
 function AuthorProfileReader() {
@@ -136,6 +137,9 @@ function AuthorProfileReader() {
                 <BookOpen size={20} />
                 <span>{t('authors.viewPublications')}</span>
               </button>
+              {profile.status_profile !== 'draft' && (
+                <ChatButton host={{ id_user: profile.user_id, name_user: profile.display_name }} origin="authors" className="btn-chat-profile" iconSize={20} />
+              )}
             </div>
           </div>
 

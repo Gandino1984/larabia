@@ -179,7 +179,9 @@ export const SubscriptionProvider = ({ children }) => {
       if (!canJoin) {
         showInfo(reason === 'workshops'
           ? i18nT('subscription.notOpenWorkshops', 'Este taller es solo para socios/as de la revista. Pronto podrás hacerte socio/a.')
-          : i18nT('subscription.notOpen', 'Pronto podrás hacerte socio/a de la revista.'));
+          : reason === 'chat'
+            ? i18nT('subscription.notOpenChat', 'Charlar con las autoras/es y artistas es solo para socios/as de la revista. Pronto podrás hacerte socio/a.')
+            : i18nT('subscription.notOpen', 'Pronto podrás hacerte socio/a de la revista.'));
         return;
       }
       setModalReason(typeof reason === 'string' ? reason : null);

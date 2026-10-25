@@ -31,11 +31,7 @@ router.get("/review", gallery.reviewList);
 router.get("/review/count", gallery.reviewCount);
 router.post("/review/:id", gallery.review);
 
-// Messages between visitors (signed in) and artists.
-router.post("/exhibition/:id/messages", gallery.writeToArtist);
-router.get("/conversations", gallery.conversations);
-router.get("/conversations/:id", gallery.conversation);
-router.post("/conversations/:id/messages", gallery.reply);
+// (Talking to an artist: the magazine's chat, /chat.)
 
 // The bell.
 router.get("/feed", gallery.feed);

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { Globe, Twitter, Instagram, ChevronDown, ChevronUp, BookOpen, Edit, UserPlus } from 'lucide-react';
+import ChatButton from '../chat/ChatButton';
 import './AuthorCard.css';
 
 const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin].some((v) => v === true || v === 1);
@@ -223,6 +224,10 @@ function AuthorCard({ profile, editorUser }) {
           <BookOpen size={16} />
           <span>{t('authors.viewPublications')}</span>
         </button>
+        {/* Socios/as ask the author to chat (a published profile). */}
+        {profile.status_profile !== 'draft' && (
+          <ChatButton host={{ id_user: profile.user_id, name_user: profile.display_name }} origin="authors" className="btn-chat-card" iconSize={16} />
+        )}
       </div>
     </article>
   );

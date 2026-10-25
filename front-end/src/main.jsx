@@ -18,6 +18,7 @@ import { EngagementProvider } from './app_context/EngagementContext.jsx';
 import { SubscriptionProvider } from './app_context/SubscriptionContext.jsx';
 import { AuthorInvitationProvider } from './app_context/AuthorInvitationContext.jsx';
 import { GalleryProvider } from './app_context/GalleryContext.jsx';
+import { ChatProvider } from './app_context/ChatContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -34,9 +35,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                         <SubscriptionProvider>
                           <AuthorInvitationProvider>
                             <GalleryProvider>
-                              <NotificationProvider>
-                                <App />
-                              </NotificationProvider>
+                              <ChatProvider>
+                                <NotificationProvider>
+                                  <App />
+                                </NotificationProvider>
+                              </ChatProvider>
                             </GalleryProvider>
                           </AuthorInvitationProvider>
                         </SubscriptionProvider>

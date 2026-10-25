@@ -7,9 +7,9 @@
 //   up to WORKS_MAX (15) works (an image, a title — none: «Sin título» — and
 //   its size in pixels, read from the file). Any change to a work sends it
 //   back to review.
-// - Visitors with an account write to an artist; each visitor ↔ artist pair is
-//   one conversation, kept, and answered in the gallery's chat. The bell feed
-//   tells each side about unread messages, and artists about their reviews.
+// - Talking to an artist is the magazine's chat (controllers/chat/): socios/as
+//   ask, the artist accepts. The bell feed here tells artists about their
+//   reviews, and super admins how many works wait.
 // - Super admins review the works and invite artists (like authors: an
 //   account for that email, accepted or declined when they first sign in).
 //   They can also prepare the gallery of someone invited, on their behalf
@@ -20,7 +20,7 @@ import multer from "multer";
 import { Op } from "sequelize";
 import user_model from "../../models/user_model.js";
 import {
-    gallery_exhibition_model, gallery_work_model, gallery_conversation_model, gallery_message_model,
+    gallery_exhibition_model, gallery_work_model,
     WORKS_MAX
 } from "../../models/gallery_models.js";
 import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
@@ -33,20 +33,13 @@ ensureDir();
 const TITLE_MAX = 120;
 const STATEMENT_MAX = 1000;
 const WORK_TITLE_MAX = 150;
-const MESSAGE_MAX = 2000;
 const REASON_MAX = 500;
-// Messages one person can send in an hour (spam brake).
-const MESSAGES_PER_HOUR = 60;
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const cleanName = (value) => String(value ?? '').trim().replace(/\s+/g, ' ');
 const cleanEmail = (value) => String(value ?? '').trim().toLowerCase();
 const cleanText = (value) => String(value ?? '').replace(/\r\n/g, '\n').trim();
 const PERSON = ['id_user', 'name_user', 'image_user'];
-// Dates come back from MySQL as UTC strings without a zone («2026-10-24
-// 13:39:10», sequelize dateStrings); handed back to a query as they are, Node
-// reads them as local time (hours off). As a Date, in UTC.
-const utcDate = (v) => (v instanceof Date ? v : v ? new Date(String(v).replace(' ', 'T') + 'Z') : null);
 
 // ---------- uploads ----------
 
@@ -478,204 +471,18 @@ async function review(req, res) {
     }
 }
 
-// ---------- messages ----------
-
-const sentLastHour = (userId) => gallery_message_model.count({
-    where: { sender_id: userId, created_at: { [Op.gte]: new Date(Date.now() - 60 * 60 * 1000) } }
-});
-
-function checkBody(body, res) {
-    if (!body) {
-        res.status(400).json({ error: 'Escribe un mensaje', code: 'empty' });
-        return false;
-    }
-    if (body.length > MESSAGE_MAX) {
-        res.status(400).json({ error: `El mensaje es demasiado largo (máximo ${MESSAGE_MAX} caracteres)`, code: 'too_long' });
-        return false;
-    }
-    return true;
-}
-
-async function postMessage(conversation, user, body) {
-    const message = await gallery_message_model.create({ conversation_id: conversation.id_conversation, sender_id: user.id_user, body });
-    const now = message.created_at || new Date();
-    const mySide = conversation.artist_id === user.id_user ? 'artist_read_at' : 'visitor_read_at';
-    await conversation.update({ last_message_at: now, [mySide]: now });
-    return message;
-}
-
-const messageOf = (m) => ({ id_message: m.id_message, sender_id: m.sender_id, body: m.body, created_at: m.created_at });
-
-/**
- * POST /gallery/exhibition/:id/messages { body } — anyone signed in (not the
- * artist): writes to the artist, in their conversation (created if needed).
- */
-async function writeToArtist(req, res) {
-    try {
-        const user = await getRequestUser(req);
-        if (!user) return res.status(403).json({ error: 'Inicia sesión para escribir a la o el artista', code: 'login_required' });
-        const ex = await gallery_exhibition_model.findByPk(req.params.id, {
-            include: [{ model: user_model, as: 'artist', attributes: [...PERSON, 'is_artist'] }]
-        });
-        if (!ex || !roleSnapshot(ex.artist).isArtist) return res.status(404).json({ error: 'Esta exposición no existe' });
-        if (ex.user_id === user.id_user) {
-            return res.status(400).json({ error: 'No puedes escribirte a ti misma o a ti mismo', code: 'own_exhibition' });
-        }
-        const body = cleanText(req.body?.body);
-        if (!checkBody(body, res)) return;
-        if (await sentLastHour(user.id_user) >= MESSAGES_PER_HOUR) {
-            return res.status(429).json({ error: 'Has enviado muchos mensajes en poco tiempo. Espera un poco', code: 'too_many' });
-        }
-        const [conversation] = await gallery_conversation_model.findOrCreate({
-            where: { artist_id: ex.user_id, visitor_id: user.id_user },
-            defaults: { artist_id: ex.user_id, visitor_id: user.id_user }
-        });
-        const message = await postMessage(conversation, user, body);
-        res.json({
-            error: null,
-            data: { id_conversation: conversation.id_conversation, message: messageOf(message) },
-            success: 'Mensaje enviado'
-        });
-    } catch (err) {
-        console.error('gallery - writeToArtist:', err);
-        res.status(500).json({ error: 'Error al enviar el mensaje' });
-    }
-}
-
-// The conversations of a user (as artist and as visitor) with their unread count.
-async function conversationsOf(userId) {
-    const conversations = await gallery_conversation_model.findAll({
-        where: { [Op.or]: [{ artist_id: userId }, { visitor_id: userId }] },
-        include: [
-            { model: user_model, as: 'artist', attributes: PERSON },
-            { model: user_model, as: 'visitor', attributes: PERSON }
-        ],
-        order: [['last_message_at', 'DESC']]
-    });
-    const exhibitions = await gallery_exhibition_model.findAll({
-        where: { user_id: [...new Set(conversations.map((c) => c.artist_id))] },
-        attributes: ['id_exhibition', 'user_id', 'title']
-    });
-    const exhibitionOf = new Map(exhibitions.map((e) => [e.user_id, e]));
-    return Promise.all(conversations.map(async (c) => {
-        const role = c.artist_id === userId ? 'artist' : 'visitor';
-        const readAt = role === 'artist' ? c.artist_read_at : c.visitor_read_at;
-        const [unread, last] = await Promise.all([
-            gallery_message_model.count({
-                where: {
-                    conversation_id: c.id_conversation,
-                    sender_id: { [Op.ne]: userId },
-                    ...(readAt ? { created_at: { [Op.gt]: utcDate(readAt) } } : {})
-                }
-            }),
-            gallery_message_model.findOne({ where: { conversation_id: c.id_conversation }, order: [['created_at', 'DESC'], ['id_message', 'DESC']] })
-        ]);
-        const ex = exhibitionOf.get(c.artist_id);
-        return {
-            id_conversation: c.id_conversation,
-            role,
-            other: personOf(role === 'artist' ? c.visitor : c.artist),
-            exhibition: ex ? { id_exhibition: ex.id_exhibition, title: ex.title || null } : null,
-            last_message: last ? messageOf(last) : null,
-            last_message_at: c.last_message_at,
-            unread
-        };
-    }));
-}
-
-/** GET /gallery/conversations — the signed-in user's conversations. */
-async function conversations(req, res) {
-    try {
-        const user = await getRequestUser(req);
-        if (!user) return res.json({ error: null, data: [] });
-        res.json({ error: null, data: await conversationsOf(user.id_user) });
-    } catch (err) {
-        console.error('gallery - conversations:', err);
-        res.status(500).json({ error: 'Error al cargar los mensajes' });
-    }
-}
-
-async function ownConversation(req, res) {
-    const user = await getRequestUser(req);
-    if (!user) {
-        res.status(403).json({ error: 'Inicia sesión para continuar', code: 'login_required' });
-        return {};
-    }
-    const conversation = await gallery_conversation_model.findByPk(req.params.id, {
-        include: [
-            { model: user_model, as: 'artist', attributes: PERSON },
-            { model: user_model, as: 'visitor', attributes: PERSON }
-        ]
-    });
-    if (!conversation || (conversation.artist_id !== user.id_user && conversation.visitor_id !== user.id_user)) {
-        res.status(404).json({ error: 'Esta conversación no existe' });
-        return {};
-    }
-    return { user, conversation };
-}
-
-/** GET /gallery/conversations/:id — its messages (participants only); marks it read. */
-async function conversation(req, res) {
-    try {
-        const { user, conversation: c } = await ownConversation(req, res);
-        if (!c) return;
-        const messages = await gallery_message_model.findAll({
-            where: { conversation_id: c.id_conversation },
-            order: [['created_at', 'ASC'], ['id_message', 'ASC']],
-            limit: 500
-        });
-        const role = c.artist_id === user.id_user ? 'artist' : 'visitor';
-        await c.update({ [role === 'artist' ? 'artist_read_at' : 'visitor_read_at']: new Date() });
-        const ex = await exhibitionOfArtist(c.artist_id);
-        res.json({
-            error: null,
-            data: {
-                id_conversation: c.id_conversation,
-                role,
-                artist: personOf(c.artist),
-                visitor: personOf(c.visitor),
-                other: personOf(role === 'artist' ? c.visitor : c.artist),
-                exhibition: ex ? { id_exhibition: ex.id_exhibition, title: ex.title || null } : null,
-                messages: messages.map(messageOf)
-            }
-        });
-    } catch (err) {
-        console.error('gallery - conversation:', err);
-        res.status(500).json({ error: 'Error al cargar la conversación' });
-    }
-}
-
-/** POST /gallery/conversations/:id/messages { body } — a reply (participants only). */
-async function reply(req, res) {
-    try {
-        const { user, conversation: c } = await ownConversation(req, res);
-        if (!c) return;
-        const body = cleanText(req.body?.body);
-        if (!checkBody(body, res)) return;
-        if (await sentLastHour(user.id_user) >= MESSAGES_PER_HOUR) {
-            return res.status(429).json({ error: 'Has enviado muchos mensajes en poco tiempo. Espera un poco', code: 'too_many' });
-        }
-        const message = await postMessage(c, user, body);
-        res.json({ error: null, data: messageOf(message), success: 'Mensaje enviado' });
-    } catch (err) {
-        console.error('gallery - reply:', err);
-        res.status(500).json({ error: 'Error al enviar el mensaje' });
-    }
-}
-
 // ---------- the bell ----------
 
 /**
- * GET /gallery/feed — for the bell: conversations with unread messages, the
- * artist's works reviewed since they last looked, and (super admins) how many
- * works wait for review. Never 401: signed out, all empty.
+ * GET /gallery/feed — for the bell: the artist's works reviewed since they
+ * last looked, and (super admins) how many works wait for review. Never 401:
+ * signed out, all empty.
  */
 async function feed(req, res) {
     try {
         const user = await getRequestUser(req);
-        if (!user) return res.json({ error: null, data: { messages: [], reviews: [], pending_review: 0 } });
+        if (!user) return res.json({ error: null, data: { reviews: [], pending_review: 0 } });
         const role = roleSnapshot(user);
-        const messages = (await conversationsOf(user.id_user)).filter((c) => c.unread > 0);
         let reviews = [];
         const ex = role.isArtist ? await exhibitionOfArtist(user.id_user) : null;
         if (ex) {
@@ -685,7 +492,7 @@ async function feed(req, res) {
             reviews = works.map((w) => workOf(w, { withReview: true }));
         }
         const pending_review = role.isSuperAdmin ? await gallery_work_model.count({ where: { status_work: 'pending' } }) : 0;
-        res.json({ error: null, data: { messages, reviews, pending_review } });
+        res.json({ error: null, data: { reviews, pending_review } });
     } catch (err) {
         console.error('gallery - feed:', err);
         res.status(500).json({ error: 'Error al cargar los avisos de la galería' });
@@ -1000,7 +807,6 @@ export default {
     list, exhibition,
     mine, updateMine, addWork, updateWork, removeWork, reorderWorks,
     reviewList, reviewCount, review,
-    writeToArtist, conversations, conversation, reply,
     feed, reviewsSeen,
     invite, invitations, resend, sendUnsent, prepareFor, myInvitation, respond
 };

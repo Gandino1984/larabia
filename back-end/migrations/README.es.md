@@ -64,6 +64,7 @@ Desde la `012`, el back-end comprueba al arrancar (`back-end/index.js`) las colu
 | `026` | `user.author_invite_email_sent_at` |
 | `027` | `user.is_artist`, `artist_invite_status`, `artist_invited_by`, `artist_invited_at`, `artist_invite_email_sent_at` |
 | `028` | `gallery_exhibitions.prepared_by` (se añade en `syncGalleryTables`, `models/gallery_models.js`, justo después de que exista esa tabla) |
+| `029` | Las tablas de las charlas, que se crean al arrancar (`syncChatTables`, `models/chat_models.js`), que la primera vez copia dentro las conversaciones de la Galería |
 
 Las tablas de `009`, `010`, `011`, `014`, `015`, `020`, `023` y `027` se crean al arrancar con `sync()` de Sequelize si no existen (las de la galería en orden, porque se referencian entre sí). Los archivos SQL siguen siendo la referencia para una base nueva.
 
@@ -94,8 +95,10 @@ Las tablas de `009`, `010`, `011`, `014`, `015`, `020`, `023` y `027` se crean a
 | `open_space_proposals` | Propuestas literarias enviadas desde Espacio abierto (texto o archivo privado en `uploads/proposals/`, estado) |
 | `gallery_exhibitions` | La Galería: una exposición por artista visual (título, texto breve; `prepared_by`: el super admin que la prepara en su nombre, hasta que la acepta — `028`) |
 | `gallery_works` | Sus obras (≤ 15, `WORKS_MAX`): imagen WebP en `uploads/gallery/`, título, tamaño en píxeles, orden, estado de revisión |
-| `gallery_conversations` | Conversaciones artista ↔ visitante (la última lectura de cada parte) |
-| `gallery_messages` | Sus mensajes |
+| `gallery_conversations` | (Ya no se usa: copiada en `chat_conversations`, `029`) |
+| `gallery_messages` | (Ya no se usa: copiada en `chat_messages`, `029`) |
+| `chat_conversations` | Las charlas: una por pareja socia/o ↔ autora/or o artista, su estado (pendiente, abierta, rechazada, terminada), su origen, lo que ha leído y visto cada parte |
+| `chat_messages` | Sus mensajes |
 
 ## Diferencias con uribarri.online
 

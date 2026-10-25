@@ -1,19 +1,23 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useSpring, animated } from '@react-spring/web';
-import { X, User, Camera, Eye, Upload, Loader, LogOut } from 'lucide-react';
+import { X, User, Camera, Eye, Upload, Loader, LogOut, MessagesSquare } from 'lucide-react';
 import MedalIcon from '../common/MedalIcon';
 import { useTranslation } from 'react-i18next';
 import { UserInfoCardUtils } from './UserInfoCardUtils.jsx';
 import axiosInstance from '../../utils/axiosConfig';
 import { useSubscription } from '../../app_context/SubscriptionContext';
+import { useChat } from '../../app_context/ChatContext';
+import ChatButton from '../chat/ChatButton';
 import '../common/SubscriberMark.css';
 import './UserInfoCard.css';
 
 // imageUrl: the photo to show instead of the account image (an author's
-// profile photo — App, the author card).
-const UserInfoCard = ({ user, imageUrl: photoUrl, bioText, onClose, isOwner, onLogout }) => {
+// profile photo — App, the author card). chatHost: an author one can ask to
+// chat («Charlar»); one's own card has «Mis charlas».
+const UserInfoCard = ({ user, imageUrl: photoUrl, bioText, chatHost, onClose, isOwner, onLogout }) => {
   const { t } = useTranslation();
+  const chat = useChat();
   const [showActionsPopup, setShowActionsPopup] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const fileInputRef = useRef(null);
@@ -222,6 +226,20 @@ const UserInfoCard = ({ user, imageUrl: photoUrl, bioText, onClose, isOwner, onL
             )}
           </div>
 
+          {!isOwner && chatHost && (
+            <ChatButton host={chatHost} origin="authors" className="user-card-chat" />
+          )}
+          {isOwner && chat && (
+            <button
+              className="user-card-chat user-card-chat--mine"
+              type="button"
+              onClick={() => { onClose?.(); chat.openChats(); }}
+            >
+              <MessagesSquare size={18} aria-hidden="true" />
+              <span>{t('chat.title', 'Mis charlas')}</span>
+              {chat.unreadTotal > 0 && <span className="user-card-chat__badge">{chat.unreadTotal}</span>}
+            </button>
+          )}
           {isOwner && onLogout && (
             <button
               className="user-card-logout"

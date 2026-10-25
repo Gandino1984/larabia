@@ -21,7 +21,7 @@ function GalleryPage() {
   const { t } = useTranslation();
   const { navigateToExhibition, navigateToMyGallery, navigateToAdmin, showSuccess, showInfo } = useUI();
   const { isSuperAdmin } = useAuth();
-  const { isArtist, feed, unreadMessages } = useGallery();
+  const { isArtist, feed } = useGallery();
   const photoOf = useAuthorPhoto();
   const [exhibitions, setExhibitions] = useState(null);
   const [inviting, setInviting] = useState(false);
@@ -61,7 +61,6 @@ function GalleryPage() {
               <button type="button" className="gallery-btn gallery-btn--primary" onClick={() => navigateToMyGallery()}>
                 <Images size={18} aria-hidden="true" />
                 {t('gallery.mine.button', 'Mi galería')}
-                {unreadMessages > 0 && <span className="gallery-badge">{unreadMessages}</span>}
               </button>
             )}
             {isSuperAdmin && (

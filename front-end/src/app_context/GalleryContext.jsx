@@ -2,10 +2,10 @@
 //
 // The Galería's live state for the signed-in user (back-end
 // controllers/gallery/gallery_api_controller.js):
-// - feed: conversations with unread messages (as artist or as visitor), the
-//   artist's works reviewed since they last looked, and — super admins — how
-//   many works wait for review. Refreshed every minute and when the tab gets
-//   focus; the bell (NotificationContext) and the Admin badge read it.
+// - feed: the artist's works reviewed since they last looked, and — super
+//   admins — how many works wait for review. Refreshed every minute and when
+//   the tab gets focus; the bell (NotificationContext) and the Admin badge
+//   read it. (Talking to artists: the magazine's chat, ChatContext.)
 // - invitation: a pending invitation to be a visual artist. App shows
 //   GalleryInvitationModal until they accept (→ artist) or decline; «Decidir
 //   más tarde» hides it for this browser session (the bell keeps it).
@@ -16,7 +16,7 @@ import { useAuth } from './AuthContext';
 import { useUI } from './UIContext';
 
 const GalleryContext = createContext(null);
-const EMPTY_FEED = { messages: [], reviews: [], pending_review: 0 };
+const EMPTY_FEED = { reviews: [], pending_review: 0 };
 const laterKey = (userId) => `larabia_artist_invite_later_${userId}`;
 
 export const GalleryProvider = ({ children }) => {
@@ -113,12 +113,11 @@ export const GalleryProvider = ({ children }) => {
     try { await axiosInstance.post('/gallery/feed/reviews-seen', {}, auth()); } catch { /* next feed refresh shows them again */ }
   }, [isArtist, feed.reviews.length, auth]);
 
-  const unreadMessages = feed.messages.reduce((n, c) => n + (c.unread || 0), 0);
 
   const value = useMemo(() => ({
-    isArtist, feed, refreshFeed, unreadMessages, markReviewsSeen,
+    isArtist, feed, refreshFeed, markReviewsSeen,
     invitation, inviteModalOpen, busy, openInviteModal, later, respond, refreshInvitation
-  }), [isArtist, feed, refreshFeed, unreadMessages, markReviewsSeen, invitation, inviteModalOpen, busy, openInviteModal, later, respond, refreshInvitation]);
+  }), [isArtist, feed, refreshFeed, markReviewsSeen, invitation, inviteModalOpen, busy, openInviteModal, later, respond, refreshInvitation]);
 
   return <GalleryContext.Provider value={value}>{children}</GalleryContext.Provider>;
 };

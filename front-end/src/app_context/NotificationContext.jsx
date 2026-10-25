@@ -23,9 +23,11 @@
 //    (AuthorInvitationContext) — Aceptar / Rechazar; stays until answered.
 //  - gallery-invite:  invited to the Galería as a visual artist
 //    (GalleryContext) — Aceptar / Rechazar; stays until answered.
-//  - gallery-message:  a conversation of the Galería with unread messages —
-//    for the artist, a visitor wrote; for the visitor, the artist answered.
-//    Until it's opened.
+//  - chat-request:  a socio/a asks the user (an author / artist) to chat
+//    (ChatContext) — Aceptar / Rechazar; stays until answered.
+//  - chat-answer:  the author accepted, declined or ended the user's chat
+//    (until it's opened or the bell is).
+//  - chat-message:  a chat with unread messages (until it's opened).
 //  - gallery-review:  the team approved or didn't publish one of the
 //    artist's works (until the bell is opened).
 //  - gallery-pending:  super admins — works waiting for review.
@@ -45,6 +47,7 @@ import { useSubscription } from './SubscriptionContext';
 import { useWorkshop } from './WorkshopContext';
 import { useAuthorInvitation } from './AuthorInvitationContext';
 import { useGallery } from './GalleryContext';
+import { useChat } from './ChatContext';
 import { useMetadata } from './MetadataContext';
 import { localDate, serverDate } from '../utils/locale';
 
@@ -57,7 +60,7 @@ export const NotificationProvider = ({ children }) => {
   const { t } = useTranslation();
   const { currentUser, canCreateContent } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
-  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToExhibition, navigateToAdmin } = useUI();
+  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToAdmin } = useUI();
   const {
     invitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen, setSelectedWorkshop,
     respondExtraSpot, markSpotAnswersSeen
@@ -68,6 +71,7 @@ export const NotificationProvider = ({ children }) => {
   const membership = subscription?.mine;
   const authorInvite = useAuthorInvitation();
   const gallery = useGallery();
+  const chat = useChat();
   const brand = useMetadata()?.metadata?.name || 'La Rabia';
 
   const [publishedArticles, setPublishedArticles] = useState([]);
@@ -165,7 +169,8 @@ export const NotificationProvider = ({ children }) => {
     const spotAnswered = (invitationFeed?.spot_answers || []).map(a => a.id_spot_request);
     if (spotAnswered.length > 0) markSpotAnswersSeen(spotAnswered);
     gallery.markReviewsSeen();
-  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, invitationFeed?.spot_answers, markInvitationResponsesSeen, markSpotAnswersSeen, gallery]);
+    if (chat?.conversations.some((c) => c.unseen_change)) chat.markSeen();
+  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, invitationFeed?.spot_answers, markInvitationResponsesSeen, markSpotAnswersSeen, gallery, chat]);
 
   const notifications = useMemo(() => {
     const list = [];
@@ -237,23 +242,60 @@ export const NotificationProvider = ({ children }) => {
       });
     }
 
-    // The Galería: unread messages (as artist or as visitor).
-    if (currentUser) {
-      for (const c of gallery.feed.messages || []) {
+    // The chat: requests to answer (the author), the author's answers not
+    // seen yet (the member), unread messages (both). Each opens the chat.
+    if (currentUser && chat) {
+      for (const c of chat.conversations) {
         const name = c.other?.name_user || '';
-        const body = c.last_message?.body || '';
-        list.push({
-          id: `gallery-message-${c.id_conversation}-${c.last_message?.id_message || 0}`,
-          type: 'gallery-message',
-          title: c.role === 'artist'
-            ? t('notifications.galleryMessage.title', { name, defaultValue: 'Mensaje de {{name}} en tu galería' })
-            : t('notifications.galleryReply.title', { name, defaultValue: '{{name}} te ha respondido' }),
-          message: body.length > 120 ? `${body.slice(0, 117)}…` : body,
-          onClick: () => (c.role === 'artist'
-            ? navigateToMyGallery({ tab: 'messages', conversationId: c.id_conversation })
-            : c.exhibition && navigateToExhibition(c.exhibition.id_exhibition, { chat: true }))
-        });
+        const open = () => chat.openChats(c.id_conversation);
+        if (c.role === 'host' && c.status === 'requested') {
+          list.push({
+            id: `chat-request-${c.id_conversation}-${c.requested_at}`,
+            type: 'chat-request',
+            title: t('notifications.chatRequest.title', { name, defaultValue: '{{name}} quiere charlar contigo' }),
+            message: c.origin === 'gallery'
+              ? t('notifications.chatRequest.fromGallery', 'Te lo pide desde tu exposición en la Galería.')
+              : t('notifications.chatRequest.fromAuthors', 'Te lo pide desde tu tarjeta de autora o autor.'),
+            onClick: open,
+            actions: [
+              { key: 'accept', variant: 'primary', label: t('chat.accept', 'Aceptar'), onClick: () => chat.respond(c.id_conversation, 'accept') },
+              { key: 'decline', variant: 'secondary', label: t('chat.decline', 'Rechazar'), onClick: () => chat.respond(c.id_conversation, 'decline') }
+            ]
+          });
+        }
+        if (c.unseen_change) {
+          const vars = { name };
+          list.push({
+            id: `chat-answer-${c.id_conversation}-${c.status}-${c.changed_at}`,
+            type: 'chat-answer',
+            title: c.status === 'active'
+              ? t('notifications.chatAccepted.title', { ...vars, defaultValue: '{{name}} ha aceptado charlar contigo' })
+              : c.status === 'declined'
+                ? t('notifications.chatDeclined.title', { ...vars, defaultValue: '{{name}} no ha aceptado charlar contigo' })
+                : t('notifications.chatEnded.title', { ...vars, defaultValue: '{{name}} ha terminado la conversación' }),
+            message: c.status === 'active'
+              ? t('notifications.chatAccepted.message', 'Ya puedes escribirle.')
+              : c.status === 'declined'
+                ? t('notifications.chatDeclined.message', 'Puedes volver a pedirlo más adelante.')
+                : t('notifications.chatEnded.message', 'Si quieres seguir hablando, vuelve a pedirlo.'),
+            onClick: () => { chat.markSeen([c.id_conversation]); open(); }
+          });
+        }
+        if (c.unread > 0) {
+          const body = c.last_message?.body || '';
+          list.push({
+            id: `chat-message-${c.id_conversation}-${c.last_message?.id_message || 0}`,
+            type: 'chat-message',
+            title: t('notifications.chatMessage.title', { name, defaultValue: '{{name}} te ha escrito' }),
+            message: body.length > 120 ? `${body.slice(0, 117)}…` : body,
+            onClick: open
+          });
+        }
       }
+    }
+
+    // The Galería.
+    if (currentUser) {
       // The team's review of the artist's works.
       for (const w of gallery.feed.reviews || []) {
         const title = w.title_work || t('gallery.untitled', 'Sin título');
@@ -466,7 +508,7 @@ export const NotificationProvider = ({ children }) => {
     profilesReady, currentUser, canCreateContent, authorProfiles, lastSeen,
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
     invitationFeed, openWorkshop, answerInvitation, respondExtraSpot, authorInvite, brand,
-    gallery, navigateToMyGallery, navigateToExhibition, navigateToAdmin,
+    gallery, chat, navigateToMyGallery, navigateToAdmin,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

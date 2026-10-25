@@ -33,6 +33,7 @@ import GalleryPage from './components/gallery/GalleryPage';
 import ExhibitionPage from './components/gallery/ExhibitionPage';
 import MyGallery from './components/gallery/MyGallery';
 import GalleryInvitationModal from './components/gallery/GalleryInvitationModal';
+import ChatPanel from './components/chat/ChatPanel';
 import AdminPage from './components/admin/permissions/AdminPage';
 import LoginPage from './components/layout/LoginPage';
 import ForgotPasswordPage from './components/layout/ForgotPasswordPage';
@@ -234,6 +235,10 @@ function App() {
       }
     : authorCardUser;
   const authorCardBio = authorCardProfile?.bio_text;
+  // «Charlar» on it: an author with a published profile (the chat's hosts).
+  const authorCardChatHost = authorCardProfile && authorCardProfile.status_profile !== 'draft'
+    ? { id_user: authorCardProfile.user_id, name_user: authorCardResolvedUser?.name_user || authorCardProfile.display_name }
+    : null;
 
   return (
     <>
@@ -277,12 +282,14 @@ function App() {
 
       {!isPreview && <AuthorInvitationModal />}
       {!isPreview && <GalleryInvitationModal />}
+      {!isPreview && <ChatPanel />}
 
       {authorCardUser && (
         <UserInfoCard
           user={authorCardResolvedUser}
           imageUrl={authorPhotoOf(authorCardResolvedUser)}
           bioText={authorCardBio}
+          chatHost={authorCardChatHost}
           onClose={closeAuthorCard}
           isOwner={false}
         />

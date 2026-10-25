@@ -59,6 +59,7 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `026` | `user.author_invite_email_sent_at` |
 | `027` | `user.is_artist`, `artist_invite_status`, `artist_invited_by`, `artist_invited_at`, `artist_invite_email_sent_at` |
 | `028` | `gallery_exhibitions.prepared_by` (added in `syncGalleryTables`, `models/gallery_models.js`, right after that table exists) |
+| `029` | The chat's tables, created at boot (`syncChatTables`, `models/chat_models.js`), which copies the Galería's conversations in the first time |
 
 The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are created at boot with Sequelize `sync()` when missing (the gallery's in order, as they reference each other). The SQL files stay the reference for a fresh database.
 
@@ -89,8 +90,10 @@ The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are crea
 | `open_space_proposals` | Literary proposals sent from Espacio abierto (text or a private file in `uploads/proposals/`, status) |
 | `gallery_exhibitions` | The Galería: one exhibition per visual artist (title, short text; `prepared_by`: the super admin preparing it on their behalf, until they accept — `028`) |
 | `gallery_works` | Its works (≤ 15, `WORKS_MAX`): WebP image in `uploads/gallery/`, title, size in pixels, order, review status |
-| `gallery_conversations` | Artist ↔ visitor conversations (each side's last read) |
-| `gallery_messages` | Their messages |
+| `gallery_conversations` | (No longer used: copied into `chat_conversations`, `029`) |
+| `gallery_messages` | (No longer used: copied into `chat_messages`, `029`) |
+| `chat_conversations` | The chat: one per member ↔ author / artist pair, its status (requested, active, declined, ended), origin, what each side has read and seen |
+| `chat_messages` | Its messages |
 
 ## Differences from uribarri.online
 

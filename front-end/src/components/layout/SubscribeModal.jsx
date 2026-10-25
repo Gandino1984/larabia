@@ -64,6 +64,11 @@ function SubscribeModal({ onClose }) {
 
         <span className="subscribe-modal__icon" aria-hidden="true"><Flame size={28} /></span>
         <h2 id="subscribe-modal-title">{t('subscription.title', 'Hazte socio/a de La Rabia')}</h2>
+        {modalReason === 'chat' && (
+          <p className="subscribe-modal__reason">
+            {t('subscription.reasonChat', 'Charlar con las autoras/es y artistas de la revista es exclusivo para socios/as. Hazte socio/a para pedirles una charla.')}
+          </p>
+        )}
         {modalReason === 'workshops' && (
           <p className="subscribe-modal__reason">
             {t('subscription.reasonWorkshops', 'Reservar plaza en los talleres es exclusivo para socios/as. Hazte socio/a para apuntarte a los talleres y a los talleres infantiles.')}
