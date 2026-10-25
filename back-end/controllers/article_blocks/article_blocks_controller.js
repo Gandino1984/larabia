@@ -9,6 +9,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
+// WebP's largest side, in pixels.
+const WEBP_MAX = 16383;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -262,7 +265,8 @@ async function uploadBlockImage(file) {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
 
-        // Check if image needs WebP conversion (JPEG/JPG/PNG)
+        // JPEG / PNG (comic panels and image blocks, up to 20 MB) become WebP.
+        // GIF (it may move), WebP and AVIF are kept as they come.
         const needsConversion = ['image/jpeg', 'image/jpg', 'image/png'].includes(file.mimetype);
         const originalFormat = file.mimetype.split('/')[1].toUpperCase();
 
@@ -273,48 +277,49 @@ async function uploadBlockImage(file) {
         let finalSize = originalSize;
 
         if (needsConversion) {
-            // Check image dimensions before conversion
             const sharp = (await import('sharp')).default;
-            const metadata = await sharp(file.buffer).metadata();
-            const maxWebPDimension = 16383; // WebP max dimension limit
-
-            console.log(`-> Image info:`, {
-                filename: file.originalname,
-                dimensions: `${metadata.width}x${metadata.height}`,
-                size: Math.round(originalSize / 1024) + 'KB',
-                format: originalFormat
-            });
-
-            // If image exceeds WebP dimension limits, keep original format
-            if (metadata.width > maxWebPDimension || metadata.height > maxWebPDimension) {
-                console.log(`-> ⚠️ Image exceeds WebP limits (max ${maxWebPDimension}px). Keeping original ${originalFormat} format.`);
-
-                // Save in original format without conversion
-                finalFileName = `block_${Date.now()}_${file.originalname}`;
-                filePath = path.join(uploadDir, finalFileName);
-                fs.writeFileSync(filePath, file.buffer);
-
-                wasConverted = false; // No conversion happened
-            } else {
-                // Convert to WebP for better compression
-                console.log(`-> Converting ${originalFormat} to WebP...`);
-
-                const webpBuffer = await sharp(file.buffer)
-                    .webp({ quality: 90, effort: 6 }) // High quality, good compression
-                    .toBuffer();
-
-                finalFileName = `block_${Date.now()}.webp`;
-                filePath = path.join(uploadDir, finalFileName);
-                fs.writeFileSync(filePath, webpBuffer);
-
-                wasConverted = true;
-                finalSize = webpBuffer.length;
-
-                console.log(`-> ✅ Converted ${originalFormat} to WebP successfully:`, {
-                    final: Math.round(finalSize / 1024) + 'KB',
-                    saved: Math.round((originalSize - finalSize) / 1024) + 'KB'
+            let webpBuffer;
+            let resized = false;
+            try {
+                const metadata = await sharp(file.buffer).metadata();
+                // Photos from phones: their EXIF orientation (rotate() applies it;
+                // the WebP has none). Orientations 5–8 turn it a quarter.
+                const turned = (metadata.orientation || 1) >= 5;
+                const width = turned ? metadata.height : metadata.width;
+                const height = turned ? metadata.width : metadata.height;
+                console.log(`-> Image info:`, {
+                    filename: file.originalname,
+                    dimensions: `${width}x${height}`,
+                    size: Math.round(originalSize / 1024) + 'KB',
+                    format: originalFormat
                 });
+                let pipeline = sharp(file.buffer).rotate();
+                // WebP can't go past WEBP_MAX px a side: a wider panel is scaled
+                // down to fit (same proportions) rather than kept as PNG/JPEG.
+                if (width > WEBP_MAX || height > WEBP_MAX) {
+                    pipeline = pipeline.resize({ width: WEBP_MAX, height: WEBP_MAX, fit: 'inside', withoutEnlargement: true });
+                    resized = true;
+                }
+                // Effort 4: the same quality and size as the slowest setting, in
+                // a fraction of the time (a 20 MB panel would near the upload's
+                // time limit at effort 6).
+                webpBuffer = await pipeline.webp({ quality: 90, effort: 4 }).toBuffer();
+            } catch (err) {
+                console.error('-> WebP conversion failed:', err.message);
+                return { error: /pixel limit/i.test(err.message)
+                    ? 'La imagen tiene demasiados píxeles para convertirla a WebP: redúcela un poco'
+                    : 'No se pudo convertir la imagen a WebP' };
             }
+
+            finalFileName = `block_${Date.now()}.webp`;
+            filePath = path.join(uploadDir, finalFileName);
+            fs.writeFileSync(filePath, webpBuffer);
+            wasConverted = true;
+            finalSize = webpBuffer.length;
+            console.log(`-> ✅ Converted ${originalFormat} to WebP${resized ? ` (scaled to fit ${WEBP_MAX}px)` : ''}:`, {
+                final: Math.round(finalSize / 1024) + 'KB',
+                saved: Math.round((originalSize - finalSize) / 1024) + 'KB'
+            });
         } else {
             // Keep original format (GIF, WebP, AVIF)
             finalFileName = `block_${Date.now()}_${file.originalname}`;

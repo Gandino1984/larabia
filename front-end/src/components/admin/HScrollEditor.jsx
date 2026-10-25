@@ -195,10 +195,10 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
       return;
     }
 
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024;
+    // Validate file size (max 20 MB; the server makes it WebP)
+    const maxSize = 20 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert(t('hscroll.editor.imageTooLarge', 'La imagen es demasiado grande. Máximo 10MB'));
+      alert(t('hscroll.editor.imageTooLarge', 'La imagen es demasiado grande. Máximo 20 MB'));
       return;
     }
 

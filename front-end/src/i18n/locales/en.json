@@ -999,7 +999,7 @@
   "messages.error.uploadDrawing": "The drawing could not be uploaded",
   "messages.success.imageConverted": "Image uploaded and converted from {{from}} to WebP. Space saved: {{saved}} KB ({{percent}}%) · Final size: {{size}} KB",
   "hscroll.editor.invalidImage": "Please choose a valid image (JPEG, PNG, WebP).\nSelected file: {{name}} ({{type}})",
-  "hscroll.editor.imageTooLarge": "The image is too large. 10 MB at most",
+  "hscroll.editor.imageTooLarge": "The image is too large. 20 MB at most",
   "hscroll.editor.title": "Comic editor · horizontal reading",
   "hscroll.editor.description": "Upload images to build your comic. They are shown side by side, all at the same height.",
   "hscroll.editor.scrollLeft": "Scroll left",
