@@ -133,6 +133,44 @@
 .gallery-artist--large .gallery-artist__photo { width: 46px; height: 46px; }
 
 /* The exhibitions */
+/* The search bar (like Autoras/es): an artist's name or an exhibition's title. */
+.gallery-search { position: relative; display: flex; align-items: center; max-width: 520px; margin: 0 0 1.5rem; }
+.gallery-search__icon { position: absolute; left: 0.9rem; color: #777777; pointer-events: none; }
+.gallery-search__input {
+  width: 100%;
+  min-width: 0;
+  min-height: 50px;
+  padding: 0.75rem 3rem 0.75rem 2.9rem;
+  border: 2px solid #cfcfcf;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 1rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.gallery-search__input::placeholder { color: #888888; }
+.gallery-search__input:focus { border-color: #1a1a1a; outline: none; }
+/* The browser's own clear button: we draw ours. */
+.gallery-search__input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+.gallery-search__clear {
+  position: absolute;
+  right: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #ececec;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+.gallery-search__count { margin: -0.75rem 0 1.25rem; color: var(--on-light-muted, #555555); font-size: 0.9rem; }
+
 .gallery-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -171,7 +209,7 @@
 .exhibition-page__header h1 { margin: 0 0 0.8rem; font-size: 1.8rem; line-height: 1.15; color: var(--on-light, #1a1a1a); }
 .exhibition-page__statement { max-width: 68ch; margin: 1rem 0 0; color: #333333; line-height: 1.65; }
 .exhibition-page__statement p { margin: 0 0 0.8rem; white-space: pre-line; }
-.exhibition-page__actions { margin-top: 1.25rem; }
+.exhibition-page__actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.25rem; }
 
 /* The works: hung like a wall, each in a white frame with its caption. */
 /* Each obra: its title, then its illustrations. */

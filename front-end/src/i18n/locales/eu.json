@@ -1738,5 +1738,14 @@
   "gallery.mine.countUnlimited": "Lanak: {{pieces}} · Ilustrazioak: {{works}}",
   "gallery.illustrationsCount_one": "Ilustrazio 1",
   "gallery.illustrationsCount_other": "{{count}} ilustrazio",
-  "admin.gallery.inPiece": "«{{title}}» lana"
+  "admin.gallery.inPiece": "«{{title}}» lana",
+  "gallery.exhibition.share": "Partekatu",
+  "gallery.exhibition.shareTitle": "Partekatu erakusketa hau",
+  "gallery.exhibition.shareText": "{{name}}(r)en galeria La Rabian",
+  "gallery.exhibition.shareCopy": "Kopiatu erakusketaren esteka:",
+  "gallery.search.placeholder": "Bilatu artista bat edo erakusketa bat…",
+  "gallery.search.label": "Bilatu galerian",
+  "gallery.search.results_one": "Erakusketa 1",
+  "gallery.search.results_other": "{{count}} erakusketa",
+  "gallery.search.none": "Ez dago «{{q}}»(r)ekin bat datorren artista edo erakusketarik."
 }

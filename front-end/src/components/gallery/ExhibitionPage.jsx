@@ -5,10 +5,12 @@
 // its approved illustrations (title, «Sin título» if none; description; size
 // in pixels), opened large in WorkViewer, which goes through the obra.
 // «Charlar»: socios/as ask the artist to chat (the magazine's chat,
-// ChatButton / ChatPanel).
+// ChatButton / ChatPanel). «Compartir», for everyone: its link
+// (?exhibition=<id>, opened by App) — the phone's share sheet on touch
+// screens, copied to the clipboard elsewhere.
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Images } from 'lucide-react';
+import { ArrowLeft, Images, Share2 } from 'lucide-react';
 import axiosInstance from '../../utils/axiosConfig';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -20,7 +22,7 @@ import './Gallery.css';
 
 function ExhibitionPage() {
   const { t } = useTranslation();
-  const { galleryView, navigateToGallery, navigateToMyGallery } = useUI();
+  const { galleryView, navigateToGallery, navigateToMyGallery, showSuccess } = useUI();
   const { currentUser } = useAuth();
   const photoOf = useAuthorPhoto();
   const [exhibition, setExhibition] = useState(null);
@@ -39,6 +41,30 @@ function ExhibitionPage() {
 
   const artist = exhibition?.artist;
   const own = currentUser && artist && currentUser.id_user === artist.id_user;
+
+  const share = async () => {
+    const url = `${window.location.origin}/?exhibition=${exhibition.id_exhibition}`;
+    const touch = window.matchMedia?.('(pointer: coarse)').matches;
+    if (touch && navigator.share) {
+      try {
+        await navigator.share({
+          title: exhibitionTitle(exhibition),
+          text: t('gallery.exhibition.shareText', { name: artist?.name_user, defaultValue: 'La galería de {{name}} en La Rabia' }),
+          url
+        });
+        return;
+      } catch (err) {
+        if (err?.name === 'AbortError') return; // closed the share sheet
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      showSuccess(t('hero.linkCopied', '¡Enlace copiado!'));
+    } catch {
+      // No clipboard access (old browser, permissions): let them copy it.
+      window.prompt(t('gallery.exhibition.shareCopy', 'Copia el enlace de la exposición:'), url);
+    }
+  };
 
   if (missing) {
     return (
@@ -77,6 +103,9 @@ function ExhibitionPage() {
           ) : (
             <ChatButton host={artist} origin="gallery" className="gallery-btn gallery-btn--primary" />
           )}
+          <button type="button" className="gallery-btn" onClick={share} title={t('gallery.exhibition.shareTitle', 'Compartir esta exposición')}>
+            <Share2 size={18} aria-hidden="true" /> {t('gallery.exhibition.share', 'Compartir')}
+          </button>
         </div>
       </header>
 

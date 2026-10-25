@@ -1738,5 +1738,14 @@
   "gallery.mine.countUnlimited": "Obras: {{pieces}} · Ilustraciones: {{works}}",
   "gallery.illustrationsCount_one": "1 ilustración",
   "gallery.illustrationsCount_other": "{{count}} ilustraciones",
-  "admin.gallery.inPiece": "obra «{{title}}»"
+  "admin.gallery.inPiece": "obra «{{title}}»",
+  "gallery.exhibition.share": "Compartir",
+  "gallery.exhibition.shareTitle": "Compartir esta exposición",
+  "gallery.exhibition.shareText": "La galería de {{name}} en La Rabia",
+  "gallery.exhibition.shareCopy": "Copia el enlace de la exposición:",
+  "gallery.search.placeholder": "Busca una artista o una exposición…",
+  "gallery.search.label": "Buscar en la galería",
+  "gallery.search.results_one": "1 exposición",
+  "gallery.search.results_other": "{{count}} exposiciones",
+  "gallery.search.none": "Ninguna artista ni exposición coincide con «{{q}}»."
 }

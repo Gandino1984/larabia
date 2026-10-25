@@ -4,10 +4,11 @@
 // with its works approved by the team (anyone sees them). Artists get «Mi
 // galería»; super admins invite artists, create galleries on an artist's
 // behalf (theirs once they accept) and review the works (Admin › Galería,
-// with the count of works waiting).
-import { useEffect, useState } from 'react';
+// with the count of works waiting). A search bar finds an artist (or an
+// exhibition by its title) — no case, no accents.
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Images, UserPlus, ClipboardCheck, ImagePlus } from 'lucide-react';
+import { Images, UserPlus, ClipboardCheck, ImagePlus, Search, X } from 'lucide-react';
 import axiosInstance from '../../utils/axiosConfig';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -16,6 +17,9 @@ import { useAuthorPhoto } from '../../app_context/AuthorContext';
 import InviteArtistModal from './InviteArtistModal';
 import { workImageUrl, exhibitionTitle, protectedImage } from './galleryUtils';
 import './Gallery.css';
+
+// For searching: no case, no accents («lucia» finds «Lucía»).
+const fold = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 function GalleryPage() {
   const { t } = useTranslation();
@@ -26,6 +30,12 @@ function GalleryPage() {
   const [exhibitions, setExhibitions] = useState(null);
   const [inviting, setInviting] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [search, setSearch] = useState('');
+  const query = fold(search).trim();
+  const shown = useMemo(() => (!query || !exhibitions
+    ? exhibitions
+    : exhibitions.filter((ex) => fold(ex.artist?.name_user).includes(query) || fold(exhibitionTitle(ex)).includes(query))
+  ), [exhibitions, query]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -89,8 +99,40 @@ function GalleryPage() {
       ) : exhibitions.length === 0 ? (
         <p className="gallery-page__empty">{t('gallery.empty', 'Todavía no hay exposiciones en la galería.')}</p>
       ) : (
+        <>
+        <div className="gallery-search" role="search">
+          <Search size={20} className="gallery-search__icon" aria-hidden="true" />
+          <input
+            type="search"
+            className="gallery-search__input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('gallery.search.placeholder', 'Busca una artista o una exposición…')}
+            aria-label={t('gallery.search.label', 'Buscar en la galería')}
+            autoComplete="off"
+            enterKeyHint="search"
+          />
+          {search && (
+            <button
+              type="button"
+              className="gallery-search__clear"
+              onClick={() => setSearch('')}
+              aria-label={t('authors.search.clear', 'Borrar la búsqueda')}
+              title={t('authors.search.clear', 'Borrar la búsqueda')}
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+        {query && (
+          <p className="gallery-search__count" aria-live="polite">
+            {shown.length > 0
+              ? t('gallery.search.results', { count: shown.length })
+              : t('gallery.search.none', { q: search.trim(), defaultValue: 'Ninguna artista ni exposición coincide con «{{q}}».' })}
+          </p>
+        )}
         <div className="gallery-grid">
-          {exhibitions.map((ex) => (
+          {shown.map((ex) => (
             <article
               key={ex.id_exhibition}
               className="gallery-card"
@@ -117,6 +159,7 @@ function GalleryPage() {
             </article>
           ))}
         </div>
+        </>
       )}
 
       {inviting && <InviteArtistModal onClose={() => setInviting(false)} onInvited={onInvited} />}

@@ -1738,5 +1738,14 @@
   "gallery.mine.countUnlimited": "Works: {{pieces}} · Illustrations: {{works}}",
   "gallery.illustrationsCount_one": "1 illustration",
   "gallery.illustrationsCount_other": "{{count}} illustrations",
-  "admin.gallery.inPiece": "work «{{title}}»"
+  "admin.gallery.inPiece": "work «{{title}}»",
+  "gallery.exhibition.share": "Share",
+  "gallery.exhibition.shareTitle": "Share this exhibition",
+  "gallery.exhibition.shareText": "{{name}}’s gallery in La Rabia",
+  "gallery.exhibition.shareCopy": "Copy the exhibition’s link:",
+  "gallery.search.placeholder": "Search for an artist or an exhibition…",
+  "gallery.search.label": "Search the gallery",
+  "gallery.search.results_one": "1 exhibition",
+  "gallery.search.results_other": "{{count}} exhibitions",
+  "gallery.search.none": "No artist or exhibition matches «{{q}}»."
 }

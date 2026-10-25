@@ -45,7 +45,7 @@ import { useAuthor } from './app_context/AuthorContext';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showProjectsList, showGallery, showExhibition, showMyGallery, galleryView, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, showSuccess, showError, authorCardUser, closeAuthorCard } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showProjectsList, showGallery, showExhibition, showMyGallery, galleryView, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, navigateToExhibition, showSuccess, showError, authorCardUser, closeAuthorCard } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { authorProfiles, fetchAllProfiles, authorPhotoOf } = useAuthor();
   const { currentUser, setUser, loading: authLoading } = useAuth();
@@ -94,6 +94,19 @@ function App() {
         showSuccess(t('newsletter.unsubscribedByLink', 'Te has dado de baja: ya no recibirás las recomendaciones por correo.'));
       })
       .catch((err) => showError(err.response?.data?.error || t('newsletter.error')));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading]);
+
+  // A shared exhibition link (?exhibition=<id>, ExhibitionPage «Compartir»):
+  // the Galería is public, so it opens for anyone, signed in or not.
+  const sharedExhibitionHandled = useRef(false);
+  useEffect(() => {
+    if (sharedExhibitionHandled.current || authLoading) return;
+    const id = parseInt(new URLSearchParams(window.location.search).get('exhibition'), 10);
+    if (!id) return;
+    sharedExhibitionHandled.current = true;
+    window.history.replaceState({}, '', '/');
+    navigateToExhibition(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading]);
 
