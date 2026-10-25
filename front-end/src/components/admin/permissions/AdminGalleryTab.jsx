@@ -16,7 +16,7 @@ import { useGallery } from '../../../app_context/GalleryContext';
 import { localDate } from '../../../utils/locale';
 import InviteArtistModal from '../../gallery/InviteArtistModal';
 import WorkViewer from '../../gallery/WorkViewer';
-import { workImageUrl, workTitle, workSize } from '../../gallery/galleryUtils';
+import { workImageUrl, workTitle, workSize, pieceTitle } from '../../gallery/galleryUtils';
 import './AdminGalleryTab.css';
 
 const STATUSES = ['pending', 'approved', 'rejected'];
@@ -32,7 +32,8 @@ function ReviewItem({ work, onOpen, onDecide, busy }) {
       </button>
       <div className="admin-gallery__info">
         <strong>{workTitle(work, t)}</strong>
-        <span>{[work.artist?.name_user, work.exhibition?.title, workSize(work, t)].filter(Boolean).join(' · ')}</span>
+        <span>{[work.artist?.name_user, work.exhibition?.title, work.piece && t('admin.gallery.inPiece', { title: pieceTitle(work.piece, t), defaultValue: 'obra «{{title}}»' }), workSize(work, t)].filter(Boolean).join(' · ')}</span>
+        {work.description_work && <span className="admin-gallery__description">{work.description_work}</span>}
         {work.artist_accepted === false && (
           <span className="admin-gallery__prepared">{t('admin.gallery.notAccepted', 'Galería preparada en su nombre: no se ve hasta que la acepte')}</span>
         )}
@@ -267,7 +268,7 @@ function AdminGalleryTab() {
                   )}
                   {a.gallery && !a.is_artist && (
                     <span className="admin-gallery__prepared">
-                      {t('admin.gallery.preparedCount', { count: a.gallery.works_count, defaultValue: 'Galería preparada: {{count}} obras' })}
+                      {t('admin.gallery.preparedCount', { count: a.gallery.pieces_count, defaultValue: 'Galería preparada: {{count}} obras' })}
                     </span>
                   )}
                 </div>

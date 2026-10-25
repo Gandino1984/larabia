@@ -1,12 +1,15 @@
 // back-end/controllers/gallery/gallery_api_controller.js
 //
-// The Galería (models/gallery_models.js, migration 027).
+// The Galería (models/gallery_models.js, migrations 027, 028, 030).
 // - Anyone sees the exhibitions: an artist's title, short text and their
-//   APPROVED works (a super admin reviews each one before it's shown).
-// - Visual artists (user.is_artist) manage their own exhibition: its text and
-//   up to WORKS_MAX (15) works (an image, a title — none: «Sin título» — and
-//   its size in pixels, read from the file). Any change to a work sends it
-//   back to review.
+//   obras, each with its APPROVED illustrations (a super admin reviews each
+//   one before it's shown). In the code an illustration is a "work".
+// - Visual artists (user.is_artist) manage their own exhibition: its text,
+//   up to PIECES_MAX obras (a title — none: «Sin título») and up to
+//   PIECE_WORKS_MAX illustrations in each (an image, a title, a description
+//   and its size in pixels, read from the file). Any change to an
+//   illustration sends it back to review; moving it to another obra doesn't.
+//   Super admins have no limits.
 // - Talking to an artist is the magazine's chat (controllers/chat/): socios/as
 //   ask, the artist accepts. The bell feed here tells artists about their
 //   reviews, and super admins how many works wait.
@@ -20,8 +23,8 @@ import multer from "multer";
 import { Op } from "sequelize";
 import user_model from "../../models/user_model.js";
 import {
-    gallery_exhibition_model, gallery_work_model,
-    WORKS_MAX
+    gallery_exhibition_model, gallery_piece_model, gallery_work_model,
+    PIECES_MAX, PIECE_WORKS_MAX, WORK_DESCRIPTION_MAX
 } from "../../models/gallery_models.js";
 import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
 import { sanitizeUserData } from "../user/google_oauth_controller.js";
@@ -131,10 +134,13 @@ const reviewOnSave = (req) => (req.galleryAdmin
 
 const personOf = (u) => (u ? { id_user: u.id_user, name_user: u.name_user, image_user: u.image_user || null } : null);
 
+// An illustration (a "work": one image of an obra).
 const workOf = (w, { withReview = false } = {}) => ({
     id_work: w.id_work,
+    piece_id: w.piece_id,
     image: workImagePath(w.image_work),
     title_work: w.title_work || null,
+    description_work: w.description_work || null,
     width_px: w.width_px,
     height_px: w.height_px,
     position_work: w.position_work,
@@ -146,6 +152,15 @@ const workOf = (w, { withReview = false } = {}) => ({
 });
 
 const byPosition = (a, b) => (a.position_work - b.position_work) || (a.id_work - b.id_work);
+const byPiecePosition = (a, b) => (a.position_piece - b.position_piece) || (a.id_piece - b.id_piece);
+
+// An obra and its illustrations (those given), in order.
+const pieceOf = (p, works, opts) => ({
+    id_piece: p.id_piece,
+    title_piece: p.title_piece || null,
+    position_piece: p.position_piece,
+    works: [...works].sort(byPosition).map((w) => workOf(w, opts))
+});
 
 async function exhibitionOfArtist(userId, { create = false, preparedBy = null } = {}) {
     let ex = await gallery_exhibition_model.findOne({ where: { user_id: userId } });
@@ -161,29 +176,46 @@ async function exhibitionOfArtist(userId, { create = false, preparedBy = null } 
     return ex;
 }
 
+// The obras of an exhibition with their illustrations (all, or the approved ones).
+async function piecesOf(exhibitionId, { approvedOnly = false, withReview = false } = {}) {
+    const [pieces, works] = await Promise.all([
+        gallery_piece_model.findAll({ where: { exhibition_id: exhibitionId } }),
+        gallery_work_model.findAll({ where: { exhibition_id: exhibitionId, ...(approvedOnly ? { status_work: 'approved' } : {}) } })
+    ]);
+    return pieces.sort(byPiecePosition)
+        .map((p) => pieceOf(p, works.filter((w) => w.piece_id === p.id_piece), { withReview }))
+        .filter((p) => !approvedOnly || p.works.length > 0);
+}
+
 // ---------- public ----------
 
-/** GET /gallery — the exhibitions with at least one approved work, newest first. */
+/** GET /gallery — the exhibitions with at least one approved illustration, newest first. */
 async function list(req, res) {
     try {
         const exhibitions = await gallery_exhibition_model.findAll({
             include: [
                 { model: user_model, as: 'artist', attributes: [...PERSON, 'is_artist'], where: { is_artist: true } },
-                { model: gallery_work_model, as: 'works', where: { status_work: 'approved' }, required: true }
+                { model: gallery_work_model, as: 'works', where: { status_work: 'approved' }, required: true },
+                { model: gallery_piece_model, as: 'pieces', attributes: ['id_piece', 'position_piece'] }
             ],
             order: [['updated_at', 'DESC']]
         });
         res.json({
             error: null,
             data: exhibitions.map((ex) => {
-                const works = [...ex.works].sort(byPosition);
+                const pieces = [...ex.pieces].sort(byPiecePosition);
+                const shown = pieces.filter((p) => ex.works.some((w) => w.piece_id === p.id_piece));
+                // The cover: the first approved illustration of the first obra that has one.
+                const first = shown[0];
+                const cover = [...ex.works].filter((w) => !first || w.piece_id === first.id_piece).sort(byPosition)[0];
                 return {
                     id_exhibition: ex.id_exhibition,
                     title: ex.title || null,
                     statement: ex.statement || null,
                     artist: personOf(ex.artist),
-                    cover: workOf(works[0]),
-                    works_count: works.length
+                    cover: workOf(cover),
+                    pieces_count: shown.length,
+                    works_count: ex.works.length
                 };
             })
         });
@@ -193,7 +225,7 @@ async function list(req, res) {
     }
 }
 
-/** GET /gallery/exhibition/:id — one exhibition and its approved works. */
+/** GET /gallery/exhibition/:id — one exhibition: its obras with their approved illustrations. */
 async function exhibition(req, res) {
     try {
         const ex = await gallery_exhibition_model.findByPk(req.params.id, {
@@ -202,8 +234,8 @@ async function exhibition(req, res) {
         if (!ex || !roleSnapshot(ex.artist).isArtist) {
             return res.status(404).json({ error: 'Esta exposición no existe' });
         }
-        const works = await gallery_work_model.findAll({ where: { exhibition_id: ex.id_exhibition, status_work: 'approved' } });
-        if (works.length === 0) return res.status(404).json({ error: 'Esta exposición no existe' });
+        const pieces = await piecesOf(ex.id_exhibition, { approvedOnly: true });
+        if (pieces.length === 0) return res.status(404).json({ error: 'Esta exposición no existe' });
         res.json({
             error: null,
             data: {
@@ -211,7 +243,7 @@ async function exhibition(req, res) {
                 title: ex.title || null,
                 statement: ex.statement || null,
                 artist: personOf(ex.artist),
-                works: works.sort(byPosition).map((w) => workOf(w))
+                pieces
             }
         });
     } catch (err) {
@@ -222,23 +254,30 @@ async function exhibition(req, res) {
 
 // ---------- the artist's own exhibition ----------
 
-async function mineData(user) {
-    const ex = await exhibitionOfArtist(user.id_user, { create: true });
-    const works = await gallery_work_model.findAll({ where: { exhibition_id: ex.id_exhibition } });
+// Super admins have no limits: their own gallery, or one they prepare.
+const unlimited = (req) => !!req.galleryAdmin || roleSnapshot(req.galleryUser).isSuperAdmin;
+
+async function mineData(req) {
+    const ex = await exhibitionOfArtist(req.galleryUser.id_user, { create: true });
+    const free = unlimited(req);
     return {
         id_exhibition: ex.id_exhibition,
         title: ex.title || null,
         statement: ex.statement || null,
-        artist: personOf(user),
-        works: works.sort(byPosition).map((w) => workOf(w, { withReview: true })),
-        works_max: WORKS_MAX
+        artist: personOf(req.galleryUser),
+        pieces: await piecesOf(ex.id_exhibition, { withReview: true }),
+        // null: no limit (super admins).
+        pieces_max: free ? null : PIECES_MAX,
+        piece_works_max: free ? null : PIECE_WORKS_MAX
     };
 }
 
-/** GET /gallery/mine — artists: their exhibition with every work and its review. */
+const reply = async (req, res, success) => res.json({ error: null, data: await mineData(req), ...(success ? { success } : {}) });
+
+/** GET /gallery/mine — artists: their exhibition, its obras and every illustration with its review. */
 async function mine(req, res) {
     try {
-        res.json({ error: null, data: await mineData(req.galleryUser) });
+        await reply(req, res);
     } catch (err) {
         console.error('gallery - mine:', err);
         res.status(500).json({ error: 'Error al cargar tu exposición' });
@@ -261,26 +300,175 @@ async function updateMine(req, res) {
             ...(title !== undefined ? { title: title || null } : {}),
             ...(statement !== undefined ? { statement: statement || null } : {})
         });
-        res.json({ error: null, data: await mineData(req.galleryUser), success: 'Exposición guardada' });
+        await reply(req, res, 'Exposición guardada');
     } catch (err) {
         console.error('gallery - updateMine:', err);
         res.status(500).json({ error: 'Error al guardar la exposición' });
     }
 }
 
-/** POST /gallery/mine/works (multipart: image, title) — artists: a new work, to review. */
+// --- obras ---
+
+// The obra :id of the artist's exhibition (404 otherwise).
+async function ownPiece(req, res, id = req.params.id) {
+    const ex = await exhibitionOfArtist(req.galleryUser.id_user);
+    const piece = ex && id && await gallery_piece_model.findOne({ where: { id_piece: id, exhibition_id: ex.id_exhibition } });
+    if (!piece) {
+        res.status(404).json({ error: 'Esta obra no existe' });
+        return null;
+    }
+    return piece;
+}
+
+function checkPieceTitle(value, res) {
+    const title = cleanName(value);
+    if (title.length > WORK_TITLE_MAX) {
+        res.status(400).json({ error: `El título es demasiado largo (máximo ${WORK_TITLE_MAX} caracteres)`, code: 'title_too_long' });
+        return undefined;
+    }
+    return title;
+}
+
+/** POST /gallery/mine/pieces { title } — artists: a new obra (up to PIECES_MAX). */
+async function addPiece(req, res) {
+    try {
+        const title = checkPieceTitle(req.body?.title, res);
+        if (title === undefined) return;
+        const ex = await exhibitionOfArtist(req.galleryUser.id_user, { create: true });
+        const count = await gallery_piece_model.count({ where: { exhibition_id: ex.id_exhibition } });
+        if (!unlimited(req) && count >= PIECES_MAX) {
+            return res.status(409).json({ error: `Una exposición tiene como mucho ${PIECES_MAX} obras`, code: 'pieces_full' });
+        }
+        const last = await gallery_piece_model.max('position_piece', { where: { exhibition_id: ex.id_exhibition } });
+        await gallery_piece_model.create({
+            exhibition_id: ex.id_exhibition,
+            title_piece: title || null,
+            position_piece: Number.isFinite(last) ? last + 1 : 0
+        });
+        await reply(req, res, 'Obra creada: añádele sus ilustraciones');
+    } catch (err) {
+        console.error('gallery - addPiece:', err);
+        res.status(500).json({ error: 'Error al crear la obra' });
+    }
+}
+
+/** PATCH /gallery/mine/pieces/:id { title } — artists: the obra's title (no review). */
+async function updatePiece(req, res) {
+    try {
+        const piece = await ownPiece(req, res);
+        if (!piece) return;
+        const title = checkPieceTitle(req.body?.title, res);
+        if (title === undefined) return;
+        await piece.update({ title_piece: title || null });
+        await reply(req, res, 'Obra guardada');
+    } catch (err) {
+        console.error('gallery - updatePiece:', err);
+        res.status(500).json({ error: 'Error al guardar la obra' });
+    }
+}
+
+/** DELETE /gallery/mine/pieces/:id — artists: an obra and its illustrations. */
+async function removePiece(req, res) {
+    try {
+        const piece = await ownPiece(req, res);
+        if (!piece) return;
+        const works = await gallery_work_model.findAll({ where: { piece_id: piece.id_piece }, attributes: ['image_work'] });
+        await gallery_work_model.destroy({ where: { piece_id: piece.id_piece } });
+        await piece.destroy();
+        works.forEach((w) => removeWorkImage(w.image_work));
+        await reply(req, res, 'Obra eliminada');
+    } catch (err) {
+        console.error('gallery - removePiece:', err);
+        res.status(500).json({ error: 'Error al eliminar la obra' });
+    }
+}
+
+// Saves an order: `ids` must be exactly those rows.
+async function saveOrder(rows, idOf, ids, update) {
+    const own = new Set(rows.map(idOf));
+    if (!ids || ids.length !== own.size || !ids.every((id) => own.has(id))) return false;
+    await Promise.all(ids.map((id, i) => update(id, i)));
+    return true;
+}
+
+/** PATCH /gallery/mine/pieces/order { ids } — artists: the order of their obras. */
+async function reorderPieces(req, res) {
+    try {
+        const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(Number) : null;
+        const ex = await exhibitionOfArtist(req.galleryUser.id_user);
+        const pieces = ex ? await gallery_piece_model.findAll({ where: { exhibition_id: ex.id_exhibition } }) : [];
+        const ok = await saveOrder(pieces, (p) => p.id_piece, ids,
+            (id, i) => gallery_piece_model.update({ position_piece: i }, { where: { id_piece: id } }));
+        if (!ok) return res.status(400).json({ error: 'El orden no coincide con tus obras' });
+        await reply(req, res, 'Orden guardado');
+    } catch (err) {
+        console.error('gallery - reorderPieces:', err);
+        res.status(500).json({ error: 'Error al guardar el orden' });
+    }
+}
+
+/** PATCH /gallery/mine/pieces/:id/order { ids } — artists: the order of an obra's illustrations. */
+async function reorderWorks(req, res) {
+    try {
+        const piece = await ownPiece(req, res);
+        if (!piece) return;
+        const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(Number) : null;
+        const works = await gallery_work_model.findAll({ where: { piece_id: piece.id_piece } });
+        const ok = await saveOrder(works, (w) => w.id_work, ids,
+            (id, i) => gallery_work_model.update({ position_work: i }, { where: { id_work: id }, silent: true }));
+        if (!ok) return res.status(400).json({ error: 'El orden no coincide con las ilustraciones de la obra' });
+        await reply(req, res, 'Orden guardado');
+    } catch (err) {
+        console.error('gallery - reorderWorks:', err);
+        res.status(500).json({ error: 'Error al guardar el orden' });
+    }
+}
+
+// --- illustrations ---
+
+// Title and description from the body (only those sent); undefined after a 400.
+function textsOf(body, res) {
+    const out = {};
+    if (body?.title !== undefined) {
+        const title = cleanName(body.title);
+        if (title.length > WORK_TITLE_MAX) {
+            res.status(400).json({ error: `El título es demasiado largo (máximo ${WORK_TITLE_MAX} caracteres)`, code: 'title_too_long' });
+            return undefined;
+        }
+        out.title_work = title || null;
+    }
+    if (body?.description !== undefined) {
+        const description = cleanText(body.description);
+        if (description.length > WORK_DESCRIPTION_MAX) {
+            res.status(400).json({ error: `La descripción es demasiado larga (máximo ${WORK_DESCRIPTION_MAX} caracteres)`, code: 'description_too_long' });
+            return undefined;
+        }
+        out.description_work = description || null;
+    }
+    return out;
+}
+
+// Room for one more illustration in the obra (super admins: always).
+async function pieceHasRoom(req, res, piece) {
+    if (unlimited(req)) return true;
+    const count = await gallery_work_model.count({ where: { piece_id: piece.id_piece } });
+    if (count < PIECE_WORKS_MAX) return true;
+    res.status(409).json({ error: `Una obra tiene como mucho ${PIECE_WORKS_MAX} ilustraciones`, code: 'piece_full' });
+    return false;
+}
+
+/**
+ * POST /gallery/mine/works (multipart: image, piece_id, title?, description?)
+ * — artists: a new illustration in one of their obras, to review.
+ */
 async function addWork(req, res) {
     try {
-        if (!req.file) return res.status(400).json({ error: 'Falta la imagen de la obra', code: 'image_required' });
-        const title = cleanName(req.body?.title);
-        if (title.length > WORK_TITLE_MAX) {
-            return res.status(400).json({ error: `El título es demasiado largo (máximo ${WORK_TITLE_MAX} caracteres)`, code: 'title_too_long' });
-        }
-        const ex = await exhibitionOfArtist(req.galleryUser.id_user, { create: true });
-        const count = await gallery_work_model.count({ where: { exhibition_id: ex.id_exhibition } });
-        if (count >= WORKS_MAX) {
-            return res.status(409).json({ error: `Una exposición tiene como mucho ${WORKS_MAX} obras`, code: 'works_full' });
-        }
+        if (!req.file) return res.status(400).json({ error: 'Falta la imagen de la ilustración', code: 'image_required' });
+        const piece = await ownPiece(req, res, req.body?.piece_id);
+        if (!piece) return;
+        const texts = textsOf(req.body, res);
+        if (!texts) return;
+        if (!(await pieceHasRoom(req, res, piece))) return;
         let saved;
         try {
             saved = await saveWorkImage(req.file.buffer);
@@ -288,24 +476,22 @@ async function addWork(req, res) {
             console.error('gallery - addWork image:', err.message);
             return res.status(400).json({ error: 'No se pudo leer la imagen', code: 'bad_image' });
         }
-        const last = await gallery_work_model.max('position_work', { where: { exhibition_id: ex.id_exhibition } });
+        const last = await gallery_work_model.max('position_work', { where: { piece_id: piece.id_piece } });
         await gallery_work_model.create({
-            exhibition_id: ex.id_exhibition,
+            exhibition_id: piece.exhibition_id,
+            piece_id: piece.id_piece,
             image_work: saved.file,
-            title_work: title || null,
+            title_work: texts.title_work ?? null,
+            description_work: texts.description_work ?? null,
             width_px: saved.width,
             height_px: saved.height,
             position_work: Number.isFinite(last) ? last + 1 : 0,
             ...reviewOnSave(req)
         });
-        res.json({
-            error: null,
-            data: await mineData(req.galleryUser),
-            success: req.galleryAdmin ? 'Obra subida' : 'Obra subida: se verá cuando la revise el equipo'
-        });
+        await reply(req, res, req.galleryAdmin ? 'Ilustración subida' : 'Ilustración subida: se verá cuando la revise el equipo');
     } catch (err) {
         console.error('gallery - addWork:', err);
-        res.status(500).json({ error: 'Error al subir la obra' });
+        res.status(500).json({ error: 'Error al subir la ilustración' });
     }
 }
 
@@ -313,27 +499,34 @@ async function ownWork(req, res) {
     const ex = await exhibitionOfArtist(req.galleryUser.id_user);
     const work = ex && await gallery_work_model.findOne({ where: { id_work: req.params.id, exhibition_id: ex.id_exhibition } });
     if (!work) {
-        res.status(404).json({ error: 'Esta obra no existe' });
+        res.status(404).json({ error: 'Esta ilustración no existe' });
         return null;
     }
     return work;
 }
 
 /**
- * PATCH /gallery/mine/works/:id (multipart: image?, title?) — artists: change a
- * work; any change sends it back to review.
+ * PATCH /gallery/mine/works/:id (multipart: image?, title?, description?,
+ * piece_id?) — artists: change an illustration (back to review), or move it
+ * to another of their obras (the image doesn't change: no review).
  */
 async function updateWork(req, res) {
     try {
         const work = await ownWork(req, res);
         if (!work) return;
+        const texts = textsOf(req.body, res);
+        if (!texts) return;
         const changes = {};
-        if (req.body?.title !== undefined) {
-            const title = cleanName(req.body.title);
-            if (title.length > WORK_TITLE_MAX) {
-                return res.status(400).json({ error: `El título es demasiado largo (máximo ${WORK_TITLE_MAX} caracteres)`, code: 'title_too_long' });
-            }
-            if ((title || null) !== (work.title_work || null)) changes.title_work = title || null;
+        for (const [key, value] of Object.entries(texts)) {
+            if ((value || null) !== (work[key] || null)) changes[key] = value;
+        }
+        let move = null;
+        if (req.body?.piece_id !== undefined && Number(req.body.piece_id) !== work.piece_id) {
+            const target = await ownPiece(req, res, req.body.piece_id);
+            if (!target) return;
+            if (!(await pieceHasRoom(req, res, target))) return;
+            const last = await gallery_work_model.max('position_work', { where: { piece_id: target.id_piece } });
+            move = { piece_id: target.id_piece, position_work: Number.isFinite(last) ? last + 1 : 0 };
         }
         let oldFile = null;
         if (req.file) {
@@ -347,22 +540,21 @@ async function updateWork(req, res) {
             oldFile = work.image_work;
             Object.assign(changes, { image_work: saved.file, width_px: saved.width, height_px: saved.height });
         }
-        if (Object.keys(changes).length) {
-            await work.update({ ...changes, ...reviewOnSave(req) });
+        const reviewed = Object.keys(changes).length > 0;
+        if (reviewed || move) {
+            await work.update({ ...changes, ...(move || {}), ...(reviewed ? reviewOnSave(req) : {}) });
             if (oldFile) removeWorkImage(oldFile);
         }
-        res.json({
-            error: null,
-            data: await mineData(req.galleryUser),
-            success: Object.keys(changes).length && !req.galleryAdmin ? 'Obra guardada: se verá cuando la revise el equipo' : 'Obra guardada'
-        });
+        await reply(req, res, reviewed && !req.galleryAdmin
+            ? 'Ilustración guardada: se verá cuando la revise el equipo'
+            : move && !reviewed ? 'Ilustración movida' : 'Ilustración guardada');
     } catch (err) {
         console.error('gallery - updateWork:', err);
-        res.status(500).json({ error: 'Error al guardar la obra' });
+        res.status(500).json({ error: 'Error al guardar la ilustración' });
     }
 }
 
-/** DELETE /gallery/mine/works/:id — artists: take a work down. */
+/** DELETE /gallery/mine/works/:id — artists: take an illustration down. */
 async function removeWork(req, res) {
     try {
         const work = await ownWork(req, res);
@@ -370,29 +562,10 @@ async function removeWork(req, res) {
         const file = work.image_work;
         await work.destroy();
         removeWorkImage(file);
-        res.json({ error: null, data: await mineData(req.galleryUser), success: 'Obra eliminada' });
+        await reply(req, res, 'Ilustración eliminada');
     } catch (err) {
         console.error('gallery - removeWork:', err);
-        res.status(500).json({ error: 'Error al eliminar la obra' });
-    }
-}
-
-/** PATCH /gallery/mine/order { ids } — artists: the order of their works. */
-async function reorderWorks(req, res) {
-    try {
-        const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(Number) : null;
-        const ex = await exhibitionOfArtist(req.galleryUser.id_user);
-        if (!ids || !ex) return res.status(400).json({ error: 'Falta el orden de las obras' });
-        const works = await gallery_work_model.findAll({ where: { exhibition_id: ex.id_exhibition } });
-        const own = new Set(works.map((w) => w.id_work));
-        if (ids.length !== own.size || !ids.every((id) => own.has(id))) {
-            return res.status(400).json({ error: 'El orden no coincide con tus obras' });
-        }
-        await Promise.all(ids.map((id, i) => gallery_work_model.update({ position_work: i }, { where: { id_work: id } })));
-        res.json({ error: null, data: await mineData(req.galleryUser), success: 'Orden guardado' });
-    } catch (err) {
-        console.error('gallery - reorderWorks:', err);
-        res.status(500).json({ error: 'Error al guardar el orden' });
+        res.status(500).json({ error: 'Error al eliminar la ilustración' });
     }
 }
 
@@ -406,10 +579,13 @@ async function reviewList(req, res) {
         const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : 'pending';
         const works = await gallery_work_model.findAll({
             where: { status_work: status },
-            include: [{
-                model: gallery_exhibition_model, as: 'exhibition',
-                include: [{ model: user_model, as: 'artist', attributes: [...PERSON, 'is_artist'] }]
-            }],
+            include: [
+                {
+                    model: gallery_exhibition_model, as: 'exhibition',
+                    include: [{ model: user_model, as: 'artist', attributes: [...PERSON, 'is_artist'] }]
+                },
+                { model: gallery_piece_model, as: 'piece', attributes: ['id_piece', 'title_piece'] }
+            ],
             order: [['updated_at', status === 'pending' ? 'ASC' : 'DESC']]
         });
         res.json({
@@ -418,6 +594,7 @@ async function reviewList(req, res) {
                 ...workOf(w, { withReview: true }),
                 updated_at: w.updated_at,
                 exhibition: { id_exhibition: w.exhibition?.id_exhibition, title: w.exhibition?.title || null },
+                piece: w.piece ? { id_piece: w.piece.id_piece, title_piece: w.piece.title_piece || null } : null,
                 artist: personOf(w.exhibition?.artist),
                 // false: a gallery prepared on their behalf, not public until they accept.
                 artist_accepted: roleSnapshot(w.exhibition?.artist).isArtist
@@ -425,7 +602,7 @@ async function reviewList(req, res) {
         });
     } catch (err) {
         console.error('gallery - reviewList:', err);
-        res.status(500).json({ error: 'Error al cargar las obras' });
+        res.status(500).json({ error: 'Error al cargar las ilustraciones' });
     }
 }
 
@@ -516,13 +693,18 @@ async function reviewsSeen(req, res) {
 const hasSignedIn = (u) => !!(u.google_id || u.pass_user);
 
 // The gallery of someone not (yet) an artist: { id_exhibition, title,
-// works_count, prepared } or null.
-const galleryShape = (ex, worksCount) => (ex
-    ? { id_exhibition: ex.id_exhibition, title: ex.title || null, works_count: worksCount, prepared: !!ex.prepared_by }
+// pieces_count (obras), works_count (illustrations), prepared } or null.
+const galleryShape = (ex, piecesCount, worksCount) => (ex
+    ? { id_exhibition: ex.id_exhibition, title: ex.title || null, pieces_count: piecesCount, works_count: worksCount, prepared: !!ex.prepared_by }
     : null);
 async function galleryOf(userId) {
     const ex = await exhibitionOfArtist(userId);
-    return ex ? galleryShape(ex, await gallery_work_model.count({ where: { exhibition_id: ex.id_exhibition } })) : null;
+    if (!ex) return null;
+    const [pieces, works] = await Promise.all([
+        gallery_piece_model.count({ where: { exhibition_id: ex.id_exhibition } }),
+        gallery_work_model.count({ where: { exhibition_id: ex.id_exhibition } })
+    ]);
+    return galleryShape(ex, pieces, works);
 }
 
 /** Deletes an exhibition, its works and their images. */
@@ -638,9 +820,12 @@ async function invitations(req, res) {
         const waiting = users.filter((u) => !roleSnapshot(u).isArtist).map((u) => u.id_user);
         const exhibitions = waiting.length ? await gallery_exhibition_model.findAll({
             where: { user_id: waiting },
-            include: [{ model: gallery_work_model, as: 'works', attributes: ['id_work'] }]
+            include: [
+                { model: gallery_piece_model, as: 'pieces', attributes: ['id_piece'] },
+                { model: gallery_work_model, as: 'works', attributes: ['id_work'] }
+            ]
         }) : [];
-        const galleries = new Map(exhibitions.map((ex) => [ex.user_id, galleryShape(ex, ex.works.length)]));
+        const galleries = new Map(exhibitions.map((ex) => [ex.user_id, galleryShape(ex, ex.pieces.length, ex.works.length)]));
         res.json({ error: null, data: users.map((u) => invitationOf(u, galleries.get(u.id_user) || null)) });
     } catch (err) {
         console.error('gallery - invitations:', err);
@@ -758,8 +943,8 @@ async function myInvitation(req, res) {
             error: null,
             data: {
                 status: 'pending', invited_at: user.artist_invited_at, inviter,
-                // A gallery prepared for them: { title, works_count }.
-                gallery: gallery?.prepared ? { title: gallery.title, works_count: gallery.works_count } : null
+                // A gallery prepared for them: { title, pieces_count, works_count }.
+                gallery: gallery?.prepared ? { title: gallery.title, pieces_count: gallery.pieces_count, works_count: gallery.works_count } : null
             }
         });
     } catch (err) {
@@ -805,7 +990,8 @@ async function respond(req, res) {
 export default {
     upload, artistOnly, onBehalf,
     list, exhibition,
-    mine, updateMine, addWork, updateWork, removeWork, reorderWorks,
+    mine, updateMine, addPiece, updatePiece, removePiece, reorderPieces,
+    addWork, updateWork, removeWork, reorderWorks,
     reviewList, reviewCount, review,
     feed, reviewsSeen,
     invite, invitations, resend, sendUnsent, prepareFor, myInvitation, respond

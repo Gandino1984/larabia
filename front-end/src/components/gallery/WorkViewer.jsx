@@ -1,8 +1,8 @@
 // magazine-front/src/components/gallery/WorkViewer.jsx
 //
-// A work of the Galería, large: its image, title («Sin título») and size in
-// pixels, with the others of the list (arrows, ← →) and a close button (✕,
-// Esc, or a click outside the picture). Used by the exhibitions and by
+// An illustration of the Galería, large: its image, title («Sin título»),
+// size in pixels and description, with the others of the list — its obra —
+// (arrows, ← →) and a close button (✕, Esc, or a click outside the picture). Used by the exhibitions and by
 // Admin › Galería when reviewing.
 import { useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -39,6 +39,7 @@ function WorkViewer({ works, index, onIndex, onClose }) {
           <strong>{workTitle(work, t)}</strong>
           {workSize(work, t) && <span>{workSize(work, t)}</span>}
           <span className="work-viewer__count">{index + 1} / {works.length}</span>
+          {work.description_work && <p className="work-viewer__description">{work.description_work}</p>}
         </figcaption>
       </figure>
       {works.length > 1 && (

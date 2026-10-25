@@ -62,7 +62,7 @@ function GalleryInvitationModal() {
         {gallery && (
           <p className="author-invite-modal__text">
             <strong>{gallery.title || currentUser?.name_user}</strong>
-            {' · '}{t('gallery.worksCount', { count: gallery.works_count })}
+            {' · '}{t('gallery.worksCount', { count: gallery.pieces_count })}
           </p>
         )}
         <p className="author-invite-modal__text">

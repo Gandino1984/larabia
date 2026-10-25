@@ -78,6 +78,7 @@
 .admin-gallery__info { display: flex; flex-direction: column; gap: 4px; flex: 1 1 14rem; min-width: 0; overflow-wrap: anywhere; }
 .admin-gallery__info > span { color: #555555; font-size: 13px; }
 .admin-gallery__reason { color: #a72020 !important; }
+.admin-gallery__description { color: #333333 !important; font-style: italic; line-height: 1.45; }
 .admin-gallery__sent { font-size: 12px !important; }
 .admin-gallery__prepared { color: #92400e !important; font-size: 12px !important; font-weight: 600; }
 

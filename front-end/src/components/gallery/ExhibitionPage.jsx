@@ -1,8 +1,9 @@
 // magazine-front/src/components/gallery/ExhibitionPage.jsx
 //
 // One exhibition of the Galería: its title (the artist's name when it has
-// none), the artist, the short text and the approved works — each with its
-// title («Sin título») and size in pixels, opened large in WorkViewer.
+// none), the artist, the short text and its obras — each with its title and
+// its approved illustrations (title, «Sin título» if none; description; size
+// in pixels), opened large in WorkViewer, which goes through the obra.
 // «Charlar»: socios/as ask the artist to chat (the magazine's chat,
 // ChatButton / ChatPanel).
 import { useEffect, useState } from 'react';
@@ -14,7 +15,7 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useAuthorPhoto } from '../../app_context/AuthorContext';
 import ChatButton from '../chat/ChatButton';
 import WorkViewer from './WorkViewer';
-import { workImageUrl, workTitle, workSize, exhibitionTitle } from './galleryUtils';
+import { workImageUrl, workTitle, workSize, exhibitionTitle, pieceTitle } from './galleryUtils';
 import './Gallery.css';
 
 function ExhibitionPage() {
@@ -79,27 +80,41 @@ function ExhibitionPage() {
         </div>
       </header>
 
-      <div className="exhibition-works">
-        {exhibition.works.map((w, i) => (
-          <figure key={w.id_work} className="exhibition-work">
-            <button type="button" className="exhibition-work__frame" onClick={() => setViewing(i)} aria-label={t('gallery.viewer.open', { title: workTitle(w, t), defaultValue: 'Ver «{{title}}» en grande' })}>
-              <img
-                src={workImageUrl(w.image)}
-                alt={workTitle(w, t)}
-                loading="lazy"
-                style={w.width_px && w.height_px ? { aspectRatio: `${w.width_px} / ${w.height_px}` } : undefined}
-              />
-            </button>
-            <figcaption>
-              <strong>{workTitle(w, t)}</strong>
-              {workSize(w, t) && <span>{workSize(w, t)}</span>}
-            </figcaption>
-          </figure>
-        ))}
-      </div>
+      {exhibition.pieces.map((piece, pi) => (
+        <section key={piece.id_piece} className="exhibition-piece" aria-labelledby={`piece-${piece.id_piece}`}>
+          <header className="exhibition-piece__head">
+            <h2 id={`piece-${piece.id_piece}`}>{pieceTitle(piece, t)}</h2>
+            <span>{t('gallery.illustrationsCount', { count: piece.works.length })}</span>
+          </header>
+          <div className="exhibition-works">
+            {piece.works.map((w, i) => (
+              <figure key={w.id_work} className="exhibition-work">
+                <button type="button" className="exhibition-work__frame" onClick={() => setViewing({ piece: pi, index: i })} aria-label={t('gallery.viewer.open', { title: workTitle(w, t), defaultValue: 'Ver «{{title}}» en grande' })}>
+                  <img
+                    src={workImageUrl(w.image)}
+                    alt={workTitle(w, t)}
+                    loading="lazy"
+                    style={w.width_px && w.height_px ? { aspectRatio: `${w.width_px} / ${w.height_px}` } : undefined}
+                  />
+                </button>
+                <figcaption>
+                  <strong>{workTitle(w, t)}</strong>
+                  {workSize(w, t) && <span>{workSize(w, t)}</span>}
+                  {w.description_work && <p className="exhibition-work__description">{w.description_work}</p>}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      ))}
 
-      {viewing !== null && (
-        <WorkViewer works={exhibition.works} index={viewing} onIndex={setViewing} onClose={() => setViewing(null)} />
+      {viewing && (
+        <WorkViewer
+          works={exhibition.pieces[viewing.piece].works}
+          index={viewing.index}
+          onIndex={(index) => setViewing((v) => ({ ...v, index }))}
+          onClose={() => setViewing(null)}
+        />
       )}
 
     </div>

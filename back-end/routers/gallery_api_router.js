@@ -11,7 +11,12 @@ router.get("/exhibition/:id", gallery.exhibition);
 // Artists: their own exhibition (artistOnly runs before any image is received).
 router.get("/mine", gallery.artistOnly, gallery.mine);
 router.patch("/mine", gallery.artistOnly, gallery.updateMine);
-router.patch("/mine/order", gallery.artistOnly, gallery.reorderWorks);
+// Its obras (pieces) — "order" before ":id" — and their illustrations (works).
+router.post("/mine/pieces", gallery.artistOnly, gallery.addPiece);
+router.patch("/mine/pieces/order", gallery.artistOnly, gallery.reorderPieces);
+router.patch("/mine/pieces/:id", gallery.artistOnly, gallery.updatePiece);
+router.delete("/mine/pieces/:id", gallery.artistOnly, gallery.removePiece);
+router.patch("/mine/pieces/:id/order", gallery.artistOnly, gallery.reorderWorks);
 router.post("/mine/works", gallery.artistOnly, gallery.upload, gallery.addWork);
 router.patch("/mine/works/:id", gallery.artistOnly, gallery.upload, gallery.updateWork);
 router.delete("/mine/works/:id", gallery.artistOnly, gallery.removeWork);
@@ -21,7 +26,11 @@ router.delete("/mine/works/:id", gallery.artistOnly, gallery.removeWork);
 router.post("/for/:userId", gallery.prepareFor);
 router.get("/for/:userId", gallery.onBehalf, gallery.mine);
 router.patch("/for/:userId", gallery.onBehalf, gallery.updateMine);
-router.patch("/for/:userId/order", gallery.onBehalf, gallery.reorderWorks);
+router.post("/for/:userId/pieces", gallery.onBehalf, gallery.addPiece);
+router.patch("/for/:userId/pieces/order", gallery.onBehalf, gallery.reorderPieces);
+router.patch("/for/:userId/pieces/:id", gallery.onBehalf, gallery.updatePiece);
+router.delete("/for/:userId/pieces/:id", gallery.onBehalf, gallery.removePiece);
+router.patch("/for/:userId/pieces/:id/order", gallery.onBehalf, gallery.reorderWorks);
 router.post("/for/:userId/works", gallery.onBehalf, gallery.upload, gallery.addWork);
 router.patch("/for/:userId/works/:id", gallery.onBehalf, gallery.upload, gallery.updateWork);
 router.delete("/for/:userId/works/:id", gallery.onBehalf, gallery.removeWork);

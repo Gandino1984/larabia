@@ -102,7 +102,7 @@ function GalleryPage() {
               <div className="gallery-card__image">
                 {ex.cover?.image && <img src={workImageUrl(ex.cover.image)} alt="" loading="lazy" />}
                 <span className="gallery-card__count">
-                  {t('gallery.worksCount', { count: ex.works_count })}
+                  {t('gallery.worksCount', { count: ex.pieces_count })}
                 </span>
               </div>
               <div className="gallery-card__body">
