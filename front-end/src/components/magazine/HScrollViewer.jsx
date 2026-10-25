@@ -1,20 +1,22 @@
 // magazine-front/src/components/magazine/HScrollViewer.jsx
 import { useRef, useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, ArrowRight, Play, Pause, X, Volume2, Link as LinkIcon, Bookmark, RotateCcw, Smartphone, Maximize, ChevronFirst, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Play, Pause, X, Link as LinkIcon, Bookmark, RotateCcw, Smartphone, Maximize, ChevronFirst, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext.jsx';
 import { useAuth } from '../../app_context/AuthContext.jsx';
 import OptionsReveal from './OptionsReveal';
 import { parseSoundscape } from '../../paisaje/integration/soundscape';
 import { announceAudioStart, onOtherAudioStart } from '../../paisaje/integration/exclusiveAudio';
-import { isMostlyVisible, VISIBILITY_THRESHOLDS } from '../../utils/visibility';
 import LoadFailBoundary from '../common/LoadFailBoundary';
 import './HScrollViewer.css';
 
 // Paisaje sonoro panels (engine by Cristian Vergara): loaded on demand.
 const PaisajePiece = lazy(() => import('../../paisaje/integration/PaisajePiece'));
+import ComicAudioPlay from './ComicAudioPlay';
 const COMIC_AUDIO_SOURCE = 'comic-panel-audio';
+// Interactive panels with a sound (simple panels have only their image).
+const hasPanelAudio = (panel) => !!(panel.is_interactive && panel.interaction_type === 'audio' && panel.interaction_data);
 
 // optionsActions: the reader's ⋯ actions (engagement, share, edit/delete),
 // repeated at the right of the bottom bar when provided.
@@ -232,31 +234,14 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
   }, [panels, articleId, showInfo, isLoading]);
 
   // Panels with sound: the first time in this visit the reader reaches each
-  // one, a card says so. Paisaje panels report it from PaisajePiece
-  // (onEnter); interactive audio panels from the observer below.
+  // one, a card says so. Their play buttons report it on entering: a paisaje
+  // panel's from PaisajePiece, an audio panel's from ComicAudioPlay (onEnter).
   const announcedAudioPanels = useRef(new Set());
-  const announceAudioPanel = useCallback((panelId, kind) => {
+  const announceAudioPanel = useCallback((panelId) => {
     if (announcedAudioPanels.current.has(String(panelId))) return;
     announcedAudioPanels.current.add(String(panelId));
-    showInfo(kind === 'paisaje'
-      ? t('hscroll.audioPanel.paisaje', 'Esta viñeta tiene sonido: pulsa play para escucharlo.')
-      : t('hscroll.audioPanel.interactive', 'Esta viñeta tiene sonido: púlsala para escucharlo.'), 'audio');
+    showInfo(t('hscroll.audioPanel.notice', 'Esta viñeta tiene sonido: pulsa play para escucharlo.'), 'audio');
   }, [showInfo, t]);
-
-  useEffect(() => {
-    if (!scrollContainerRef.current || isLoading) return undefined;
-    // Implicit root: the screen, clipped by the viewer — a comic further
-    // down the page isn't "reached" yet.
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (isMostlyVisible(entry)) announceAudioPanel(entry.target.dataset.panelId, 'interactive');
-      });
-    }, { threshold: VISIBILITY_THRESHOLDS });
-    scrollContainerRef.current
-      .querySelectorAll('.interactive-panel[data-interaction-type="audio"]')
-      .forEach((panel) => io.observe(panel));
-    return () => io.disconnect();
-  }, [panels, isLoading, announceAudioPanel]);
 
   // Monitor current visible panel and stop audio at stop panel
   useEffect(() => {
@@ -532,8 +517,9 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
     const handleKeyDown = (e) => {
       // Don't trigger if user is typing in input/textarea
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      // A paisaje sonoro panel's own controls (Space = play/pause there).
-      if (e.target.closest?.('.larabia-paisaje')) return;
+      // A paisaje sonoro panel's own controls, or an audio panel's play button
+      // (Space = play/pause there).
+      if (e.target.closest?.('.larabia-paisaje, .comic-audio')) return;
 
       switch(e.key) {
         case 'ArrowLeft':
@@ -755,85 +741,90 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
         window.open(panel.interaction_data, '_blank', 'noopener,noreferrer');
       }
     } else if (panel.interaction_type === 'audio') {
-      // Play audio
-      if (panel.interaction_data) {
-        const audioUrl = getImageUrl(panel.interaction_data);
+      playPanelAudio(panel);
+    }
+  };
 
-        // If same audio is playing, toggle play/pause
-        if (currentAudio === audioUrl && audioRef.current) {
-          if (audioRef.current.paused) {
-            audioRef.current.play();
-            setIsPlaying(true);
-          } else {
-            audioRef.current.pause();
-            setIsPlaying(false);
-          }
-        } else {
-          // Play new audio
-          if (audioRef.current) {
-            audioRef.current.pause();
-          }
+  // An audio panel's sound: plays it, or pauses / resumes it if it's already
+  // the one on (tapping the panel or its play button).
+  const playPanelAudio = (panel) => {
+    if (panel.interaction_data) {
+      const audioUrl = getImageUrl(panel.interaction_data);
 
-          // Store audio configuration
-          const mode = panel.audio_mode || 'once';
-          const stopPanel = panel.audio_stop_panel || null;
-          setAudioConfig({ mode, stopPanel });
-
-          const audio = new Audio(audioUrl);
-          audioRef.current = audio;
-          setCurrentAudio(audioUrl);
+      // If same audio is playing, toggle play/pause
+      if (currentAudio === audioUrl && audioRef.current) {
+        if (audioRef.current.paused) {
+          audioRef.current.play();
           setIsPlaying(true);
-          setCurrentTime(0);
-          setDuration(0);
-
-          // Set loop based on mode
-          audio.loop = (mode === 'loop');
-
-          // …and the comic's audio starting pauses any paisaje sonoro.
-          audio.addEventListener('play', () => announceAudioStart(COMIC_AUDIO_SOURCE));
-
-          // Set up event listeners
-          audio.addEventListener('loadedmetadata', () => {
-            setDuration(audio.duration);
-          });
-
-          audio.addEventListener('timeupdate', () => {
-            setCurrentTime(audio.currentTime);
-          });
-
-          audio.addEventListener('ended', () => {
-            // If mode is 'once', close the player
-            if (mode === 'once') {
-              setCurrentAudio(null);
-              setIsPlaying(false);
-              setCurrentTime(0);
-              setDuration(0);
-              setAudioConfig({ mode: 'once', stopPanel: null });
-            } else if (mode === 'loop') {
-              // Explicitly restart the audio for loop mode
-              audio.currentTime = 0;
-              audio.play().catch(err => {
-                console.error('Error looping audio:', err);
-              });
-            }
-          });
-
-          // Fires when the file can't be decoded/loaded (e.g. an unsupported
-          // codec like OGG on iOS Safari) — play() itself may not reject there.
-          audio.addEventListener('error', () => {
-            console.error('Audio error (unsupported format or load failure):', audioUrl);
-            alert(t('hscroll.audio.errorPlaying'));
-            setIsPlaying(false);
-            setCurrentAudio(null);
-            if (audioRef.current === audio) audioRef.current = null;
-          });
-
-          audio.play().catch(err => {
-            console.error('Error playing audio:', err);
-            alert(t('hscroll.audio.errorPlaying'));
-            setIsPlaying(false);
-          });
+        } else {
+          audioRef.current.pause();
+          setIsPlaying(false);
         }
+      } else {
+        // Play new audio
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+
+        // Store audio configuration
+        const mode = panel.audio_mode || 'once';
+        const stopPanel = panel.audio_stop_panel || null;
+        setAudioConfig({ mode, stopPanel });
+
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+        setCurrentAudio(audioUrl);
+        setIsPlaying(true);
+        setCurrentTime(0);
+        setDuration(0);
+
+        // Set loop based on mode
+        audio.loop = (mode === 'loop');
+
+        // …and the comic's audio starting pauses any paisaje sonoro.
+        audio.addEventListener('play', () => announceAudioStart(COMIC_AUDIO_SOURCE));
+
+        // Set up event listeners
+        audio.addEventListener('loadedmetadata', () => {
+          setDuration(audio.duration);
+        });
+
+        audio.addEventListener('timeupdate', () => {
+          setCurrentTime(audio.currentTime);
+        });
+
+        audio.addEventListener('ended', () => {
+          // If mode is 'once', close the player
+          if (mode === 'once') {
+            setCurrentAudio(null);
+            setIsPlaying(false);
+            setCurrentTime(0);
+            setDuration(0);
+            setAudioConfig({ mode: 'once', stopPanel: null });
+          } else if (mode === 'loop') {
+            // Explicitly restart the audio for loop mode
+            audio.currentTime = 0;
+            audio.play().catch(err => {
+              console.error('Error looping audio:', err);
+            });
+          }
+        });
+
+        // Fires when the file can't be decoded/loaded (e.g. an unsupported
+        // codec like OGG on iOS Safari) — play() itself may not reject there.
+        audio.addEventListener('error', () => {
+          console.error('Audio error (unsupported format or load failure):', audioUrl);
+          alert(t('hscroll.audio.errorPlaying'));
+          setIsPlaying(false);
+          setCurrentAudio(null);
+          if (audioRef.current === audio) audioRef.current = null;
+        });
+
+        audio.play().catch(err => {
+          console.error('Error playing audio:', err);
+          alert(t('hscroll.audio.errorPlaying'));
+          setIsPlaying(false);
+        });
       }
     }
   };
@@ -978,7 +969,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
               {sortedPanels.map((panel, index) => (
                 <div
                   key={panel.id_block}
-                  className={`hscroll-viewer-panel ${panel.is_interactive ? 'interactive-panel' : ''} ${panel.interaction_type === 'iframe' ? 'iframe-panel' : ''} ${panel.soundscape_data ? 'paisaje-panel' : ''}`}
+                  className={`hscroll-viewer-panel ${panel.is_interactive ? 'interactive-panel' : ''} ${panel.interaction_type === 'iframe' ? 'iframe-panel' : ''} ${panel.soundscape_data ? 'paisaje-panel' : ''} ${hasPanelAudio(panel) ? 'audio-panel' : ''}`}
                   data-interaction-type={panel.interaction_type}
                   data-panel-number={index + 1}
                   data-panel-id={panel.id_block}
@@ -1009,7 +1000,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                         <PaisajePiece
                           soundscape={panel.soundscape_data}
                           variant="panel"
-                          onEnter={() => announceAudioPanel(panel.id_block, 'paisaje')}
+                          onEnter={() => announceAudioPanel(panel.id_block)}
                         />
                       </Suspense>
                     </LoadFailBoundary>
@@ -1040,25 +1031,24 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                         <p className="viewer-panel-caption">{panel.image_caption}</p>
                       )}
 
-                      {/* Audio badge only for NON-interactive audio panels.
-                          Interactive audio panels already show the (animated)
-                          interactive indicator below, so showing both duplicated
-                          the icon on the left and right corners. */}
-                      {panel.interaction_type === 'audio' && !panel.is_interactive && (
-                        <div className="panel-audio-badge" title={t('hscroll.panelWithAudio')}>
-                          <Volume2 size={20} />
-                        </div>
-                      )}
-
-                      {panel.is_interactive && (
+                      {/* Audio: a play button bottom-left, as on paisaje panels. */}
+                      {hasPanelAudio(panel) ? (() => {
+                        const on = currentAudio === getImageUrl(panel.interaction_data);
+                        const playingHere = on && isPlaying;
+                        return (
+                          <ComicAudioPlay
+                            playing={playingHere}
+                            time={on && duration ? formatTime(playingHere ? Math.max(0, duration - currentTime) : duration) : null}
+                            onToggle={() => { if (!hasDragged) playPanelAudio(panel); }}
+                            onEnter={() => announceAudioPanel(panel.id_block)}
+                            label={playingHere ? t('hscroll.audio.pause') : t('hscroll.audio.play')}
+                          />
+                        );
+                      })() : panel.is_interactive && (
                         <div className="interactive-indicator">
                           <div className="pulse-ring"></div>
                           <span className={`interactive-icon ${blueIconPanels.has(panel.id_block) ? 'blue' : ''}`}>
-                            {panel.interaction_type === 'link' ? (
-                              <LinkIcon size={20} />
-                            ) : (
-                              <Volume2 size={20} />
-                            )}
+                            <LinkIcon size={20} />
                           </span>
                         </div>
                       )}
