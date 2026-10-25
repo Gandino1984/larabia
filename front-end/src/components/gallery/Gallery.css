@@ -262,12 +262,38 @@
   background: rgba(10, 10, 10, 0.94);
   color: #ffffff;
 }
-.work-viewer__figure { display: flex; flex-direction: column; align-items: center; max-width: 100%; max-height: 100%; margin: 0; }
-.work-viewer__figure img { max-width: 100%; max-height: calc(100dvh - 8rem); object-fit: contain; }
-.work-viewer figcaption { justify-content: center; color: #ffffff; }
+/* The figure fills the screen as a column: the caption (title, size, a
+   description of up to 300 characters) at its height, the image in what's
+   left — scaled down to fit, never up. Its empty part lets clicks through
+   to the backdrop (which closes the viewer). */
+.work-viewer__figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  pointer-events: none;
+}
+.work-viewer__figure > * { pointer-events: auto; }
+.work-viewer__figure img { flex: 0 1 auto; min-height: 0; max-width: 100%; max-height: 100%; object-fit: contain; }
+.work-viewer figcaption {
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+  max-height: 45%;
+  overflow-y: auto;
+  color: #ffffff;
+  text-align: center;
+}
+/* Its first line — title, size, «2 / 7» — then the description below. */
+.work-viewer figcaption > strong,
+.work-viewer figcaption > span { display: inline-block; margin: 0 0.4rem; }
 .work-viewer figcaption span { color: #cfcfcf; font-size: 0.8rem; }
 .work-viewer__count { opacity: 0.8; }
-.work-viewer__description { flex-basis: 100%; max-width: 60ch; margin: 0.1rem auto 0; color: #e6e6e6; line-height: 1.45; text-align: center; }
+.work-viewer__description { max-width: 60ch; margin: 0.4rem auto 0; color: #e6e6e6; line-height: 1.45; }
 .work-viewer__close,
 .work-viewer__nav {
   position: absolute;
