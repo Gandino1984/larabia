@@ -4,7 +4,6 @@ import { useSpring, animated, to } from '@react-spring/web';
 import { useTranslation } from 'react-i18next';
 import { articleTitle, articleExcerpt, projectTitle } from '../../utils/contentLang';
 import { categoryLabel } from '../../utils/articleFilters';
-import { projectFormatLabel } from '../../utils/projectKinds';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import { useMagazine } from '../../app_context/MagazineContext';
@@ -371,8 +370,9 @@ function Header({ ready = true }) {
     setShowSearchResults(false);
   };
 
-  // Filter authors based on search query (shown in dropdown on non-authors pages)
-  const authorResults = !showAuthors && searchQuery.length > 0 ? authorProfiles.filter(profile => {
+  // Filter authors based on search query (shown in dropdown on non-authors
+  // pages, and not when projects match: then only the projects' names).
+  const authorResults = !showAuthors && searchQuery.length > 0 && projectResults.length === 0 ? authorProfiles.filter(profile => {
     const searchLower = searchQuery.toLowerCase();
     return (
       profile.display_name?.toLowerCase().includes(searchLower) ||
@@ -587,9 +587,6 @@ function Header({ ready = true }) {
                           >
                             <div className="search-result-content">
                               <h4 className="search-result-title">{projectTitle(project, lang)}</h4>
-                              {project.format_project && (
-                                <span className="search-result-category">{projectFormatLabel(project.format_project, t)}</span>
-                              )}
                             </div>
                             {project.cover_image_project && (
                               <img className="search-result-thumb" src={resolveMediaUrl(project.cover_image_project)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
@@ -647,6 +644,13 @@ function Header({ ready = true }) {
                                   {articleExcerpt(article, lang).substring(0, 100)}
                                   {articleExcerpt(article, lang).length > 100 ? '...' : ''}
                                 </p>
+                              )}
+                              {(article.authors?.length > 0 || article.author_name) && (
+                                <span className="search-result-author">
+                                  {t('article.detail.by')} {article.authors?.length > 0
+                                    ? article.authors.map(a => a.name_user).join(', ')
+                                    : article.author_name}
+                                </span>
                               )}
                             </div>
                             {article.cover_image_article && (
@@ -801,9 +805,6 @@ function Header({ ready = true }) {
                                 >
                                   <div className="mobile-search-result-text">
                                     <h4 className="mobile-search-result-title">{projectTitle(project, lang)}</h4>
-                                    {project.format_project && (
-                                      <span className="mobile-search-result-category">{projectFormatLabel(project.format_project, t)}</span>
-                                    )}
                                   </div>
                                   {project.cover_image_project && (
                                     <img className="search-result-thumb" src={resolveMediaUrl(project.cover_image_project)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
@@ -831,6 +832,13 @@ function Header({ ready = true }) {
                                     <h4 className="mobile-search-result-title">{articleTitle(article, lang)}</h4>
                                     {article.category_article && article.category_article.toLowerCase() !== 'general' && (
                                       <span className="mobile-search-result-category">{categoryLabel(article.category_article, t)}</span>
+                                    )}
+                                    {(article.authors?.length > 0 || article.author_name) && (
+                                      <span className="mobile-search-result-author">
+                                        {t('article.detail.by')} {article.authors?.length > 0
+                                          ? article.authors.map(a => a.name_user).join(', ')
+                                          : article.author_name}
+                                      </span>
                                     )}
                                   </div>
                                   {article.cover_image_article && (

@@ -786,6 +786,14 @@
   margin-bottom: 0.25rem;
 }
 
+.mobile-search-result-author {
+  font-size: 0.7rem;
+  color: rgba(0, 0, 0, 0.4);
+  font-style: italic;
+  margin-top: 0.25rem;
+  display: block;
+}
+
 .mobile-search-no-results {
   color: rgba(0, 0, 0, 0.4);
   font-size: 0.8rem;
@@ -911,7 +919,10 @@
   z-index: 100;
   animation: slideDown 0.2s ease-out;
   max-height: 400px;
-  overflow: hidden;
+  /* One scroll for the whole dropdown: lists scrolling on their own shrank
+     to share the height and cut their rows (a project, an author). */
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
 }
@@ -943,8 +954,7 @@
 }
 
 .search-results-list {
-  overflow-y: auto;
-  max-height: 340px;
+  flex-shrink: 0;
 }
 
 .search-result-item {
@@ -1062,6 +1072,17 @@
 
 .header-bar.active .search-result-excerpt {
   color: rgba(0, 0, 0, 0.5);
+}
+
+.search-result-author {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  margin-top: 0.25rem;
+}
+
+.header-bar.active .search-result-author {
+  color: rgba(0, 0, 0, 0.4);
 }
 
 .search-no-results {
