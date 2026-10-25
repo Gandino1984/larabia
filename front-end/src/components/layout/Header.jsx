@@ -648,13 +648,6 @@ function Header({ ready = true }) {
                                   {articleExcerpt(article, lang).length > 100 ? '...' : ''}
                                 </p>
                               )}
-                              {(article.authors?.length > 0 || article.author_name) && (
-                                <span className="search-result-author">
-                                  {t('article.detail.by')} {article.authors?.length > 0
-                                    ? article.authors.map(a => a.name_user).join(', ')
-                                    : article.author_name}
-                                </span>
-                              )}
                             </div>
                             {article.cover_image_article && (
                               <img className="search-result-thumb" src={resolveMediaUrl(article.cover_image_article)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
@@ -838,13 +831,6 @@ function Header({ ready = true }) {
                                     <h4 className="mobile-search-result-title">{articleTitle(article, lang)}</h4>
                                     {article.category_article && article.category_article.toLowerCase() !== 'general' && (
                                       <span className="mobile-search-result-category">{categoryLabel(article.category_article, t)}</span>
-                                    )}
-                                    {(article.authors?.length > 0 || article.author_name) && (
-                                      <span className="mobile-search-result-author">
-                                        {t('article.detail.by')} {article.authors?.length > 0
-                                          ? article.authors.map(a => a.name_user).join(', ')
-                                          : article.author_name}
-                                      </span>
                                     )}
                                   </div>
                                   {article.cover_image_article && (

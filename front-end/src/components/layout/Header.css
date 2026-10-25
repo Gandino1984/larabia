@@ -786,14 +786,6 @@
   margin-bottom: 0.25rem;
 }
 
-.mobile-search-result-author {
-  font-size: 0.7rem;
-  color: rgba(0, 0, 0, 0.4);
-  font-style: italic;
-  margin-top: 0.25rem;
-  display: block;
-}
-
 .mobile-search-no-results {
   color: rgba(0, 0, 0, 0.4);
   font-size: 0.8rem;
@@ -1070,17 +1062,6 @@
 
 .header-bar.active .search-result-excerpt {
   color: rgba(0, 0, 0, 0.5);
-}
-
-.search-result-author {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
-  font-style: italic;
-  margin-top: 0.25rem;
-}
-
-.header-bar.active .search-result-author {
-  color: rgba(0, 0, 0, 0.4);
 }
 
 .search-no-results {
