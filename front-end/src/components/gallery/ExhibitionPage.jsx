@@ -15,7 +15,7 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useAuthorPhoto } from '../../app_context/AuthorContext';
 import ChatButton from '../chat/ChatButton';
 import WorkViewer from './WorkViewer';
-import { workImageUrl, workTitle, workSize, exhibitionTitle, pieceTitle } from './galleryUtils';
+import { workImageUrl, workTitle, workSize, exhibitionTitle, pieceTitle, protectedImage } from './galleryUtils';
 import './Gallery.css';
 
 function ExhibitionPage() {
@@ -91,6 +91,7 @@ function ExhibitionPage() {
               <figure key={w.id_work} className="exhibition-work">
                 <button type="button" className="exhibition-work__frame" onClick={() => setViewing({ piece: pi, index: i })} aria-label={t('gallery.viewer.open', { title: workTitle(w, t), defaultValue: 'Ver «{{title}}» en grande' })}>
                   <img
+                    {...protectedImage}
                     src={workImageUrl(w.image)}
                     alt={workTitle(w, t)}
                     loading="lazy"

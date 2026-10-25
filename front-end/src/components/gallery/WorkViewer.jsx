@@ -8,7 +8,7 @@ import { useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { workImageUrl, workTitle, workSize } from './galleryUtils';
+import { workImageUrl, workTitle, workSize, protectedImage } from './galleryUtils';
 import './Gallery.css';
 
 function WorkViewer({ works, index, onIndex, onClose }) {
@@ -34,7 +34,7 @@ function WorkViewer({ works, index, onIndex, onClose }) {
         <X size={24} />
       </button>
       <figure className="work-viewer__figure" onClick={(e) => e.stopPropagation()}>
-        <img src={workImageUrl(work.image)} alt={workTitle(work, t)} />
+        <img src={workImageUrl(work.image)} alt={workTitle(work, t)} {...protectedImage} />
         <figcaption>
           <strong>{workTitle(work, t)}</strong>
           {workSize(work, t) && <span>{workSize(work, t)}</span>}

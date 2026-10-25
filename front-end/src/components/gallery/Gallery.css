@@ -33,6 +33,15 @@
   white-space: nowrap;
 }
 
+/* An artist's image shown to the public (galleryUtils protectedImage): no
+   long-press menu on phones, no selecting or dragging it. */
+.gallery-protected {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 /* Buttons */
 .gallery-btn {
   display: inline-flex;

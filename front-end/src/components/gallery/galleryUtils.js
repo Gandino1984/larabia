@@ -16,5 +16,19 @@ export const workSize = (work, t) => (work?.width_px && work?.height_px
   ? t('gallery.sizePx', { w: work.width_px, h: work.height_px, defaultValue: '{{w}} × {{h}} px' })
   : '');
 
+/**
+ * Props for an artist's image shown to the public: no right-click menu (no
+ * «Copiar / Guardar imagen»), no dragging it out; with the .gallery-protected
+ * class, no long-press menu on phones. It only makes copying harder — a
+ * screenshot or the browser's developer tools still get it.
+ */
+const blockEvent = (e) => e.preventDefault();
+export const protectedImage = {
+  className: 'gallery-protected',
+  draggable: false,
+  onContextMenu: blockEvent,
+  onDragStart: blockEvent
+};
+
 /** An exhibition's title — the artist's name when it has none. */
 export const exhibitionTitle = (exhibition) => exhibition?.title || exhibition?.artist?.name_user || '';

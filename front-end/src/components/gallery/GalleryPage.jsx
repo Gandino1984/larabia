@@ -14,7 +14,7 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useGallery } from '../../app_context/GalleryContext';
 import { useAuthorPhoto } from '../../app_context/AuthorContext';
 import InviteArtistModal from './InviteArtistModal';
-import { workImageUrl, exhibitionTitle } from './galleryUtils';
+import { workImageUrl, exhibitionTitle, protectedImage } from './galleryUtils';
 import './Gallery.css';
 
 function GalleryPage() {
@@ -100,7 +100,7 @@ function GalleryPage() {
               onKeyDown={(e) => { if (e.key === 'Enter') navigateToExhibition(ex.id_exhibition); }}
             >
               <div className="gallery-card__image">
-                {ex.cover?.image && <img src={workImageUrl(ex.cover.image)} alt="" loading="lazy" />}
+                {ex.cover?.image && <img src={workImageUrl(ex.cover.image)} alt="" loading="lazy" {...protectedImage} />}
                 <span className="gallery-card__count">
                   {t('gallery.worksCount', { count: ex.pieces_count })}
                 </span>
