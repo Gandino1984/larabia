@@ -3,9 +3,9 @@
 // Content in other languages: the original text of an article, its blocks and
 // a project is Spanish; editors can add versions in English and Basque
 // (back-end utils/translations.js):
-//   translations_article  { en: { title, excerpt }, eu: { … } }
+//   translations_article  { en: { title, subtitle, excerpt }, eu: { … } }
 //   translations_block    { en: { content, caption, alt }, eu: { … } }
-//   translations_project  { en: { title, description }, eu: { … } }
+//   translations_project  { en: { title, subtitle, description }, eu: { … } }
 // Readers get the version of the language they chose in the header (or the
 // article reader's own toggle), and the original where there is none.
 
@@ -45,10 +45,12 @@ export function localized(original, translations, field, lang) {
 }
 
 export const articleTitle = (a, lang) => localized(a?.title_article, a?.translations_article, 'title', lang);
+export const articleSubtitle = (a, lang) => localized(a?.subtitle_article, a?.translations_article, 'subtitle', lang);
 export const articleExcerpt = (a, lang) => localized(a?.excerpt_article, a?.translations_article, 'excerpt', lang);
 // The project an article belongs to, as the article lists bring it.
 export const articleProjectTitle = (a, lang) => localized(a?.project_title, a?.project_translations, 'title', lang);
 export const projectTitle = (p, lang) => localized(p?.title_project, p?.translations_project, 'title', lang);
+export const projectSubtitle = (p, lang) => localized(p?.subtitle_project, p?.translations_project, 'subtitle', lang);
 export const projectDescription = (p, lang) => localized(p?.description_project, p?.translations_project, 'description', lang);
 export const blockText = (b, lang) => localized(b?.content, b?.translations_block, 'content', lang);
 export const blockCaption = (b, lang) => localized(b?.image_caption, b?.translations_block, 'caption', lang);

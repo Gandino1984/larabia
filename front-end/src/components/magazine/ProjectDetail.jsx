@@ -13,7 +13,7 @@ import OptionsReveal from './OptionsReveal';
 import AuthorChip from '../common/AuthorChip';
 import ImageLightbox from '../common/ImageLightbox';
 import { useDragScroll } from '../../hooks/useDragScroll';
-import { projectTitle, projectDescription } from '../../utils/contentLang';
+import { projectTitle, projectSubtitle, projectDescription } from '../../utils/contentLang';
 import { projectTypeLabel, projectFormatLabel } from '../../utils/projectKinds';
 import './ProjectDetail.css';
 import './ArticlesCarousel.css';
@@ -195,6 +195,9 @@ function ProjectDetail() {
             </div>
           )}
           <h1 className="project-detail-title">{projectTitle(selectedProject, lang)}</h1>
+          {projectSubtitle(selectedProject, lang) && (
+            <p className="project-detail-subtitle">{projectSubtitle(selectedProject, lang)}</p>
+          )}
 
           {projectDescription(selectedProject, lang) && (
             <p className="project-detail-description">{projectDescription(selectedProject, lang)}</p>

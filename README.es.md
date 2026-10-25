@@ -28,7 +28,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 - **Portada:** un hero con las historias destacadas (su título, entradilla y proyecto siguen el idioma elegido en la cabecera) y, debajo, avances de las secciones.
 - **Secciones:** los botones de la barra superior (Artículos, Proyectos, Talleres, Más › Ficción, Internacional…). Cualquier artículo o proyecto puede aparecer también en otras secciones si un super admin lo aprueba.
 - **Página de proyectos:** «Proyectos» en la barra superior abre la página con todos los proyectos publicados, del más nuevo al más antiguo, con buscador (título, descripción o autora/or, sin importar mayúsculas ni tildes); cada tarjeta muestra sus autoras/es y cuántas publicaciones tiene.
-- **Las publicaciones** pueden pertenecer a un **proyecto** (una serie, un fanzine, un libro…) o ir sueltas. Cada una es de uno de estos tipos:
+- **Las publicaciones** pueden pertenecer a un **proyecto** (una serie, un fanzine, un libro…) o ir sueltas. Los artículos y los proyectos pueden llevar un **subtítulo** (opcional, hasta 100 caracteres, traducible): una línea bajo el título en su página, en la portada y en las tarjetas. Cada una es de uno de estos tipos:
   - un **artículo** (texto, imágenes e incrustados, por bloques);
   - un **cómic** (lector horizontal con paneles que pueden ser imagen, enlace, audio, incrustado o paisaje sonoro; navegación panel a panel, progreso de lectura guardado y pantalla completa); en el creador, cada panel muestra el porcentaje de su imagen mientras se sube (hasta 20 MB; JPEG y PNG pasan a WebP —con su giro EXIF aplicado y, si un lado pasa de 16.383 px, reducida para caber— y la WebP queda tal cual);
   - un **micro-perfil**;
@@ -195,7 +195,7 @@ Los roles son marcas independientes en `user`; una cuenta puede tener varias.
 
 **Contenido en otros idiomas** (`back-end/utils/translations.js`, `front-end/src/utils/contentLang.js`):
 
-- El original es en castellano. Las versiones en inglés y en euskera van en columnas JSON: `translations_article` (título, entradilla), `translations_block` (texto, pie de foto, texto alternativo) y `translations_project` (título, descripción).
+- El original es en castellano. Las versiones en inglés y en euskera van en columnas JSON: `translations_article` (título, subtítulo, entradilla), `translations_block` (texto, pie de foto, texto alternativo) y `translations_project` (título, subtítulo, descripción).
 - En el creador, el selector «Idioma en el que escribes» elige qué versión se escribe.
 - Cada lectora ve la versión de su idioma, o el original si no la hay.
 

@@ -14,6 +14,11 @@ const magazine_project_model = sequelize.define(
             type: DataTypes.STRING(255),
             allowNull: false
         },
+        // A line under the title (up to 100 characters; migration 031).
+        subtitle_project: {
+            type: DataTypes.STRING(100),
+            allowNull: true
+        },
         description_project: {
             type: DataTypes.TEXT,
             allowNull: true,

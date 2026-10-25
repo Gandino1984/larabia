@@ -471,6 +471,7 @@ async function create(projectData, roleCtx = EMPTY_ROLE_CTX) {
             const queryWithValues = `
                 INSERT INTO magazine_projects (
                     title_project,
+                    subtitle_project,
                     description_project,
                     author_id,
                     author_name,
@@ -486,6 +487,7 @@ async function create(projectData, roleCtx = EMPTY_ROLE_CTX) {
                     updated_at
                 ) VALUES (
                     ${escapeSQLValue(projectData.title_project)},
+                    ${escapeSQLValue(projectData.subtitle_project || null)},
                     ${escapeSQLValue(projectData.description_project || null)},
                     ${escapeSQLValue(projectData.author_id || null)},
                     ${escapeSQLValue(projectData.author_name || null)},
@@ -587,6 +589,10 @@ async function update(id_project, projectData, roleCtx = EMPTY_ROLE_CTX) {
         if (projectData.title_project !== undefined) {
             updateFields.push('title_project = ?');
             values.push(projectData.title_project);
+        }
+        if (projectData.subtitle_project !== undefined) {
+            updateFields.push('subtitle_project = ?');
+            values.push(projectData.subtitle_project);
         }
         if (projectData.description_project !== undefined) {
             updateFields.push('description_project = ?');

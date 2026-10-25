@@ -85,6 +85,18 @@
   text-align: center;
 }
 
+/* The subtitle: a line under the title (up to 100 characters). */
+.project-detail-subtitle {
+  margin: -0.4rem 0 1rem;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #cfcfcf;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
 .project-detail-description {
   color: #b0b0b0;
   font-size: 1rem;

@@ -16,7 +16,7 @@ import LangSwitch from '../common/LangSwitch';
 import { categoryLabel } from '../../utils/articleFilters';
 import { localDate } from '../../utils/locale';
 import {
-  articleLangs, articleTitle, articleExcerpt, articleProjectTitle,
+  articleLangs, articleTitle, articleSubtitle, articleExcerpt, articleProjectTitle,
   blockText, blockCaption, blockAlt, baseLang
 } from '../../utils/contentLang';
 import './ArticleDetail.css';
@@ -303,6 +303,9 @@ function ArticleDetail({ previewMode = false }) {
               </span>
             )}
             <h1 className="article-detail-title">{articleTitle(selectedArticle, readLang)}</h1>
+            {articleSubtitle(selectedArticle, readLang) && (
+              <p className="article-detail-subtitle">{articleSubtitle(selectedArticle, readLang)}</p>
+            )}
 
             {articleExcerpt(selectedArticle, readLang) && (
               <p className="article-detail-excerpt">{articleExcerpt(selectedArticle, readLang)}</p>

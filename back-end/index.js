@@ -194,6 +194,15 @@ Promise.all([
             await qi.addColumn('magazine_articles', 'featured_order', { type: DataTypes.INTEGER, allowNull: true });
             console.log('>>> Added magazine_articles.featured_order');
         }
+        // Subtitles of articles and projects (migration 031).
+        if (!articles.subtitle_article) {
+            await qi.addColumn('magazine_articles', 'subtitle_article', { type: DataTypes.STRING(100), allowNull: true });
+            console.log('>>> Added magazine_articles.subtitle_article');
+        }
+        if (!(await qi.describeTable('magazine_projects')).subtitle_project) {
+            await qi.addColumn('magazine_projects', 'subtitle_project', { type: DataTypes.STRING(100), allowNull: true });
+            console.log('>>> Added magazine_projects.subtitle_project');
+        }
         // Magazine sections of articles and projects (migration 017) and
         // content in other languages (migration 019).
         for (const [table, cols] of [

@@ -6,7 +6,7 @@
 import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useUI } from '../../app_context/UIContext';
-import { projectTitle, projectDescription } from '../../utils/contentLang';
+import { projectTitle, projectSubtitle, projectDescription } from '../../utils/contentLang';
 import { projectFormatLabel } from '../../utils/projectKinds';
 import './ArticleCard.css';
 
@@ -56,6 +56,9 @@ function ProjectCard({ project }) {
       </div>
       <div className="article-card-content">
         <h3 className="article-card-title">{projectTitle(project, lang)}</h3>
+        {projectSubtitle(project, lang) && (
+          <p className="article-card-subtitle">{projectSubtitle(project, lang)}</p>
+        )}
         {projectDescription(project, lang) && (
           <p className="article-card-excerpt">{projectDescription(project, lang)}</p>
         )}

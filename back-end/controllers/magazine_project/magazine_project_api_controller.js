@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import magazineProjectController from "./magazine_project_controller.js";
 import { getRequestUser, roleSnapshot, requireSuperAdmin, requireOwnerOrSuperAdmin, requireCreator } from "../../utils/authHelper.js";
 import { isProjectAuthor, signsIt } from "../../utils/ownership.js";
+import { cleanSubtitle } from "../../utils/subtitle.js";
 
 // Only a super admin or one of its authors changes a project (sends the 403).
 const ownProjectOnly = (req, res, projectId) =>
@@ -124,6 +125,7 @@ async function create(req, res) {
     try {
         const {
             title_project,
+            subtitle_project,
             description_project,
             author_id,
             author_name,
@@ -137,6 +139,9 @@ async function create(req, res) {
             sections,
             translations_project
         } = req.body;
+
+        const subtitle = cleanSubtitle(subtitle_project);
+        if (subtitle.error) return res.status(400).json({ error: subtitle.error, code: 'subtitle_too_long' });
 
         if (!title_project) {
             return res.status(400).json({
@@ -155,6 +160,7 @@ async function create(req, res) {
 
         const projectData = {
             title_project,
+            subtitle_project: subtitle.value ?? null,
             description_project: description_project || null,
             author_id: author_id || null,
             author_name: author_name || null,
@@ -209,6 +215,7 @@ async function update(req, res) {
 
         const {
             title_project,
+            subtitle_project,
             description_project,
             author_id,
             author_name,
@@ -229,8 +236,12 @@ async function update(req, res) {
             return str;
         };
 
+        const subtitle = cleanSubtitle(subtitle_project);
+        if (subtitle.error) return res.status(400).json({ error: subtitle.error, code: 'subtitle_too_long' });
+
         const projectData = {};
         if (title_project !== undefined) projectData.title_project = title_project;
+        if (subtitle.value !== undefined) projectData.subtitle_project = subtitle.value;
         if (description_project !== undefined) projectData.description_project = description_project;
         if (author_id !== undefined) projectData.author_id = author_id;
         if (author_name !== undefined) projectData.author_name = author_name;

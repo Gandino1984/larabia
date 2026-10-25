@@ -249,6 +249,15 @@
   min-width: 0;
 }
 
+.articles-list-page .article-subtitle {
+  margin: -0.6rem 0 0.9rem;
+  color: #d0d0d0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
 .articles-list-page .article-excerpt {
   margin: 0 0 1rem;
   color: #b0b0b0;

@@ -3,7 +3,7 @@
 // Content in other languages. The original text of an article, its blocks and
 // a project is Spanish (its usual columns); the editor can add versions in the
 // other languages of the magazine, stored as JSON:
-//   { en: { title: '…', excerpt: '…' }, eu: { … } }
+//   { en: { title: '…', subtitle: '…', excerpt: '…' }, eu: { … } }
 // Readers see the version of their language, or the original (front-end
 // utils/contentLang.js).
 
@@ -11,9 +11,9 @@ export const CONTENT_LANGS = ['en', 'eu'];
 
 // Fields each kind of content can translate, with their maximum length.
 export const TRANSLATABLE = {
-    article: { title: 255, excerpt: 2000 },
+    article: { title: 255, subtitle: 100, excerpt: 2000 },
     block: { content: 200000, caption: 1000, alt: 500 },
-    project: { title: 255, description: 10000 }
+    project: { title: 255, subtitle: 100, description: 10000 }
 };
 
 // Quill's empty paragraph ("<p><br></p>") or bare spaces count as nothing.

@@ -263,6 +263,18 @@
   animation: hero-title-shimmer 7s ease-in-out infinite;
   filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.5));
 }
+/* The story's subtitle, under the title in the same band. */
+.hero-subtitle {
+  max-width: min(92vw, 960px);
+  margin: 0.35rem auto 0;
+  color: #ffffff;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0, 0, 0, 0.8);
+}
 @keyframes hero-title-shimmer {
   0%, 100% { background-position: 100% 50%; }
   50% { background-position: 0% 50%; }
@@ -655,6 +667,10 @@
     font-size: 2.125rem;
   }
 
+  .hero-subtitle {
+    font-size: 1.05rem;
+  }
+
   .hero-excerpt {
     font-size: 1.05rem;
   }
@@ -710,6 +726,10 @@
   .hero-title {
     font-size: 2.75rem;
     margin-bottom: 1.25rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.2rem;
   }
 
   .hero-excerpt {

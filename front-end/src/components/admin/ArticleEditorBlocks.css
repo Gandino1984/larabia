@@ -1854,6 +1854,12 @@
   font-weight: 600;
   overflow-wrap: anywhere;
 }
+.pub-review__subtitle {
+  display: block;
+  margin-top: 0.15rem;
+  color: #555555;
+  font-weight: 400;
+}
 .pub-review__cover {
   display: block;
   width: 160px;
@@ -2340,4 +2346,13 @@
   font-size: 0.82rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
+}
+
+/* «n/100» under the subtitle field. */
+.pub-count {
+  display: block;
+  margin-top: 0.3rem;
+  color: #666666;
+  font-size: 0.8rem;
+  text-align: right;
 }

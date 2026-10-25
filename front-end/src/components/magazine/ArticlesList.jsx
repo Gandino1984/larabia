@@ -14,7 +14,7 @@ import { EMPTY_ARTICLE_FILTERS, applyArticleFilters, countActiveFilters, categor
 import { inSection, sectionLabel } from '../../utils/sections';
 import { useSectionCatalog } from '../../app_context/useSectionCatalog';
 import SectionProjects from './SectionProjects';
-import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
+import { articleTitle, articleSubtitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
 import { localDate } from '../../utils/locale';
 import './ArticlesList.css';
 import './ArticlesCarousel.css';
@@ -242,6 +242,9 @@ function ArticlesList() {
           </span>
         )}
         <h2 className="article-title">{articleTitle(article, lang)}</h2>
+        {articleSubtitle(article, lang) && (
+          <p className="article-subtitle">{articleSubtitle(article, lang)}</p>
+        )}
 
         {articleExcerpt(article, lang) && (
           <p className="article-excerpt">{articleExcerpt(article, lang)}</p>

@@ -66,6 +66,7 @@ Desde la `012`, el back-end comprueba al arrancar (`back-end/index.js`) las colu
 | `028` | `gallery_exhibitions.prepared_by` (se añade en `syncGalleryTables`, `models/gallery_models.js`, justo después de que exista esa tabla) |
 | `029` | Las tablas de las charlas, que se crean al arrancar (`syncChatTables`, `models/chat_models.js`), que la primera vez copia dentro las conversaciones de la Galería |
 | `030` | `gallery_pieces` (obras) y `gallery_works.piece_id`, `description_work` — en `syncGalleryTables`, que además convierte cada ilustración de antes en una obra propia |
+| `031` | `magazine_articles.subtitle_article`, `magazine_projects.subtitle_project` (hasta 100 caracteres) |
 
 Las tablas de `009`, `010`, `011`, `014`, `015`, `020`, `023` y `027` se crean al arrancar con `sync()` de Sequelize si no existen (las de la galería en orden, porque se referencian entre sí). Los archivos SQL siguen siendo la referencia para una base nueva.
 

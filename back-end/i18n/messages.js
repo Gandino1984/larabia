@@ -636,4 +636,5 @@ export const PATTERNS = [
     { re: new RegExp("^Has\\ rechazado\\ la\\ solicitud\\ de\\ (.+?)$", 's'), en: "You’ve declined $1’s request", eu: "$1(r)en eskaera baztertu duzu" },
     { re: new RegExp("^La\\ descripción\\ es\\ demasiado\\ larga\\ \\(máximo\\ (.+?)\\ caracteres\\)$", 's'), en: "The description is too long (at most $1 characters)", eu: "Deskribapena luzeegia da (gehienez $1 karaktere)" },
     { re: new RegExp("^Una\\ obra\\ tiene\\ como\\ mucho\\ (.+?)\\ ilustraciones$", 's'), en: "A work has at most $1 illustrations", eu: "Lan batek gehienez $1 ilustrazio ditu" },
+    { re: new RegExp("^El\\ subtítulo\\ no\\ puede\\ exceder\\ (.+?)\\ caracteres$", 's'), en: "The subtitle can’t be longer than $1 characters", eu: "Azpitituluak ezin ditu $1 karaktere baino gehiago izan" },
 ];

@@ -12,7 +12,7 @@ import RollText from '../common/RollText';
 import SubscriberMark from '../common/SubscriberMark';
 import { categoryLabel } from '../../utils/articleFilters';
 import { localDate } from '../../utils/locale';
-import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
+import { articleTitle, articleSubtitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
 import './HomePage.css';
 import { useAuthorPhoto } from '../../app_context/AuthorContext';
 
@@ -382,6 +382,9 @@ function HomePage({ ready = true }) {
                     </span>
                   )}
                   <h1 className="hero-title">{articleTitle(currentArticle, lang)}</h1>
+                  {articleSubtitle(currentArticle, lang) && (
+                    <p className="hero-subtitle">{articleSubtitle(currentArticle, lang)}</p>
+                  )}
                 </div>
                 {currentArticle.date_published && (
                   <span className="hero-date">

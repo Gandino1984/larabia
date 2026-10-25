@@ -9,7 +9,7 @@ import ArticleEngagementBar from './ArticleEngagementBar';
 import SubscriberMark from '../common/SubscriberMark';
 import { categoryLabel } from '../../utils/articleFilters';
 import { projectTypeLabel } from '../../utils/projectKinds';
-import { articleTitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
+import { articleTitle, articleSubtitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
 import { localDate } from '../../utils/locale';
 import './ArticleCard.css';
 import { useAuthorPhoto } from '../../app_context/AuthorContext';
@@ -119,6 +119,9 @@ function ArticleCard({ article, typeBadge, featuredBadge }) {
           </span>
         )}
         <h3 className="article-card-title">{articleTitle(article, lang)}</h3>
+        {articleSubtitle(article, lang) && (
+          <p className="article-card-subtitle">{articleSubtitle(article, lang)}</p>
+        )}
 
         {articleExcerpt(article, lang) && (
           <p className="article-card-excerpt">{articleExcerpt(article, lang)}</p>

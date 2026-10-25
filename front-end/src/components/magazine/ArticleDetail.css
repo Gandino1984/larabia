@@ -550,6 +550,18 @@
   text-align: center;
 }
 
+/* The subtitle: a line under the title (up to 100 characters). */
+.article-detail-subtitle {
+  margin: -0.35rem 0 1rem;
+  font-family: 'Source Code Pro', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333333;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
 /* Description: same sizes as the hero description at each breakpoint (1rem →
    1.3rem), upright (no italics). */
 .article-detail-excerpt {

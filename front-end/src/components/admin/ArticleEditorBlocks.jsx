@@ -56,7 +56,9 @@ const isBlockComplete = (block) => {
 // Project classification options (new-project step + edit-project modal):
 // utils/projectKinds.js.
 
-const EMPTY_WIZARD_PROJECT = { title_project: '', description_project: '', type_project: '', format_project: '', sections: [], translations_project: {} };
+// A line under the title of an article or a project (back-end utils/subtitle.js).
+const SUBTITLE_MAX = 100;
+const EMPTY_WIZARD_PROJECT = { title_project: '', subtitle_project: '', description_project: '', type_project: '', format_project: '', sections: [], translations_project: {} };
 const TOTAL_STEPS = 6;
 
 function ArticleEditorBlocks() {
@@ -153,6 +155,7 @@ function ArticleEditorBlocks() {
   };
   const [formData, setFormData] = useState({
     title_article: '',
+    subtitle_article: '',
     excerpt_article: '',
     category_article: 'general',
     authors: [currentUser?.id_user].filter(Boolean),
@@ -187,6 +190,7 @@ function ArticleEditorBlocks() {
   const [articleListFilter, setArticleListFilter] = useState('all');
   const [newProjectData, setNewProjectData] = useState({
     title_project: '',
+    subtitle_project: '',
     description_project: '',
     type_project: '',
     format_project: '',
@@ -257,6 +261,7 @@ function ArticleEditorBlocks() {
                        (selectedArticle.author_id ? [selectedArticle.author_id] : []);
       setFormData({
         title_article: selectedArticle.title_article,
+        subtitle_article: selectedArticle.subtitle_article || '',
         excerpt_article: selectedArticle.excerpt_article || '',
         category_article: selectedArticle.category_article || 'general',
         authors: authorIds,
@@ -391,6 +396,7 @@ function ArticleEditorBlocks() {
     const primaryAuthor = newProjectAuthors[0] || { id_user: currentUser.id_user, name_user: currentUser.name_user };
     return {
       title_project: newProjectData.title_project,
+      subtitle_project: newProjectData.subtitle_project || '',
       description_project: newProjectData.description_project,
       type_project: newProjectData.type_project,
       format_project: newProjectData.format_project,
@@ -448,6 +454,7 @@ function ArticleEditorBlocks() {
     setSelectedProjectAuthorToAdd('');
     setNewProjectData({
       title_project: '',
+      subtitle_project: '',
       description_project: '',
       type_project: '',
       format_project: '',
@@ -465,6 +472,7 @@ function ArticleEditorBlocks() {
     setEditingProjectId(project.id_project);
     setNewProjectData({
       title_project: project.title_project || '',
+      subtitle_project: project.subtitle_project || '',
       description_project: project.description_project || '',
       type_project: project.type_project || '',
       format_project: project.format_project || '',
@@ -812,6 +820,9 @@ function ArticleEditorBlocks() {
       if (formData.title_article.length > 200) {
         return problem('title_article', t('editor.wizard.need.titleLong', { count: formData.title_article.length, defaultValue: 'El título es demasiado largo ({{count}}/200 caracteres)' }));
       }
+      if ((formData.subtitle_article || '').length > SUBTITLE_MAX) {
+        return problem('subtitle_article', t('editor.wizard.need.subtitleLong', { count: formData.subtitle_article.length, max: SUBTITLE_MAX, defaultValue: 'El subtítulo es demasiado largo ({{count}}/{{max}} caracteres)' }));
+      }
       if (formData.excerpt_article && formData.excerpt_article.length > 500) {
         return problem('excerpt_article', t('editor.wizard.need.excerptLong', { count: formData.excerpt_article.length, defaultValue: 'El extracto es demasiado largo ({{count}}/500 caracteres)' }));
       }
@@ -830,6 +841,7 @@ function ArticleEditorBlocks() {
     category_article: 'pub-category',
     authors: 'pub-add-author',
     title_article: 'title',
+    subtitle_article: 'subtitle',
     excerpt_article: 'excerpt'
   };
 
@@ -938,6 +950,7 @@ function ArticleEditorBlocks() {
     const primary = getAuthorDetails(authorIds[0]) || currentUser;
     const payload = {
       title_project: wizardProject.title_project.trim(),
+      subtitle_project: wizardProject.subtitle_project || '',
       description_project: wizardProject.description_project,
       type_project: wizardProject.type_project,
       format_project: wizardProject.format_project,
@@ -1240,6 +1253,7 @@ function ArticleEditorBlocks() {
                      (article.author_id ? [article.author_id] : []);
     setFormData({
       title_article: article.title_article,
+      subtitle_article: article.subtitle_article || '',
       excerpt_article: article.excerpt_article || '',
       category_article: article.category_article || 'general',
       authors: authorIds,
@@ -1290,6 +1304,7 @@ function ArticleEditorBlocks() {
     setEditingArticle(null);
     setFormData({
       title_article: '',
+      subtitle_article: '',
       excerpt_article: '',
       category_article: 'general',
       authors: [currentUser?.id_user].filter(Boolean),
@@ -1579,6 +1594,22 @@ function ArticleEditorBlocks() {
             {fieldErrors.project_title && <span className="field-error-msg" role="alert">{fieldErrors.project_title}</span>}
           </div>
           <div className="form-group">
+            <label htmlFor="pub-project-subtitle">{t('editor.project.subtitleLabel', 'Subtítulo del proyecto (opcional)')}{langSuffix(editLang)}</label>
+            <input
+              type="text"
+              id="pub-project-subtitle"
+              lang={editLang}
+              maxLength={SUBTITLE_MAX}
+              value={translating ? trOf(wizardProject.translations_project, editLang, 'subtitle') : (wizardProject.subtitle_project || '')}
+              onChange={(e) => (translating
+                ? setWizardProjectTr('subtitle', e.target.value)
+                : setWizardProject(prev => ({ ...prev, subtitle_project: e.target.value })))}
+              placeholder={translating ? wizardProject.subtitle_project : t('editor.subtitle.placeholder', 'Una línea bajo el título')}
+            />
+            <span className="pub-count">{(translating ? trOf(wizardProject.translations_project, editLang, 'subtitle') : (wizardProject.subtitle_project || '')).length}/{SUBTITLE_MAX}</span>
+            {translating && originalNote(wizardProject.subtitle_project)}
+          </div>
+          <div className="form-group">
             <label htmlFor="pub-project-description">{t('editor.project.descriptionLabel')}{langSuffix(editLang)}</label>
             <textarea
               id="pub-project-description"
@@ -1860,6 +1891,25 @@ function ArticleEditorBlocks() {
       </div>
 
       <div className="form-group full-width">
+        <label htmlFor="subtitle">{t('editor.wizard.subtitleLabel', 'Subtítulo (opcional)')}{langSuffix(editLang)}</label>
+        <input
+          type="text"
+          id="subtitle"
+          name="subtitle_article"
+          lang={editLang}
+          maxLength={SUBTITLE_MAX}
+          value={translating ? trOf(formData.translations_article, editLang, 'subtitle') : (formData.subtitle_article || '')}
+          onChange={translating ? (e) => setArticleTr('subtitle', e.target.value) : handleInputChange}
+          placeholder={translating ? formData.subtitle_article : t('editor.subtitle.placeholder', 'Una línea bajo el título')}
+          className={fieldErrors.subtitle_article ? 'input-error' : ''}
+          aria-invalid={!!fieldErrors.subtitle_article}
+        />
+        <span className="pub-count">{(translating ? trOf(formData.translations_article, editLang, 'subtitle') : (formData.subtitle_article || '')).length}/{SUBTITLE_MAX}</span>
+        {translating && originalNote(formData.subtitle_article)}
+        {fieldErrors.subtitle_article && <span className="field-error-msg" role="alert">{fieldErrors.subtitle_article}</span>}
+      </div>
+
+      <div className="form-group full-width">
         <label htmlFor="excerpt">{t('editor.wizard.excerptLabel', 'Extracto')}{langSuffix(editLang)}</label>
         <textarea
           id="excerpt"
@@ -2046,6 +2096,7 @@ function ArticleEditorBlocks() {
         <dt>{t('editor.wizard.titleLabel', 'Título *').replace(' *', '')}</dt>
         <dd>
           {formData.title_article || '—'}
+          {formData.subtitle_article && <span className="pub-review__subtitle">{formData.subtitle_article}</span>}
           <button type="button" className="pub-link" onClick={() => setStep(3)}>{t('editor.wizard.review.change', 'Cambiar')}</button>
         </dd>
         <dt>{t('editor.wizard.coverLabel', 'Imagen de portada')}</dt>
@@ -2448,6 +2499,22 @@ function ArticleEditorBlocks() {
                   required={projectEditLang === 'es'}
                 />
                 {projectEditLang !== 'es' && originalNote(newProjectData.title_project)}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="project_subtitle">{t('editor.project.subtitleLabel', 'Subtítulo del proyecto (opcional)')}{langSuffix(projectEditLang)}</label>
+                <input
+                  type="text"
+                  id="project_subtitle"
+                  name="subtitle_project"
+                  lang={projectEditLang}
+                  maxLength={SUBTITLE_MAX}
+                  value={projectEditLang !== 'es' ? trOf(newProjectData.translations_project, projectEditLang, 'subtitle') : (newProjectData.subtitle_project || '')}
+                  onChange={projectEditLang !== 'es' ? (e) => setModalProjectTr('subtitle', e.target.value) : handleProjectInputChange}
+                  placeholder={projectEditLang !== 'es' ? newProjectData.subtitle_project : t('editor.subtitle.placeholder', 'Una línea bajo el título')}
+                />
+                <span className="pub-count">{(projectEditLang !== 'es' ? trOf(newProjectData.translations_project, projectEditLang, 'subtitle') : (newProjectData.subtitle_project || '')).length}/{SUBTITLE_MAX}</span>
+                {projectEditLang !== 'es' && originalNote(newProjectData.subtitle_project)}
               </div>
 
               <div className="form-group">

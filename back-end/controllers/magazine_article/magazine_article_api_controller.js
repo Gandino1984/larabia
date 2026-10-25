@@ -6,6 +6,7 @@ import article_author_invitation_model from "../../models/article_author_invitat
 import user_model from "../../models/user_model.js";
 import { getRequestUser, roleSnapshot, requireSuperAdmin, requireOwnerOrSuperAdmin, requireCreator } from "../../utils/authHelper.js";
 import { isArticleAuthor, signsIt } from "../../utils/ownership.js";
+import { cleanSubtitle } from "../../utils/subtitle.js";
 import { normalizeTranslations } from "../../utils/translations.js";
 
 // Only a super admin or one of its authors changes an article (sends the 403).
@@ -149,6 +150,7 @@ async function create(req, res) {
     try {
         const {
             title_article,
+            subtitle_article,
             content_article,
             excerpt_article,
             author_id,
@@ -165,6 +167,8 @@ async function create(req, res) {
             sections,
             translations_article
         } = req.body;
+        const subtitle = cleanSubtitle(subtitle_article);
+        if (subtitle.error) return res.status(400).json({ error: subtitle.error, code: 'subtitle_too_long' });
 
         if (!title_article || !content_article) {
             return res.status(400).json({
@@ -178,6 +182,7 @@ async function create(req, res) {
 
         const articleData = {
             title_article,
+            subtitle_article: subtitle.value ?? null,
             content_article,
             excerpt_article: excerpt_article || null,
             author_id: author_id || null,
@@ -238,6 +243,7 @@ async function update(req, res) {
 
         const {
             title_article,
+            subtitle_article,
             content_article,
             excerpt_article,
             author_id,
@@ -255,9 +261,12 @@ async function update(req, res) {
             sections,
             translations_article
         } = req.body;
+        const subtitle = cleanSubtitle(subtitle_article);
+        if (subtitle.error) return res.status(400).json({ error: subtitle.error, code: 'subtitle_too_long' });
 
         const updateData = {};
         if (title_article !== undefined) updateData.title_article = title_article;
+        if (subtitle.value !== undefined) updateData.subtitle_article = subtitle.value;
         if (content_article !== undefined) updateData.content_article = content_article;
         if (excerpt_article !== undefined) updateData.excerpt_article = excerpt_article;
         if (author_id !== undefined) updateData.author_id = author_id;
