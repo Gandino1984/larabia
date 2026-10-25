@@ -30,6 +30,22 @@ export function visibleRect(el, clippers = clippingAncestors(el)) {
   return { left, top, width: Math.max(0, right - left), height: Math.max(0, bottom - top) };
 }
 
+/** The same test as isMostlyVisible, measured now — for elements so wide
+ *  (a long comic panel) that no IntersectionObserver threshold is crossed
+ *  while they scroll by. */
+export function isMostlyOnScreen(el, clippers = clippingAncestors(el), share = 0.6) {
+  const r = el.getBoundingClientRect();
+  let maxW = Math.min(r.width, window.innerWidth);
+  let maxH = Math.min(r.height, window.innerHeight);
+  clippers.forEach((c) => {
+    const cr = c.getBoundingClientRect();
+    maxW = Math.min(maxW, cr.width);
+    maxH = Math.min(maxH, cr.height);
+  });
+  const seen = visibleRect(el, clippers);
+  return maxW > 0 && maxH > 0 && seen.width >= maxW * share && seen.height >= maxH * share;
+}
+
 /**
  * `entry`: an IntersectionObserver entry with the implicit root (its
  * intersectionRect is already clipped by those boxes).
