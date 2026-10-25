@@ -22,6 +22,8 @@ export const DEFAULT_NAV = [
   { id: 'more', kind: 'group', visible: true, min_role: 'all',
     label: { es: 'Más', en: 'More', eu: 'Gehiago' },
     children: [
+      { id: 'authors', kind: 'link', visible: true, min_role: 'all',
+        label: { es: 'Autoras/es', en: 'Authors', eu: 'Egileak' }, action: { type: 'section', value: 'authors' } },
       { id: 'no-ficcion', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'No-ficción', en: 'Non-fiction', eu: 'Ez-fikzioa' }, action: { type: 'category', value: 'no-ficcion' } },
       { id: 'ficcion', kind: 'link', visible: true, min_role: 'all',
@@ -38,8 +40,6 @@ export const DEFAULT_NAV = [
         ] },
       { id: 'internacional', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Internacional', en: 'International', eu: 'Nazioartea' }, action: { type: 'category', value: 'internacional' } },
-      { id: 'authors', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Autoras/es', en: 'Authors', eu: 'Egileak' }, action: { type: 'section', value: 'authors' } },
       { id: 'contact', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Contacto', en: 'Contact', eu: 'Kontaktua' }, action: { type: 'modal', value: 'contact' } },
       { id: 'newsletter', kind: 'link', visible: true, min_role: 'all',
