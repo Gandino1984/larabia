@@ -53,7 +53,8 @@ function WorkshopsList() {
   const { workshops, loading, fetchWorkshops, setSelectedWorkshop, focusWorkshopId, setFocusWorkshopId } = useWorkshop();
   const [audience, setAudience] = useState('general');
   // Search / month / instructor / spots / order (WorkshopFilters); `when`
-  // is the «Mostrar talleres finalizados» button ('upcoming' | 'all').
+  // is the «Ocultar / Mostrar talleres finalizados» button ('all', the
+  // default, | 'upcoming').
   const [filters, setFilters] = useState(EMPTY_WORKSHOP_FILTERS);
   const showPast = filters.when !== 'upcoming';
   const togglePast = () => setFilters(prev => ({ ...prev, when: prev.when === 'upcoming' ? 'all' : 'upcoming' }));
@@ -87,8 +88,8 @@ function WorkshopsList() {
   useDragScroll(carouselRef, viewMode === 'carousel');
 
   // A shared link opened signed out (App.jsx): once the list is in, its card
-  // — in its tab, and with past workshops shown if it's over — scrolled into
-  // view and ringed, with a note to sign in (here, not in App: on a phone the
+  // — in its tab; finished ones are shown by default — scrolled into view and
+  // ringed, with a note to sign in (here, not in App: on a phone the
   // loading screen still covered the page and hid it).
   const [sharedId, setSharedId] = useState(null);
   useEffect(() => {
@@ -99,7 +100,6 @@ function WorkshopsList() {
       const w = (res?.data || []).find((x) => x.id_workshop === focusWorkshopId);
       if (!w) return;
       setAudience(audienceOf(w));
-      if (!applyWorkshopFilters([w], EMPTY_WORKSHOP_FILTERS).length) setFilters({ ...EMPTY_WORKSHOP_FILTERS, when: 'all' });
       setSharedId(w.id_workshop);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -301,15 +301,15 @@ function WorkshopsList() {
             </div>
             </div>
 
-            {/* The finished workshops, greyed out after the upcoming ones
-                (only when this tab has some, or they're being shown). */}
-            {(showPast || pastCount > 0) && (
+            {/* The finished workshops, greyed out after the upcoming ones:
+                shown by default, the button hides them (only when this tab
+                has some). Dark while they're hidden — not the default. */}
+            {pastCount > 0 && (
             <div className="workshops-past-toggle-row">
               <button
                 type="button"
-                className={`workshops-past-toggle ${showPast ? 'is-on' : ''}`}
+                className={`workshops-past-toggle ${showPast ? '' : 'is-on'}`}
                 onClick={togglePast}
-                aria-pressed={showPast}
               >
                 <History size={16} />
                 <span>

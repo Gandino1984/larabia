@@ -1,15 +1,15 @@
 // magazine-front/src/utils/workshopFilters.js
 //
 // Filtering + sorting for the workshops page (WorkshopFilters): text search,
-// when (upcoming, or all with the finished ones — the page's «Mostrar
-// talleres finalizados» button), month, instructor, availability, access
-// (free / for socios/as) and order.
+// when (all — the finished ones too, after the upcoming: the default — or
+// only the upcoming: the page's «Ocultar talleres finalizados» button),
+// month, instructor, availability, access (free / for socios/as) and order.
 // Pure functions — the UI lives in components/workshops/WorkshopFilters.jsx.
 import { serverDate } from './locale';
 
 export const EMPTY_WORKSHOP_FILTERS = {
   q: '',
-  when: 'upcoming',   // 'upcoming' | 'past' | 'all'
+  when: 'all',        // 'all' | 'upcoming' | 'past'
   month: '',          // 'YYYY-MM'
   author: '',         // instructor id_user
   availability: '',   // '' | 'free' (places left)
