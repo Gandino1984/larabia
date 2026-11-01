@@ -52,15 +52,6 @@ function WorkshopFilters({ workshops, filters, onChange }) {
         </label>
 
         <label className="article-filters__field">
-          <span>{t('workshops.filters.when', 'Cuándo')}</span>
-          <select value={filters.when} onChange={(e) => set('when', e.target.value)}>
-            <option value="upcoming">{t('workshops.filters.upcoming', 'Próximos')}</option>
-            <option value="past">{t('workshops.filters.past', 'Pasados')}</option>
-            <option value="all">{t('workshops.filters.all', 'Todos')}</option>
-          </select>
-        </label>
-
-        <label className="article-filters__field">
           <span>{t('filters.month', 'Mes')}</span>
           <select value={filters.month} onChange={(e) => set('month', e.target.value)}>
             <option value="">{t('filters.allM', 'Todos')}</option>
@@ -106,7 +97,7 @@ function WorkshopFilters({ workshops, filters, onChange }) {
           <button
             type="button"
             className="article-filters__clear"
-            onClick={() => onChange({ ...EMPTY_WORKSHOP_FILTERS, sort: filters.sort })}
+            onClick={() => onChange({ ...EMPTY_WORKSHOP_FILTERS, sort: filters.sort, when: filters.when })}
           >
             <X size={15} />
             <span>{t('filters.clear', 'Limpiar filtros')}</span>

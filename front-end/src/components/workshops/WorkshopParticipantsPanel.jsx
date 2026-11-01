@@ -15,8 +15,9 @@ import SubscriberMark from '../common/SubscriberMark';
 import { getAuthorImageUrl } from '../common/AuthorChip';
 import { isFreeWorkshop } from './WorkshopAccessTag';
 
-// Photo (or initial) + name (+ an optional second line).
-function Person({ person, you, sub }) {
+// Photo (or initial) + name (+ an optional second line). Also on the cards'
+// list of requests for a place (WorkshopsList).
+export function Person({ person, you, sub }) {
   const { t } = useTranslation();
   const [imgError, setImgError] = useState(false);
   const url = getAuthorImageUrl(person);
@@ -44,7 +45,8 @@ function WorkshopParticipantsPanel({ workshop }) {
   const { searchWorkshopUsers, manageWorkshopParticipant, respondExtraSpot } = useWorkshop();
   const id = workshop.id_workshop;
   const participants = workshop.participants || [];
-  // Socios/as asking for an extra place (the workshop is full).
+  // Socios/as asking for an extra place (the workshop is full). Sent only to
+  // its creator and the super admins: its other talleristas don't get them.
   const spotRequests = workshop.spot_requests || [];
   const invitations = workshop.invitations || [];
   const blocked = workshop.blocked_users || [];

@@ -1,7 +1,8 @@
 // magazine-front/src/utils/workshopFilters.js
 //
 // Filtering + sorting for the workshops page (WorkshopFilters): text search,
-// when (upcoming / past / all), month, instructor, availability, access
+// when (upcoming, or all with the finished ones — the page's «Mostrar
+// talleres finalizados» button), month, instructor, availability, access
 // (free / for socios/as) and order.
 // Pure functions — the UI lives in components/workshops/WorkshopFilters.jsx.
 import { serverDate } from './locale';
@@ -34,6 +35,9 @@ const isUpcoming = (w, now) => {
   return d >= startOfToday;
 };
 
+/** Finished: its day is over (the server says the same — no booking then). */
+export const isPastWorkshop = (w, now = new Date()) => !isUpcoming(w, now);
+
 const hasFreeSpots = (w) => w.capacity_workshop == null || (w.spots_left ?? 1) > 0;
 
 /** Options present in the workshops (months, instructors). */
@@ -52,9 +56,10 @@ export function buildWorkshopFilterOptions(workshops, filters = EMPTY_WORKSHOP_F
   };
 }
 
-/** How many filters (not the sort, not the default "upcoming") are set. */
+/** How many filters are set (not the sort, nor the finished ones: that's
+ *  the page's own button). */
 export const countActiveWorkshopFilters = (f) =>
-  [f.q?.trim(), f.when !== 'upcoming' ? f.when : '', f.month, f.author, f.availability, f.access].filter(Boolean).length;
+  [f.q?.trim(), f.month, f.author, f.availability, f.access].filter(Boolean).length;
 
 /** Filter + sort. */
 export function applyWorkshopFilters(workshops, f, now = new Date()) {
@@ -86,15 +91,17 @@ export function applyWorkshopFilters(workshops, f, now = new Date()) {
   } else if (f.sort === 'recent') {
     sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
   } else {
-    // Soonest first (past: most recent first); undated ones at the end.
-    const dir = f.when === 'past' ? -1 : 1;
-    sorted.sort((a, b) => {
+    // Upcoming: soonest first, undated ones at the end. Then the finished
+    // ones: the most recent first.
+    const upcoming = sorted.filter((w) => isUpcoming(w, now)).sort((a, b) => {
       const ta = time(a); const tb = time(b);
       if (ta == null && tb == null) return 0;
       if (ta == null) return 1;
       if (tb == null) return -1;
-      return (ta - tb) * dir;
+      return ta - tb;
     });
+    const past = sorted.filter((w) => !isUpcoming(w, now)).sort((a, b) => time(b) - time(a));
+    return [...upcoming, ...past];
   }
   return sorted;
 }

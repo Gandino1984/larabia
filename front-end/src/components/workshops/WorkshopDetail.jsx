@@ -13,6 +13,7 @@ import WorkshopOptions from './WorkshopOptions';
 import WorkshopParticipantsPanel from './WorkshopParticipantsPanel';
 import WorkshopAccessTag from './WorkshopAccessTag';
 import WorkshopExtraSpot from './WorkshopExtraSpot';
+import { isPastWorkshop } from '../../utils/workshopFilters';
 import '../magazine/ArticleCard.css';
 import '../magazine/ProjectDetail.css';
 import './Workshops.css';
@@ -172,7 +173,10 @@ function WorkshopDetail() {
 
         {/* Reservation action */}
         <div className="workshop-reserve-box">
-          {invitation ? (
+          {isPastWorkshop(w) ? (
+            // Finished: no booking, no extra places (the server says so too).
+            <p className="workshop-full-note">{t('workshops.finishedNote', 'Este taller ya ha terminado.')}</p>
+          ) : invitation ? (
             <>
               <p className="workshop-invitation-note">
                 {t('workshops.invitation.note', {

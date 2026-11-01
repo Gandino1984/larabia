@@ -27,7 +27,6 @@
 .workshop-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .workshop-card-image--placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#aaa; }
 .workshop-badge { position: absolute; top: 8px; right: 8px; padding: 3px 9px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; }
-.workshop-badge--full { background: #e53935; color: #fff; }
 .workshop-card-body { padding: 0.9rem 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.3rem; }
 .workshop-card-title { margin: 0 0 0.2rem; font-size: 1.05rem; color: #1a1a1a; }
 .workshop-meta { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-size: 0.85rem; color: #555; }
@@ -744,6 +743,114 @@
   color: #7a5a0a;
   text-transform: none;
   cursor: default;
+}
+
+/* ---- A card's colour (WorkshopsList statusOf) ----
+   green: places left · orange: full (ask for a place) · grey: finished —
+   greyed out, but its text stays legible. The thick top edge carries the
+   colour; the badge on the photo says it in words. */
+.workshop-card--open,
+.workshop-card--full,
+.workshop-card--past {
+  border-width: 2px;
+  border-top-width: 6px;
+}
+.workshop-card--open {
+  border-color: #2fae58;
+  background: linear-gradient(180deg, #132a1b 0%, #181818 60%);
+}
+.workshop-card--full {
+  border-color: #f08c00;
+  background: linear-gradient(180deg, #33230b 0%, #181818 60%);
+}
+.workshop-card--past {
+  border-color: #3d3d3d;
+  background: #222222;
+}
+.workshop-card--past:hover {
+  transform: none;
+  box-shadow: none;
+}
+.workshop-card--past .workshop-card-image img,
+.workshop-card--past .workshop-card-image--placeholder,
+.workshop-card--past .workshop-map {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+.workshop-card--past .workshop-card-title { color: #cfcfcf; }
+.workshop-card--past .workshop-meta { color: #b3b3b3; }
+.workshop-card--past .workshop-meta svg { color: #8a8a8a; }
+
+.workshop-badge--open { background: #157a36; color: #ffffff; }
+.workshop-badge--full { background: #f08c00; color: #111111; }
+.workshop-badge--past { background: #4a4a4a; color: #ffffff; }
+
+/* «Solicitar plaza» on an orange card: orange too. */
+.workshop-card--full .workshop-card-request:not(.workshop-card-request--sent) {
+  background: #f08c00;
+  color: #111111;
+}
+.workshop-card--full .workshop-card-request:not(.workshop-card-request--sent):hover,
+.workshop-card--full .workshop-card-request:not(.workshop-card-request--sent):focus-visible {
+  background: #ffa424;
+}
+
+/* Who asked for a place (its creator and the super admins see it). */
+.workshop-card-requesters {
+  margin-top: 0.35rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(240, 140, 0, 0.4);
+  border-radius: 8px;
+  background: rgba(240, 140, 0, 0.1);
+}
+.workshop-card-requesters ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.workshop-card-requesters .workshop-person__avatar {
+  width: 26px;
+  height: 26px;
+  border-color: #444444;
+}
+.workshop-card-requesters .workshop-person__name {
+  color: #f2f2f2;
+  font-size: 0.85rem;
+}
+.workshop-card-requesters__hint {
+  margin: 0.5rem 0 0;
+  color: #c4c4c4;
+  font-size: 0.75rem;
+}
+
+/* «Mostrar talleres finalizados» (under the tabs). */
+.workshops-past-toggle-row {
+  display: flex;
+  justify-content: center;
+  margin: -1rem 0 1.5rem;
+}
+.workshops-past-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.workshops-past-toggle:hover,
+.workshops-past-toggle.is-on {
+  background: #1a1a1a;
+  color: #ffffff;
 }
 
 /* The card of a shared link opened signed out (WorkshopsList): a gold ring

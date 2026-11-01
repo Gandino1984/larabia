@@ -38,6 +38,17 @@ async function isWorkshopManager(user, workshop) {
 }
 
 /**
+ * Requests for an extra place: seen and answered by the super admins and the
+ * workshop's creator only (not its other talleristas) — on its page, its
+ * card and in the bell.
+ */
+function answersSpotRequests(user, workshop) {
+    if (!user || !workshop) return false;
+    const role = roleSnapshot(user);
+    return role.isSuperAdmin || (role.canCreateContent && workshop.author_id === user.id_user);
+}
+
+/**
  * Editing / deleting a workshop (and its cover) and managing its
  * participants: its managers (see isWorkshopManager). Returns the user, or
  * sends a 403 / 404.
@@ -103,9 +114,20 @@ async function getAll(req, res) {
         const { error, data } = await magazineWorkshopController.getAll();
         if (error) return res.json({ error, data });
         const user = await getRequestUser(req);
-        const list = user
+        let list = user
             ? await magazineWorkshopController.personalize(data, user.id_user, await hasActiveSubscription(user.id_user))
             : data;
+        if (user) {
+            // Whoever runs a workshop doesn't ask for a place in it: they open
+            // one by editing its capacity.
+            for (const w of list) {
+                if (w.can_request_spot && await isWorkshopManager(user, w)) w.can_request_spot = false;
+            }
+            // Who asked for an extra place, on the cards of whoever answers them.
+            const ids = list.filter((w) => w.spot_request_count > 0 && answersSpotRequests(user, w)).map((w) => w.id_workshop);
+            const byWorkshop = await magazineWorkshopController.spotRequestsByWorkshop(ids);
+            if (byWorkshop.size) list = list.map((w) => (byWorkshop.has(w.id_workshop) ? { ...w, spot_requests: byWorkshop.get(w.id_workshop) } : w));
+        }
         res.json({ error: null, data: list });
     } catch (err) {
         console.error("-> workshop api getAll() - Error =", err);
@@ -148,14 +170,14 @@ async function getById(req, res) {
             is_member: await hasActiveSubscription(user.id_user),
             can_manage: canManage
         };
-        out.can_request_spot = magazineWorkshopController.canRequestSpot(out, {
+        out.can_request_spot = !canManage && magazineWorkshopController.canRequestSpot(out, {
             reserved: out.reserved_by_me,
             blocked: bookingCode === 'blocked',
             request: out.my_spot_request?.status || null,
             isMember: out.is_member
         });
         if (canManage) {
-            out.spot_requests = await magazineWorkshopController.loadWorkshopSpotRequests(id_workshop);
+            if (answersSpotRequests(user, data)) out.spot_requests = await magazineWorkshopController.loadWorkshopSpotRequests(id_workshop);
             out.invitations = await magazineWorkshopController.loadWorkshopInvitations(id_workshop);
             out.blocked_users = await magazineWorkshopController.loadWorkshopBlocked(id_workshop);
         } else {
@@ -384,8 +406,26 @@ async function withdrawSpotRequest(req, res) {
 }
 
 // POST /manage/:id_workshop/spot-requests/:id_user { response: 'accept' | 'decline' }
-const respondSpotRequest = (req, res) => manage(req, res,
-    (id, userId, manager) => magazineWorkshopController.respondSpotRequest(id, userId, manager.id_user, req.body?.response));
+// The workshop's creator or a super admin (answersSpotRequests).
+async function respondSpotRequest(req, res) {
+    try {
+        const { id_workshop } = req.params;
+        const user = await getRequestUser(req);
+        const workshop = await magazine_workshop_model.findByPk(id_workshop, { attributes: ['id_workshop', 'author_id'] });
+        if (!workshop) return res.status(404).json({ error: 'Taller no encontrado' });
+        if (!answersSpotRequests(user, workshop)) {
+            return res.status(403).json({ error: 'Solo quien creó el taller (o el super-administrador) puede responder a las solicitudes de plaza' });
+        }
+        const userId = targetUserId(req);
+        if (!userId) return res.status(400).json({ error: 'Falta el usuario' });
+        const result = await magazineWorkshopController.respondSpotRequest(id_workshop, userId, user.id_user, req.body?.response);
+        if (result.error) return res.status(400).json(result);
+        res.json(result);
+    } catch (err) {
+        console.error("-> workshop api respondSpotRequest() - Error =", err);
+        res.status(500).json({ error: "Error al gestionar participantes", details: err.message });
+    }
+}
 
 // POST /spot-requests/answers/seen { ids } — the requester has seen the answers.
 async function markSpotAnswersSeen(req, res) {
@@ -426,11 +466,12 @@ async function invitationFeed(req, res) {
         if (!user) return res.json({ error: null, data: { invitations: [], responses: [], spot_requests: [], spot_answers: [] } });
         const result = await magazineWorkshopController.invitationFeed(user.id_user);
         if (result.error) return res.status(500).json(result);
-        // Extra-place requests: pending ones on the workshops they manage,
-        // and the answers to their own.
+        // Extra-place requests: pending ones on the workshops they created
+        // (super admins: all of them — answersSpotRequests), and the answers
+        // to their own.
         const role = roleSnapshot(user);
         const managed = role.isSuperAdmin ? 'all'
-            : role.canCreateContent ? await magazineWorkshopController.managedWorkshopIds(user.id_user) : [];
+            : role.canCreateContent ? await magazineWorkshopController.createdWorkshopIds(user.id_user) : [];
         const spots = await magazineWorkshopController.spotFeed(user.id_user, managed);
         res.json({ error: null, data: { ...result.data, ...spots } });
     } catch (err) {

@@ -9,6 +9,18 @@ import sequelize from "../../config/sequelize.js";
 import reader_subscription_model, { liveSubscriptionWhere } from "../../models/reader_subscription_model.js";
 import user_model from "../../models/user_model.js";
 import { Op } from "sequelize";
+
+// The API's dates are UTC strings without a zone («2026-11-20 17:00:00»).
+const utcDate = (v) => (v instanceof Date ? v : v ? new Date(String(v).replace(' ', 'T') + 'Z') : null);
+
+// Finished: its day is over (as on the cards: a workshop is "upcoming" all
+// of its day). Undated ones aren't finished. No booking, no extra places.
+function isPastWorkshop(w) {
+    const d = utcDate(w?.date_workshop);
+    if (!d || Number.isNaN(d.getTime())) return false;
+    const now = new Date();
+    return d < new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
 import { deleteFile } from "../../utils/file_cleanup.js";
 
 // Who a workshop is for.
@@ -178,12 +190,13 @@ async function decorate(workshop) {
     };
 }
 
-// Who can ask for an extra place: the workshop is full (with a capacity),
-// they aren't in it, blocked or already waiting / turned down — and they're
-// a socio/a, or the workshop is free (then anyone signed in).
+// Who can ask for an extra place: the workshop is full (with a capacity)
+// and not finished, they aren't in it, blocked or already waiting / turned
+// down — and they're a socio/a, or the workshop is free (then anyone signed
+// in).
 function canRequestSpot(w, { reserved, blocked, request, isMember }) {
     const open = !request || request === 'accepted';
-    return w.capacity_workshop != null && !!w.is_full && !reserved && !blocked && open
+    return w.capacity_workshop != null && !!w.is_full && !isPastWorkshop(w) && !reserved && !blocked && open
         && (isMember || !!w.free_workshop);
 }
 
@@ -339,6 +352,7 @@ async function reserve(id_workshop, userId) {
         if (!userId) return { error: "Autenticación requerida" };
         const workshop = await magazine_workshop_model.findByPk(id_workshop);
         if (!workshop || !workshop.active_workshop) return { error: "Taller no encontrado" };
+        if (isPastWorkshop(workshop)) return { error: "Este taller ya ha terminado", code: 'finished' };
 
         if (await isBlocked(id_workshop, userId)) {
             return { error: "No puedes reservar plaza en este taller", code: 'blocked' };
@@ -667,6 +681,7 @@ async function requestSpot(id_workshop, userId, rawMessage) {
     try {
         const workshop = await magazine_workshop_model.findByPk(id_workshop);
         if (!workshop || !workshop.active_workshop) return { error: "Taller no encontrado" };
+        if (isPastWorkshop(workshop)) return { error: "Este taller ya ha terminado", code: 'finished' };
         const message = String(rawMessage || '').trim();
         if (message.length > SPOT_MESSAGE_MAX) return { error: `El mensaje es demasiado largo (máximo ${SPOT_MESSAGE_MAX} caracteres)` };
         if (await isBlocked(id_workshop, userId)) return { error: "No puedes pedir plaza en este taller", code: 'blocked' };
@@ -751,7 +766,8 @@ async function spotFeed(userId, managedIds) {
         limit: 30
     });
     return {
-        spot_requests: pending.filter(r => r.workshop && r.requester && r.user_id !== userId).map(r => ({
+        // Not on finished workshops: nothing left to answer there.
+        spot_requests: pending.filter(r => r.workshop && r.requester && r.user_id !== userId && !isPastWorkshop(r.workshop)).map(r => ({
             id_spot_request: r.id_spot_request,
             created_at: r.created_at,
             message: r.message,
@@ -768,12 +784,30 @@ async function spotFeed(userId, managedIds) {
 }
 
 // Workshops this team member manages (created or teaches): ids.
-async function managedWorkshopIds(userId) {
-    const [created, teaches] = await Promise.all([
-        magazine_workshop_model.findAll({ where: { author_id: userId }, attributes: ['id_workshop'] }),
-        workshop_author_model.findAll({ where: { user_id: userId }, attributes: ['workshop_id'] })
-    ]);
-    return [...new Set([...created.map(w => w.id_workshop), ...teaches.map(a => a.workshop_id)])];
+// The workshops this person created: their extra-place requests are theirs
+// to answer (with the super admins').
+async function createdWorkshopIds(userId) {
+    const rows = await magazine_workshop_model.findAll({ where: { author_id: userId }, attributes: ['id_workshop'] });
+    return rows.map(w => w.id_workshop);
+}
+
+// The pending requests of these workshops, by workshop (the cards of their
+// creator and of the super admins).
+async function spotRequestsByWorkshop(workshopIds) {
+    if (!workshopIds.length) return new Map();
+    const rows = await workshop_spot_request_model.findAll({
+        where: { workshop_id: workshopIds, status: 'pending' },
+        include: [{ model: user_model, as: 'requester', attributes: ['id_user', 'name_user', 'image_user'] }],
+        order: [['created_at', 'ASC']]
+    });
+    const out = new Map();
+    for (const r of rows) {
+        if (!r.requester) continue;
+        const list = out.get(r.workshop_id) || [];
+        list.push({ id_user: r.requester.id_user, name_user: r.requester.name_user, image_user: r.requester.image_user, created_at: r.created_at });
+        out.set(r.workshop_id, list);
+    }
+    return out;
 }
 
 async function markSpotAnswersSeen(userId, ids) {
@@ -816,6 +850,8 @@ export default {
     withdrawSpotRequest,
     respondSpotRequest,
     spotFeed,
-    managedWorkshopIds,
+    createdWorkshopIds,
+    spotRequestsByWorkshop,
+    isPastWorkshop,
     markSpotAnswersSeen
 };

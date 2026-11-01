@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { localDate } from '../../utils/locale';
-import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus, CalendarDays, Hourglass, HandHelping } from 'lucide-react';
+import { Calendar, MapPin, Users, Lock, LayoutGrid, GalleryHorizontal, ChevronLeft, ChevronRight, Plus, CalendarDays, Hourglass, HandHelping, History } from 'lucide-react';
 import { useUI } from '../../app_context/UIContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -11,7 +11,8 @@ import WorkshopOptions from './WorkshopOptions';
 import WorkshopAccessTag from './WorkshopAccessTag';
 import WorkshopSpotDialog from './WorkshopSpotDialog';
 import WorkshopFilters from './WorkshopFilters';
-import { EMPTY_WORKSHOP_FILTERS, applyWorkshopFilters, countActiveWorkshopFilters } from '../../utils/workshopFilters';
+import { Person } from './WorkshopParticipantsPanel';
+import { EMPTY_WORKSHOP_FILTERS, applyWorkshopFilters, countActiveWorkshopFilters, isPastWorkshop } from '../../utils/workshopFilters';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import AuthorChip from '../common/AuthorChip';
 import WorkshopMap from '../maps/WorkshopMap';
@@ -42,13 +43,20 @@ const formatDate = (d) => {
 const AUDIENCE_TABS = ['general', 'infantil'];
 const audienceOf = (w) => (w.audience_workshop === 'infantil' ? 'infantil' : 'general');
 
+// A card's colour: finished (greyed out, still legible), full (orange: ask
+// for a place) or with places left (green).
+const statusOf = (w) => (isPastWorkshop(w) ? 'past' : w.is_full ? 'full' : 'open');
+
 function WorkshopsList() {
   const { t } = useTranslation();
   const { navigateToWorkshopDetail, navigateToWorkshopEditor, navigateToMyWorkshops, showInfo } = useUI();
   const { workshops, loading, fetchWorkshops, setSelectedWorkshop, focusWorkshopId, setFocusWorkshopId } = useWorkshop();
   const [audience, setAudience] = useState('general');
-  // Search / when / month / instructor / spots / order (WorkshopFilters).
+  // Search / month / instructor / spots / order (WorkshopFilters); `when`
+  // is the «Mostrar talleres finalizados» button ('upcoming' | 'all').
   const [filters, setFilters] = useState(EMPTY_WORKSHOP_FILTERS);
+  const showPast = filters.when !== 'upcoming';
+  const togglePast = () => setFilters(prev => ({ ...prev, when: prev.when === 'upcoming' ? 'all' : 'upcoming' }));
   // Admins and super admins create workshops (the workshop editor, also from
   // Admin → Talleres); «Mis talleres» for whoever manages one — its
   // talleristas on the team, like an article's authors.
@@ -126,22 +134,36 @@ function WorkshopsList() {
     infantil: filtered.filter(w => audienceOf(w) === 'infantil').length
   };
   const visible = filtered.filter(w => audienceOf(w) === audience);
+  // The finished ones of this tab (with the other filters): the button says
+  // how many there are.
+  const pastCount = applyWorkshopFilters(workshops, { ...filters, when: 'all' })
+    .filter(w => audienceOf(w) === audience && isPastWorkshop(w)).length;
 
   const renderCard = (w) => {
     const cover = resolveImg(w.cover_image_workshop);
     const dateStr = formatDate(w.date_workshop);
+    const status = statusOf(w);
+    const past = status === 'past';
+    // Who asked for an extra place: only its creator and the super admins get
+    // the list (the server sends it to nobody else); the rest, how many.
+    const requesters = !past ? (w.spot_requests || []) : [];
     return (
       <article
         key={w.id_workshop}
         data-workshop-id={w.id_workshop}
-        className={`workshop-card ${sharedId === w.id_workshop ? 'is-shared' : ''}`}
+        data-status={status}
+        className={`workshop-card workshop-card--${status} ${sharedId === w.id_workshop ? 'is-shared' : ''}`}
         onClick={() => openWorkshop(w)}
       >
         <div className="workshop-card-image">
           {cover
             ? <img src={cover} alt={w.title_workshop} onError={(e) => { e.target.style.display = 'none'; }} />
             : <div className="workshop-card-image--placeholder"><Users size={32} /></div>}
-          {w.is_full && <span className="workshop-badge workshop-badge--full">{t('workshops.full')}</span>}
+          <span className={`workshop-badge workshop-badge--${status}`}>
+            {past ? t('workshops.status.past', 'Finalizado')
+              : status === 'full' ? t('workshops.full')
+              : t('workshops.status.open', 'Plazas libres')}
+          </span>
           {locked && (
             <span className="workshop-badge workshop-badge--locked">
               <Lock size={12} /> {t('workshops.lockedBadgeLogin', 'Inicia sesión para entrar')}
@@ -161,8 +183,20 @@ function WorkshopsList() {
               ? t('workshops.spots', { left: w.spots_left, total: w.capacity_workshop })
               : t('workshops.participants', { count: w.reservation_count })}
           </p>
-          {/* Requests for an extra place waiting for an answer. */}
-          {w.spot_request_count > 0 && (
+          {/* Requests for an extra place waiting for an answer: who (its
+              creator, super admins — answered on its page or in the bell),
+              or how many. */}
+          {requesters.length > 0 ? (
+            <div className="workshop-card-requesters">
+              <p className="workshop-meta workshop-meta--requests">
+                <Hourglass size={15} /> {t('workshops.extra.count', { count: requesters.length })}
+              </p>
+              <ul>
+                {requesters.map(r => <li key={r.id_user}><Person person={r} /></li>)}
+              </ul>
+              <p className="workshop-card-requesters__hint">{t('workshops.extra.cardAnswerHint', 'Respóndelas desde la página del taller o la campana.')}</p>
+            </div>
+          ) : !past && w.spot_request_count > 0 && (
             <p className="workshop-meta workshop-meta--requests">
               <Hourglass size={15} /> {t('workshops.extra.count', { count: w.spot_request_count })}
             </p>
@@ -179,10 +213,11 @@ function WorkshopsList() {
         {/* ⋯ options: share (everyone), edit / delete (its managers). */}
         <div className="article-engagement-bar workshop-card-bar">
           <WorkshopOptions workshop={w} />
-          {/* Full: ask for an extra place (socios/as; anyone signed in if free). */}
-          {w.my_spot_request?.status === 'pending' ? (
+          {/* Full and not finished: ask for an extra place (socios/as;
+              anyone signed in if it's free). */}
+          {past ? null : w.my_spot_request?.status === 'pending' ? (
             <span className="workshop-card-request workshop-card-request--sent">
-              <Hourglass size={15} /> {t('workshops.extra.cardPending', 'Plaza pedida')}
+              <Hourglass size={15} /> {t('workshops.extra.cardPending', 'Plaza solicitada')}
             </span>
           ) : w.can_request_spot ? (
             <button
@@ -190,7 +225,7 @@ function WorkshopsList() {
               className="workshop-card-request"
               onClick={(e) => { e.stopPropagation(); setSpotFor(w); }}
             >
-              <HandHelping size={16} /> {t('workshops.extra.cardAsk', 'Pedir una plaza')}
+              <HandHelping size={16} /> {t('workshops.extra.cardAsk', 'Solicitar plaza')}
             </button>
           ) : null}
         </div>
@@ -266,6 +301,23 @@ function WorkshopsList() {
             </div>
             </div>
 
+            {/* The finished workshops, greyed out after the upcoming ones. */}
+            <div className="workshops-past-toggle-row">
+              <button
+                type="button"
+                className={`workshops-past-toggle ${showPast ? 'is-on' : ''}`}
+                onClick={togglePast}
+                aria-pressed={showPast}
+              >
+                <History size={16} />
+                <span>
+                  {showPast
+                    ? t('workshops.past.hide', 'Ocultar talleres finalizados')
+                    : t('workshops.past.show', { count: pastCount, defaultValue: 'Mostrar talleres finalizados ({{count}})' })}
+                </span>
+              </button>
+            </div>
+
             <WorkshopFilters workshops={workshops} filters={filters} onChange={setFilters} />
 
             {loading && <div className="workshops-loading"><div className="workshops-spinner" /></div>}
@@ -287,7 +339,7 @@ function WorkshopsList() {
                   <button
                     type="button"
                     className="workshop-back-btn"
-                    onClick={() => setFilters(prev => ({ ...EMPTY_WORKSHOP_FILTERS, sort: prev.sort }))}
+                    onClick={() => setFilters(prev => ({ ...EMPTY_WORKSHOP_FILTERS, sort: prev.sort, when: prev.when }))}
                   >
                     {t('filters.clear', 'Limpiar filtros')}
                   </button>
