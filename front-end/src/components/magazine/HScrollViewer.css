@@ -5,11 +5,12 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  background: rgba(30, 30, 30, 0.92);
-  color: #f0f0f0;
+  background: #dc2626;
+  color: #ffffff;
   padding: 0.6rem 1rem;
   font-size: 0.85rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  border-bottom: 1px solid #991b1b;
 }
 
 .hscroll-rotate-banner span {
@@ -29,7 +30,7 @@
 .hscroll-rotate-dismiss {
   background: none;
   border: none;
-  color: #aaa;
+  color: rgba(255, 255, 255, 0.85);
   cursor: pointer;
   padding: 0.2rem;
   display: flex;
