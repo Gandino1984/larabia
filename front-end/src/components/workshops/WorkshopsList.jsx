@@ -301,7 +301,9 @@ function WorkshopsList() {
             </div>
             </div>
 
-            {/* The finished workshops, greyed out after the upcoming ones. */}
+            {/* The finished workshops, greyed out after the upcoming ones
+                (only when this tab has some, or they're being shown). */}
+            {(showPast || pastCount > 0) && (
             <div className="workshops-past-toggle-row">
               <button
                 type="button"
@@ -317,6 +319,7 @@ function WorkshopsList() {
                 </span>
               </button>
             </div>
+            )}
 
             <WorkshopFilters workshops={workshops} filters={filters} onChange={setFilters} />
 
