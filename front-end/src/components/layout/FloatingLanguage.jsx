@@ -5,10 +5,11 @@
 // moves up to the top-left corner). Computers and tablets only: on phones it
 // stays in the burger menu (Header). Just below the bar's left end, beside the
 // bar on wide screens. Under it, for anyone signed in, «Reportar un error»: a
-// pale red square with the bug icon whose name unfolds to its right on hover
-// (also in the menu, under «Sobre La Rabia»); the red
+// pale red circle with the bug icon whose name unfolds on hover — to the left
+// on wide screens (beside the bar: not over it) when it fits there, to the
+// right otherwise (also in the menu, under «Sobre La Rabia»); the red
 // «Hazte socio/a» button goes under them (<html data-report-pill>).
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bug } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
@@ -28,11 +29,29 @@ function FloatingLanguage({ ready = true, cornered = false }) {
     return () => root.removeAttribute('data-report-pill');
   }, [report]);
   const label = t('report.title', 'Reportar un error');
+  // Which way its name unfolds, decided as the pointer (or focus) arrives.
+  const [unfold, setUnfold] = useState('right');
+  const pickSide = (e) => {
+    const button = e.currentTarget;
+    const text = button.querySelector('.floating-report-btn__text');
+    const besideBar = !cornered && window.matchMedia('(min-width: 1410px)').matches;
+    const room = button.getBoundingClientRect().left;
+    setUnfold(besideBar && room >= (text?.scrollWidth || 0) + 20 ? 'left' : 'right');
+  };
   return (
     <div className={`floating-lang ${ready ? 'is-in' : ''} ${cornered ? 'floating-lang--corner' : ''}`}>
       <LanguageSelector />
       {report && (
-        <button type="button" className="floating-report-btn" onClick={openReportModal} title={label} aria-label={label}>
+        <button
+          type="button"
+          className="floating-report-btn"
+          data-unfold={unfold}
+          onClick={openReportModal}
+          onMouseEnter={pickSide}
+          onFocus={pickSide}
+          title={label}
+          aria-label={label}
+        >
           <Bug size={17} aria-hidden="true" />
           <span className="floating-report-btn__text" aria-hidden="true">{label}</span>
         </button>

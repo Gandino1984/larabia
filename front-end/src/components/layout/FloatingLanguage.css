@@ -6,7 +6,9 @@
    - from 1410px: beside the bar on the left, level with its top;
    - bar hidden (an article): in the top-left corner of the screen.
    Under it, for anyone signed in, the «Reportar un error» button: a pale red
-   square with the bug icon; on hover its name unfolds to the right. The red
+   circle (rounded like the language pill) with the bug icon; on hover its name
+   unfolds — to the left beside the bar on wide screens when it fits, to the
+   right otherwise — and the two make one pill. The red
    «Hazte socio/a» button, when shown, goes right under them
    (SubscribeButton.css, with --floating-lang-space). */
 .floating-lang {
@@ -74,9 +76,10 @@
     height: 15px;
   }
 
-  /* «Reportar un error»: the pill's height, square, pale red, the bug icon.
-     Its name unfolds to the right on hover (or keyboard focus): a strip of
-     the same colour laid over what's beside it, so nothing moves. */
+  /* «Reportar un error»: the pill's height and rounding (a circle), pale red,
+     the bug icon. Its name unfolds to the right on hover (or keyboard focus):
+     a strip of the same colour laid over what's beside it, so nothing moves;
+     button and strip then round off as one pill. */
   .floating-report-btn {
     position: relative;
     display: inline-flex;
@@ -86,7 +89,7 @@
     height: var(--floating-lang-h);
     padding: 0;
     border: none;
-    border-radius: 0;
+    border-radius: 999px;
     background: #fecaca;
     color: #991b1b;
     cursor: pointer;
@@ -103,6 +106,7 @@
     max-width: 0;
     padding-right: 0;
     overflow: hidden;
+    border-radius: 0 999px 999px 0;
     background: inherit;
     color: inherit;
     font-family: 'Source Code Pro', monospace;
@@ -114,6 +118,7 @@
 
   .floating-report-btn:hover,
   .floating-report-btn:focus-visible {
+    border-radius: 999px 0 0 999px;
     background: #dc2626;
     color: #ffffff;
   }
@@ -122,6 +127,24 @@
   .floating-report-btn:focus-visible .floating-report-btn__text {
     max-width: 14rem;
     padding-right: 10px;
+  }
+
+  /* Unfolding to the left (FloatingLanguage picks the side). */
+  .floating-report-btn[data-unfold='left'] .floating-report-btn__text {
+    left: auto;
+    right: 100%;
+    justify-content: flex-end;
+    border-radius: 999px 0 0 999px;
+    transition: max-width 0.3s ease, padding-left 0.3s ease;
+  }
+  .floating-report-btn[data-unfold='left']:hover .floating-report-btn__text,
+  .floating-report-btn[data-unfold='left']:focus-visible .floating-report-btn__text {
+    padding-right: 0;
+    padding-left: 10px;
+  }
+  .floating-report-btn[data-unfold='left']:hover,
+  .floating-report-btn[data-unfold='left']:focus-visible {
+    border-radius: 0 999px 999px 0;
   }
 
   /* Unfolded, over the bar too (beside it on wide screens). */
