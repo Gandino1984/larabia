@@ -1896,7 +1896,7 @@
   "report.error": "The report couldn't be sent. Please try again.",
   "report.label": "What happened?",
   "report.placeholder": "Tell us what you were doing, what you expected to happen and what happened.",
-  "report.note": "With your message we send the page you're on, the language, your screen size and your browser, to find the problem. The magazine's super admins read it.",
+  "report.note": "In your message, to help us find our way, tell us which section of the magazine you're in and which browser you use, whether you're on a phone or a computer, etc. That way we'll find the problem faster. Thank you very much for your help.",
   "report.sent": "Thank you! The team now knows what happened.",
   "report.sending": "Sending…",
   "report.submit": "Send",

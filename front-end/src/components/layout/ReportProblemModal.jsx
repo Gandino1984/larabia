@@ -3,7 +3,8 @@
 // «Reportar un error»: someone signed in tells the team something on the web
 // doesn't work. With their words go where they were — the address, the view
 // and what was open (an article, a project, a workshop…) — and their
-// language, screen and browser, so the team can find it (said in the form).
+// language, screen and browser, so the team can find it. The form's note
+// asks them to say where they were and on what device, too.
 // The super admins hear of it (Admin badge and bell) and handle it in
 // Admin › Errores. Opened from the menu (Más) and from the pill under the
 // language picker (FloatingLanguage). Looks like the contact form.
@@ -109,7 +110,7 @@ function ReportProblemModal({ onClose }) {
           </div>
 
           <p className="report-modal-note">
-            {t('report.note', 'Con tu mensaje enviamos la página en la que estás, el idioma, el tamaño de tu pantalla y tu navegador, para encontrar el error. Lo leen los super admins de la revista.')}
+            {t('report.note', 'En tu mensaje, para ubicarnos mejor, envíanos la sección de la revista en la que estás y qué navegador usas, si estás en móvil u ordenador, etc. Así encontraremos el error más rápido. Muchas gracias por tu ayuda.')}
           </p>
 
           {status === 'error' && (
