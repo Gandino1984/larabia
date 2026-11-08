@@ -30,6 +30,7 @@ export default defineConfig(({ mode }) => {
     '/paisaje',
     '/paisaje-files',
     '/open-space',
+    '/bug-reports',
     '/gallery',
     '/chat',
     '/health'

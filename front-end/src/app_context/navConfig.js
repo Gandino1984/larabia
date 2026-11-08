@@ -51,7 +51,11 @@ export const DEFAULT_NAV = [
       { id: 'recommendations', kind: 'link', visible: true, min_role: 'admin',
         label: { es: 'Recomendaciones', en: 'Recommendations', eu: 'Gomendioak' }, action: { type: 'modal', value: 'recommendations' } },
       { id: 'about', kind: 'link', visible: true, min_role: 'all',
-        label: { es: 'Sobre La Rabia', en: 'About La Rabia', eu: 'La Rabiari buruz' }, action: { type: 'section', value: 'about' } }
+        label: { es: 'Sobre La Rabia', en: 'About La Rabia', eu: 'La Rabiari buruz' }, action: { type: 'section', value: 'about' } },
+      // Signed-in people tell the team something doesn't work (ReportProblemModal;
+      // also a pill under the language picker — FloatingLanguage).
+      { id: 'report', kind: 'link', visible: true, min_role: 'account',
+        label: { es: 'Reportar un error', en: 'Report a problem', eu: 'Eman akats baten berri' }, action: { type: 'modal', value: 'report' } }
     ] }
 ];
 
@@ -81,11 +85,13 @@ export const SECTION_OPTIONS = [
 export const MODAL_OPTIONS = [
   { value: 'contact', key: 'admin.nav.modal.contact', label: 'Contacto' },
   { value: 'newsletter', key: 'admin.nav.modal.newsletter', label: 'Newsletter' },
-  { value: 'recommendations', key: 'admin.nav.modal.recommendations', label: 'Recomendaciones (admins)' }
+  { value: 'recommendations', key: 'admin.nav.modal.recommendations', label: 'Recomendaciones (admins)' },
+  { value: 'report', key: 'admin.nav.modal.report', label: 'Reportar un error' }
 ];
 
 export const ROLE_OPTIONS = [
   { value: 'all', key: 'admin.nav.role.all', label: 'Todo el mundo' },
+  { value: 'account', key: 'admin.nav.role.account', label: 'Quien tiene cuenta' },
   { value: 'editor', key: 'admin.nav.role.editor', label: 'Editores y superiores' },
   { value: 'admin', key: 'admin.nav.role.admin', label: 'Admins y super-admin' },
   { value: 'super_admin', key: 'admin.nav.role.superAdmin', label: 'Solo super-admin' }
@@ -131,8 +137,9 @@ export function navLabel(item, lang) {
 }
 
 /** Can a user with the given role flags see an item with this min_role? */
-export function canSeeNavItem(item, { isEditor, isAdmin, isSuperAdmin } = {}) {
+export function canSeeNavItem(item, { isSignedIn, isEditor, isAdmin, isSuperAdmin } = {}) {
   switch (item?.min_role) {
+    case 'account': return !!(isSignedIn || isEditor || isAdmin || isSuperAdmin);
     case 'super_admin': return !!isSuperAdmin;
     case 'admin': return !!(isAdmin || isSuperAdmin);
     case 'editor': return !!(isEditor || isAdmin || isSuperAdmin);

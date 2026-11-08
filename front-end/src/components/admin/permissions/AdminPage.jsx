@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../app_context/AuthContext';
 import { useUI } from '../../../app_context/UIContext';
@@ -12,12 +12,14 @@ import AdminAppearanceTab from './AdminAppearanceTab';
 import AdminNavTab from './AdminNavTab';
 import AdminWorkshopsTab from './AdminWorkshopsTab';
 import AdminGalleryTab from './AdminGalleryTab';
+import AdminReportsTab from './AdminReportsTab';
 import './AdminPage.css';
 
 const TABS = [
   { key: 'users', label: 'Usuarios' },
   { key: 'pending', label: 'Pendientes de aprobación' },
   { key: 'proposals', label: 'Propuestas' },
+  { key: 'reports', label: 'Errores' },
   { key: 'hero', label: 'Portada' },
   { key: 'metadata', label: 'Datos de la revista' },
   { key: 'workshops', label: 'Talleres' },
@@ -31,8 +33,10 @@ function AdminPage() {
   const { t } = useTranslation();
   const { isSuperAdmin } = useAuth();
   const { navigateToHome, adminTab } = useUI();
-  const { totalPending, newProposals, galleryPending } = usePendingReview();
+  const { totalPending, newProposals, galleryPending, newReports } = usePendingReview();
   const [activeTab, setActiveTab] = useState(adminTab || 'users');
+  // Asked for a tab while already here (a bell notification: Errores…).
+  useEffect(() => { if (adminTab) setActiveTab(adminTab); }, [adminTab]);
 
   if (!isSuperAdmin) {
     return (
@@ -72,6 +76,9 @@ function AdminPage() {
             {tab.key === 'gallery' && galleryPending > 0 && (
               <span className="admin-page__tab-badge">{galleryPending}</span>
             )}
+            {tab.key === 'reports' && newReports > 0 && (
+              <span className="admin-page__tab-badge">{newReports}</span>
+            )}
           </button>
         ))}
       </nav>
@@ -80,6 +87,7 @@ function AdminPage() {
         {activeTab === 'users' && <AdminUsersTab />}
         {activeTab === 'pending' && <AdminPendingTab />}
         {activeTab === 'proposals' && <AdminProposalsTab />}
+        {activeTab === 'reports' && <AdminReportsTab />}
         {activeTab === 'hero' && <AdminHeroTab />}
         {activeTab === 'metadata' && <AdminMetadataTab />}
         {activeTab === 'workshops' && <AdminWorkshopsTab />}

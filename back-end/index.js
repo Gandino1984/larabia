@@ -33,6 +33,7 @@ import readerSubscriptionModel from './models/reader_subscription_model.js';
 import workshopBlockModel from './models/workshop_block_model.js';
 import workshopInvitationModel from './models/workshop_invitation_model.js';
 import openSpaceProposalModel from './models/open_space_proposal_model.js';
+import bugReportModel from './models/bug_report_model.js';
 import workshopSpotRequestModel from './models/workshop_spot_request_model.js';
 import { syncGalleryTables } from './models/gallery_models.js';
 import { syncChatTables } from './models/chat_models.js';
@@ -95,13 +96,14 @@ Promise.all([
     workshopBlockModel.sync(),
     workshopInvitationModel.sync(),
     openSpaceProposalModel.sync(),
-    workshopSpotRequestModel.sync()
+    workshopSpotRequestModel.sync(),
+    bugReportModel.sync()
 ])
     // The Galería's tables reference each other: created one after another.
     .then(() => syncGalleryTables())
     // The chat (after the Galería's tables: its first sync copies their conversations).
     .then(() => syncChatTables())
-    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks + invitations + spot requests/open space proposals/gallery/chat)'))
+    .then(() => console.log('>>> Engagement tables ready (likes/favorites/comments/subscriptions/workshop blocks + invitations + spot requests/open space proposals/bug reports/gallery/chat)'))
     .catch((err) => console.error('Error syncing engagement tables:', err.message));
 
 // Columns added to tables that already exist in production (idempotent: each

@@ -71,6 +71,10 @@ export const UIProvider = ({ children }) => {
   // newsletter subscribers) — opened from the header's "Más" menu.
   const [showRecommendationsModal, setShowRecommendationsModal] = useState(false);
   const openRecommendationsModal = useCallback(() => setShowRecommendationsModal(true), []);
+  // «Reportar un error» (ReportProblemModal, rendered by the Header).
+  const [showReportModal, setShowReportModal] = useState(false);
+  const openReportModal = useCallback(() => setShowReportModal(true), []);
+  const closeReportModal = useCallback(() => setShowReportModal(false), []);
   const closeRecommendationsModal = useCallback(() => setShowRecommendationsModal(false), []);
 
   // Newsletter modal
@@ -514,6 +518,9 @@ export const UIProvider = ({ children }) => {
     closeNewsletterModal,
     showRecommendationsModal,
     openRecommendationsModal,
+    showReportModal,
+    openReportModal,
+    closeReportModal,
     closeRecommendationsModal,
     authorCardUser,
     openAuthorCard,

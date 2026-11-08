@@ -38,6 +38,7 @@ export function useNavActions() {
         if (value === 'contact') ui.openContactModal?.();
         else if (value === 'newsletter') ui.openNewsletterModal?.();
         else if (value === 'recommendations') ui.openRecommendationsModal?.();
+        else if (value === 'report') ui.openReportModal?.();
         break;
       case 'category':
         // A magazine section («Internacional»…): the publications — articles

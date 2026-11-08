@@ -14,6 +14,7 @@ import engagementApiRouter from "./engagement_api_router.js";
 import subscriptionApiRouter from "./subscription_api_router.js";
 import paisajeApiRouter from "./paisaje_api_router.js";
 import openSpaceApiRouter from "./open_space_api_router.js";
+import bugReportApiRouter from "./bug_report_api_router.js";
 import galleryApiRouter from "./gallery_api_router.js";
 import chatApiRouter from "./chat_api_router.js";
 
@@ -32,6 +33,7 @@ router.use("/engagement", engagementApiRouter);
 router.use("/subscription", subscriptionApiRouter);
 router.use("/paisaje", paisajeApiRouter);
 router.use("/open-space", openSpaceApiRouter);
+router.use("/bug-reports", bugReportApiRouter);
 router.use("/gallery", galleryApiRouter);
 router.use("/chat", chatApiRouter);
 

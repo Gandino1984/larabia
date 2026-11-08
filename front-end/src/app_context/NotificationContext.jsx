@@ -33,6 +33,9 @@
 //  - gallery-review:  the team approved or didn't publish one of the
 //    artist's works (until the bell is opened).
 //  - gallery-pending:  super admins — works waiting for review.
+//  - bug-report:  super admins — someone reported an error on the web
+//    («Reportar un error»; PendingReviewContext, refreshed every minute);
+//    until it's marked seen or fixed in Admin › Errores, which it opens.
 //  - gallery-comment / gallery-like:  readers' new comments on the artist's
 //    illustrations and likes on their illustrations and obras, one per
 //    illustration / obra (GalleryContext feed.activity; until the bell is
@@ -45,6 +48,7 @@ import { createContext, useContext, useCallback, useEffect, useMemo, useState } 
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
+import { usePendingReview } from './PendingReviewContext';
 import { useAuthor } from './AuthorContext';
 import { useUI } from './UIContext';
 import { useMagazine } from './MagazineContext';
@@ -71,6 +75,7 @@ export const NotificationProvider = ({ children }) => {
     invitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen, setSelectedWorkshop,
     respondExtraSpot, markSpotAnswersSeen, markContestReviewsSeen
   } = useWorkshop();
+  const { newReports, latestReports } = usePendingReview();
   const { setSelectedArticle, setSelectedProject } = useMagazine();
   const { subscribedProjectIds } = useEngagement();
   const subscription = useSubscription();
@@ -359,6 +364,30 @@ export const NotificationProvider = ({ children }) => {
       }
     }
 
+    // Super admins: errors people reported, not looked at yet — the latest
+    // ones each on its own, and how many more there are.
+    if (currentUser && newReports > 0) {
+      for (const r of latestReports) {
+        const excerpt = r.description_report.length > 120 ? `${r.description_report.slice(0, 117)}…` : r.description_report;
+        list.push({
+          id: `bug-report-${r.id_report}`,
+          type: 'bug-report',
+          title: t('notifications.bugReport.title', { name: r.user?.name_user || t('notifications.someone', 'Alguien'), defaultValue: '{{name}} ha reportado un error' }),
+          message: `«${excerpt}»`,
+          onClick: () => navigateToAdmin('reports')
+        });
+      }
+      if (newReports > latestReports.length) {
+        list.push({
+          id: `bug-report-more-${newReports}`,
+          type: 'bug-report',
+          title: t('notifications.bugReportMore.title', { count: newReports - latestReports.length }),
+          message: t('notifications.bugReportMore.message', 'Míralos en Admin › Errores.'),
+          onClick: () => navigateToAdmin('reports')
+        });
+      }
+    }
+
     // Invitations to a workshop, waiting for an answer.
     if (currentUser) {
       for (const inv of invitationFeed?.invitations || []) {
@@ -563,6 +592,7 @@ export const NotificationProvider = ({ children }) => {
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
     invitationFeed, openWorkshop, answerInvitation, respondExtraSpot, authorInvite, brand,
     gallery, chat, navigateToMyGallery, navigateToExhibition, navigateToAdmin, navigateToWorkshopEditor,
+    newReports, latestReports,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

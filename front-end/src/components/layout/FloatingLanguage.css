@@ -5,7 +5,8 @@
    - up to 1409px: just below the bar, left edges flush;
    - from 1410px: beside the bar on the left, level with its top;
    - bar hidden (an article): in the top-left corner of the screen.
-   The red «Hazte socio/a» button, when shown, goes right under it
+   Under it, for anyone signed in, the «Reportar un error» pill, styled the
+   same. The red «Hazte socio/a» button, when shown, goes right under them
    (SubscribeButton.css, with --floating-lang-space). */
 .floating-lang {
   display: none;
@@ -17,9 +18,13 @@
     /* What the red button below it moves down by. */
     --floating-lang-space: calc(var(--floating-lang-h) + 0.5rem);
   }
+  /* Two pills (signed in: «Reportar un error» too). */
+  :root[data-report-pill] {
+    --floating-lang-space: calc(2 * var(--floating-lang-h) + 1rem);
+  }
 
   .floating-lang {
-    display: block;
+    display: flex;
     position: fixed;
     top: calc(1.25rem + var(--header-bar-h, var(--header-h)) + 0.5rem);
     left: max(1%, calc((100% - 1200px) / 2));
@@ -39,12 +44,20 @@
     opacity: 1;
   }
 
+  /* The language pill and, under it, «Reportar un error». */
+  .floating-lang {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
   .floating-lang--corner {
     top: 1rem;
     left: 1rem;
   }
 
-  .floating-lang .language-selector-btn {
+  .floating-lang .language-selector-btn,
+  .floating-report-btn {
     min-height: var(--floating-lang-h);
     height: var(--floating-lang-h);
     padding: 0 10px;
@@ -61,8 +74,21 @@
     height: 15px;
   }
 
+  .floating-report-btn {
+    display: inline-flex;
+    align-items: center;
+    border: none;
+    font-family: 'Source Code Pro', monospace;
+    text-transform: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
   .floating-lang .language-selector-btn:hover,
-  .floating-lang .language-selector-btn:focus-visible {
+  .floating-lang .language-selector-btn:focus-visible,
+  .floating-report-btn:hover,
+  .floating-report-btn:focus-visible {
     background: #000000;
     color: #ffffff;
   }
@@ -79,6 +105,14 @@
     top: 1rem;
     left: auto;
     right: calc(50% + 600px + 1rem);
+    align-items: flex-end;
+  }
+}
+/* Beside the bar there's little room until the screen is wide: the report
+   pill keeps only its icon (its name: title / aria-label). */
+@media (min-width: 1410px) and (max-width: 1619px) {
+  .floating-lang:not(.floating-lang--corner) .floating-report-btn__text {
+    display: none;
   }
 }
 

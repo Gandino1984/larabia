@@ -25,6 +25,10 @@ export const PendingReviewProvider = ({ children }) => {
   const [newProposals, setNewProposals] = useState(0);
   // Works the artists hung, waiting for review (Admin › Galería).
   const [galleryPending, setGalleryPending] = useState(0);
+  // «Reportar un error»: how many nobody has looked at, and the latest of
+  // them (the bell). Refreshed every minute and when the tab gets focus.
+  const [newReports, setNewReports] = useState(0);
+  const [latestReports, setLatestReports] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -36,6 +40,8 @@ export const PendingReviewProvider = ({ children }) => {
       setSectionRequestProjects([]);
       setNewProposals(0);
       setGalleryPending(0);
+      setNewReports(0);
+      setLatestReports([]);
       return;
     }
     setLoading(true);
@@ -77,10 +83,31 @@ export const PendingReviewProvider = ({ children }) => {
     refresh();
   }, [refresh]);
 
+  const refreshReports = useCallback(async () => {
+    if (!isSuperAdmin || !currentUser?.id_user) return;
+    try {
+      const res = await axiosInstance.get('/bug-reports/count', { headers: { 'x-user-id': currentUser.id_user } });
+      if (!res.data?.error) {
+        setNewReports(res.data?.data?.new || 0);
+        setLatestReports(res.data?.data?.latest || []);
+      }
+    } catch {
+      // Next time.
+    }
+  }, [isSuperAdmin, currentUser]);
+  useEffect(() => {
+    if (!isSuperAdmin) return undefined;
+    refreshReports();
+    const timer = setInterval(refreshReports, 60000);
+    const onFocus = () => refreshReports();
+    window.addEventListener('focus', onFocus);
+    return () => { clearInterval(timer); window.removeEventListener('focus', onFocus); };
+  }, [isSuperAdmin, refreshReports]);
+
   const totalPending = pendingArticles.length + pendingProjects.length + pendingContests.length
     + sectionRequestArticles.length + sectionRequestProjects.length;
   // Everything waiting for the super admin (the Admin badge in the header).
-  const totalAttention = totalPending + newProposals + galleryPending;
+  const totalAttention = totalPending + newProposals + galleryPending + newReports;
 
   const value = {
     pendingArticles,
@@ -91,6 +118,9 @@ export const PendingReviewProvider = ({ children }) => {
     totalPending,
     newProposals,
     galleryPending,
+    newReports,
+    latestReports,
+    refreshReports,
     totalAttention,
     loading,
     refresh,

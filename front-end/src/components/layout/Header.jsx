@@ -21,6 +21,7 @@ import SpringDropdown from './SpringDropdown';
 import RollText, { CycleText } from '../common/RollText';
 import AnimatedLogo from './AnimatedLogo';
 import ContactModal from '../contact/ContactModal';
+import ReportProblemModal from './ReportProblemModal';
 import NewsletterModal from '../newsletter/NewsletterModal';
 import RecommendationsModal from '../admin/RecommendationsModal';
 import SubscriberMark from '../common/SubscriberMark';
@@ -59,7 +60,7 @@ function Header({ ready = true }) {
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { totalAttention } = usePendingReview();
   const { notifications, count: notifCount, markAllSeen } = useNotifications();
-  const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, showProjectsList, showGallery, showExhibition, showMyGallery, navigateToGallery, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, showRecommendationsModal, closeRecommendationsModal, navigateToAuthorProfile } = useUI();
+  const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, showProjectsList, showGallery, showExhibition, showMyGallery, navigateToGallery, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, showRecommendationsModal, closeRecommendationsModal, navigateToAuthorProfile, showReportModal, closeReportModal } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
   const { metadata, resolveLogoUrl } = useMetadata();
@@ -128,7 +129,7 @@ function Header({ ready = true }) {
   const mobileSearchRef = useRef(null);
 
   // Configurable top-bar items the current user may see (visibility + role).
-  const roleFlags = { isEditor, isAdmin, isSuperAdmin };
+  const roleFlags = { isSignedIn: !!currentUser, isEditor, isAdmin, isSuperAdmin };
   // «Proyectos» (the fixed special item) opens the projects page, like any
   // link — it used to open a dropdown of every project.
   const visibleNavItems = (navConfig || [])
@@ -980,6 +981,12 @@ function Header({ ready = true }) {
       {/* Contact Modal */}
       {showContactModal && (
         <ContactModal onClose={closeContactModal} />
+      )}
+
+      {/* «Reportar un error» (signed in): from the menu or the pill under the
+          language picker. */}
+      {showReportModal && currentUser && (
+        <ReportProblemModal onClose={closeReportModal} />
       )}
 
       {/* Newsletter Modal */}
