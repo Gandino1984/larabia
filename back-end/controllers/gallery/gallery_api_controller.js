@@ -30,6 +30,7 @@ import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/aut
 import { sanitizeUserData } from "../user/google_oauth_controller.js";
 import { sendArtistInvitationEmail } from "../../services/emailService.js";
 import { IMAGE_TYPES, IMAGE_MAX_MB, ensureDir, saveWorkImage, removeWorkImage, workImagePath } from "./gallery_store.js";
+import { withEngagement } from "./gallery_engagement_controller.js";
 
 ensureDir();
 
@@ -225,7 +226,8 @@ async function list(req, res) {
     }
 }
 
-/** GET /gallery/exhibition/:id — one exhibition: its obras with their approved illustrations. */
+/** GET /gallery/exhibition/:id — one exhibition: its obras with their approved
+ *  illustrations, their likes (and the caller's) and comment counts. */
 async function exhibition(req, res) {
     try {
         const ex = await gallery_exhibition_model.findByPk(req.params.id, {
@@ -234,8 +236,9 @@ async function exhibition(req, res) {
         if (!ex || !roleSnapshot(ex.artist).isArtist) {
             return res.status(404).json({ error: 'Esta exposición no existe' });
         }
-        const pieces = await piecesOf(ex.id_exhibition, { approvedOnly: true });
-        if (pieces.length === 0) return res.status(404).json({ error: 'Esta exposición no existe' });
+        const shown = await piecesOf(ex.id_exhibition, { approvedOnly: true });
+        if (shown.length === 0) return res.status(404).json({ error: 'Esta exposición no existe' });
+        const pieces = await withEngagement(shown, (await getRequestUser(req))?.id_user);
         res.json({
             error: null,
             data: {

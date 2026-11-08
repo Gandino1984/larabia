@@ -6,6 +6,8 @@
 // `gallery_works` (a "work" in the code and the API: one image, its title and
 // description), reviewed by a super admin before it's shown. Super admins
 // have no limits. Synced at boot in this order (each references the one before).
+// Readers (migration 032) like illustrations and obras and comment on
+// illustrations — gone with them (ON DELETE CASCADE).
 // Talking to an artist is the magazine's chat now (models/chat_models.js); the
 // old gallery_conversations / gallery_messages tables are no longer used.
 import { DataTypes } from "sequelize";
@@ -17,6 +19,8 @@ export const PIECES_MAX = 5;
 export const PIECE_WORKS_MAX = 10;
 export const WORK_DESCRIPTION_MAX = 300;
 export const WORK_STATUSES = ['pending', 'approved', 'rejected'];
+// A comment on an illustration (like an article's).
+export const COMMENT_MAX = 2000;
 
 const timestamps = { timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' };
 
@@ -73,6 +77,37 @@ export const gallery_work_model = sequelize.define("gallery_work", {
     ]
 });
 
+// A reader's comment on an illustration. The exhibition's artist and super
+// admins can delete it.
+export const gallery_work_comment_model = sequelize.define("gallery_work_comment", {
+    id_comment: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
+    work_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    content_comment: { type: DataTypes.TEXT, allowNull: false }
+}, {
+    tableName: "gallery_work_comments", ...timestamps,
+    indexes: [{ fields: ['work_id'], name: 'idx_work_comment_work' }]
+});
+
+// Likes: one per person and illustration, and per person and obra.
+export const gallery_work_like_model = sequelize.define("gallery_work_like", {
+    id_like: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
+    work_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false }
+}, {
+    tableName: "gallery_work_likes", ...timestamps,
+    indexes: [{ unique: true, fields: ['work_id', 'user_id'], name: 'uq_work_like' }]
+});
+
+export const gallery_piece_like_model = sequelize.define("gallery_piece_like", {
+    id_like: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
+    piece_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false }
+}, {
+    tableName: "gallery_piece_likes", ...timestamps,
+    indexes: [{ unique: true, fields: ['piece_id', 'user_id'], name: 'uq_piece_like' }]
+});
+
 user_model.hasOne(gallery_exhibition_model, { foreignKey: 'user_id', as: 'exhibition', onDelete: 'CASCADE' });
 gallery_exhibition_model.belongsTo(user_model, { foreignKey: 'user_id', as: 'artist', onDelete: 'CASCADE' });
 gallery_exhibition_model.hasMany(gallery_piece_model, { foreignKey: 'exhibition_id', as: 'pieces', onDelete: 'CASCADE' });
@@ -81,6 +116,15 @@ gallery_exhibition_model.hasMany(gallery_work_model, { foreignKey: 'exhibition_i
 gallery_work_model.belongsTo(gallery_exhibition_model, { foreignKey: 'exhibition_id', as: 'exhibition', onDelete: 'CASCADE' });
 gallery_piece_model.hasMany(gallery_work_model, { foreignKey: 'piece_id', as: 'works', onDelete: 'CASCADE' });
 gallery_work_model.belongsTo(gallery_piece_model, { foreignKey: 'piece_id', as: 'piece', onDelete: 'CASCADE' });
+gallery_work_model.hasMany(gallery_work_comment_model, { foreignKey: 'work_id', as: 'comments', onDelete: 'CASCADE' });
+gallery_work_comment_model.belongsTo(gallery_work_model, { foreignKey: 'work_id', as: 'work', onDelete: 'CASCADE' });
+gallery_work_comment_model.belongsTo(user_model, { foreignKey: 'user_id', as: 'user', onDelete: 'CASCADE' });
+gallery_work_model.hasMany(gallery_work_like_model, { foreignKey: 'work_id', as: 'likes', onDelete: 'CASCADE' });
+gallery_work_like_model.belongsTo(gallery_work_model, { foreignKey: 'work_id', as: 'work', onDelete: 'CASCADE' });
+gallery_work_like_model.belongsTo(user_model, { foreignKey: 'user_id', as: 'user', onDelete: 'CASCADE' });
+gallery_piece_model.hasMany(gallery_piece_like_model, { foreignKey: 'piece_id', as: 'likes', onDelete: 'CASCADE' });
+gallery_piece_like_model.belongsTo(gallery_piece_model, { foreignKey: 'piece_id', as: 'piece', onDelete: 'CASCADE' });
+gallery_piece_like_model.belongsTo(user_model, { foreignKey: 'user_id', as: 'user', onDelete: 'CASCADE' });
 
 /** Creates the tables that don't exist yet, in dependency order. */
 export async function syncGalleryTables() {
@@ -118,4 +162,8 @@ export async function syncGalleryTables() {
         await w.update({ piece_id: piece.id_piece, position_work: 0 }, { silent: true });
     }
     if (loose.length) console.log(`>>> Gallery: ${loose.length} work(s) became obras`);
+    // Readers' comments and likes (migration 032).
+    await gallery_work_comment_model.sync();
+    await gallery_work_like_model.sync();
+    await gallery_piece_like_model.sync();
 }

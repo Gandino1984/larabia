@@ -4,6 +4,9 @@
 // size in pixels and description, with the others of the list — its obra —
 // (arrows, ← →) and a close button (✕, Esc, or a click outside the picture). Used by the exhibitions and by
 // Admin › Galería when reviewing.
+// `actions(work)`: what goes under the caption (the exhibitions: likes,
+// comments, share). `paused`: something is open on top (the comments) — the
+// keys are theirs.
 import { useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,13 +14,14 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { workImageUrl, workTitle, workSize, protectedImage } from './galleryUtils';
 import './Gallery.css';
 
-function WorkViewer({ works, index, onIndex, onClose }) {
+function WorkViewer({ works, index, onIndex, onClose, actions, paused = false }) {
   const { t } = useTranslation();
   const work = works[index];
   const go = useCallback((d) => onIndex((index + d + works.length) % works.length), [index, works.length, onIndex]);
 
   useEffect(() => {
     const onKey = (e) => {
+      if (paused || e.target.closest?.('input, textarea, select')) return;
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight') go(1);
       if (e.key === 'ArrowLeft') go(-1);
@@ -26,7 +30,7 @@ function WorkViewer({ works, index, onIndex, onClose }) {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
-  }, [go, onClose]);
+  }, [go, onClose, paused]);
 
   return createPortal(
     <div className="work-viewer" role="dialog" aria-modal="true" aria-label={workTitle(work, t)} onClick={onClose}>
@@ -40,6 +44,7 @@ function WorkViewer({ works, index, onIndex, onClose }) {
           {workSize(work, t) && <span>{workSize(work, t)}</span>}
           <span className="work-viewer__count">{index + 1} / {works.length}</span>
           {work.description_work && <p className="work-viewer__description">{work.description_work}</p>}
+          {actions?.(work)}
         </figcaption>
       </figure>
       {works.length > 1 && (

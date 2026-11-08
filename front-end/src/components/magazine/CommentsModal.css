@@ -38,6 +38,15 @@
   font-weight: 800;
 }
 
+/* What they're about (an illustration's title). */
+.comments-modal-heading { min-width: 0; }
+.comments-modal-subtitle {
+  margin: 0.15rem 0 0;
+  color: #bbb;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
 .comments-modal-close {
   background: transparent;
   border: none;

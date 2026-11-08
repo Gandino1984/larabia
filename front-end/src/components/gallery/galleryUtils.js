@@ -32,3 +32,36 @@ export const protectedImage = {
 
 /** An exhibition's title — the artist's name when it has none. */
 export const exhibitionTitle = (exhibition) => exhibition?.title || exhibition?.artist?.name_user || '';
+
+/**
+ * Links to share — for everyone, signed in or not (App opens them):
+ * an exhibition, one of its obras (scrolled to), one illustration (opened large).
+ */
+export const exhibitionLink = (exhibitionId) => `${window.location.origin}/?exhibition=${exhibitionId}`;
+export const pieceLink = (exhibitionId, pieceId) => `${exhibitionLink(exhibitionId)}&piece=${pieceId}`;
+export const workLink = (exhibitionId, workId) => `${exhibitionLink(exhibitionId)}&work=${workId}`;
+
+/**
+ * Shares a link: the phone's share sheet on touch screens, copied to the
+ * clipboard elsewhere — or, with no clipboard access, a prompt to copy it.
+ * Resolves to 'shared' | 'copied' | 'prompted' | 'cancelled'.
+ */
+export async function shareLink({ url, title, text, promptLabel }) {
+  const touch = window.matchMedia?.('(pointer: coarse)').matches;
+  if (touch && navigator.share) {
+    try {
+      await navigator.share({ title, text, url });
+      return 'shared';
+    } catch (err) {
+      if (err?.name === 'AbortError') return 'cancelled'; // closed the share sheet
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    return 'copied';
+  } catch {
+    // No clipboard access (old browser, permissions): let them copy it.
+    window.prompt(promptLabel, url);
+    return 'prompted';
+  }
+}

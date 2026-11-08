@@ -243,6 +243,53 @@
 .exhibition-piece__head h2 { margin: 0; font-size: 1.4rem; color: var(--on-light, #1a1a1a); }
 .exhibition-piece__head span { color: var(--on-light-muted, #666666); font-size: 0.85rem; }
 .exhibition-work__description { flex-basis: 100%; margin: 0.15rem 0 0; color: #444444; font-size: 0.85rem; line-height: 1.45; }
+
+/* A shared link's obra: the header clears the top bar, and it's marked a moment. */
+.exhibition-piece { scroll-margin-top: 110px; }
+.exhibition-piece.is-focused .exhibition-piece__head { animation: exhibition-piece-focus 2.6s ease-out; }
+@keyframes exhibition-piece-focus {
+  0%, 40% { box-shadow: 0 0 0 3px #1a1a1a; background: rgba(26, 26, 26, 0.06); }
+  100% { box-shadow: 0 0 0 3px transparent; background: transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exhibition-piece.is-focused .exhibition-piece__head { animation: none; box-shadow: 0 0 0 3px #1a1a1a; }
+}
+
+/* Likes, comments and «Compartir» (GalleryActions): under an illustration,
+   at the end of an obra's title, under the viewer's caption. Icons and
+   numbers: they keep their case. */
+.gallery-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; flex-basis: 100%; margin-top: 0.35rem; }
+.exhibition-piece__head .gallery-actions { flex-basis: auto; margin: 0 0 0 auto; }
+.work-viewer .gallery-actions { justify-content: center; margin-top: 0.6rem; }
+.gallery-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 40px;
+  min-height: 36px;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid #cccccc;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 0.85rem;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+}
+.gallery-actions .gallery-action__count { margin: 0; color: inherit; font-size: inherit; font-variant-numeric: tabular-nums; }
+.gallery-action:hover,
+.gallery-action:focus-visible { border-color: #1a1a1a; }
+.gallery-action:focus-visible { outline: 2px solid #1a1a1a; outline-offset: 2px; }
+.gallery-action.is-on { border-color: #1a1a1a; background: #1a1a1a; color: #ffffff; }
+.gallery-actions--dark .gallery-action { border-color: rgba(255, 255, 255, 0.28); background: rgba(255, 255, 255, 0.1); color: #ffffff; }
+.gallery-actions--dark .gallery-action:hover,
+.gallery-actions--dark .gallery-action:focus-visible { border-color: #ffffff; }
+.gallery-actions--dark .gallery-action:focus-visible { outline-color: #ffffff; }
+.gallery-actions--dark .gallery-action.is-on { border-color: #ffffff; background: #ffffff; color: #1a1a1a; }
 .exhibition-works { columns: 1; column-gap: 1.75rem; }
 .exhibition-work { break-inside: avoid; margin: 0 0 1.75rem; }
 .exhibition-work__frame {

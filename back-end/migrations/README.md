@@ -62,6 +62,7 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `029` | The chat's tables, created at boot (`syncChatTables`, `models/chat_models.js`), which copies the Galería's conversations in the first time |
 | `030` | `gallery_pieces` (obras) and `gallery_works.piece_id`, `description_work` — in `syncGalleryTables`, which also turns each older illustration into an obra of its own |
 | `031` | `magazine_articles.subtitle_article`, `magazine_projects.subtitle_project` (up to 100 characters) |
+| `032` | `gallery_work_comments`, `gallery_work_likes`, `gallery_piece_likes` — readers' comments on illustrations and likes on illustrations and obras (in `syncGalleryTables`) |
 
 The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are created at boot with Sequelize `sync()` when missing (the gallery's in order, as they reference each other). The SQL files stay the reference for a fresh database.
 

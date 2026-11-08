@@ -1,12 +1,22 @@
 // back-end/routers/gallery_api_router.js — the Galería (gallery_api_controller.js).
 import { Router } from "express";
 import gallery from "../controllers/gallery/gallery_api_controller.js";
+import engagement from "../controllers/gallery/gallery_engagement_controller.js";
 
 const router = Router();
 
 // Anyone: the exhibitions and their approved works.
 router.get("/", gallery.list);
 router.get("/exhibition/:id", gallery.exhibition);
+
+// Readers: likes on illustrations and obras (with an account); an
+// illustration's comments — everyone reads, accounts write, the artist and
+// super admins delete (gallery_engagement_controller.js).
+router.post("/works/:id/like", engagement.likeWork);
+router.post("/pieces/:id/like", engagement.likePiece);
+router.get("/works/:id/comments", engagement.listComments);
+router.post("/works/:id/comments", engagement.createComment);
+router.delete("/comments/:id", engagement.deleteComment);
 
 // Artists: their own exhibition (artistOnly runs before any image is received).
 router.get("/mine", gallery.artistOnly, gallery.mine);

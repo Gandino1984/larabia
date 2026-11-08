@@ -3,6 +3,8 @@
 // Comments modal for an article: a compose box for logged-in users on top, and
 // the list of all comments below. Super admins get a red trash button on each
 // comment with a 5s countdown-to-delete that can be undone by clicking again.
+// With `source`, the comments of something else — an illustration of the
+// Galería (ExhibitionPage), whose artist can delete them too.
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -32,10 +34,22 @@ function CommentAvatar({ name, image, userId }) {
   return <SubscriberMark userId={userId}>{avatar}</SubscriberMark>;
 }
 
-function CommentsModal({ articleId, articleTitle, onClose }) {
+// source: { key, load(), create(text), remove(id), canDelete, onCountChange(delta) }
+// — load/create/remove resolve to { data } or { error }. Without it, the
+// article's comments (articleId). `subtitle`: what they're about.
+function CommentsModal({ articleId, source, subtitle, onClose }) {
   const { t } = useTranslation();
   const { currentUser, isSuperAdmin } = useAuth();
   const { fetchComments, createComment, deleteComment } = useEngagement();
+  const api = source || {
+    key: `article-${articleId}`,
+    load: () => fetchComments(articleId),
+    create: (content) => createComment(articleId, content),
+    remove: (id) => deleteComment(id),
+    canDelete: isSuperAdmin
+  };
+  const apiRef = useRef(api);
+  apiRef.current = api;
 
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,10 +61,11 @@ function CommentsModal({ articleId, articleTitle, onClose }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetchComments(articleId);
+    const res = await apiRef.current.load();
     if (res.data) setComments(res.data);
     setLoading(false);
-  }, [articleId, fetchComments]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [api.key]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -64,11 +79,12 @@ function CommentsModal({ articleId, articleTitle, onClose }) {
     const content = text.trim();
     if (!content) return;
     setSubmitting(true);
-    const res = await createComment(articleId, content);
+    const res = await apiRef.current.create(content);
     setSubmitting(false);
     if (res.data) {
       setComments(prev => [res.data, ...prev]);
       setText('');
+      apiRef.current.onCountChange?.(1);
     }
   };
 
@@ -83,20 +99,22 @@ function CommentsModal({ articleId, articleTitle, onClose }) {
     }
     // Start countdown.
     setPendingDelete(prev => ({ ...prev, [id_comment]: DELETE_DELAY }));
+    let left = DELETE_DELAY;
     timersRef.current[id_comment] = setInterval(() => {
-      setPendingDelete(prev => {
-        const current = prev[id_comment];
-        if (current === undefined) return prev;
-        if (current <= 1) {
-          // Time's up — delete for real.
-          clearInterval(timersRef.current[id_comment]);
-          delete timersRef.current[id_comment];
-          deleteComment(id_comment).then(r => {
-            if (!r.error) setComments(cs => cs.filter(c => c.id_comment !== id_comment));
-          });
-          const next = { ...prev }; delete next[id_comment]; return next;
-        }
-        return { ...prev, [id_comment]: current - 1 };
+      left -= 1;
+      if (left > 0) {
+        setPendingDelete(prev => ({ ...prev, [id_comment]: left }));
+        return;
+      }
+      // Time's up — delete for real. Here, not inside a state updater: React
+      // may run those twice (StrictMode), which sent the delete twice.
+      clearInterval(timersRef.current[id_comment]);
+      delete timersRef.current[id_comment];
+      setPendingDelete(prev => { const next = { ...prev }; delete next[id_comment]; return next; });
+      apiRef.current.remove(id_comment).then(r => {
+        if (r.error) return;
+        setComments(cs => cs.filter(c => c.id_comment !== id_comment));
+        apiRef.current.onCountChange?.(-1);
       });
     }, 1000);
   };
@@ -133,7 +151,10 @@ function CommentsModal({ articleId, articleTitle, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="comments-modal-header">
-          <h3>{t('comments.title')}</h3>
+          <div className="comments-modal-heading">
+            <h3>{t('comments.title')}</h3>
+            {subtitle && <p className="comments-modal-subtitle">{subtitle}</p>}
+          </div>
           <button className="comments-modal-close" onClick={onClose} aria-label={t('common.buttons.close')}>
             <X size={22} />
           </button>
@@ -178,7 +199,7 @@ function CommentsModal({ articleId, articleTitle, onClose }) {
                     </div>
                     <p className="comment-text">{c.content_comment}</p>
                   </div>
-                  {isSuperAdmin && (
+                  {api.canDelete && (
                     <button
                       className={`comment-delete-btn ${counting !== undefined ? 'comment-delete-btn--counting' : ''}`}
                       onClick={() => handleDeleteClick(c.id_comment)}

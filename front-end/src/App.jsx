@@ -97,16 +97,21 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading]);
 
-  // A shared exhibition link (?exhibition=<id>, ExhibitionPage «Compartir»):
+  // A shared exhibition link (?exhibition=<id>, ExhibitionPage «Compartir»),
+  // maybe to one of its obras (&piece=<id>) or illustrations (&work=<id>):
   // the Galería is public, so it opens for anyone, signed in or not.
   const sharedExhibitionHandled = useRef(false);
   useEffect(() => {
     if (sharedExhibitionHandled.current || authLoading) return;
-    const id = parseInt(new URLSearchParams(window.location.search).get('exhibition'), 10);
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get('exhibition'), 10);
     if (!id) return;
     sharedExhibitionHandled.current = true;
     window.history.replaceState({}, '', '/');
-    navigateToExhibition(id);
+    navigateToExhibition(id, {
+      piece: parseInt(params.get('piece'), 10) || null,
+      work: parseInt(params.get('work'), 10) || null
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading]);
 
