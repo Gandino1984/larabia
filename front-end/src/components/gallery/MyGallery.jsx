@@ -17,7 +17,7 @@
 // public until that person accepts it and takes it over.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Upload, Save, Eye, MessagesSquare, ImagePlus, RefreshCw, FolderPlus } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Upload, Save, Eye, MessagesSquare, ImagePlus, RefreshCw, FolderPlus, User } from 'lucide-react';
 import axiosInstance from '../../utils/axiosConfig';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -169,7 +169,7 @@ function NewWorkBox({ piece, busy, progress, onBehalf, onUpload }) {
 
 function MyGallery() {
   const { t } = useTranslation();
-  const { galleryView, navigateToGallery, navigateToExhibition, navigateToAdmin, showSuccess, showError } = useUI();
+  const { galleryView, navigateToGallery, navigateToExhibition, navigateToAdmin, navigateToAuthorEditor, showSuccess, showError } = useUI();
   const { currentUser, isSuperAdmin } = useAuth();
   const { isArtist, feed, markReviewsSeen } = useGallery();
   const chat = useChat();
@@ -372,6 +372,10 @@ function MyGallery() {
             <button type="button" className="gallery-btn" onClick={() => chat?.openChats()}>
               <MessagesSquare size={18} aria-hidden="true" /> {t('chat.title', 'Mis charlas')}
               {chat?.unreadTotal > 0 && <span className="gallery-badge">{chat.unreadTotal}</span>}
+            </button>
+            {/* Their profile in Autoras/es (artists can have one too); back here when done. */}
+            <button type="button" className="gallery-btn" onClick={() => navigateToAuthorEditor({ from: 'myGallery' })}>
+              <User size={18} aria-hidden="true" /> {t('gallery.mine.profile', 'Mi perfil de autor/a')}
             </button>
           </div>
         )}

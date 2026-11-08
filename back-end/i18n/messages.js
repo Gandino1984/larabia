@@ -458,7 +458,7 @@ export const MESSAGES = {
     "Solo las y los artistas de la galería pueden hacer esto": { en: "Only the gallery's artists can do this", eu: "Galeriako artistek bakarrik egin dezakete hau" },
     "Solo los administradores pueden realizar esta acción": { en: "Only administrators can do this", eu: "Administratzaileek bakarrik egin dezakete hau" },
     "Solo los autores del artículo pueden invitar co-autores": { en: "Only the article’s authors can invite co-authors", eu: "Artikuluaren egileek bakarrik gonbida ditzakete egilekideak" },
-    "Solo los editores pueden crear perfiles de autor": { en: "Only editors can create author profiles", eu: "Editoreek bakarrik sor ditzakete egile-profilak" },
+    "Solo el equipo de la revista y las y los artistas de la Galería pueden tener perfil de autor/a": { en: "Only the magazine team and the Gallery's artists can have an author profile", eu: "Aldizkariaren taldeak eta Galeriako artistek bakarrik izan dezakete egile-profila" },
     "Solo puedes cambiar tu propia contraseña": { en: "You can only change your own password", eu: "Zure pasahitza bakarrik alda dezakezu" },
     "Solo puedes crear publicaciones que firmes tú": { en: "You can only create publications you sign", eu: "Zuk sinatzen dituzun argitalpenak bakarrik sor ditzakezu" },
     "Solo puedes editar tu propio perfil": { en: "You can only edit your own profile", eu: "Zure profila bakarrik edita dezakezu" },

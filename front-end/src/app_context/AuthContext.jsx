@@ -126,6 +126,7 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = flag(currentUser?.is_admin);
   const isSuperAdmin = flag(currentUser?.is_super_admin);
   const isPremiumReader = flag(currentUser?.is_premium_reader);
+  const isArtist = flag(currentUser?.is_artist);
 
   const value = {
     currentUser,
@@ -140,12 +141,16 @@ export const AuthProvider = ({ children }) => {
     isAdmin,
     isSuperAdmin,
     isPremiumReader,
+    isArtist,
     // True if this user can publish without going through the approval flow.
     // Only super admins publish directly; editors AND admins must submit for
     // super-admin review before content goes public.
     canPublishDirectly: isSuperAdmin,
     // True if this user can create articles at all (admin, editor, or super admin).
     canCreateContent: isEditor || isAdmin || isSuperAdmin,
+    // A profile in Autoras/es: the team, and the Galería's visual artists
+    // (who publish no articles but hang an exhibition).
+    canHaveAuthorProfile: isEditor || isAdmin || isSuperAdmin || isArtist,
     isArticleAuthor
   };
 

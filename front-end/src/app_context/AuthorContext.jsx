@@ -314,9 +314,23 @@ export const AuthorProvider = ({ children }) => {
     return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
   }, [profilePhotoByUser]);
 
+  // The Galería's exhibitions by artist (id_user → id_exhibition): an
+  // artist's profile links to theirs. Loaded when an authors page asks.
+  const [exhibitionByArtist, setExhibitionByArtist] = useState(() => new Map());
+  const loadArtistExhibitions = useCallback(() => {
+    axiosInstance.get('/gallery')
+      .then((res) => setExhibitionByArtist(new Map((res.data?.data || [])
+        .filter((ex) => ex.artist)
+        .map((ex) => [String(ex.artist.id_user), ex.id_exhibition]))))
+      .catch(() => { /* no button to the exhibition */ });
+  }, []);
+  const exhibitionOf = useCallback((userId) => exhibitionByArtist.get(String(userId)) ?? null, [exhibitionByArtist]);
+
   const value = {
     authorProfiles,
     authorPhotoOf,
+    exhibitionOf,
+    loadArtistExhibitions,
     allProfilesAdmin,
     editorUsers,
     featuredProfiles,

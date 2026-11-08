@@ -427,3 +427,19 @@
   background: #ececec;
   color: #444444;
 }
+
+/* A Galería artist (they hang an exhibition, no articles).
+   Information, not a button: keeps its case. */
+.author-role-chip {
+  display: inline-block;
+  align-self: flex-start;
+  width: fit-content;
+  margin: 0 0 0.6rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: none;
+}

@@ -3,22 +3,27 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
-import { Globe, Twitter, Instagram, ChevronDown, ChevronUp, BookOpen, Edit, UserPlus } from 'lucide-react';
+import { useAuthor } from '../../app_context/AuthorContext';
+import { Globe, Twitter, Instagram, ChevronDown, ChevronUp, BookOpen, Edit, UserPlus, Images } from 'lucide-react';
 import ChatButton from '../chat/ChatButton';
 import './AuthorCard.css';
 
-const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin].some((v) => v === true || v === 1);
+const flag = (v) => v === true || v === 1;
+const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin].some(flag);
+// A Galería artist: publishes no articles — their profile leads to their exhibition.
+const isArtist = (u) => flag(u?.is_artist);
 // Where the invitation of an author a super admin signed up stands
 // (InviteAuthorModal): 'pending' | 'declined' | null.
-const inviteStatusOf = (u) => (u && !isCreator(u) && ['pending', 'declined'].includes(u.author_invite_status)
+const inviteStatusOf = (u) => (u && !isCreator(u) && !isArtist(u) && ['pending', 'declined'].includes(u.author_invite_status)
   ? u.author_invite_status
   : null);
 
 // editorUser prop: when set, renders a "no profile yet" card for that editor (super admin view)
 function AuthorCard({ profile, editorUser }) {
   const { t } = useTranslation();
-  const { navigateToAuthorProfile, navigateToAuthorPublications, navigateToAuthorEditorForProfile, navigateToAuthorEditorForUser } = useUI();
+  const { navigateToAuthorProfile, navigateToAuthorPublications, navigateToAuthorEditorForProfile, navigateToAuthorEditorForUser, navigateToExhibition } = useUI();
   const { isSuperAdmin } = useAuth();
+  const { exhibitionOf } = useAuthor();
   const [imageError, setImageError] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -47,10 +52,15 @@ function AuthorCard({ profile, editorUser }) {
           {invited && (
             <p className="author-invite-status">{t('authors.invitation.pendingBadge', 'Invitación pendiente')}</p>
           )}
+          {isArtist(editorUser) && (
+            <p className="author-role-chip">{t('authors.card.artist', 'Artista visual')}</p>
+          )}
           <p className="bio-preview no-profile-text">
             {invited
               ? t('authors.invitation.noProfileText', 'Aún no ha aceptado la invitación. Ya puedes crear su perfil.')
-              : t('authors.card.noProfileText', 'Este/a editor/a aún no tiene perfil de autor/a.')}
+              : isArtist(editorUser)
+                ? t('authors.card.noProfileTextArtist', 'Este/a artista de la Galería aún no tiene perfil de autor/a.')
+                : t('authors.card.noProfileText', 'Este/a editor/a aún no tiene perfil de autor/a.')}
           </p>
           <button
             className="btn-create-profile-admin"
@@ -96,6 +106,10 @@ function AuthorCard({ profile, editorUser }) {
     e.stopPropagation();
     navigateToAuthorPublications(profile.user_id);
   };
+
+  // An artist off the team signs no articles: no «Ver publicaciones», their exhibition instead.
+  const artist = isArtist(profile.user);
+  const exhibitionId = artist ? exhibitionOf(profile.user_id) : null;
 
   return (
     <article
@@ -146,6 +160,9 @@ function AuthorCard({ profile, editorUser }) {
         <div className="author-name-row">
           <h3 className="author-name">{profile.display_name}</h3>
         </div>
+        {artist && (
+          <p className="author-role-chip">{t('authors.card.artist', 'Artista visual')}</p>
+        )}
         {isSuperAdmin && inviteStatusOf(profile.user) && (
           <p className={`author-invite-status is-${inviteStatusOf(profile.user)}`}>
             {inviteStatusOf(profile.user) === 'pending'
@@ -216,14 +233,25 @@ function AuthorCard({ profile, editorUser }) {
           </div>
         )}
 
-        <button
-          className="btn-view-publications-card"
-          onClick={handleViewPublications}
-          title={t('authors.viewPublications')}
-        >
-          <BookOpen size={16} />
-          <span>{t('authors.viewPublications')}</span>
-        </button>
+        {(!artist || isCreator(profile.user)) && (
+          <button
+            className="btn-view-publications-card"
+            onClick={handleViewPublications}
+            title={t('authors.viewPublications')}
+          >
+            <BookOpen size={16} />
+            <span>{t('authors.viewPublications')}</span>
+          </button>
+        )}
+        {exhibitionId && (
+          <button
+            className="btn-view-publications-card"
+            onClick={(e) => { e.stopPropagation(); navigateToExhibition(exhibitionId); }}
+          >
+            <Images size={16} />
+            <span>{t('authors.viewExhibition', 'Ver su exposición')}</span>
+          </button>
+        )}
         {/* Socios/as ask the author to chat (a published profile). */}
         {profile.status_profile !== 'draft' && (
           <ChatButton host={{ id_user: profile.user_id, name_user: profile.display_name }} origin="authors" className="btn-chat-card" iconSize={16} />

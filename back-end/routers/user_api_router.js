@@ -24,7 +24,8 @@ router.get("/", userApiController.getAll);
 // Creator directory — used by magazine-front for co-author selection + the author list.
 // Returns anyone with editor, admin, or super_admin role. Endpoint still called /editors
 // for back-compat with magazine-front (UI labels say "editores" generically).
-// Super admins also get the authors they invited who haven't answered yet.
+// Super admins also get the authors they invited who haven't answered yet,
+// and the Galería artists (they can have a profile in Autoras/es too).
 router.get('/editors', async (req, res) => {
     try {
         const caller = roleSnapshot(await getRequestUser(req));
@@ -34,12 +35,12 @@ router.get('/editors', async (req, res) => {
                     { is_editor: true },
                     { is_admin: true },
                     { is_super_admin: true },
-                    ...(caller.isSuperAdmin ? [{ author_invite_status: 'pending' }] : [])
+                    ...(caller.isSuperAdmin ? [{ author_invite_status: 'pending' }, { is_artist: true }] : [])
                 ]
             },
             attributes: [
                 'id_user', 'name_user', 'image_user',
-                ...(caller.isSuperAdmin ? ['is_editor', 'is_admin', 'is_super_admin', 'author_invite_status'] : [])
+                ...(caller.isSuperAdmin ? ['is_editor', 'is_admin', 'is_super_admin', 'is_artist', 'author_invite_status'] : [])
             ],
             order: [['name_user', 'ASC']]
         });

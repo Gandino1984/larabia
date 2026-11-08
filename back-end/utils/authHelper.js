@@ -40,6 +40,9 @@ export function roleSnapshot(user) {
             isArtist: false,
             // Convenience: can create content (editor, admin, or super admin).
             canCreateContent: false,
+            // Can have a profile in Autoras/es: the magazine team and the
+            // visual artists (who only hang in the Galería).
+            canHaveAuthorProfile: false,
             // Convenience: can publish without approval. Super admin only —
             // everyone below must submit for super-admin review.
             canPublishDirectly: false,
@@ -49,14 +52,16 @@ export function roleSnapshot(user) {
     const isEditor = truthy(user.is_editor);
     const isAdmin = truthy(user.is_admin);
     const isSuperAdmin = truthy(user.is_super_admin);
+    const isArtist = truthy(user.is_artist);
     return {
         isAuthenticated: true,
         isEditor,
         isAdmin,
         isSuperAdmin,
         isPremiumReader: truthy(user.is_premium_reader),
-        isArtist: truthy(user.is_artist),
+        isArtist,
         canCreateContent: isEditor || isAdmin || isSuperAdmin,
+        canHaveAuthorProfile: isEditor || isAdmin || isSuperAdmin || isArtist,
         // Only super admins publish without review. Editors AND admins must
         // submit content for super-admin validation before it goes public.
         canPublishDirectly: isSuperAdmin,

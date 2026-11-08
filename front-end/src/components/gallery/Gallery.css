@@ -130,6 +130,23 @@
   font-weight: 700;
 }
 .gallery-artist__name { font-weight: 700; overflow-wrap: anywhere; }
+/* The name leads to their profile in Autoras/es: a link, so it keeps its case. */
+.gallery-artist__name--link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: inherit;
+  text-align: left;
+  text-transform: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.gallery-artist__name--link:hover { text-decoration-thickness: 2px; }
+.gallery-artist__name--link:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .gallery-artist--large .gallery-artist__photo { width: 46px; height: 46px; }
 
 /* The exhibitions */

@@ -128,6 +128,17 @@
   line-height: 1.2;
 }
 
+/* A Galería artist. Information, not a button: keeps its case. */
+.profile-role-chip {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: none;
+}
+
 .profile-tags {
   display: flex;
   flex-wrap: wrap;

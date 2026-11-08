@@ -4,9 +4,12 @@ import user_model from "../../models/user_model.js";
 import { roleSnapshot } from "../../utils/authHelper.js";
 
 // Someone a super admin signed up as an author who said no
-// (controllers/user/author_invitation_controller.js): their profile stays hidden.
-const declinedAuthor = (user) => user?.author_invite_status === 'declined' && !roleSnapshot(user).canCreateContent;
+// (controllers/user/author_invitation_controller.js): their profile stays
+// hidden — unless they're on the team or a Galería artist anyway.
+const declinedAuthor = (user) => user?.author_invite_status === 'declined' && !roleSnapshot(user).canHaveAuthorProfile;
 const DECLINED_ERROR = "Esta persona rechazó la invitación de autora o autor: su perfil no se puede publicar";
+// What a profile tells about its person (is_artist: the reader links to their exhibition).
+const USER_ATTRIBUTES = ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin', 'is_artist'];
 
 const authorProfileController = {
     /**
@@ -24,7 +27,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
+                    attributes: USER_ATTRIBUTES
                 }],
                 order: [
                     ['featured_profile', 'DESC'],
@@ -55,7 +58,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin', 'author_invite_status']
+                    attributes: [...USER_ATTRIBUTES, 'author_invite_status']
                 }],
                 order: [
                     ['featured_profile', 'DESC'],
@@ -91,7 +94,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
+                    attributes: USER_ATTRIBUTES
                 }],
                 order: [['created_at', 'DESC']]
             });
@@ -120,7 +123,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
+                    attributes: USER_ATTRIBUTES
                 }]
             });
 
@@ -154,7 +157,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
+                    attributes: USER_ATTRIBUTES
                 }]
             });
 
@@ -192,7 +195,7 @@ const authorProfileController = {
                 };
             }
 
-            // Check the user is a content creator (editor, admin, or super admin)
+            // Check the user is on the team (editor, admin, or super admin) or a Galería artist
             const user = await user_model.findByPk(profileData.user_id);
             if (!user) {
                 return {
@@ -203,9 +206,9 @@ const authorProfileController = {
 
             // Or an author a super admin invited who hasn't answered yet
             // (controllers/user/author_invitation_controller.js).
-            if (!roleSnapshot(user).canCreateContent && user.author_invite_status !== 'pending') {
+            if (!roleSnapshot(user).canHaveAuthorProfile && user.author_invite_status !== 'pending') {
                 return {
-                    error: "Solo los editores pueden crear perfiles de autor",
+                    error: "Solo el equipo de la revista y las y los artistas de la Galería pueden tener perfil de autor/a",
                     data: null
                 };
             }
@@ -234,7 +237,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
+                    attributes: USER_ATTRIBUTES
                 }]
             });
 
@@ -287,7 +290,7 @@ const authorProfileController = {
                 include: [{
                     model: user_model,
                     as: 'user',
-                    attributes: ['id_user', 'name_user', 'image_user', 'is_editor', 'is_admin', 'is_super_admin']
+                    attributes: USER_ATTRIBUTES
                 }]
             });
 

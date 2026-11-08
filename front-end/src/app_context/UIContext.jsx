@@ -216,6 +216,14 @@ export const UIProvider = ({ children }) => {
         resetAllViews();
         setShowProjectDetail(true);
         break;
+      case 'exhibition':
+        resetAllViews();
+        setShowExhibition(true);
+        break;
+      case 'myGallery':
+        resetAllViews();
+        setShowMyGallery(true);
+        break;
       case 'home':
       default:
         navigateToHome();
@@ -275,9 +283,10 @@ export const UIProvider = ({ children }) => {
     setShowAuthors(true);
   };
 
-  const navigateToAuthorEditor = () => {
+  // `from`: where it returns ('myGallery' from «Mi galería»).
+  const navigateToAuthorEditor = ({ from } = {}) => {
     setSuperAdminEditingProfile(null); // own profile
-    setPreviousView(showAuthors ? 'authors' : 'home');
+    setPreviousView(from || (showAuthors ? 'authors' : 'home'));
     resetAllViews();
     setShowAuthorEditor(true);
   };
@@ -301,8 +310,9 @@ export const UIProvider = ({ children }) => {
     setShowAuthorEditor(true);
   };
 
-  const navigateToAuthorProfile = (profile) => {
-    setPreviousView('authors');
+  // `from`: where its back button returns ('authors', or 'exhibition' — an artist's).
+  const navigateToAuthorProfile = (profile, { from = 'authors' } = {}) => {
+    setPreviousView(from);
     setSelectedAuthorProfile(profile);
     resetAllViews();
     setShowAuthorProfile(true);

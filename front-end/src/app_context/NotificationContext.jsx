@@ -58,7 +58,7 @@ const MAX_CONTENT_NOTIFS = 30;
 
 export const NotificationProvider = ({ children }) => {
   const { t } = useTranslation();
-  const { currentUser, canCreateContent } = useAuth();
+  const { currentUser, canHaveAuthorProfile } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToAdmin } = useUI();
   const {
@@ -126,12 +126,12 @@ export const NotificationProvider = ({ children }) => {
       if (aRes.status === 'fulfilled' && !aRes.value.data.error) setPublishedArticles(aRes.value.data.data || []);
       if (pRes.status === 'fulfilled' && !pRes.value.data.error) setPublishedProjects(pRes.value.data.data || []);
     })();
-    if (canCreateContent) {
+    if (canHaveAuthorProfile) {
       setProfilesReady(false);
       Promise.resolve(fetchAllProfiles()).finally(() => { if (active) setProfilesReady(true); });
     }
     return () => { active = false; };
-  }, [currentUser?.id_user, canCreateContent, fetchAllProfiles]);
+  }, [currentUser?.id_user, canHaveAuthorProfile, fetchAllProfiles]);
 
   // Workshop invitations: open the workshop, or answer from the bell.
   const openWorkshop = useCallback((workshop) => {
@@ -176,7 +176,7 @@ export const NotificationProvider = ({ children }) => {
     const list = [];
 
     // Reminder: complete your author profile.
-    if (profilesReady && currentUser && canCreateContent) {
+    if (profilesReady && currentUser && canHaveAuthorProfile) {
       const hasProfile = authorProfiles.some(p => p.user_id === currentUser.id_user);
       if (!hasProfile) {
         list.push({
@@ -505,7 +505,7 @@ export const NotificationProvider = ({ children }) => {
 
     return list;
   }, [
-    profilesReady, currentUser, canCreateContent, authorProfiles, lastSeen,
+    profilesReady, currentUser, canHaveAuthorProfile, authorProfiles, lastSeen,
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
     invitationFeed, openWorkshop, answerInvitation, respondExtraSpot, authorInvite, brand,
     gallery, chat, navigateToMyGallery, navigateToAdmin,

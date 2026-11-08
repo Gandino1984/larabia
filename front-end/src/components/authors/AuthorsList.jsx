@@ -17,14 +17,14 @@ const fold = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g,
 function AuthorsList() {
   const { t, i18n } = useTranslation();
   const {
-    authorProfiles, allProfilesAdmin, editorUsers,
+    authorProfiles, allProfilesAdmin, editorUsers, loadArtistExhibitions,
     loading, fetchAllProfiles, fetchAllProfilesAdmin, fetchEditorUsers, authorSearch, setAuthorSearch
   } = useAuthor();
   const {
     navigateToAuthorEditor, navigateToAuthorEditorForUser, navigateToAuthorEditorForProfile,
     showAuthors, showSuccess, showInfo, showError
   } = useUI();
-  const { canCreateContent, isSuperAdmin, currentUser } = useAuth();
+  const { canHaveAuthorProfile, isSuperAdmin, currentUser } = useAuth();
   const { fetchEditors } = useMagazine();
   const [inviting, setInviting] = useState(false);
 
@@ -60,21 +60,22 @@ function AuthorsList() {
   // Re-fetch whenever the authors list becomes visible (e.g. after editing a profile)
   useEffect(() => {
     if (!showAuthors) return;
+    loadArtistExhibitions(); // the artists' cards lead to their exhibitions
     if (isSuperAdmin) {
       fetchAllProfilesAdmin();
       fetchEditorUsers();
     } else {
       fetchAllProfiles();
     }
-  }, [showAuthors, isSuperAdmin, fetchAllProfiles, fetchAllProfilesAdmin, fetchEditorUsers]);
+  }, [showAuthors, isSuperAdmin, fetchAllProfiles, fetchAllProfilesAdmin, fetchEditorUsers, loadArtistExhibitions]);
 
   // Check if current user already has a profile
   const hasOwnProfile = useMemo(() => {
-    if (!currentUser || !canCreateContent) return false;
+    if (!currentUser || !canHaveAuthorProfile) return false;
     return authorProfiles.some(profile => profile.user_id === currentUser.id_user);
-  }, [currentUser, canCreateContent, authorProfiles]);
+  }, [currentUser, canHaveAuthorProfile, authorProfiles]);
 
-  // For super admin: compute editors without any profile
+  // For super admin: compute editors (and Galería artists) without any profile
   const editorsWithoutProfile = useMemo(() => {
     if (!isSuperAdmin) return [];
     const profileUserIds = new Set(allProfilesAdmin.map(p => p.user_id));
@@ -130,14 +131,14 @@ function AuthorsList() {
         <h1>{t('authors.title')}</h1>
         <p className="authors-subtitle">{t('authors.subtitle')}</p>
 
-        {canCreateContent && !isSuperAdmin && !hasOwnProfile && (
+        {canHaveAuthorProfile && !isSuperAdmin && !hasOwnProfile && (
           <button onClick={handleCreateProfile} className="create-profile-btn">
             <Plus size={20} />
             <span>{t('authors.createProfile')}</span>
           </button>
         )}
 
-        {canCreateContent && !isSuperAdmin && hasOwnProfile && (
+        {canHaveAuthorProfile && !isSuperAdmin && hasOwnProfile && (
           <button onClick={handleCreateProfile} className="edit-profile-btn">
             <span>{t('authors.editProfile')}</span>
           </button>
@@ -212,7 +213,7 @@ function AuthorsList() {
       {!loading && isEmpty && (
         <div className="empty-state">
           <p>{t('authors.emptyState')}</p>
-          {canCreateContent && (
+          {canHaveAuthorProfile && (
             <p className="empty-hint">{t('authors.emptyHint')}</p>
           )}
         </div>

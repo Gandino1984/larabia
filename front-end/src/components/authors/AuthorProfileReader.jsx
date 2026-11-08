@@ -1,17 +1,26 @@
 // magazine-front/src/components/authors/AuthorProfileReader.jsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
-import { Globe, Twitter, Instagram, ArrowLeft, BookOpen, Edit } from 'lucide-react';
+import { useAuthor } from '../../app_context/AuthorContext';
+import { Globe, Twitter, Instagram, BookOpen, Edit, Images } from 'lucide-react';
 import ChatButton from '../chat/ChatButton';
 import './AuthorProfileReader.css';
 
+const flag = (v) => v === true || v === 1;
+const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin].some(flag);
+
 function AuthorProfileReader() {
   const { t } = useTranslation();
-  const { selectedAuthorProfile, navigateBack, navigateToAuthorPublications, navigateToAuthorEditorForProfile } = useUI();
+  const { selectedAuthorProfile, navigateToAuthorPublications, navigateToAuthorEditorForProfile, navigateToExhibition } = useUI();
   const { isSuperAdmin } = useAuth();
+  const { exhibitionOf, loadArtistExhibitions } = useAuthor();
   const [imageError, setImageError] = useState(false);
+
+  // A Galería artist off the team signs no articles: their exhibition instead of «Ver publicaciones».
+  const artist = flag(selectedAuthorProfile?.user?.is_artist);
+  useEffect(() => { if (artist) loadArtistExhibitions(); }, [artist, loadArtistExhibitions]);
 
   if (!selectedAuthorProfile) {
     return (
@@ -80,6 +89,9 @@ function AuthorProfileReader() {
             <div className="profile-info-section">
               <div className="profile-name-row">
                 <h2 className="profile-name">{profile.display_name}</h2>
+                {artist && (
+                  <span className="profile-role-chip">{t('authors.card.artist', 'Artista visual')}</span>
+                )}
                 {profile.specialty_tags && profile.specialty_tags.length > 0 && (
                   <div className="profile-tags">
                     {profile.specialty_tags.map((tag, idx) => (
@@ -130,13 +142,24 @@ function AuthorProfileReader() {
                 </div>
               )}
 
-              <button
-                onClick={handleViewPublications}
-                className="btn-view-publications"
-              >
-                <BookOpen size={20} />
-                <span>{t('authors.viewPublications')}</span>
-              </button>
+              {(!artist || isCreator(profile.user)) && (
+                <button
+                  onClick={handleViewPublications}
+                  className="btn-view-publications"
+                >
+                  <BookOpen size={20} />
+                  <span>{t('authors.viewPublications')}</span>
+                </button>
+              )}
+              {artist && exhibitionOf(profile.user_id) && (
+                <button
+                  onClick={() => navigateToExhibition(exhibitionOf(profile.user_id))}
+                  className="btn-view-publications"
+                >
+                  <Images size={20} />
+                  <span>{t('authors.viewExhibition', 'Ver su exposición')}</span>
+                </button>
+              )}
               {profile.status_profile !== 'draft' && (
                 <ChatButton host={{ id_user: profile.user_id, name_user: profile.display_name }} origin="authors" className="btn-chat-profile" iconSize={20} />
               )}

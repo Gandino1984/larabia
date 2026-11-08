@@ -14,7 +14,7 @@ import { ArrowLeft, Images, Share2 } from 'lucide-react';
 import axiosInstance from '../../utils/axiosConfig';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
-import { useAuthorPhoto } from '../../app_context/AuthorContext';
+import { useAuthor, useAuthorPhoto } from '../../app_context/AuthorContext';
 import ChatButton from '../chat/ChatButton';
 import WorkViewer from './WorkViewer';
 import { workImageUrl, workTitle, workSize, exhibitionTitle, pieceTitle, protectedImage } from './galleryUtils';
@@ -22,9 +22,10 @@ import './Gallery.css';
 
 function ExhibitionPage() {
   const { t } = useTranslation();
-  const { galleryView, navigateToGallery, navigateToMyGallery, showSuccess } = useUI();
+  const { galleryView, navigateToGallery, navigateToMyGallery, navigateToAuthorProfile, showSuccess } = useUI();
   const { currentUser } = useAuth();
   const photoOf = useAuthorPhoto();
+  const { authorProfiles } = useAuthor();
   const [exhibition, setExhibition] = useState(null);
   const [missing, setMissing] = useState(false);
   const [viewing, setViewing] = useState(null);
@@ -41,6 +42,8 @@ function ExhibitionPage() {
 
   const artist = exhibition?.artist;
   const own = currentUser && artist && currentUser.id_user === artist.id_user;
+  // Their published profile in Autoras/es: the name leads to it.
+  const profile = artist ? authorProfiles.find((p) => p.user_id === artist.id_user) : null;
 
   const share = async () => {
     const url = `${window.location.origin}/?exhibition=${exhibition.id_exhibition}`;
@@ -88,7 +91,18 @@ function ExhibitionPage() {
           {photoOf(artist)
             ? <img src={photoOf(artist)} alt="" className="gallery-artist__photo" />
             : <span className="gallery-artist__photo gallery-artist__photo--initial" aria-hidden="true">{artist?.name_user?.charAt(0)?.toUpperCase()}</span>}
-          <span className="gallery-artist__name">{artist?.name_user}</span>
+          {profile ? (
+            <button
+              type="button"
+              className="gallery-artist__name gallery-artist__name--link"
+              onClick={() => navigateToAuthorProfile(profile, { from: 'exhibition' })}
+              title={t('gallery.exhibition.artistProfile', 'Ver el perfil de la artista o el artista')}
+            >
+              {artist?.name_user}
+            </button>
+          ) : (
+            <span className="gallery-artist__name">{artist?.name_user}</span>
+          )}
         </span>
         {exhibition.statement && (
           <div className="exhibition-page__statement">

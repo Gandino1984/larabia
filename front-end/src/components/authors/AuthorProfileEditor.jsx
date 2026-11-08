@@ -8,11 +8,12 @@ import { ArrowLeft, Upload } from 'lucide-react';
 import AuthorInvitationBox from './AuthorInvitationBox';
 import './AuthorProfileEditor.css';
 
-const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin].some((v) => v === true || v === 1);
+// The team or a Galería artist: they can have a profile whatever they answered to an author invitation.
+const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin, u?.is_artist].some((v) => v === true || v === 1);
 
 function AuthorProfileEditor() {
   const { t } = useTranslation();
-  const { currentUser, canCreateContent, isSuperAdmin } = useAuth();
+  const { currentUser, canHaveAuthorProfile, isSuperAdmin } = useAuth();
   const { navigateBack, showSuccess, showError, superAdminEditingProfile, setSuperAdminEditingProfile } = useUI();
   const { myProfile, fetchMyProfile, createProfile, updateProfile, uploadProfileImage, fetchAllProfilesAdmin } = useAuthor();
 
@@ -52,8 +53,8 @@ function AuthorProfileEditor() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    if (!canCreateContent) {
-      showError(t('authors.editor.onlyEditors', 'Solo los editores pueden crear perfiles de autor'));
+    if (!canHaveAuthorProfile) {
+      showError(t('authors.editor.onlyEditors', 'Solo el equipo de la revista y las y los artistas de la Galería pueden tener perfil de autor/a'));
       navigateBack();
       return;
     }
@@ -67,7 +68,7 @@ function AuthorProfileEditor() {
     if (currentUser?.id_user) {
       fetchMyProfile(currentUser.id_user);
     }
-  }, [currentUser, canCreateContent, isSuperAdmin, superAdminEditingProfile, fetchMyProfile, showError, navigateBack]);
+  }, [currentUser, canHaveAuthorProfile, isSuperAdmin, superAdminEditingProfile, fetchMyProfile, showError, navigateBack]);
 
   useEffect(() => {
     if (targetProfile) {
