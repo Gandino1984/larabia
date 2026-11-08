@@ -30,7 +30,7 @@ import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/aut
 import { sanitizeUserData } from "../user/google_oauth_controller.js";
 import { sendArtistInvitationEmail } from "../../services/emailService.js";
 import { IMAGE_TYPES, IMAGE_MAX_MB, ensureDir, saveWorkImage, removeWorkImage, workImagePath } from "./gallery_store.js";
-import { withEngagement } from "./gallery_engagement_controller.js";
+import { withEngagement, artistActivity } from "./gallery_engagement_controller.js";
 
 ensureDir();
 
@@ -655,24 +655,27 @@ async function review(req, res) {
 
 /**
  * GET /gallery/feed — for the bell: the artist's works reviewed since they
- * last looked, and (super admins) how many works wait for review. Never 401:
- * signed out, all empty.
+ * last looked and readers' new comments and likes on their exhibition
+ * (artistActivity), and (super admins) how many works wait for review.
+ * Never 401: signed out, all empty.
  */
 async function feed(req, res) {
     try {
         const user = await getRequestUser(req);
-        if (!user) return res.json({ error: null, data: { reviews: [], pending_review: 0 } });
+        if (!user) return res.json({ error: null, data: { reviews: [], pending_review: 0, activity: null } });
         const role = roleSnapshot(user);
         let reviews = [];
+        let activity = null;
         const ex = role.isArtist ? await exhibitionOfArtist(user.id_user) : null;
         if (ex) {
             const works = await gallery_work_model.findAll({
                 where: { exhibition_id: ex.id_exhibition, review_seen: false, status_work: ['approved', 'rejected'] }
             });
             reviews = works.map((w) => workOf(w, { withReview: true }));
+            activity = await artistActivity(ex);
         }
         const pending_review = role.isSuperAdmin ? await gallery_work_model.count({ where: { status_work: 'pending' } }) : 0;
-        res.json({ error: null, data: { reviews, pending_review } });
+        res.json({ error: null, data: { reviews, pending_review, activity } });
     } catch (err) {
         console.error('gallery - feed:', err);
         res.status(500).json({ error: 'Error al cargar los avisos de la galería' });

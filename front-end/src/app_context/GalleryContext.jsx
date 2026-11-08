@@ -2,10 +2,11 @@
 //
 // The Galería's live state for the signed-in user (back-end
 // controllers/gallery/gallery_api_controller.js):
-// - feed: the artist's works reviewed since they last looked, and — super
-//   admins — how many works wait for review. Refreshed every minute and when
-//   the tab gets focus; the bell (NotificationContext) and the Admin badge
-//   read it. (Talking to artists: the magazine's chat, ChatContext.)
+// - feed: the artist's works reviewed since they last looked, readers' new
+//   comments and likes on their exhibition (activity), and — super admins —
+//   how many works wait for review. Refreshed every minute and when the tab
+//   gets focus; the bell (NotificationContext) and the Admin badge read it.
+//   (Talking to artists: the magazine's chat, ChatContext.)
 // - invitation: a pending invitation to be a visual artist. App shows
 //   GalleryInvitationModal until they accept (→ artist) or decline; «Decidir
 //   más tarde» hides it for this browser session (the bell keeps it).
@@ -16,7 +17,9 @@ import { useAuth } from './AuthContext';
 import { useUI } from './UIContext';
 
 const GalleryContext = createContext(null);
-const EMPTY_FEED = { reviews: [], pending_review: 0 };
+const EMPTY_FEED = { reviews: [], pending_review: 0, activity: null };
+// Where each kind of activity's ids go when marked seen.
+const SEEN_FIELD = { comment: 'comments', 'work-like': 'work_likes', 'piece-like': 'piece_likes' };
 const laterKey = (userId) => `larabia_artist_invite_later_${userId}`;
 
 export const GalleryProvider = ({ children }) => {
@@ -113,11 +116,20 @@ export const GalleryProvider = ({ children }) => {
     try { await axiosInstance.post('/gallery/feed/reviews-seen', {}, auth()); } catch { /* next feed refresh shows them again */ }
   }, [isArtist, feed.reviews.length, auth]);
 
+  // The artist has seen the new comments and likes (the bell): those shown, by id.
+  const activityItems = feed.activity?.items;
+  const markActivitySeen = useCallback(async () => {
+    if (!isArtist || !activityItems?.length) return;
+    const seen = { comments: [], work_likes: [], piece_likes: [] };
+    activityItems.forEach((item) => seen[SEEN_FIELD[item.kind]]?.push(...item.ids));
+    setFeed((f) => ({ ...f, activity: f.activity && { ...f.activity, items: [] } }));
+    try { await axiosInstance.post('/gallery/feed/activity-seen', seen, auth()); } catch { /* next feed refresh shows them again */ }
+  }, [isArtist, activityItems, auth]);
 
   const value = useMemo(() => ({
-    isArtist, feed, refreshFeed, markReviewsSeen,
+    isArtist, feed, refreshFeed, markReviewsSeen, markActivitySeen,
     invitation, inviteModalOpen, busy, openInviteModal, later, respond, refreshInvitation
-  }), [isArtist, feed, refreshFeed, markReviewsSeen, invitation, inviteModalOpen, busy, openInviteModal, later, respond, refreshInvitation]);
+  }), [isArtist, feed, refreshFeed, markReviewsSeen, markActivitySeen, invitation, inviteModalOpen, busy, openInviteModal, later, respond, refreshInvitation]);
 
   return <GalleryContext.Provider value={value}>{children}</GalleryContext.Provider>;
 };

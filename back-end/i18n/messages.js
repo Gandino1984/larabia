@@ -178,6 +178,7 @@ export const MESSAGES = {
     "Error al guardar la exposición": { en: "The exhibition could not be saved", eu: "Ezin izan da erakusketa gorde" },
     "Error al guardar la ilustración": { en: "The illustration could not be saved", eu: "Ezin izan da ilustrazioa gorde" },
     "Error al guardar la obra": { en: "The work could not be saved", eu: "Ezin izan da lana gorde" },
+    "Error al guardar los avisos vistos": { en: "Could not save the notices as seen", eu: "Ezin izan dira abisuak ikusitzat gorde" },
     "Error al iniciar sesión": { en: "Sign-in failed", eu: "Ezin izan da saioa hasi" },
     "Error al invitar a la o el artista": { en: "The artist could not be invited", eu: "Ezin izan da artista gonbidatu" },
     "Error al modificar el rol": { en: "The role could not be changed", eu: "Ezin izan da rola aldatu" },

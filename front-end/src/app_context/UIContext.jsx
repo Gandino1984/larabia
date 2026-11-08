@@ -27,11 +27,11 @@ export const UIProvider = ({ children }) => {
   // (galleryView.tab: 'works' | 'messages', conversationId: one to open;
   // forUser: { id_user, name_user } — a super admin preparing the gallery of
   // someone invited, on their behalf; focusPiece / focusWork: the obra or
-  // illustration a shared link points to).
+  // illustration a shared link points to — focusComments: open its comments).
   const [showGallery, setShowGallery] = useState(false);
   const [showExhibition, setShowExhibition] = useState(false);
   const [showMyGallery, setShowMyGallery] = useState(false);
-  const [galleryView, setGalleryView] = useState({ exhibitionId: null, chat: false, tab: 'works', conversationId: null, forUser: null, focusPiece: null, focusWork: null });
+  const [galleryView, setGalleryView] = useState({ exhibitionId: null, chat: false, tab: 'works', conversationId: null, forUser: null, focusPiece: null, focusWork: null, focusComments: false });
   const [showWorkshopDetail, setShowWorkshopDetail] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
@@ -405,9 +405,10 @@ export const UIProvider = ({ children }) => {
     setShowGallery(true);
   };
 
-  // piece / work: a shared link to one obra (scrolled to) or one illustration (opened large).
-  const navigateToExhibition = (exhibitionId, { chat = false, piece = null, work = null } = {}) => {
-    setGalleryView((v) => ({ ...v, exhibitionId, chat, focusPiece: piece, focusWork: work }));
+  // piece / work: a shared link to one obra (scrolled to) or one illustration
+  // (opened large) — with `comments`, its comments open too (the artist's bell).
+  const navigateToExhibition = (exhibitionId, { chat = false, piece = null, work = null, comments = false } = {}) => {
+    setGalleryView((v) => ({ ...v, exhibitionId, chat, focusPiece: piece, focusWork: work, focusComments: comments }));
     resetAllViews();
     setShowExhibition(true);
   };

@@ -31,6 +31,10 @@
 //  - gallery-review:  the team approved or didn't publish one of the
 //    artist's works (until the bell is opened).
 //  - gallery-pending:  super admins — works waiting for review.
+//  - gallery-comment / gallery-like:  readers' new comments on the artist's
+//    illustrations and likes on their illustrations and obras, one per
+//    illustration / obra (GalleryContext feed.activity; until the bell is
+//    opened). They open the exhibition there — the comments, for comments.
 //
 // "New content" notifications accumulate (persist as unread) until the user
 // opens the bell — the last-seen timestamp is stored per user in localStorage,
@@ -60,7 +64,7 @@ export const NotificationProvider = ({ children }) => {
   const { t } = useTranslation();
   const { currentUser, canHaveAuthorProfile } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
-  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToAdmin } = useUI();
+  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToExhibition, navigateToAdmin } = useUI();
   const {
     invitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen, setSelectedWorkshop,
     respondExtraSpot, markSpotAnswersSeen
@@ -169,6 +173,7 @@ export const NotificationProvider = ({ children }) => {
     const spotAnswered = (invitationFeed?.spot_answers || []).map(a => a.id_spot_request);
     if (spotAnswered.length > 0) markSpotAnswersSeen(spotAnswered);
     gallery.markReviewsSeen();
+    gallery.markActivitySeen();
     if (chat?.conversations.some((c) => c.unseen_change)) chat.markSeen();
   }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, invitationFeed?.spot_answers, markInvitationResponsesSeen, markSpotAnswersSeen, gallery, chat]);
 
@@ -311,6 +316,32 @@ export const NotificationProvider = ({ children }) => {
             : t('notifications.galleryRejected.message', { title, reason: w.rejection_reason, defaultValue: '«{{title}}»: {{reason}}' }),
           onClick: () => navigateToMyGallery()
         });
+      }
+      // Readers' new comments and likes on the artist's exhibition.
+      const activity = gallery.feed.activity;
+      for (const a of activity?.items || []) {
+        const title = a.title || t('gallery.untitled', 'Sin título');
+        const name = a.last_name || t('notifications.someone', 'Alguien');
+        if (a.kind === 'comment') {
+          list.push({
+            id: `gallery-comment-${a.target_id}-${a.ids[0]}`,
+            type: 'gallery-comment',
+            title: t('notifications.galleryComment.title', { count: a.count, name, title }),
+            message: t('notifications.galleryComment.message', { name, text: a.last_text }),
+            onClick: () => navigateToExhibition(activity.exhibition_id, { work: a.target_id, comments: true })
+          });
+        } else {
+          const piece = a.kind === 'piece-like';
+          list.push({
+            id: `gallery-like-${a.kind}-${a.target_id}-${a.ids[0]}`,
+            type: 'gallery-like',
+            title: t('notifications.galleryLike.title', { count: a.count, name, title }),
+            message: piece
+              ? t('notifications.galleryLike.piece', 'Una obra de tu exposición')
+              : t('notifications.galleryLike.work', 'Una ilustración de tu exposición'),
+            onClick: () => navigateToExhibition(activity.exhibition_id, piece ? { piece: a.target_id } : { work: a.target_id })
+          });
+        }
       }
       // Super admins: works waiting for review.
       if (gallery.feed.pending_review > 0) {
@@ -508,7 +539,7 @@ export const NotificationProvider = ({ children }) => {
     profilesReady, currentUser, canHaveAuthorProfile, authorProfiles, lastSeen,
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
     invitationFeed, openWorkshop, answerInvitation, respondExtraSpot, authorInvite, brand,
-    gallery, chat, navigateToMyGallery, navigateToAdmin,
+    gallery, chat, navigateToMyGallery, navigateToExhibition, navigateToAdmin,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

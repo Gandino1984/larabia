@@ -55,6 +55,7 @@ router.post("/review/:id", gallery.review);
 // The bell.
 router.get("/feed", gallery.feed);
 router.post("/feed/reviews-seen", gallery.artistOnly, gallery.reviewsSeen);
+router.post("/feed/activity-seen", gallery.artistOnly, engagement.activitySeen);
 
 // Invitations: super admins invite; the invited person answers.
 router.post("/invite", gallery.invite);

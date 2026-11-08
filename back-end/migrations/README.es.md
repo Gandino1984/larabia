@@ -68,6 +68,7 @@ Desde la `012`, el back-end comprueba al arrancar (`back-end/index.js`) las colu
 | `030` | `gallery_pieces` (obras) y `gallery_works.piece_id`, `description_work` — en `syncGalleryTables`, que además convierte cada ilustración de antes en una obra propia |
 | `031` | `magazine_articles.subtitle_article`, `magazine_projects.subtitle_project` (hasta 100 caracteres) |
 | `032` | `gallery_work_comments`, `gallery_work_likes`, `gallery_piece_likes`: comentarios de lectoras/es en las ilustraciones y «me gusta» en ilustraciones y obras (en `syncGalleryTables`) |
+| `033` | `artist_seen` en `gallery_work_comments`, `gallery_work_likes`, `gallery_piece_likes`: la campana de la o el artista (en `syncGalleryTables`) |
 
 Las tablas de `009`, `010`, `011`, `014`, `015`, `020`, `023` y `027` se crean al arrancar con `sync()` de Sequelize si no existen (las de la galería en orden, porque se referencian entre sí). Los archivos SQL siguen siendo la referencia para una base nueva.
 

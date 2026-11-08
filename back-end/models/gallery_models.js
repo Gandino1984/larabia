@@ -7,7 +7,8 @@
 // description), reviewed by a super admin before it's shown. Super admins
 // have no limits. Synced at boot in this order (each references the one before).
 // Readers (migration 032) like illustrations and obras and comment on
-// illustrations — gone with them (ON DELETE CASCADE).
+// illustrations — gone with them (ON DELETE CASCADE); the artist hears of it
+// in their bell (033: artist_seen).
 // Talking to an artist is the magazine's chat now (models/chat_models.js); the
 // old gallery_conversations / gallery_messages tables are no longer used.
 import { DataTypes } from "sequelize";
@@ -21,6 +22,9 @@ export const WORK_DESCRIPTION_MAX = 300;
 export const WORK_STATUSES = ['pending', 'approved', 'rejected'];
 // A comment on an illustration (like an article's).
 export const COMMENT_MAX = 2000;
+// Readers' comments and likes the artist hasn't seen in their bell yet
+// (migration 033). A factory: Sequelize changes the definitions it's given.
+const artistSeen = () => ({ type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false });
 
 const timestamps = { timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' };
 
@@ -83,7 +87,8 @@ export const gallery_work_comment_model = sequelize.define("gallery_work_comment
     id_comment: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     work_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    content_comment: { type: DataTypes.TEXT, allowNull: false }
+    content_comment: { type: DataTypes.TEXT, allowNull: false },
+    artist_seen: artistSeen()
 }, {
     tableName: "gallery_work_comments", ...timestamps,
     indexes: [{ fields: ['work_id'], name: 'idx_work_comment_work' }]
@@ -93,7 +98,8 @@ export const gallery_work_comment_model = sequelize.define("gallery_work_comment
 export const gallery_work_like_model = sequelize.define("gallery_work_like", {
     id_like: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     work_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false }
+    user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    artist_seen: artistSeen()
 }, {
     tableName: "gallery_work_likes", ...timestamps,
     indexes: [{ unique: true, fields: ['work_id', 'user_id'], name: 'uq_work_like' }]
@@ -102,7 +108,8 @@ export const gallery_work_like_model = sequelize.define("gallery_work_like", {
 export const gallery_piece_like_model = sequelize.define("gallery_piece_like", {
     id_like: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     piece_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false }
+    user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    artist_seen: artistSeen()
 }, {
     tableName: "gallery_piece_likes", ...timestamps,
     indexes: [{ unique: true, fields: ['piece_id', 'user_id'], name: 'uq_piece_like' }]
@@ -162,8 +169,14 @@ export async function syncGalleryTables() {
         await w.update({ piece_id: piece.id_piece, position_work: 0 }, { silent: true });
     }
     if (loose.length) console.log(`>>> Gallery: ${loose.length} work(s) became obras`);
-    // Readers' comments and likes (migration 032).
-    await gallery_work_comment_model.sync();
-    await gallery_work_like_model.sync();
-    await gallery_piece_like_model.sync();
+    // Readers' comments and likes (migration 032), and whether the artist
+    // has seen them (033, added to the tables 032 made).
+    for (const model of [gallery_work_comment_model, gallery_work_like_model, gallery_piece_like_model]) {
+        await model.sync();
+        const table = model.getTableName();
+        if (!(await qi.describeTable(table)).artist_seen) {
+            await qi.addColumn(table, 'artist_seen', artistSeen());
+            console.log(`>>> Added ${table}.artist_seen`);
+        }
+    }
 }

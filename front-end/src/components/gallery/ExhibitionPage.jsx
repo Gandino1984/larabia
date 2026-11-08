@@ -61,18 +61,21 @@ function ExhibitionPage() {
   }, [id, userId]);
 
   // A shared link to an obra (scrolled to, marked a moment) or an
-  // illustration (opened large) — once per link.
+  // illustration (opened large; from the artist's bell, with its comments)
+  // — once per link.
   const focusDone = useRef(null);
   useEffect(() => {
-    const { focusPiece, focusWork } = galleryView;
+    const { focusPiece, focusWork, focusComments } = galleryView;
     if (!exhibition || (!focusPiece && !focusWork)) return;
-    const key = `${exhibition.id_exhibition}:${focusPiece}:${focusWork}`;
+    const key = `${exhibition.id_exhibition}:${focusPiece}:${focusWork}:${focusComments}`;
     if (focusDone.current === key) return;
     focusDone.current = key;
     if (focusWork) {
       exhibition.pieces.forEach((p, pi) => {
         const index = p.works.findIndex((w) => w.id_work === focusWork);
-        if (index >= 0) setViewing({ piece: pi, index });
+        if (index < 0) return;
+        setViewing({ piece: pi, index });
+        if (focusComments) setCommentsWorkId(focusWork);
       });
       return;
     }

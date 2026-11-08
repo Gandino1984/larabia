@@ -6,6 +6,9 @@
 // - Comments on an illustration: everyone reads them; anyone with an account
 //   writes (COMMENT_MAX characters, COMMENTS_PER_HOUR); the exhibition's
 //   artist and super admins delete them.
+// - The artist's bell (artistActivity, in GET /gallery/feed): others' new
+//   comments and likes on their exhibition, grouped by illustration / obra,
+//   until they've seen them (artist_seen, migration 033).
 // Only on what the public sees: approved illustrations of an artist's
 // exhibition, and obras with at least one. Sharing needs nothing here: the
 // links (?exhibition=…&piece=… / &work=…) open the public exhibition.
@@ -89,14 +92,15 @@ export async function withEngagement(pieces, userId) {
     }));
 }
 
-// Likes or unlikes (a toggle); answers the new state and count.
-async function toggle(model, key, id, userId) {
+// Likes or unlikes (a toggle); answers the new state and count. The artist's
+// own like is born seen (it's not news to them).
+async function toggle(model, key, id, userId, artistId) {
     const where = { [key]: id, user_id: userId };
     const existing = await model.findOne({ where });
     if (existing) await existing.destroy();
     else {
         try {
-            await model.create(where);
+            await model.create({ ...where, artist_seen: userId === artistId });
         } catch (err) {
             // A double tap: the other request made it.
             if (err.name !== 'SequelizeUniqueConstraintError') throw err;
@@ -116,8 +120,9 @@ async function likeWork(req, res) {
     try {
         const user = await signedIn(req, res, 'Inicia sesión para dar me gusta');
         if (!user) return;
-        if (!(await publicWork(req.params.id))) return res.status(404).json({ error: NO_WORK });
-        res.json({ error: null, data: await toggle(gallery_work_like_model, 'work_id', Number(req.params.id), user.id_user) });
+        const work = await publicWork(req.params.id);
+        if (!work) return res.status(404).json({ error: NO_WORK });
+        res.json({ error: null, data: await toggle(gallery_work_like_model, 'work_id', work.id_work, user.id_user, work.exhibition.user_id) });
     } catch (err) {
         console.error('gallery - likeWork:', err);
         res.status(500).json({ error: 'Error al guardar el me gusta' });
@@ -129,8 +134,9 @@ async function likePiece(req, res) {
     try {
         const user = await signedIn(req, res, 'Inicia sesión para dar me gusta');
         if (!user) return;
-        if (!(await publicPiece(req.params.id))) return res.status(404).json({ error: NO_PIECE });
-        res.json({ error: null, data: await toggle(gallery_piece_like_model, 'piece_id', Number(req.params.id), user.id_user) });
+        const piece = await publicPiece(req.params.id);
+        if (!piece) return res.status(404).json({ error: NO_PIECE });
+        res.json({ error: null, data: await toggle(gallery_piece_like_model, 'piece_id', piece.id_piece, user.id_user, piece.exhibition.user_id) });
     } catch (err) {
         console.error('gallery - likePiece:', err);
         res.status(500).json({ error: 'Error al guardar el me gusta' });
@@ -179,7 +185,10 @@ async function createComment(req, res) {
         if (lastHour >= COMMENTS_PER_HOUR) {
             return res.status(429).json({ error: 'Has escrito muchos comentarios en poco tiempo. Espera un poco', code: 'too_many' });
         }
-        const created = await gallery_work_comment_model.create({ work_id: work.id_work, user_id: user.id_user, content_comment: text });
+        const created = await gallery_work_comment_model.create({
+            work_id: work.id_work, user_id: user.id_user, content_comment: text,
+            artist_seen: user.id_user === work.exhibition.user_id
+        });
         res.json({ error: null, data: commentOf({ ...created.get(), user }), success: 'Comentario publicado' });
     } catch (err) {
         console.error('gallery - createComment:', err);
@@ -208,4 +217,80 @@ async function deleteComment(req, res) {
     }
 }
 
-export default { likeWork, likePiece, listComments, createComment, deleteComment };
+// ---------- the artist's bell ----------
+
+const SNIPPET_MAX = 140;
+
+// Rows (newest first) grouped by what they're on: how many, the ids (to mark
+// them seen) and the newest one's person and time.
+function groupBy(rows, kind, keyOf, titleOf, idOf, extra = () => ({})) {
+    const groups = new Map();
+    for (const r of rows) {
+        const key = keyOf(r);
+        if (!groups.has(key)) {
+            groups.set(key, {
+                kind, target_id: key, title: titleOf(r), count: 0, ids: [],
+                last_name: r.user?.name_user || null, last_at: r.created_at, ...extra(r)
+            });
+        }
+        const g = groups.get(key);
+        g.count += 1;
+        g.ids.push(idOf(r));
+    }
+    return [...groups.values()];
+}
+
+/**
+ * Others' comments and likes on an artist's exhibition they haven't seen:
+ * { exhibition_id, items: [{ kind: 'comment' | 'work-like' | 'piece-like',
+ *   target_id, title, count, ids, last_name, last_at, last_text? }] }, newest first.
+ */
+export async function artistActivity(ex) {
+    const unseen = { artist_seen: false, user_id: { [Op.ne]: ex.user_id } };
+    const person = { model: user_model, as: 'user', attributes: PERSON };
+    const onWork = { model: gallery_work_model, as: 'work', where: { exhibition_id: ex.id_exhibition, status_work: 'approved' }, attributes: ['id_work', 'title_work'] };
+    const onPiece = { model: gallery_piece_model, as: 'piece', where: { exhibition_id: ex.id_exhibition }, attributes: ['id_piece', 'title_piece'] };
+    const [comments, workLikes, pieceLikes] = await Promise.all([
+        gallery_work_comment_model.findAll({ where: unseen, include: [onWork, person], order: [['id_comment', 'DESC']] }),
+        gallery_work_like_model.findAll({ where: unseen, include: [onWork, person], order: [['id_like', 'DESC']] }),
+        gallery_piece_like_model.findAll({ where: unseen, include: [onPiece, person], order: [['id_like', 'DESC']] })
+    ]);
+    const snippet = (text) => (text.length > SNIPPET_MAX ? `${text.slice(0, SNIPPET_MAX - 1)}…` : text);
+    const items = [
+        ...groupBy(comments, 'comment', (c) => c.work_id, (c) => c.work.title_work || null, (c) => c.id_comment,
+            (c) => ({ last_text: snippet(c.content_comment) })),
+        ...groupBy(workLikes, 'work-like', (l) => l.work_id, (l) => l.work.title_work || null, (l) => l.id_like),
+        ...groupBy(pieceLikes, 'piece-like', (l) => l.piece_id, (l) => l.piece.title_piece || null, (l) => l.id_like)
+    ].sort((a, b) => new Date(b.last_at) - new Date(a.last_at));
+    return { exhibition_id: ex.id_exhibition, items };
+}
+
+const idList = (value) => (Array.isArray(value) ? value.map(Number).filter((n) => Number.isInteger(n) && n > 0).slice(0, 1000) : []);
+
+/** POST /gallery/feed/activity-seen {comments, work_likes, piece_likes: [ids]} — artists: seen in their bell. */
+async function activitySeen(req, res) {
+    try {
+        const ex = await gallery_exhibition_model.findOne({ where: { user_id: req.galleryUser.id_user } });
+        if (!ex) return res.json({ error: null });
+        // Only what's on their own exhibition.
+        const [works, pieces] = await Promise.all([
+            gallery_work_model.findAll({ where: { exhibition_id: ex.id_exhibition }, attributes: ['id_work'], raw: true }),
+            gallery_piece_model.findAll({ where: { exhibition_id: ex.id_exhibition }, attributes: ['id_piece'], raw: true })
+        ]);
+        const workIds = works.map((w) => w.id_work);
+        const pieceIds = pieces.map((p) => p.id_piece);
+        const seen = { artist_seen: true };
+        const [comments, workLikes, pieceLikes] = [idList(req.body?.comments), idList(req.body?.work_likes), idList(req.body?.piece_likes)];
+        await Promise.all([
+            comments.length && gallery_work_comment_model.update(seen, { where: { id_comment: comments, work_id: workIds } }),
+            workLikes.length && gallery_work_like_model.update(seen, { where: { id_like: workLikes, work_id: workIds } }),
+            pieceLikes.length && gallery_piece_like_model.update(seen, { where: { id_like: pieceLikes, piece_id: pieceIds } })
+        ]);
+        res.json({ error: null });
+    } catch (err) {
+        console.error('gallery - activitySeen:', err);
+        res.status(500).json({ error: 'Error al guardar los avisos vistos' });
+    }
+}
+
+export default { likeWork, likePiece, listComments, createComment, deleteComment, activitySeen };
