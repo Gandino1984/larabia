@@ -53,7 +53,8 @@ export function ContestAwards({ workshop, showWinners = contestPhase(workshop) =
             <strong>{awardLabel(place, t)}</strong>
             <span>
               {withWinners ? winner : prize}
-              {withWinners && prize ? <span className="contest-awards__prize"> · {prize}</span> : null}
+              {/* With the winner, the prize under it. */}
+              {withWinners && prize ? <span className="contest-awards__prize">{prize}</span> : null}
             </span>
           </li>
         ))}

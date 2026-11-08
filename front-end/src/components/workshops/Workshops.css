@@ -850,26 +850,26 @@
   letter-spacing: 0.04em;
   color: #cfcfcf;
 }
+/* One grid for all the places (each li lends its three cells to it), so the
+   icons, the places and their prizes / winners line up in columns. */
 .contest-awards ul {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-.contest-awards li {
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr);
-  align-items: baseline;
-  gap: 0.4rem;
+  align-items: start;
+  column-gap: 0.45rem;
+  row-gap: 0.35rem;
   font-size: 0.85rem;
+  line-height: 1.4;
   color: #e6e6e6;
-  overflow-wrap: anywhere;
 }
-.contest-awards li svg { color: #d4a72c; align-self: center; }
+.contest-awards li { display: contents; }
+.contest-awards li svg { color: #d4a72c; margin-top: 0.12em; }
 .contest-awards li strong { white-space: nowrap; font-weight: 700; }
-.contest-awards__prize { color: #a9a9a9; }
+.contest-awards li > span { overflow-wrap: anywhere; }
+.contest-awards__prize { display: block; color: #a9a9a9; font-size: 0.92em; }
 .workshop-card--past .contest-awards li svg { color: #8a8a8a; }
 
 /* On the workshop page (white). */
@@ -879,7 +879,7 @@
 }
 .workshop-detail .contest-awards--winners { background: #fdf3d3; border-color: #e3c25b; }
 .workshop-detail .contest-awards__title { color: #5c4a12; }
-.workshop-detail .contest-awards li { color: #1a1a1a; font-size: 0.95rem; }
+.workshop-detail .contest-awards ul { color: #1a1a1a; font-size: 0.95rem; }
 .workshop-detail .contest-awards__prize { color: #6b6b6b; }
 
 /* «Solicitar plaza» on an orange card: orange too. */
