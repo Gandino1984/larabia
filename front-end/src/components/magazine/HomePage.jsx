@@ -11,6 +11,8 @@ import ScrollHint from '../common/ScrollHint';
 import RollText from '../common/RollText';
 import SubscriberMark from '../common/SubscriberMark';
 import { categoryLabel } from '../../utils/articleFilters';
+import { inSection, sameKey } from '../../utils/sections';
+import { useSectionCatalog } from '../../app_context/useSectionCatalog';
 import { localDate } from '../../utils/locale';
 import { articleTitle, articleSubtitle, articleExcerpt, articleProjectTitle } from '../../utils/contentLang';
 import './HomePage.css';
@@ -40,10 +42,14 @@ function AuthorAvatar({ author, getUrl }) {
 let heroEntrancePlayed = false;
 let scrollOverlayShown = false;
 
+// Sections whose name also goes on the story's image, next to its category.
+const HERO_SECTIONS = ['internacional'];
+
 function HomePage({ ready = true }) {
   const { t, i18n } = useTranslation();
   const { featuredArticles, setSelectedArticle, fetchArticleById, projects, fetchProjects } = useMagazine();
   const { navigateToArticle, openAuthorCard, showSuccess } = useUI();
+  const sectionCatalog = useSectionCatalog();
 
   const handleShare = (e, article) => {
     e.stopPropagation();
@@ -331,10 +337,18 @@ function HomePage({ ready = true }) {
 
   const currentArticle = featuredArticles?.[currentSlide];
   // The story's category, translated when it's one of the known ones
-  // ("general" isn't shown).
-  const heroCategory = currentArticle?.category_article && currentArticle.category_article.toLowerCase() !== 'general'
-    ? categoryLabel(currentArticle.category_article, t)
+  // ("general" isn't shown)…
+  const category = currentArticle?.category_article;
+  const heroCategory = category && category.toLowerCase() !== 'general' && !HERO_SECTIONS.some((key) => sameKey(key, category))
+    ? categoryLabel(category, t)
     : null;
+  // …and the sections of HERO_SECTIONS it's in (older stories: as their
+  // category), named as in the header menu.
+  const heroSections = currentArticle
+    ? HERO_SECTIONS
+      .filter((key) => inSection(currentArticle, key))
+      .map((key) => sectionCatalog.find((s) => sameKey(s.key, key))?.label || categoryLabel(key, t))
+    : [];
   // Title, excerpt and project in the language chosen in the header (or the
   // original when there's no version in it — utils/contentLang.js).
   const lang = i18n.language;
@@ -411,8 +425,8 @@ function HomePage({ ready = true }) {
                     <p className="hero-excerpt">{articleExcerpt(currentArticle, lang)}</p>
                   )}
                   <div className="hero-media">
-                    {/* The story's image, with its category on top (like the
-                        badges of the article cards). */}
+                    {/* The story's image, with its category (and Internacional)
+                        on top, like the badges of the article cards. */}
                     <div className="hero-desc-figure">
                       <div
                         className="hero-desc-image"
@@ -420,7 +434,12 @@ function HomePage({ ready = true }) {
                         role="img"
                         aria-label={articleTitle(currentArticle, lang)}
                       />
-                      {heroCategory && <span className="hero-category">{heroCategory}</span>}
+                      {(heroCategory || heroSections.length > 0) && (
+                        <div className="hero-badges">
+                          {heroCategory && <span className="hero-category">{heroCategory}</span>}
+                          {heroSections.map((label) => <span key={label} className="hero-category">{label}</span>)}
+                        </div>
+                      )}
                     </div>
                     <div className="hero-actions">
                       <button
