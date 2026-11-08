@@ -74,19 +74,29 @@ function ActionEditor({ action: rawAction, onChange }) {
   );
 }
 
-/** Shared row controls: label (es/en), visibility, role, reorder, delete. */
+// The label in each language: [code, i18n key, Spanish default].
+const LABEL_FIELDS = [
+  ['es', 'admin.nav.labelEs', 'Etiqueta (ES)'],
+  ['en', 'admin.nav.labelEn', 'Etiqueta (EN)'],
+  ['eu', 'admin.nav.labelEu', 'Etiqueta (EU)']
+];
+
+/** Shared row controls: label (es/en/eu, each tagged with its language —
+    once filled, the placeholder no longer says which), visibility, role,
+    reorder, delete. */
 function ItemMeta({ item, onChange, onMove, onDelete, canDelete, isFirst, isLast }) {
   const { t } = useTranslation();
   const setLabel = (lang, v) => onChange({ ...item, label: { ...item.label, [lang]: v } });
   return (
     <div className="nav-item__meta">
       <div className="nav-item__labels">
-        <input className="nav-item__label" type="text" maxLength={40} placeholder={t('admin.nav.labelEs', 'Etiqueta (ES)')} lang="es"
-          value={item.label?.es || ''} onChange={(e) => setLabel('es', e.target.value)} />
-        <input className="nav-item__label" type="text" maxLength={40} placeholder={t('admin.nav.labelEn', 'Etiqueta (EN)')} lang="en"
-          value={item.label?.en || ''} onChange={(e) => setLabel('en', e.target.value)} />
-        <input className="nav-item__label" type="text" maxLength={40} placeholder={t('admin.nav.labelEu', 'Etiqueta (EU)')} lang="eu"
-          value={item.label?.eu || ''} onChange={(e) => setLabel('eu', e.target.value)} />
+        {LABEL_FIELDS.map(([lang, key, fallback]) => (
+          <label key={lang} className="nav-item__label-field">
+            <span className="nav-item__lang" aria-hidden="true">{lang.toUpperCase()}</span>
+            <input className="nav-item__label" type="text" maxLength={40} placeholder={t(key, fallback)} aria-label={t(key, fallback)} lang={lang}
+              value={item.label?.[lang] || ''} onChange={(e) => setLabel(lang, e.target.value)} />
+          </label>
+        ))}
       </div>
       <div className="nav-item__controls">
         <button type="button" title={item.visible ? t('admin.nav.visible', 'Visible') : t('admin.nav.hidden', 'Oculto')}

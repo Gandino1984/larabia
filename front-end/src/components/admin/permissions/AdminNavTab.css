@@ -33,7 +33,21 @@
 
 .nav-item__meta { display: flex; flex-direction: column; gap: 0.5rem; }
 
-.nav-item__labels { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+/* Phones: one label per line, whole (three side by side cut «Espacio
+   abierto» or «Recomendaciones» short). */
+.nav-item__labels { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.nav-item__label-field { display: flex; align-items: center; gap: 0.4rem; min-width: 0; }
+
+.nav-item__lang {
+  flex-shrink: 0;
+  width: 1.8rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: var(--color-text-muted, #999);
+}
 
 .nav-item__label,
 .nav-action input,
@@ -69,11 +83,11 @@
 .nav-icon-btn--danger:hover { color: var(--color-danger, #dc2626); border-color: var(--color-danger, #dc2626); }
 
 .nav-action { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-.nav-action select, .nav-action input { flex: 1; }
+/* Side by side when they fit whole, else one per line. */
+.nav-action select, .nav-action input { flex: 1 1 12rem; }
 
 .nav-children {
-  margin-left: 0.5rem;
-  padding-left: 0.75rem;
+  padding-left: 0.6rem;
   border-left: 2px solid var(--color-border, rgba(255, 255, 255, 0.15));
   display: flex;
   flex-direction: column;
@@ -134,7 +148,19 @@
 .admin-nav__save { background: var(--color-accent, #667eea); color: #fff; border-color: var(--color-accent, #667eea); }
 .admin-nav__save:disabled, .admin-nav__reset:disabled { opacity: 0.6; cursor: not-allowed; }
 
+/* Until the labels and the controls share a line, «Quién lo ve» takes the
+   room the buttons leave (so the bin doesn't drop to a line of its own). */
+@media (max-width: 999px) {
+  .nav-item__controls select { flex: 1 1 6rem; }
+}
+
 @media (min-width: 600px) {
+  .nav-item__labels { flex-direction: row; }
+  .nav-item__label-field { flex: 1; }
+  .nav-children { margin-left: 0.5rem; padding-left: 0.75rem; }
+}
+
+@media (min-width: 1000px) {
   .nav-item__meta { flex-direction: row; align-items: center; justify-content: space-between; }
   .nav-item__labels { flex: 1; }
 }

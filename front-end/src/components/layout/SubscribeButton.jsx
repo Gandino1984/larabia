@@ -3,10 +3,11 @@
 // "Suscríbete": a red button flanking the header bar on the LEFT (mirror of
 // the "Publica" button on the right). Opens the plan picker (SubscribeModal);
 // readers who aren't signed in are sent to log in first. Hidden for readers
-// who already subscribe and wherever the header is hidden (editor, article
-// reader). Only for whoever can become a member (SubscriptionContext
-// canJoin): while it isn't open to the public, admins and super admins only;
-// while Stripe isn't configured, super admins (preview).
+// who already subscribe, wherever the header is hidden (editor, article
+// reader) and in Admin (a work screen; on phones it covered the title).
+// Only for whoever can become a member (SubscriptionContext canJoin): while
+// it isn't open to the public, admins and super admins only; while Stripe
+// isn't configured, super admins (preview).
 import { useEffect, useRef, useState } from 'react';
 import { Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +23,7 @@ let slideInPlayed = false;
 function SubscribeButton({ ready = true }) {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
-  const { navigateToLogin, showInfo, showSuccess, showEditor, showWorkshopEditor, showArticleDetail } = useUI();
+  const { navigateToLogin, showInfo, showSuccess, showEditor, showWorkshopEditor, showArticleDetail, showAdmin } = useUI();
   const subscription = useSubscription();
   const [isIn, setIsIn] = useState(slideInPlayed);
   const timerRef = useRef(null);
@@ -56,7 +57,7 @@ function SubscribeButton({ ready = true }) {
   if (!subscription || subscription.isSubscriber) return modal;
   if (!subscription.canJoin) return modal;
 
-  const isHidden = showEditor || showWorkshopEditor || showArticleDetail;
+  const isHidden = showEditor || showWorkshopEditor || showArticleDetail || showAdmin;
   const label = t('subscription.button', 'Hazte socio/a');
 
   const handleClick = () => {

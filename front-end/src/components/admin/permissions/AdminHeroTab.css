@@ -195,6 +195,14 @@
   font-size: 15px;
 }
 
+/* Phones: the buttons go to a line of their own, so the title and its
+   details aren't squeezed into a narrow column. */
+@media (max-width: 480px) {
+  .admin-hero__item { flex-wrap: wrap; }
+  .admin-hero__text { flex: 1 1 10rem; }
+  .admin-hero__actions { margin-left: auto; }
+}
+
 @media (min-width: 769px) {
   .admin-hero__grip { display: inline-block; }
   .admin-hero__thumb { width: 64px; height: 64px; }

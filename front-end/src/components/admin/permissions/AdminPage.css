@@ -19,50 +19,57 @@
 
 .admin-page__subtitle {
   margin: 0;
-  color: #6b6b6b;
+  color: var(--color-text-muted, #999999);
   font-size: 14px;
 }
 
+/* The tabs are pills that wrap onto as many rows as they need, so all of
+   them are always in sight (a single scrolling row hid the last ones, even
+   on a laptop). */
 .admin-page__tabs {
   display: flex;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 24px;
-  border-bottom: 2px solid #ececec;
-  overflow-x: auto;
-  flex-wrap: nowrap;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
 }
 
 .admin-page__tab {
-  background: none;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
   white-space: nowrap;
-  flex-shrink: 0;
-  padding: 12px 18px;
-  font-size: 14px;
+  padding: 8px 14px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.4px;
   color: #cfcfcf;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: color 120ms ease, border-color 120ms ease;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
 }
 
 @media (max-width: 768px) {
   .admin-page { padding: 6rem 1rem 4rem; }
   .admin-page__header h1 { font-size: 22px; }
-  .admin-page__tab { padding: 10px 12px; font-size: 13px; }
+  .admin-page__tabs { gap: 6px; }
+  .admin-page__tab { padding: 7px 11px; font-size: 12px; }
+}
+
+/* Small phones (320px): a bit tighter, four rows instead of six. */
+@media (max-width: 374px) {
+  .admin-page__tab { padding: 7px 9px; font-size: 11px; letter-spacing: 0.2px; }
 }
 
 .admin-page__tab:hover {
   color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .admin-page__tab.is-active {
-  color: #ffffff;
-  border-bottom-color: #ffffff;
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #111111;
 }
 
 .admin-page__body {
