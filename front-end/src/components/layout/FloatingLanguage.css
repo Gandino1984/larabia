@@ -5,8 +5,9 @@
    - up to 1409px: just below the bar, left edges flush;
    - from 1410px: beside the bar on the left, level with its top;
    - bar hidden (an article): in the top-left corner of the screen.
-   Under it, for anyone signed in, the «Reportar un error» pill, styled the
-   same. The red «Hazte socio/a» button, when shown, goes right under them
+   Under it, for anyone signed in, the «Reportar un error» button: a pale red
+   square with the bug icon; on hover its name unfolds to the right. The red
+   «Hazte socio/a» button, when shown, goes right under them
    (SubscribeButton.css, with --floating-lang-space). */
 .floating-lang {
   display: none;
@@ -56,8 +57,7 @@
     left: 1rem;
   }
 
-  .floating-lang .language-selector-btn,
-  .floating-report-btn {
+  .floating-lang .language-selector-btn {
     min-height: var(--floating-lang-h);
     height: var(--floating-lang-h);
     padding: 0 10px;
@@ -74,21 +74,64 @@
     height: 15px;
   }
 
+  /* «Reportar un error»: the pill's height, square, pale red, the bug icon.
+     Its name unfolds to the right on hover (or keyboard focus): a strip of
+     the same colour laid over what's beside it, so nothing moves. */
   .floating-report-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    width: var(--floating-lang-h);
+    height: var(--floating-lang-h);
+    padding: 0;
     border: none;
-    font-family: 'Source Code Pro', monospace;
-    text-transform: none;
-    white-space: nowrap;
+    border-radius: 0;
+    background: #fecaca;
+    color: #991b1b;
     cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
   }
 
-  .floating-lang .language-selector-btn:hover,
-  .floating-lang .language-selector-btn:focus-visible,
+  .floating-report-btn__text {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    max-width: 0;
+    padding-right: 0;
+    overflow: hidden;
+    background: inherit;
+    color: inherit;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: max-width 0.3s ease, padding-right 0.3s ease;
+  }
+
   .floating-report-btn:hover,
   .floating-report-btn:focus-visible {
+    background: #dc2626;
+    color: #ffffff;
+  }
+
+  .floating-report-btn:hover .floating-report-btn__text,
+  .floating-report-btn:focus-visible .floating-report-btn__text {
+    max-width: 14rem;
+    padding-right: 10px;
+  }
+
+  /* Unfolded, over the bar too (beside it on wide screens). */
+  .floating-lang:has(.floating-report-btn:hover),
+  .floating-lang:has(.floating-report-btn:focus-visible) {
+    z-index: 1001;
+  }
+
+  .floating-lang .language-selector-btn:hover,
+  .floating-lang .language-selector-btn:focus-visible {
     background: #000000;
     color: #ffffff;
   }
@@ -108,14 +151,6 @@
     align-items: flex-end;
   }
 }
-/* Beside the bar there's little room until the screen is wide: the report
-   pill keeps only its icon (its name: title / aria-label). */
-@media (min-width: 1410px) and (max-width: 1619px) {
-  .floating-lang:not(.floating-lang--corner) .floating-report-btn__text {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .floating-lang {
     transition: none;

@@ -4,8 +4,9 @@
 // so it's always at hand — also where the bar is hidden (an article: then it
 // moves up to the top-left corner). Computers and tablets only: on phones it
 // stays in the burger menu (Header). Just below the bar's left end, beside the
-// bar on wide screens. Under it, for anyone signed in, the same pill for
-// «Reportar un error» (also in the menu, under «Sobre La Rabia»); the red
+// bar on wide screens. Under it, for anyone signed in, «Reportar un error»: a
+// pale red square with the bug icon whose name unfolds to its right on hover
+// (also in the menu, under «Sobre La Rabia»); the red
 // «Hazte socio/a» button goes under them (<html data-report-pill>).
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,8 +33,8 @@ function FloatingLanguage({ ready = true, cornered = false }) {
       <LanguageSelector />
       {report && (
         <button type="button" className="floating-report-btn" onClick={openReportModal} title={label} aria-label={label}>
-          <Bug size={15} aria-hidden="true" />
-          <span className="floating-report-btn__text">{label}</span>
+          <Bug size={17} aria-hidden="true" />
+          <span className="floating-report-btn__text" aria-hidden="true">{label}</span>
         </button>
       )}
     </div>
