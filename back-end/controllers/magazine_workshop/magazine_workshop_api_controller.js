@@ -1,6 +1,6 @@
 // back-end/controllers/magazine_workshop/magazine_workshop_api_controller.js
-import magazineWorkshopController from "./magazine_workshop_controller.js";
-import { getRequestUser, roleSnapshot } from "../../utils/authHelper.js";
+import magazineWorkshopController, { isContest, awardsWithoutWinners } from "./magazine_workshop_controller.js";
+import { getRequestUser, roleSnapshot, requireSuperAdmin } from "../../utils/authHelper.js";
 import reader_subscription_model, { isLiveSubscription } from "../../models/reader_subscription_model.js";
 import magazine_workshop_model from "../../models/magazine_workshop_model.js";
 import workshop_author_model from "../../models/workshop_author_model.js";
@@ -14,7 +14,7 @@ async function requireWorkshopCreator(req, res) {
     const user = await getRequestUser(req);
     const role = roleSnapshot(user);
     if (!user || !(role.isAdmin || role.isSuperAdmin)) {
-        res.status(403).json({ error: 'Solo admins y super-admins pueden crear talleres' });
+        res.status(403).json({ error: 'Solo admins y super-admins pueden crear talleres y concursos' });
         return null;
     }
     return user;
@@ -107,7 +107,28 @@ async function requireWorkshopAccess(req, res, workshop) {
     return null;
 }
 
-// Public: anyone can see the workshops.
+// A contest as this viewer sees it: its managers (super admins included) see
+// everything; anyone else, the winners only from the jury's day on, and never
+// the review's reason.
+function contestForViewer(w, manages) {
+    if (!isContest(w) || manages) return w;
+    const { rejection_reason_workshop, ...rest } = w;
+    return w.contest_phase === 'resolved' ? rest : { ...rest, awards_workshop: awardsWithoutWinners(w.awards_workshop) };
+}
+
+// Contests waiting for review (or sent back) are seen only by their managers
+// and the super admins.
+async function shapeForViewer(list, user) {
+    const out = [];
+    for (const w of list) {
+        const manages = user ? await isWorkshopManager(user, w) : false;
+        if (isContest(w) && w.review_status_workshop !== 'approved' && !manages) continue;
+        out.push(contestForViewer(w, manages));
+    }
+    return out;
+}
+
+// Public: anyone can see the workshops and contests.
 // Signed in, each card also says what this reader can do (personalize).
 async function getAll(req, res) {
     try {
@@ -128,7 +149,7 @@ async function getAll(req, res) {
             const byWorkshop = await magazineWorkshopController.spotRequestsByWorkshop(ids);
             if (byWorkshop.size) list = list.map((w) => (byWorkshop.has(w.id_workshop) ? { ...w, spot_requests: byWorkshop.get(w.id_workshop) } : w));
         }
-        res.json({ error: null, data: list });
+        res.json({ error: null, data: await shapeForViewer(list, user) });
     } catch (err) {
         console.error("-> workshop api getAll() - Error =", err);
         res.status(500).json({ error: "Error al obtener los talleres", details: err.message });
@@ -142,16 +163,24 @@ async function getAll(req, res) {
 // sent to the workshop's managers.
 async function getById(req, res) {
     try {
-        const user = await getRequestUser(req);
-        if (!user) {
-            return res.status(403).json({ error: 'Inicia sesión para ver el taller', code: 'login_required' });
-        }
         const { id_workshop } = req.params;
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
+        const user = await getRequestUser(req);
+        if (!user) {
+            const kind = await magazine_workshop_model.findByPk(id_workshop, { attributes: ['kind_workshop'] });
+            return res.status(403).json({
+                error: isContest(kind) ? 'Inicia sesión para ver el concurso' : 'Inicia sesión para ver el taller',
+                code: 'login_required'
+            });
+        }
         const { error, data } = await magazineWorkshopController.getById(id_workshop);
         if (error) return res.status(404).json({ error });
 
         const canManage = await isWorkshopManager(user, data);
+        // A contest not approved yet: its managers only.
+        if (isContest(data) && data.review_status_workshop !== 'approved' && !canManage) {
+            return res.status(404).json({ error: 'Concurso no encontrado' });
+        }
         const participants = data.participants || [];
         let bookingCode = null;
         if (await magazineWorkshopController.isBlocked(id_workshop, user.id_user)) bookingCode = 'blocked';
@@ -183,7 +212,7 @@ async function getById(req, res) {
         } else {
             delete out.participants;
         }
-        res.json({ error, data: out });
+        res.json({ error, data: contestForViewer(out, canManage) });
     } catch (err) {
         console.error("-> workshop api getById() - Error =", err);
         res.status(500).json({ error: "Error al obtener el taller", details: err.message });
@@ -196,9 +225,18 @@ async function create(req, res) {
         if (!admin) return; // 403 already sent
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
-            cover_image_workshop, capacity_workshop, audience_workshop, free_workshop, lat_workshop, lng_workshop, authors, author_name } = req.body;
+            cover_image_workshop, capacity_workshop, audience_workshop, free_workshop, lat_workshop, lng_workshop, authors, author_name,
+            kind_workshop, registration_start_workshop, registration_end_workshop, resolution_date_workshop, awards_workshop } = req.body;
 
+        // A contest by anyone but a super admin waits for one to approve it.
+        const contest = kind_workshop === 'contest';
         const data = {
+            kind_workshop: contest ? 'contest' : 'workshop',
+            registration_start_workshop,
+            registration_end_workshop,
+            resolution_date_workshop,
+            awards_workshop,
+            review_status_workshop: contest && !roleSnapshot(admin).isSuperAdmin ? 'pending' : 'approved',
             title_workshop,
             description_workshop,
             location_workshop,
@@ -231,9 +269,15 @@ async function update(req, res) {
         if (!admin) return;
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
-            cover_image_workshop, capacity_workshop, audience_workshop, free_workshop, lat_workshop, lng_workshop, authors, author_name } = req.body;
+            cover_image_workshop, capacity_workshop, audience_workshop, free_workshop, lat_workshop, lng_workshop, authors, author_name,
+            registration_start_workshop, registration_end_workshop, resolution_date_workshop, awards_workshop } = req.body;
 
-        const data = {};
+        // A contest sent back goes to the review again once it's edited.
+        const data = { resubmit: true };
+        if (registration_start_workshop !== undefined) data.registration_start_workshop = registration_start_workshop;
+        if (registration_end_workshop !== undefined) data.registration_end_workshop = registration_end_workshop;
+        if (resolution_date_workshop !== undefined) data.resolution_date_workshop = resolution_date_workshop;
+        if (awards_workshop !== undefined) data.awards_workshop = awards_workshop;
         if (title_workshop !== undefined) data.title_workshop = title_workshop;
         if (description_workshop !== undefined) data.description_workshop = description_workshop;
         if (location_workshop !== undefined) data.location_workshop = location_workshop;
@@ -297,9 +341,15 @@ async function reserve(req, res) {
     try {
         const { id_workshop } = req.params;
         if (!id_workshop) return res.status(400).json({ error: 'El ID del taller es obligatorio' });
-        const workshop = await magazine_workshop_model.findByPk(id_workshop, { attributes: ['id_workshop', 'free_workshop'] });
-        const user = await requireWorkshopAccess(req, res, workshop);
-        if (!user) return;
+        const workshop = await magazine_workshop_model.findByPk(id_workshop, { attributes: ['id_workshop', 'free_workshop', 'kind_workshop'] });
+        // A contest: anyone signed in signs up.
+        const user = isContest(workshop)
+            ? await getRequestUser(req)
+            : await requireWorkshopAccess(req, res, workshop);
+        if (!user) {
+            if (!res.headersSent) res.status(403).json({ error: 'Inicia sesión para inscribirte', code: 'login_required' });
+            return;
+        }
         const result = await magazineWorkshopController.reserve(id_workshop, user.id_user);
         if (result.error) return res.status(400).json(result);
         res.json(result);
@@ -463,7 +513,7 @@ async function searchUsers(req, res) {
 async function invitationFeed(req, res) {
     try {
         const user = await getRequestUser(req);
-        if (!user) return res.json({ error: null, data: { invitations: [], responses: [], spot_requests: [], spot_answers: [] } });
+        if (!user) return res.json({ error: null, data: { invitations: [], responses: [], spot_requests: [], spot_answers: [], contest_reviews: [] } });
         const result = await magazineWorkshopController.invitationFeed(user.id_user);
         if (result.error) return res.status(500).json(result);
         // Extra-place requests: pending ones on the workshops they created
@@ -473,7 +523,9 @@ async function invitationFeed(req, res) {
         const managed = role.isSuperAdmin ? 'all'
             : role.canCreateContent ? await magazineWorkshopController.createdWorkshopIds(user.id_user) : [];
         const spots = await magazineWorkshopController.spotFeed(user.id_user, managed);
-        res.json({ error: null, data: { ...result.data, ...spots } });
+        // The super admins' decisions on the contests they created.
+        const contest_reviews = role.canCreateContent ? await magazineWorkshopController.reviewFeed(user.id_user) : [];
+        res.json({ error: null, data: { ...result.data, ...spots, contest_reviews } });
     } catch (err) {
         console.error("-> workshop api invitationFeed() - Error =", err);
         res.status(500).json({ error: "Error al cargar las invitaciones", details: err.message });
@@ -522,7 +574,52 @@ async function markResponsesSeen(req, res) {
     }
 }
 
+// ── Contests' review: super admins ──
+
+// GET /review/pending — contests waiting for approval.
+async function pendingContests(req, res) {
+    try {
+        if (!(await requireSuperAdmin(req, res))) return;
+        const result = await magazineWorkshopController.pendingContests();
+        if (result.error) return res.status(500).json(result);
+        res.json({ error: null, data: result.data });
+    } catch (err) {
+        console.error("-> workshop api pendingContests() - Error =", err);
+        res.status(500).json({ error: "Error al obtener los concursos pendientes", details: err.message });
+    }
+}
+
+// PATCH /review/:id_workshop/approve | /reject { reason }
+const reviewContest = (decision) => async (req, res) => {
+    try {
+        if (!(await requireSuperAdmin(req, res))) return;
+        const result = await magazineWorkshopController.reviewContest(req.params.id_workshop, decision, req.body?.reason);
+        if (result.error) return res.status(400).json(result);
+        res.json({ error: null, ...result });
+    } catch (err) {
+        console.error("-> workshop api reviewContest() - Error =", err);
+        res.status(500).json({ error: "Error al revisar el concurso", details: err.message });
+    }
+};
+
+// POST /review/seen { ids } — the creator has seen these decisions.
+async function markReviewsSeen(req, res) {
+    try {
+        const user = await getRequestUser(req);
+        if (!user) return res.status(403).json({ error: 'Inicia sesión', code: 'login_required' });
+        const result = await magazineWorkshopController.markReviewsSeen(user.id_user, req.body?.ids);
+        res.json({ error: null, data: result.data });
+    } catch (err) {
+        console.error("-> workshop api markReviewsSeen() - Error =", err);
+        res.status(500).json({ error: "Error al actualizar las notificaciones", details: err.message });
+    }
+}
+
 export default {
+    pendingContests,
+    approveContest: reviewContest('approve'),
+    rejectContest: reviewContest('reject'),
+    markReviewsSeen,
     getAll,
     getById,
     create,

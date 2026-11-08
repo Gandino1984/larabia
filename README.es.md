@@ -34,7 +34,10 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
   - un **micro-perfil**;
   - un **paisaje sonoro** (un dibujo que se mueve con un sonido).
 - **Autoras/es:** el directorio de perfiles, en orden alfabético y con buscador (por nombre o especialidad, sin importar mayúsculas ni tildes), y las publicaciones de cada persona. Las y los artistas visuales también pueden tener perfil (desde «Autoras/es» o con «Mi perfil de autor/a» en «Mi galería»): lleva la etiqueta «Artista visual» y lleva a su exposición («Ver su exposición») en lugar de a sus publicaciones; en la exposición, su nombre lleva al perfil. La foto de una autora o autor es la de su perfil (si no tiene, la de su cuenta) en todas partes: el directorio, el avatar junto a su nombre y su tarjeta.
-- **Talleres:**
+- **Talleres y concursos** (el botón «Talleres», cuyo texto se alterna cada 3 s con «Concursos» — `CycleText`, `cycle` en el menú; se cambia en Admin › Menú):
+  - Tres pestañas: Talleres, Talleres infantiles y **Concursos**. Cada tarjeta dice lo que es («Taller», «Taller infantil», «Concurso»). Los concursos son filas de `magazine_workshops` con `kind_workshop = 'contest'` (`utils/contests.js`) y se hacen en el mismo editor (se elige en el paso 1 al crearlo; después no cambia).
+  - Un **concurso** no tiene fecha, lugar ni aforo: las inscripciones se abren un día y se cierran al acabar otro, y el jurado da a conocer a quien gana un tercero (días, hora de Madrid). Se inscribe cualquiera con cuenta («Inscribirme»; sin ser socio/a). Su tarjeta y su página muestran los días y la fase: inscripciones próximamente (azul), abiertas (verde), cerradas (naranja), resuelto (dorado) y, después, finalizado (gris). Puede dar un 1.er, 2.º y 3.er premio y una mención honorífica: el premio de cada puesto se ve desde el principio y quién lo gana, solo desde el día del fallo (el servidor no se lo manda a nadie más antes; lo rellena quien lo gestiona). En los concursos no hay invitaciones ni plazas extra; quien lo gestiona ve las inscripciones y puede quitar o bloquear a alguien.
+  - Los concursos de quien no es super admin esperan a que uno los revise: salen en Admin › Pendientes («Concursos»), se publican o se devuelven con un motivo (quien lo creó se entera por la campana y ve el motivo en el editor; al guardarlo se envía de nuevo). Hasta entonces solo lo ven quienes lo gestionan y las super admins, con la etiqueta «En revisión» / «Devuelto». Editar un concurso aprobado no lo despublica.
   - Las tarjetas son públicas. Su color dice cómo está cada una (`statusOf`, `WorkshopsList.jsx`): **verde** si quedan plazas, **naranja** si está completo (con «Solicitar plaza» para quien puede pedirla), **gris** cuando ha terminado: con aspecto desactivado, pero legible. Un taller termina cuando acaba su día (los que no tienen fecha, nunca). La portada va en un marco 4:3, entera (los carteles llevan texto), sobre una copia desenfocada de sí misma, así que todas las tarjetas miden lo mismo sea cual sea la forma de la imagen.
   - **Talleres finalizados:** se ven por defecto, en gris, después de los próximos (el más reciente primero); «Ocultar talleres finalizados», bajo las pestañas, los quita y «Mostrar talleres finalizados (N)» los devuelve (el botón solo aparece en una pestaña que tenga alguno). En un taller terminado no se puede reservar ni pedir plaza (el servidor responde «Este taller ya ha terminado», `isPastWorkshop`), y su página lo dice.
   - **Compartir:** cualquiera, con cuenta o sin ella, copia el enlace de un taller desde su menú ⋯ («Compartir»), como con los artículos. El enlace abre la página del taller a quien tiene la sesión iniciada; sin sesión, muestra la tarjeta de ese taller en Talleres (con un borde dorado, en su pestaña, aunque ya haya pasado) y una nota para iniciar sesión, y la página se abre en cuanto la inicia.
@@ -55,7 +58,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 - **Avisos** en la campana de la cabecera: contenido nuevo, invitaciones, respuestas y hacerse socio/a.
 - **Barra superior:** la campana va justo después de la foto de perfil; «Publica» (editoras/es en adelante) es lo último de la barra (en el móvil, un icono a la izquierda del menú). El selector de idioma es una pequeña píldora fuera de la barra, arriba a la izquierda (el botón rojo «Hazte socio/a» va debajo; no en Admin, donde en el móvil tapaba la página), así que se ve incluso donde la barra se oculta (un artículo); en el móvil está en el menú.
 - **Formulario de contacto** y **newsletter** («Recomendaciones»):
-  - Las cuentas nuevas (al entrar con Google por primera vez) la reciben; la página de inicio de sesión lo avisa. Cualquiera la activa o la quita desde «Recomendaciones».
+  - **Todas las cuentas nuevas la reciben**: al entrar con Google por primera vez, al registrarse con contraseña, las que crea un super admin y la autora/or o artista invitada al entrar por primera vez (su cuenta se prepara sin ella). La página de inicio de sesión lo avisa. Cualquiera la activa o la quita desde «Recomendaciones». Las cuentas anteriores no cambian.
   - Cada newsletter lleva un enlace «Darme de baja» de un clic que funciona sin iniciar sesión, y una cabecera `List-Unsubscribe` para el botón propio del programa de correo (un token aleatorio por persona, `user.newsletter_token`, que nunca llega al front-end).
 
 **Tres idiomas:** castellano, inglés y euskera.
@@ -76,13 +79,13 @@ Ver [Idiomas (i18n)](#idiomas-i18n).
 **Administración** (*Admin*, super admins) — sus pestañas son píldoras que bajan de línea, así que se ven todas también en el móvil:
 
 - usuarios y roles;
-- la cola de revisión (artículos, proyectos y cambios de sección);
+- la cola de revisión (artículos, proyectos, concursos y cambios de sección);
 - la **portada**: el orden de las historias destacadas del hero (flechas o arrastrando), quitar una, añadir cualquier historia publicada (`magazine_articles.featured_order`). El hero muestra solo las destacadas; las más gustadas que no lo están aparecen como sugerencias, para destacarlas con un clic;
 - las propuestas enviadas desde Espacio abierto (leerlas, aceptarlas o descartarlas, descargar el archivo, responder por email);
 - datos de la revista (nombre, eslogan, logos);
 - talleres;
 - apariencia (temas, colores, animaciones);
-- el **constructor del menú** de la barra superior (etiquetas en ES / EN / EU, quién ve cada botón y qué abre).
+- el **constructor del menú** de la barra superior (etiquetas en ES / EN / EU, quién ve cada botón, qué abre y, si se quiere, un segundo texto con el que el botón se alterna cada 3 s).
 
 **Hazte socio/a:** las lectoras y lectores se hacen socios/as de pago con **Stripe** (mensual y anual). La interfaz dice «socio/a» («Hazte socio/a», la insignia «Socio/a»); el código y las tablas lo siguen llamando *subscription*.
 
@@ -140,7 +143,7 @@ Los roles son marcas independientes en `user`; una cuenta puede tener varias.
 | Lector/a (por defecto) | Leer, dar me gusta, comentar, seguir proyectos, hacerse socio/a, reservar talleres (siendo socio/a) |
 | Lector/a premium (`is_premium_reader`) | Además, leer los artículos marcados como premium |
 | Editor/a (`is_editor`) | Crear publicaciones y perfiles de autoría; todo pasa por revisión. Editar los talleres que imparte |
-| Admin (`is_admin`) | Como editor/a, más crear talleres y las recomendaciones de la newsletter |
+| Admin (`is_admin`) | Como editor/a, más crear talleres y concursos (los concursos pasan por la revisión de un super admin) y las recomendaciones de la newsletter |
 | Super admin (`is_super_admin`) | Todo; publica directamente; revisa lo de los demás; panel de Admin; invita autoras/es y artistas |
 | Artista visual (`is_artist`, combinable con cualquier rol) | Su exposición en la Galería, su perfil de autoría y las charlas que le piden las socias/os — nada más |
 

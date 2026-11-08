@@ -141,3 +141,56 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* A contest: its three days side by side from tablets up. */
+@media (min-width: 641px) {
+  .workshop-editor__row--three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Editing: what it is can't change any more. */
+.workshop-editor__kind-fixed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* A contest's awards: per place, the prize and the winner (one under the
+   other on phones, side by side from tablets up). */
+.contest-editor__awards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.contest-editor__award {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.4rem 1rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  background: #fafafa;
+}
+.contest-editor__award .form-group { margin: 0; }
+.contest-editor__award input,
+.contest-editor__award textarea { width: 100%; min-width: 0; }
+.contest-editor__place {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  color: #5c4a12;
+}
+.contest-editor__place svg { color: #b8901f; }
+@media (min-width: 641px) {
+  .contest-editor__award {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .contest-editor__place { grid-column: 1 / -1; }
+}
+.contest-editor__review-award {
+  display: block;
+}
+.contest-editor__review-award strong { margin-right: 0.4rem; }

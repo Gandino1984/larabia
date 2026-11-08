@@ -37,6 +37,21 @@
 .more-dropdown-btn .roll__line {
   display: block;
 }
+/* CycleText: texts taking turns (one line high, as wide as the longest). */
+.roll--cycle { height: 1.2em; }
+.roll--cycle .roll__track {
+  display: block;
+  transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
+  will-change: transform;
+}
+.roll--cycle .roll__track.is-jumping { transition: none; }
+.roll--cycle .roll__line,
+.nav-link .roll--cycle .roll__line { display: block; text-align: center; }
+.roll--cycle .roll__line:nth-child(2) { position: static; }
+/* The hover roll doesn't apply (it would move each line on its own). */
+.nav-link:hover .roll--cycle .roll__line,
+.mobile-nav-link:hover .roll--cycle .roll__line { transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .roll__line { transition: none; }
   .nav-link:hover .roll__line,
@@ -1737,3 +1752,7 @@
   gap: 0.75rem;
 }
 
+
+@media (prefers-reduced-motion: reduce) {
+  .roll--cycle .roll__track { transition: none; }
+}

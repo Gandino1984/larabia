@@ -16,8 +16,11 @@ export const DEFAULT_NAV = [
   // but its behavior is fixed.
   { id: 'projects', kind: 'projects', visible: true, min_role: 'all',
     label: { es: 'Proyectos', en: 'Projects', eu: 'Proiektuak' } },
+  // The section holds workshops and contests: the button alternates its
+  // label with «Concursos» every 3 s (`cycle`, navCycleLabel).
   { id: 'talleres', kind: 'link', visible: true, min_role: 'all',
     label: { es: 'Talleres', en: 'Workshops', eu: 'Tailerrak' },
+    cycle: { es: 'Concursos', en: 'Contests', eu: 'Lehiaketak' },
     action: { type: 'section', value: 'talleres' } },
   { id: 'more', kind: 'group', visible: true, min_role: 'all',
     label: { es: 'Más', en: 'More', eu: 'Gehiago' },
@@ -89,14 +92,34 @@ export const ROLE_OPTIONS = [
 ];
 
 // The default buttons' labels by id: a saved menu whose label wasn't changed
-// still gets the languages added later (e.g. Basque).
+// still gets the languages added later (e.g. Basque). Same for the texts a
+// button alternates with (a menu saved before they existed gets them).
 const DEFAULT_LABELS = {};
+const DEFAULT_CYCLES = {};
 (function collect(items) {
   items.forEach((it) => {
     DEFAULT_LABELS[it.id] = it.label;
+    if (it.cycle) DEFAULT_CYCLES[it.id] = it.cycle;
     if (it.children) collect(it.children);
   });
 })(DEFAULT_NAV);
+
+/** The text a button alternates with every 3 s, in this language ('' = none). */
+export function navCycleLabel(item, lang) {
+  const cycle = item?.cycle === undefined ? DEFAULT_CYCLES[item?.id] : item.cycle;
+  if (!cycle) return '';
+  return cycle[lang] || cycle.es || cycle.en || '';
+}
+
+/** A menu for the builder: the default alternating texts filled in where a
+ *  saved menu has none yet (so they can be seen and changed). */
+export function withDefaultCycles(items) {
+  return (items || []).map((it) => ({
+    ...it,
+    ...(it.cycle === undefined && DEFAULT_CYCLES[it.id] ? { cycle: { ...DEFAULT_CYCLES[it.id] } } : {}),
+    ...(it.children ? { children: withDefaultCycles(it.children) } : {})
+  }));
+}
 
 /** Pick the label for the current language, falling back to Spanish then English. */
 export function navLabel(item, lang) {

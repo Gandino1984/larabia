@@ -34,7 +34,10 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
   - a **micro-profile**;
   - a **soundscape** (*paisaje sonoro*, a drawing that moves with a sound).
 - **Authors:** the directory of author profiles, in alphabetical order with a search bar (by name or specialty, ignoring case and accents), and each author's publications. Visual artists can have a profile too (from «Autoras/es» or «Mi perfil de autor/a» in «Mi galería»): it carries an «Artista visual» chip and leads to their exhibition («Ver su exposición») instead of publications, and the artist's name on their exhibition leads back to it. An author's photo is their profile's own photo (else their account image) everywhere: the directory, the avatars next to their name and their card.
-- **Workshops:**
+- **Workshops and contests** (the «Talleres» button, whose label alternates every 3 s with «Concursos» — `CycleText`, `cycle` in the menu; editable in Admin › Menú):
+  - Three tabs: Talleres, Talleres infantiles and **Concursos**. Every card says what it is («Taller», «Taller infantil», «Concurso»). Contests are rows of `magazine_workshops` with `kind_workshop = 'contest'` (`utils/contests.js`), made in the same editor (chosen in step 1 when creating; it can't change afterwards).
+  - A **contest** has no date, place or capacity: sign-ups open on one day and close at the end of another, and the jury announces the winners on a third (plain days, Madrid time). Anyone with an account signs up («Inscribirme»; no membership). Its card and page show the days and the phase — sign-ups soon (blue), open (green), closed (orange), resolved (gold), then finished (grey). It can award a 1st, 2nd and 3rd place and an honorable mention: each place's prize is shown from the start, its winner only from the jury's day (the server sends it to nobody else before then; its managers fill them in). No invitations or extra places in contests; its managers see the sign-ups and can remove or block people.
+  - Contests by anyone but a super admin wait for one: they appear in Admin › Pendientes («Concursos»), are published or sent back with a reason (the creator hears of it in the bell and sees why in the editor; saving it sends it again). Until then only its managers and the super admins see it, tagged «En revisión» / «Devuelto». Editing an approved contest keeps it published.
   - The cards are public. Their colour says where each one stands (`statusOf`, `WorkshopsList.jsx`): **green** with places left, **orange** when full (with «Solicitar plaza» for whoever can ask), **grey** once finished — greyed out, still legible. A workshop is finished once its day is over (undated ones never are). The cover sits in a 4:3 frame, whole (posters carry text), over a blurred copy of itself, so every card is the same height whatever the image's shape.
   - **Finished workshops** are shown by default, greyed, after the upcoming ones (the most recent first); «Ocultar talleres finalizados» under the tabs hides them and «Mostrar talleres finalizados (N)» brings them back (the button only appears in a tab that has some). A finished workshop can't be booked or asked for a place (the server says «Este taller ya ha terminado», `isPastWorkshop`), and its page says so.
   - **Sharing:** anyone, with or without an account, can copy a workshop's link from its ⋯ menu («Compartir»), as with articles. The link opens the workshop page for someone signed in; signed out, it shows that workshop's card in Talleres (ringed in gold, in its tab, past workshops included) with a note to sign in, and the page opens once they have.
@@ -55,7 +58,7 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
 - **Notifications** in the header bell: new content, invitations, answers and membership.
 - **Top bar:** the bell sits right after the profile photo; «Publica» (editors and up) is the last item of the bar (on phones, an icon left of the burger). The language picker is a small pill outside the bar, top left (the red «Hazte socio/a» button goes under it; not in Admin, where on phones it covered the page), so it's there even where the bar hides (an article); on phones it's in the burger menu.
 - **Contact form** and **newsletter** («Recomendaciones»):
-  - New accounts (signing in with Google for the first time) get it; the sign-in page says so. Anyone turns it on or off from «Recomendaciones».
+  - **Every new account gets it**: signing in with Google for the first time, registering with a password, an account a super admin creates — and an invited author or artist on their first sign-in (their account is prepared without it). The sign-in page says so. Anyone turns it on or off from «Recomendaciones». Accounts made before this aren't changed.
   - Every newsletter has a one-click «Darme de baja» link that works without signing in, and a `List-Unsubscribe` header for the mail client's own button (a random token per person, `user.newsletter_token`, never sent to the front-end).
 
 **Three languages:** Spanish, English and Basque.
@@ -76,13 +79,13 @@ See [Languages (i18n)](#languages-i18n).
 **Administration** (*Admin*, super admins) — its tabs are pills that wrap, so all of them are in sight on a phone too:
 
 - users and roles;
-- the review queue (articles, projects and section changes);
+- the review queue (articles, projects, contests and section changes);
 - the **front page** (*Portada*): the order of the hero's featured stories (arrows or drag and drop), taking one out, adding any published story (`magazine_articles.featured_order`). The hero shows only the featured stories; the most liked ones that aren't featured are listed as suggestions, to feature with one click;
 - the proposals sent from Espacio abierto (read them, accept or decline them, download the file, reply by e-mail);
 - magazine details (name, slogan, logos);
 - workshops;
 - appearance (theme presets, colours, animations);
-- the top-bar **menu builder** (labels in ES / EN / EU, who sees each button, what it opens).
+- the top-bar **menu builder** (labels in ES / EN / EU, who sees each button, what it opens, and an optional second text a button alternates with every 3 s).
 
 **Membership** (*hacerse socio/a*): readers become paying members through **Stripe** (monthly and yearly). The interface says «socio/a» («Hazte socio/a», the «Socio/a» badge); the code and the tables still call it *subscription*.
 
@@ -140,7 +143,7 @@ Roles are independent flags on `user`. One account can hold several.
 | Reader (default) | Read, like, comment, follow projects, become a member, book workshops (as a member) |
 | Premium reader (`is_premium_reader`) | Also read articles marked premium |
 | Editor (`is_editor`) | Create publications and author profiles; everything goes through review. Edit the workshops they teach |
-| Admin (`is_admin`) | Like an editor, plus creating workshops and newsletter recommendations |
+| Admin (`is_admin`) | Like an editor, plus creating workshops and contests (contests go to a super admin's review) and newsletter recommendations |
 | Super admin (`is_super_admin`) | Everything; publishes directly; reviews others' work; Admin panel; invites authors and artists |
 | Visual artist (`is_artist`, combinable with any role) | Their exhibition in the Galería, their author profile, and the chats socios/as ask them for — nothing else |
 

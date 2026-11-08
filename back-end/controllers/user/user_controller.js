@@ -242,6 +242,8 @@ async function register(userData) {
         userData.verification_token = verificationToken;
         userData.verification_token_expires = verificationTokenExpires;
         userData.email_verified = false;
+        // Like every new account: the newsletter (opt-out).
+        userData.receives_newsletter = true;
 
         userData.pass_user = await bcrypt.hash(userData.pass_user, 5);
 

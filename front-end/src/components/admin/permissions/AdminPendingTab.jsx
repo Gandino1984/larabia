@@ -10,14 +10,17 @@ import { sectionsOf, requestedSectionsOf, sectionList } from '../../../utils/sec
 import SectionPicker from '../../common/SectionPicker';
 import { categoryLabel } from '../../../utils/articleFilters';
 import { projectTypeLabel, projectFormatLabel } from '../../../utils/projectKinds';
+import { useWorkshop } from '../../../app_context/WorkshopContext';
+import { formatDay, signupRange } from '../../../utils/contests';
 import './AdminPendingTab.css';
 
 function AdminPendingTab() {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
-  const { showSuccess, showError, navigateToProjectDetail, navigateToArticle } = useUI();
+  const { showSuccess, showError, navigateToProjectDetail, navigateToArticle, navigateToWorkshopDetail } = useUI();
   const { fetchArticleById, setSelectedProject } = useMagazine?.() || {};
-  const { pendingArticles, pendingProjects, sectionRequestArticles, sectionRequestProjects, loading, refresh } = usePendingReview();
+  const { setSelectedWorkshop } = useWorkshop();
+  const { pendingArticles, pendingProjects, pendingContests, sectionRequestArticles, sectionRequestProjects, loading, refresh } = usePendingReview();
   const [actingId, setActingId] = useState(null);
   // Magazine sections (utils/sections.js): what the approver settles on for
   // each publication — by default what its author asked for.
@@ -26,7 +29,7 @@ function AdminPendingTab() {
   const chosenKey = (kind, item) => `${kind}-${kind === 'article' ? item.id_article : item.id_project}`;
   const sectionsFor = (kind, item) => chosen[chosenKey(kind, item)] ?? requestedSectionsOf(item) ?? sectionsOf(item);
   const choose = (kind, item, value) => setChosen((prev) => ({ ...prev, [chosenKey(kind, item)]: value }));
-  // Reject-with-reason modal: { kind: 'article'|'project', id, title } | null
+  // Reject-with-reason modal: { kind: 'article'|'project'|'contest', id, title } | null
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
 
@@ -39,15 +42,19 @@ function AdminPendingTab() {
   }, [refresh]);
 
   const resourcePath = (kind) => (kind === 'article' ? 'magazine-article' : 'magazine-project');
-  const idOf = (kind, item) => (kind === 'article' ? item.id_article : item.id_project);
+  const idOf = (kind, item) => (kind === 'article' ? item.id_article : kind === 'contest' ? item.id_workshop : item.id_project);
+  // Contests (Talleres) are reviewed at /magazine-workshop/review/:id/…
+  const reviewUrl = (kind, id, decision) => (kind === 'contest'
+    ? `/magazine-workshop/review/${id}/${decision}`
+    : `/${resourcePath(kind)}/${decision}/${id}`);
 
   const handleApprove = async (kind, item) => {
     const id = idOf(kind, item);
     setActingId(id);
     try {
       const res = await axiosInstance.patch(
-        `/${resourcePath(kind)}/approve/${id}`,
-        { sections: sectionsFor(kind, item) },
+        reviewUrl(kind, id, 'approve'),
+        kind === 'contest' ? {} : { sections: sectionsFor(kind, item) },
         buildAuthHeader()
       );
       if (res.data.error) {
@@ -93,7 +100,7 @@ function AdminPendingTab() {
     setActingId(id);
     try {
       const res = await axiosInstance.patch(
-        `/${resourcePath(kind)}/reject/${id}`,
+        reviewUrl(kind, id, 'reject'),
         { reason: rejectReason.trim() || null },
         buildAuthHeader()
       );
@@ -118,6 +125,11 @@ function AdminPendingTab() {
     if (result?.success) navigateToArticle();
   };
 
+  const handlePreviewContest = (contest) => {
+    setSelectedWorkshop(contest);
+    navigateToWorkshopDetail();
+  };
+
   const handlePreviewProject = (project) => {
     if (!setSelectedProject || !navigateToProjectDetail) return;
     setSelectedProject(project);
@@ -129,7 +141,7 @@ function AdminPendingTab() {
       ? item.authors.map((a) => a.name_user).join(', ')
       : (item.author_name || t('admin.pending.unknownAuthor', 'Autor desconocido'));
 
-  const total = pendingArticles.length + pendingProjects.length
+  const total = pendingArticles.length + pendingProjects.length + pendingContests.length
     + sectionRequestArticles.length + sectionRequestProjects.length;
 
   // The sections block of a pending card.
@@ -299,6 +311,59 @@ function AdminPendingTab() {
                         className="admin-pending-card__btn admin-pending-card__btn--approve"
                         disabled={isActing}
                         onClick={() => handleApprove('project', project)}
+                      >
+                        {t('admin.pending.approvePublish', 'Aprobar y publicar')}
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          <h3 className="admin-pending__section-title">
+            {t('admin.pending.contests', 'Concursos')} <span className="admin-pending__count">{pendingContests.length}</span>
+          </h3>
+          {pendingContests.length === 0 ? (
+            <p className="admin-pending__empty">{t('admin.pending.noContests', 'No hay concursos pendientes.')}</p>
+          ) : (
+            <ul className="admin-pending__list">
+              {pendingContests.map((contest) => {
+                const isActing = actingId === contest.id_workshop;
+                return (
+                  <li key={`c-${contest.id_workshop}`} className="admin-pending-card">
+                    <div className="admin-pending-card__body">
+                      <h3 className="admin-pending-card__title">{contest.title_workshop}</h3>
+                      <p className="admin-pending-card__author">
+                        {t('contests.kind', 'Concurso')} · {t('article.detail.by', 'Por')} {authorLabelOf(contest)}
+                      </p>
+                      {contest.description_workshop && (
+                        <p className="admin-pending-card__excerpt">{contest.description_workshop}</p>
+                      )}
+                      <p className="admin-pending-card__meta">
+                        {t('contests.signups', { ...signupRange(contest.registration_start_workshop, contest.registration_end_workshop), defaultValue: 'Inscripciones: del {{from}} al {{to}}' })}
+                        {' · '}
+                        {t('contests.juryOn', { day: formatDay(contest.resolution_date_workshop), defaultValue: 'Fallo del jurado: {{day}}' })}
+                      </p>
+                    </div>
+                    <div className="admin-pending-card__actions">
+                      <button
+                        className="admin-pending-card__btn admin-pending-card__btn--preview"
+                        onClick={() => handlePreviewContest(contest)}
+                      >
+                        {t('admin.pending.preview', 'Vista previa')}
+                      </button>
+                      <button
+                        className="admin-pending-card__btn admin-pending-card__btn--reject"
+                        disabled={isActing}
+                        onClick={() => setRejectTarget({ kind: 'contest', id: contest.id_workshop, title: contest.title_workshop })}
+                      >
+                        {t('admin.pending.return', 'Devolver al autor')}
+                      </button>
+                      <button
+                        className="admin-pending-card__btn admin-pending-card__btn--approve"
+                        disabled={isActing}
+                        onClick={() => handleApprove('contest', contest)}
                       >
                         {t('admin.pending.approvePublish', 'Aprobar y publicar')}
                       </button>

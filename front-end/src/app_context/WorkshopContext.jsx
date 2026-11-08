@@ -19,7 +19,8 @@ import { useUI } from './UIContext';
 const WorkshopContext = createContext(null);
 // invitations to me · answers to mine · extra-place requests on the workshops I
 // manage · answers to my requests.
-const EMPTY_FEED = { invitations: [], responses: [], spot_requests: [], spot_answers: [] };
+// contest_reviews: a super admin's decision on a contest this user created.
+const EMPTY_FEED = { invitations: [], responses: [], spot_requests: [], spot_answers: [], contest_reviews: [] };
 
 export const WorkshopProvider = ({ children }) => {
   const { currentUser } = useAuth();
@@ -282,6 +283,17 @@ export const WorkshopProvider = ({ children }) => {
     }
   }, [userId]);
 
+  // The creator has seen the decisions on their contests: they leave the bell.
+  const markContestReviewsSeen = useCallback(async (ids) => {
+    if (!userId || !ids?.length) return;
+    setInvitationFeed(prev => ({ ...prev, contest_reviews: (prev.contest_reviews || []).filter(r => !ids.includes(r.id_workshop)) }));
+    try {
+      await axiosInstance.post('/magazine-workshop/review/seen', { ids }, { headers: { 'x-user-id': userId } });
+    } catch {
+      // They'll show again on the next refresh.
+    }
+  }, [userId]);
+
   // ── Participants (the workshop's managers) ──
 
   // People to include / block, by name (2+ characters).
@@ -338,7 +350,7 @@ export const WorkshopProvider = ({ children }) => {
     reserveWorkshop, cancelWorkshopReservation,
     searchWorkshopUsers, manageWorkshopParticipant,
     invitationFeed, refreshInvitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen,
-    requestExtraSpot, withdrawExtraSpot, respondExtraSpot, markSpotAnswersSeen
+    requestExtraSpot, withdrawExtraSpot, respondExtraSpot, markSpotAnswersSeen, markContestReviewsSeen
   };
 
   return <WorkshopContext.Provider value={value}>{children}</WorkshopContext.Provider>;

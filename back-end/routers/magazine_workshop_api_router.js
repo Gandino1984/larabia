@@ -9,7 +9,8 @@ const router = Router();
 router.get("/", magazineWorkshopApiController.getAll);
 router.get("/by-id/:id_workshop", magazineWorkshopApiController.getById);           // signed-in readers (participants: managers)
 router.get("/manage/:id_workshop/users", magazineWorkshopApiController.searchUsers); // managers: find people (?q=)
-router.get("/invitations/feed", magazineWorkshopApiController.invitationFeed);       // signed-in: invitations + answers
+router.get("/invitations/feed", magazineWorkshopApiController.invitationFeed);       // signed-in: invitations + answers (+ their contests' review)
+router.get("/review/pending", magazineWorkshopApiController.pendingContests);       // super admins: contests waiting for approval
 
 // POST
 router.post("/create", magazineWorkshopApiController.create);                       // admins / super-admin
@@ -17,6 +18,7 @@ router.post("/reserve/:id_workshop", magazineWorkshopApiController.reserve);    
 router.post("/manage/:id_workshop/invitations", magazineWorkshopApiController.inviteParticipant); // managers: invite someone
 router.post("/invitations/:id_invitation/respond", magazineWorkshopApiController.respondInvitation); // invitee: accept / decline
 router.post("/invitations/responses/seen", magazineWorkshopApiController.markResponsesSeen);       // inviter: answers seen
+router.post("/review/seen", magazineWorkshopApiController.markReviewsSeen);                       // a contest's creator: decisions seen
 router.post("/spot-requests/answers/seen", magazineWorkshopApiController.markSpotAnswersSeen);   // requester: answers seen
 router.post("/spot-requests/:id_workshop", magazineWorkshopApiController.requestSpot);            // socios/as: ask for an extra place (full workshop)
 router.delete("/spot-requests/:id_workshop", magazineWorkshopApiController.withdrawSpotRequest);   // withdraw own pending request
@@ -26,6 +28,8 @@ router.post("/upload-cover-image", handleWorkshopImageUpload, magazineWorkshopAp
 
 // PATCH
 router.patch("/update/:id_workshop", magazineWorkshopApiController.update);         // managers: super admin, or its creator / talleristas on the team
+router.patch("/review/:id_workshop/approve", magazineWorkshopApiController.approveContest); // super admins: publish a contest
+router.patch("/review/:id_workshop/reject", magazineWorkshopApiController.rejectContest);   // super admins: send it back { reason }
 
 // DELETE
 router.delete("/remove-by-id/:id_workshop", magazineWorkshopApiController.remove);  // managers: super admin, or its creator / talleristas on the team

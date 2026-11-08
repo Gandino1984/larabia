@@ -71,6 +71,52 @@ const magazine_workshop_model = sequelize.define(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: true
+        },
+        // 'workshop' | 'contest' (migration 034), chosen when it's created.
+        // A contest has no date, place or capacity: sign-ups open and close
+        // on two days, the jury decides on a third, and it can award a 1st,
+        // 2nd and 3rd place and an honorable mention. Anyone signed in signs
+        // up (no membership).
+        kind_workshop: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+            defaultValue: 'workshop'
+        },
+        registration_start_workshop: {
+            type: DataTypes.DATEONLY,
+            allowNull: true
+        },
+        registration_end_workshop: {
+            type: DataTypes.DATEONLY,
+            allowNull: true
+        },
+        resolution_date_workshop: {
+            type: DataTypes.DATEONLY,
+            allowNull: true
+        },
+        // { first, second, third, mention }: each { prize, winner } — what the
+        // place awards (shown from the start) and who won it (shown from the
+        // jury's day on).
+        awards_workshop: {
+            type: DataTypes.JSON,
+            allowNull: true
+        },
+        // Contests by anyone but a super admin wait for one: 'approved' |
+        // 'pending' | 'rejected' (with a reason). Workshops are 'approved'.
+        // review_seen_workshop: its creator has seen the latest decision (bell).
+        review_status_workshop: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+            defaultValue: 'approved'
+        },
+        rejection_reason_workshop: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        review_seen_workshop: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
         }
     },
     {

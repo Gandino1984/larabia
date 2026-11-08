@@ -440,9 +440,10 @@ export const UIProvider = ({ children }) => {
 
   // The workshop editor, like the publications creator: a workshop to edit
   // (null = create one) or «Mis talleres». `from` = where closing returns.
-  const navigateToWorkshopEditor = (workshop = null, from = 'talleres') => {
+  // `kind`: what a new one starts as — 'workshop' | 'contest'.
+  const navigateToWorkshopEditor = (workshop = null, from = 'talleres', kind = 'workshop') => {
     resetAllViews();
-    setWorkshopEditor({ workshop, view: 'wizard', returnTo: from });
+    setWorkshopEditor({ workshop, view: 'wizard', returnTo: from, kind });
     setShowWorkshopEditor(true);
   };
   const navigateToMyWorkshops = (from = 'talleres') => {

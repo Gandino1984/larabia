@@ -1,7 +1,8 @@
 // magazine-front/src/components/workshops/WorkshopFilters.jsx
 //
 // Filter bar for the workshops page: Buscar · Cuándo · Mes · Tallerista ·
-// Plazas · Ordenar + "Limpiar filtros". Same look as the article filters
+// Plazas · Ordenar + "Limpiar filtros". In the contests tab (`contests`):
+// no Plazas or Acceso (anyone with an account signs up), and «Organiza». Same look as the article filters
 // (ArticleFilters.css); folds behind "Filtros" on small screens. Logic:
 // utils/workshopFilters.js.
 import { useMemo, useState } from 'react';
@@ -16,7 +17,7 @@ import {
 import '../common/ArticleFilters.css';
 import './WorkshopFilters.css';
 
-function WorkshopFilters({ workshops, filters, onChange }) {
+function WorkshopFilters({ workshops, filters, onChange, contests = false }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const options = useMemo(() => buildWorkshopFilterOptions(workshops, filters), [workshops, filters]);
@@ -46,7 +47,9 @@ function WorkshopFilters({ workshops, filters, onChange }) {
               type="search"
               value={filters.q}
               onChange={(e) => set('q', e.target.value)}
-              placeholder={t('workshops.filters.searchPlaceholder', 'Título, lugar, tallerista…')}
+              placeholder={contests
+                ? t('contests.searchPlaceholder', 'Título, bases, organización…')
+                : t('workshops.filters.searchPlaceholder', 'Título, lugar, tallerista…')}
             />
           </span>
         </label>
@@ -60,13 +63,14 @@ function WorkshopFilters({ workshops, filters, onChange }) {
         </label>
 
         <label className="article-filters__field">
-          <span>{t('workshops.filters.instructor', 'Tallerista')}</span>
+          <span>{contests ? t('contests.organizer', 'Organiza') : t('workshops.filters.instructor', 'Tallerista')}</span>
           <select value={filters.author} onChange={(e) => set('author', e.target.value)}>
             <option value="">{t('filters.allAuthors', 'Todas/os')}</option>
             {options.authors.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
           </select>
         </label>
 
+        {!contests && (<>
         <label className="article-filters__field">
           <span>{t('workshops.filters.spots', 'Plazas')}</span>
           <select value={filters.availability} onChange={(e) => set('availability', e.target.value)}>
@@ -83,6 +87,7 @@ function WorkshopFilters({ workshops, filters, onChange }) {
             <option value="members">{t('workshops.filters.accessMembers', 'Para socios/as')}</option>
           </select>
         </label>
+        </>)}
 
         <label className="article-filters__field">
           <span>{t('filters.sort.label', 'Ordenar')}</span>

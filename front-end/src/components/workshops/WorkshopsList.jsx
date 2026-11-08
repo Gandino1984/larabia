@@ -1,4 +1,7 @@
 // magazine-front/src/components/workshops/WorkshopsList.jsx
+//
+// The Talleres section: workshops and contests (utils/contests.js), in three
+// tabs — Talleres, Talleres infantiles, Concursos. Each card says which it is.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { localDate } from '../../utils/locale';
@@ -9,6 +12,9 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshopAccess, canManageWorkshop } from '../../app_context/useWorkshopAccess';
 import WorkshopOptions from './WorkshopOptions';
 import WorkshopAccessTag from './WorkshopAccessTag';
+import WorkshopKindTag, { WorkshopReviewTag } from './WorkshopKindTag';
+import { ContestDates, ContestAwards } from './ContestInfo';
+import { isContest, contestPhase } from '../../utils/contests';
 import WorkshopSpotDialog from './WorkshopSpotDialog';
 import WorkshopFilters from './WorkshopFilters';
 import { Person } from './WorkshopParticipantsPanel';
@@ -39,13 +45,18 @@ const formatDate = (d) => {
   } catch { return null; }
 };
 
-// The two sections of the page.
-const AUDIENCE_TABS = ['general', 'infantil'];
-const audienceOf = (w) => (w.audience_workshop === 'infantil' ? 'infantil' : 'general');
+// The sections of the page: workshops (adults, children) and contests.
+const AUDIENCE_TABS = ['general', 'infantil', 'contests'];
+const audienceOf = (w) => (isContest(w) ? 'contests' : w.audience_workshop === 'infantil' ? 'infantil' : 'general');
 
 // A card's colour: finished (greyed out, still legible), full (orange: ask
-// for a place) or with places left (green).
-const statusOf = (w) => (isPastWorkshop(w) ? 'past' : w.is_full ? 'full' : 'open');
+// for a place) or with places left (green). A contest: sign-ups soon (blue),
+// open (green), closed (orange), resolved (gold), then finished (grey).
+const statusOf = (w) => {
+  if (isPastWorkshop(w)) return 'past';
+  if (isContest(w)) return contestPhase(w);
+  return w.is_full ? 'full' : 'open';
+};
 
 function WorkshopsList() {
   const { t } = useTranslation();
@@ -109,7 +120,10 @@ function WorkshopsList() {
     const timer = setTimeout(() => {
       document.querySelector(`.workshop-card[data-workshop-id="${sharedId}"]`)
         ?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-      showInfo(t('workshops.sharedSignIn', 'Te han compartido este taller. Inicia sesión para abrirlo y reservar plaza.'));
+      const shared = workshops.find((x) => x.id_workshop === sharedId);
+      showInfo(isContest(shared)
+        ? t('contests.sharedSignIn', 'Te han compartido este concurso. Inicia sesión para abrirlo e inscribirte.')
+        : t('workshops.sharedSignIn', 'Te han compartido este taller. Inicia sesión para abrirlo y reservar plaza.'));
     }, 400);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,10 +143,8 @@ function WorkshopsList() {
   // filters).
   const filtered = applyWorkshopFilters(workshops, filters);
   const filtersActive = countActiveWorkshopFilters(filters) > 0;
-  const counts = {
-    general: filtered.filter(w => audienceOf(w) === 'general').length,
-    infantil: filtered.filter(w => audienceOf(w) === 'infantil').length
-  };
+  const counts = Object.fromEntries(AUDIENCE_TABS.map((key) => [key, filtered.filter(w => audienceOf(w) === key).length]));
+  const contestsTab = audience === 'contests';
   const visible = filtered.filter(w => audienceOf(w) === audience);
   // The finished ones of this tab (with the other filters): the button says
   // how many there are.
@@ -144,6 +156,7 @@ function WorkshopsList() {
     const dateStr = formatDate(w.date_workshop);
     const status = statusOf(w);
     const past = status === 'past';
+    const contest = isContest(w);
     // Who asked for an extra place: only its creator and the super admins get
     // the list (the server sends it to nobody else); the rest, how many.
     const requesters = !past ? (w.spot_requests || []) : [];
@@ -162,6 +175,12 @@ function WorkshopsList() {
             : <div className="workshop-card-image--placeholder"><Users size={32} /></div>}
           <span className={`workshop-badge workshop-badge--${status}`}>
             {past ? t('workshops.status.past', 'Finalizado')
+              : contest ? {
+                soon: t('contests.status.soon', 'Próximamente'),
+                open: t('contests.status.open', 'Inscripciones abiertas'),
+                closed: t('contests.status.closed', 'Inscripciones cerradas'),
+                resolved: t('contests.status.resolved', 'Resuelto')
+              }[status]
               : status === 'full' ? t('workshops.full')
               : t('workshops.status.open', 'Plazas libres')}
           </span>
@@ -172,18 +191,37 @@ function WorkshopsList() {
           )}
         </div>
         <div className="workshop-card-body">
-          <WorkshopAccessTag workshop={w} />
+          {/* Workshop or contest; who books a workshop; a contest's review
+              (only its managers see it before it's published). */}
+          <div className="workshop-card-tags">
+            <WorkshopKindTag workshop={w} />
+            {!contest && <WorkshopAccessTag workshop={w} />}
+            <WorkshopReviewTag workshop={w} />
+          </div>
           <h3 className="workshop-card-title">{w.title_workshop}</h3>
-          {dateStr && <p className="workshop-meta"><Calendar size={15} /> {dateStr}</p>}
-          <p className="workshop-meta"><MapPin size={15} /> {w.location_workshop || t('workshops.map.defaultPlace', 'Matiko, Uribarri')}</p>
-          {/* Where: small map preview (the workshop's place or the default). */}
-          <WorkshopMap lat={w.lat_workshop} lng={w.lng_workshop} compact />
-          <p className="workshop-meta">
-            <Users size={15} />{' '}
-            {w.capacity_workshop != null
-              ? t('workshops.spots', { left: w.spots_left, total: w.capacity_workshop })
-              : t('workshops.participants', { count: w.reservation_count })}
-          </p>
+          {contest ? (
+            <>
+              <ContestDates workshop={w} />
+              <p className="workshop-meta">
+                <Users size={15} />{' '}
+                {t('contests.signedUp', { count: w.reservation_count || 0 })}
+              </p>
+              <ContestAwards workshop={w} />
+            </>
+          ) : (
+            <>
+              {dateStr && <p className="workshop-meta"><Calendar size={15} /> {dateStr}</p>}
+              <p className="workshop-meta"><MapPin size={15} /> {w.location_workshop || t('workshops.map.defaultPlace', 'Matiko, Uribarri')}</p>
+              {/* Where: small map preview (the workshop's place or the default). */}
+              <WorkshopMap lat={w.lat_workshop} lng={w.lng_workshop} compact />
+              <p className="workshop-meta">
+                <Users size={15} />{' '}
+                {w.capacity_workshop != null
+                  ? t('workshops.spots', { left: w.spots_left, total: w.capacity_workshop })
+                  : t('workshops.participants', { count: w.reservation_count })}
+              </p>
+            </>
+          )}
           {/* Requests for an extra place waiting for an answer: who (its
               creator, super admins — answered on its page or in the bell),
               or how many. */}
@@ -246,12 +284,12 @@ function WorkshopsList() {
             <div className="workshops-header-actions">
               <button type="button" className="workshops-create-btn workshops-create-btn--ghost" onClick={() => navigateToMyWorkshops('talleres')}>
                 <CalendarDays size={18} />
-                <span>{t('workshops.editor.mine.button', 'Mis talleres')}</span>
+                <span>{t('workshops.editor.mine.button', 'Mis talleres y concursos')}</span>
               </button>
               {canCreateWorkshop && (
-                <button type="button" className="workshops-create-btn" onClick={() => navigateToWorkshopEditor(null, 'talleres')}>
+                <button type="button" className="workshops-create-btn" onClick={() => navigateToWorkshopEditor(null, 'talleres', contestsTab ? 'contest' : 'workshop')}>
                   <Plus size={18} />
-                  <span>{t('workshops.create', 'Crear taller')}</span>
+                  <span>{contestsTab ? t('contests.create', 'Crear concurso') : t('workshops.create', 'Crear taller')}</span>
                 </button>
               )}
             </div>
@@ -263,7 +301,7 @@ function WorkshopsList() {
 
         {/* Sections (general / children's) + grid/carousel toggle */}
             <div className="workshops-toolbar">
-            <div className="workshops-tabs" role="tablist" aria-label={t('workshops.tabsLabel', 'Tipo de taller')}>
+            <div className="workshops-tabs" role="tablist" aria-label={t('workshops.tabsLabel', 'Talleres o concursos')}>
               {AUDIENCE_TABS.map(key => (
                 <button
                   key={key}
@@ -273,7 +311,9 @@ function WorkshopsList() {
                   className={`workshops-tab ${audience === key ? 'is-active' : ''}`}
                   onClick={() => setAudience(key)}
                 >
-                  {key === 'infantil'
+                  {key === 'contests'
+                    ? t('contests.tab', 'Concursos')
+                    : key === 'infantil'
                     ? t('workshops.tabKids', 'Talleres infantiles')
                     : t('workshops.tabGeneral', 'Talleres')}
                   <span className="workshops-tab__count">{counts[key]}</span>
@@ -314,7 +354,11 @@ function WorkshopsList() {
               >
                 <History size={16} />
                 <span>
-                  {showPast
+                  {contestsTab
+                    ? (showPast
+                      ? t('contests.past.hide', 'Ocultar concursos finalizados')
+                      : t('contests.past.show', { count: pastCount, defaultValue: 'Mostrar concursos finalizados ({{count}})' }))
+                    : showPast
                     ? t('workshops.past.hide', 'Ocultar talleres finalizados')
                     : t('workshops.past.show', { count: pastCount, defaultValue: 'Mostrar talleres finalizados ({{count}})' })}
                 </span>
@@ -322,7 +366,7 @@ function WorkshopsList() {
             </div>
             )}
 
-            <WorkshopFilters workshops={workshops} filters={filters} onChange={setFilters} />
+            <WorkshopFilters workshops={workshops.filter(w => audienceOf(w) === audience)} filters={filters} onChange={setFilters} contests={contestsTab} />
 
             {loading && <div className="workshops-loading"><div className="workshops-spinner" /></div>}
 
@@ -330,7 +374,13 @@ function WorkshopsList() {
               <div className="workshops-empty">
                 <p>
                   {filtersActive
-                    ? t('workshops.filters.noResults', 'Ningún taller coincide con los filtros.')
+                    ? (contestsTab
+                      ? t('contests.noResults', 'Ningún concurso coincide con los filtros.')
+                      : t('workshops.filters.noResults', 'Ningún taller coincide con los filtros.'))
+                    : contestsTab
+                    ? (filters.when === 'upcoming'
+                      ? t('contests.emptyUpcoming', 'No hay concursos abiertos ni próximos.')
+                      : t('contests.empty', 'Todavía no hay concursos.'))
                     : filters.when === 'upcoming'
                     ? (audience === 'infantil'
                       ? t('workshops.emptyKidsUpcoming', 'No hay talleres infantiles próximos.')

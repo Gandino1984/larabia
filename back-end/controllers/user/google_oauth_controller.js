@@ -99,11 +99,20 @@ async function googleLogin(idToken, isRegisterMode = false) {
         if (existingByEmail) {
             // If account is "google" auth_provider with no password, link automatically (legacy edge case)
             if (existingByEmail.auth_provider === 'google' && !existingByEmail.pass_user) {
-                await existingByEmail.update({ google_id: googleUser.sub, email_verified: true });
+                // Never signed in before (an account a super admin prepared
+                // for an invited author or artist): this is when they make it
+                // theirs — and, like every new account, get the newsletter.
+                const firstSignIn = !existingByEmail.google_id;
+                await existingByEmail.update({
+                    google_id: googleUser.sub,
+                    email_verified: true,
+                    ...(firstSignIn ? { receives_newsletter: true } : {})
+                });
                 await ensureSuperAdminPromotion(existingByEmail);
                 return {
                     data: sanitizeUserData(existingByEmail),
-                    message: 'Login exitoso con Google', code: 'signed_in'
+                    message: firstSignIn ? 'Cuenta creada exitosamente con Google' : 'Login exitoso con Google',
+                    code: firstSignIn ? 'account_created' : 'signed_in'
                 };
             }
             return {

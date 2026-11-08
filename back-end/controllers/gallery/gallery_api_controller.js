@@ -794,7 +794,9 @@ async function invite(req, res) {
                 age_user: 18,
                 artist_invite_status: 'pending',
                 artist_invited_by: admin.id_user,
-                artist_invited_at: new Date()
+                artist_invited_at: new Date(),
+                // Not theirs yet: the newsletter starts on their first sign-in.
+                receives_newsletter: false
             });
         }
         if (withGallery) await exhibitionOfArtist(user.id_user, { create: true, preparedBy: admin.id_user });

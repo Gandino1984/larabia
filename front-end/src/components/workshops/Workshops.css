@@ -71,6 +71,8 @@
 .workshop-btn--decline { background: #e4e4e4; color: #1a1a1a; }
 .workshop-btn--decline:hover { background: #000000; color: #ffffff; }
 .workshop-full-note { margin: 0; color: #c62828; font-weight: 600; }
+/* Where a contest's sign-ups stand (not a warning). */
+.workshop-contest-note { margin: 0; color: #2a2a2a; font-weight: 600; line-height: 1.5; }
 
 .workshop-participants { margin-top: 1.5rem; }
 .workshop-participants h3 { color: #1a1a1a; font-size: 1.05rem; }
@@ -763,7 +765,10 @@
    colour; the badge on the photo says it in words. */
 .workshop-card--open,
 .workshop-card--full,
-.workshop-card--past {
+.workshop-card--past,
+.workshop-card--soon,
+.workshop-card--closed,
+.workshop-card--resolved {
   border-width: 2px;
   border-top-width: 6px;
 }
@@ -796,6 +801,86 @@
 .workshop-badge--open { background: #157a36; color: #ffffff; }
 .workshop-badge--full { background: #f08c00; color: #111111; }
 .workshop-badge--past { background: #4a4a4a; color: #ffffff; }
+
+/* Contests: sign-ups soon (blue) · open (green, as above) · closed — waiting
+   for the jury (orange, like a full workshop) · resolved (gold) · then
+   finished (grey, as above). */
+.workshop-card--soon {
+  border-color: #3b82f6;
+  background: linear-gradient(180deg, #121e33 0%, #181818 60%);
+}
+.workshop-card--closed {
+  border-color: #f08c00;
+  background: linear-gradient(180deg, #33230b 0%, #181818 60%);
+}
+.workshop-card--resolved {
+  border-color: #d4a72c;
+  background: linear-gradient(180deg, #2e2610 0%, #181818 60%);
+}
+.workshop-badge--soon { background: #1d4ed8; color: #ffffff; }
+.workshop-badge--closed { background: #f08c00; color: #111111; }
+.workshop-badge--resolved { background: #d4a72c; color: #111111; }
+
+/* What it is (Taller / Concurso), who books it, a contest's review. */
+.workshop-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.15rem;
+}
+
+/* A contest's prizes — or, once the jury has decided, its winners. */
+.contest-awards {
+  margin: 0.35rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.contest-awards--winners {
+  background: rgba(212, 167, 44, 0.12);
+  border-color: rgba(212, 167, 44, 0.45);
+}
+.contest-awards__title {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #cfcfcf;
+}
+.contest-awards ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.contest-awards li {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #e6e6e6;
+  overflow-wrap: anywhere;
+}
+.contest-awards li svg { color: #d4a72c; align-self: center; }
+.contest-awards li strong { white-space: nowrap; font-weight: 700; }
+.contest-awards__prize { color: #a9a9a9; }
+.workshop-card--past .contest-awards li svg { color: #8a8a8a; }
+
+/* On the workshop page (white). */
+.workshop-detail .contest-awards {
+  background: #faf6e8;
+  border-color: #ecdca6;
+}
+.workshop-detail .contest-awards--winners { background: #fdf3d3; border-color: #e3c25b; }
+.workshop-detail .contest-awards__title { color: #5c4a12; }
+.workshop-detail .contest-awards li { color: #1a1a1a; font-size: 0.95rem; }
+.workshop-detail .contest-awards__prize { color: #6b6b6b; }
 
 /* «Solicitar plaza» on an orange card: orange too. */
 .workshop-card--full .workshop-card-request:not(.workshop-card-request--sent) {
@@ -886,3 +971,14 @@
 @media (min-width: 768px) {
   .workshops-page { padding-top: 10.5rem; }
 }
+
+/* A contest its managers see before it's published (WorkshopDetail). */
+.workshop-review-note {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+.workshop-review-note--pending { background: #dbeafe; color: #1e3a8a; border: 1px solid #93c5fd; }
+.workshop-review-note--rejected { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }

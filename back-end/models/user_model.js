@@ -88,10 +88,14 @@ const user_model = sequelize.define("user", {
         defaultValue: false,
         comment: 'Subscriber-tier reader: can access articles with is_premium=1'
     },
+    // The newsletter («Recomendaciones»): everyone who makes an account gets
+    // it (opt-out: «Darme de baja» in every e-mail). Accounts a super admin
+    // prepares for an invited author or artist start without it and get it
+    // on their first sign-in (google_oauth_controller.js).
     receives_newsletter: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: false
+        defaultValue: true
     },
     // The newsletter's one-click «Darme de baja» link (no sign-in needed);
     // made when the first newsletter is sent. Never sent to the front-end.

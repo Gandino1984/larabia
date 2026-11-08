@@ -19,6 +19,8 @@
 //    workshop this user manages — «Abrir plaza» / «Rechazar»; until answered.
 //  - workshop-spot-answer:  the answer to the user's own request (until the
 //    bell is opened).
+//  - contest-review:  a super admin published or sent back a contest the
+//    user created (until the bell is opened).
 //  - author-invite:  a super admin signed the user up as an author
 //    (AuthorInvitationContext) — Aceptar / Rechazar; stays until answered.
 //  - gallery-invite:  invited to the Galería as a visual artist
@@ -64,10 +66,10 @@ export const NotificationProvider = ({ children }) => {
   const { t } = useTranslation();
   const { currentUser, canHaveAuthorProfile } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
-  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToExhibition, navigateToAdmin } = useUI();
+  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToExhibition, navigateToAdmin, navigateToWorkshopEditor } = useUI();
   const {
     invitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen, setSelectedWorkshop,
-    respondExtraSpot, markSpotAnswersSeen
+    respondExtraSpot, markSpotAnswersSeen, markContestReviewsSeen
   } = useWorkshop();
   const { setSelectedArticle, setSelectedProject } = useMagazine();
   const { subscribedProjectIds } = useEngagement();
@@ -172,10 +174,12 @@ export const NotificationProvider = ({ children }) => {
     if (answered.length > 0) markInvitationResponsesSeen(answered);
     const spotAnswered = (invitationFeed?.spot_answers || []).map(a => a.id_spot_request);
     if (spotAnswered.length > 0) markSpotAnswersSeen(spotAnswered);
+    const reviewed = (invitationFeed?.contest_reviews || []).map(r => r.id_workshop);
+    if (reviewed.length > 0) markContestReviewsSeen(reviewed);
     gallery.markReviewsSeen();
     gallery.markActivitySeen();
     if (chat?.conversations.some((c) => c.unseen_change)) chat.markSeen();
-  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, invitationFeed?.spot_answers, markInvitationResponsesSeen, markSpotAnswersSeen, gallery, chat]);
+  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, invitationFeed?.spot_answers, invitationFeed?.contest_reviews, markInvitationResponsesSeen, markSpotAnswersSeen, markContestReviewsSeen, gallery, chat]);
 
   const notifications = useMemo(() => {
     const list = [];
@@ -530,6 +534,25 @@ export const NotificationProvider = ({ children }) => {
         });
       }
 
+      // A super admin's decision on a contest this user created: published
+      // (opens it) or sent back (opens it in the editor, with the reason).
+      for (const r of invitationFeed?.contest_reviews || []) {
+        const approved = r.review_status_workshop === 'approved';
+        const title = r.title_workshop || '';
+        content.push({
+          id: `contest-review-${r.id_workshop}-${r.review_status_workshop}`,
+          type: 'contest-review',
+          ts: r.updated_at ? tsOf(r.updated_at) : Date.now(),
+          title: approved
+            ? t('notifications.contestApproved.title', 'Tu concurso ya está publicado')
+            : t('notifications.contestRejected.title', 'Un super admin ha devuelto tu concurso'),
+          message: approved || !r.rejection_reason_workshop
+            ? `«${title}»`
+            : t('notifications.contestRejected.message', { title, reason: r.rejection_reason_workshop, defaultValue: '«{{title}}»: {{reason}}' }),
+          onClick: () => (approved ? openWorkshop(r) : navigateToWorkshopEditor(r, 'talleres'))
+        });
+      }
+
       content.sort((x, y) => y.ts - x.ts);
       list.push(...content.slice(0, MAX_CONTENT_NOTIFS));
     }
@@ -539,7 +562,7 @@ export const NotificationProvider = ({ children }) => {
     profilesReady, currentUser, canHaveAuthorProfile, authorProfiles, lastSeen,
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
     invitationFeed, openWorkshop, answerInvitation, respondExtraSpot, authorInvite, brand,
-    gallery, chat, navigateToMyGallery, navigateToExhibition, navigateToAdmin,
+    gallery, chat, navigateToMyGallery, navigateToExhibition, navigateToAdmin, navigateToWorkshopEditor,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

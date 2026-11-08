@@ -81,7 +81,7 @@ function SectionPreviews() {
       navigateToProjectDetail();
       return;
     }
-    if (item.kind === 'workshop') {
+    if (item.kind === 'workshop' || item.kind === 'contest') {
       setSelectedWorkshop(item.raw);
       navigateToWorkshopDetail();
       return;
@@ -122,10 +122,12 @@ function SectionPreviews() {
           raw: a,
         }));
 
+      // Workshops and contests (only published ones: a super admin's list
+      // also brings those waiting for review).
       const workshopItems = sec.includeWorkshops
-        ? (workshops || []).map((w) => ({
+        ? (workshops || []).filter((w) => (w.review_status_workshop || 'approved') === 'approved').map((w) => ({
             key: `workshop-${w.id_workshop}`,
-            kind: 'workshop',
+            kind: w.kind_workshop === 'contest' ? 'contest' : 'workshop',
             title: w.title_workshop,
             description: w.description_workshop,
             image: resolveImage(w.cover_image_workshop),

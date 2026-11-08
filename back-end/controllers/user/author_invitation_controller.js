@@ -169,7 +169,9 @@ async function invite(req, res) {
                 age_user: 18,
                 author_invite_status: 'pending',
                 author_invited_by: admin.id_user,
-                author_invited_at: new Date()
+                author_invited_at: new Date(),
+                // Not theirs yet: the newsletter starts on their first sign-in.
+                receives_newsletter: false
             });
         }
 

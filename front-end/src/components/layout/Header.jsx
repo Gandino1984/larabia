@@ -13,12 +13,12 @@ import { useNav } from '../../app_context/NavContext';
 import { usePendingReview } from '../../app_context/PendingReviewContext';
 import { useNotifications } from '../../app_context/NotificationContext';
 import { useNavActions } from '../../app_context/navActions';
-import { navLabel, canSeeNavItem } from '../../app_context/navConfig';
+import { navLabel, navCycleLabel, canSeeNavItem } from '../../app_context/navConfig';
 import { User, LogOut, Menu, X, Trash2, Plus, FolderPlus, Search, ChevronDown, Globe, Shield, Bell, ArrowLeft, Edit } from 'lucide-react';
 import UserInfoCard from '../user/UserInfoCard';
 import NavGroupDropdown from './NavGroupDropdown';
 import SpringDropdown from './SpringDropdown';
-import RollText from '../common/RollText';
+import RollText, { CycleText } from '../common/RollText';
 import AnimatedLogo from './AnimatedLogo';
 import ContactModal from '../contact/ContactModal';
 import NewsletterModal from '../newsletter/NewsletterModal';
@@ -681,9 +681,12 @@ function Header({ ready = true }) {
                 />
               );
             }
+            // A button with a second text (Talleres ↔ Concursos) alternates them.
+            const label = navLabel(item, currentLanguage);
+            const cycle = navCycleLabel(item, currentLanguage);
             return (
-              <button key={item.id} className="nav-link" onClick={() => handleNavItemSelect(item)}>
-                <RollText text={navLabel(item, currentLanguage)} />
+              <button key={item.id} className="nav-link" onClick={() => handleNavItemSelect(item)} aria-label={cycle ? `${label} / ${cycle}` : undefined}>
+                {cycle ? <CycleText texts={[label, cycle]} /> : <RollText text={label} />}
               </button>
             );
           })}
@@ -920,8 +923,15 @@ function Header({ ready = true }) {
                 );
               }
               return (
-                <button key={item.id} className="mobile-nav-link" onClick={() => handleNavItemSelect(item)}>
-                  <span>{navLabel(item, currentLanguage)}</span>
+                <button
+                  key={item.id}
+                  className="mobile-nav-link"
+                  onClick={() => handleNavItemSelect(item)}
+                  aria-label={navCycleLabel(item, currentLanguage) ? `${navLabel(item, currentLanguage)} / ${navCycleLabel(item, currentLanguage)}` : undefined}
+                >
+                  {navCycleLabel(item, currentLanguage)
+                    ? <CycleText texts={[navLabel(item, currentLanguage), navCycleLabel(item, currentLanguage)]} />
+                    : <span>{navLabel(item, currentLanguage)}</span>}
                 </button>
               );
             })}

@@ -1,8 +1,9 @@
 // front-end/src/app_context/PendingReviewContext.jsx
 //
 // Shared in-app "notification" state for the super-admin review queue.
-// Holds the articles and projects awaiting approval — and the published ones
-// whose author asked to change their magazine sections — so both the admin
+// Holds the articles, projects and contests awaiting approval — and the
+// published publications whose author asked to change their magazine
+// sections — so both the admin
 // panel badge and the pending tab read one source of truth. Super-admin only
 // — for anyone else it stays empty and makes no requests.
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
@@ -15,6 +16,8 @@ export const PendingReviewProvider = ({ children }) => {
   const { currentUser, isSuperAdmin } = useAuth();
   const [pendingArticles, setPendingArticles] = useState([]);
   const [pendingProjects, setPendingProjects] = useState([]);
+  // Contests (Talleres) by admins, waiting for a super admin.
+  const [pendingContests, setPendingContests] = useState([]);
   // Published publications with a section change waiting (utils/sections.js).
   const [sectionRequestArticles, setSectionRequestArticles] = useState([]);
   const [sectionRequestProjects, setSectionRequestProjects] = useState([]);
@@ -28,6 +31,7 @@ export const PendingReviewProvider = ({ children }) => {
     if (!isSuperAdmin || !currentUser?.id_user) {
       setPendingArticles([]);
       setPendingProjects([]);
+      setPendingContests([]);
       setSectionRequestArticles([]);
       setSectionRequestProjects([]);
       setNewProposals(0);
@@ -37,11 +41,12 @@ export const PendingReviewProvider = ({ children }) => {
     setLoading(true);
     const authHeader = { headers: { 'x-user-id': currentUser.id_user } };
     try {
-      const [articlesRes, projectsRes, proposalsRes, galleryRes] = await Promise.allSettled([
+      const [articlesRes, projectsRes, proposalsRes, galleryRes, contestsRes] = await Promise.allSettled([
         axiosInstance.get('/magazine-article/pending', authHeader),
         axiosInstance.get('/magazine-project/pending', authHeader),
         axiosInstance.get('/open-space/proposals/count', authHeader),
-        axiosInstance.get('/gallery/review/count', authHeader)
+        axiosInstance.get('/gallery/review/count', authHeader),
+        axiosInstance.get('/magazine-workshop/review/pending', authHeader)
       ]);
       if (articlesRes.status === 'fulfilled' && !articlesRes.value.data.error) {
         setPendingArticles(articlesRes.value.data.data || []);
@@ -57,6 +62,9 @@ export const PendingReviewProvider = ({ children }) => {
       if (galleryRes.status === 'fulfilled') {
         setGalleryPending(galleryRes.value.data?.data?.pending || 0);
       }
+      if (contestsRes.status === 'fulfilled' && !contestsRes.value.data.error) {
+        setPendingContests(contestsRes.value.data.data || []);
+      }
     } catch (err) {
       console.error('Error fetching pending review queue:', err);
     } finally {
@@ -69,7 +77,7 @@ export const PendingReviewProvider = ({ children }) => {
     refresh();
   }, [refresh]);
 
-  const totalPending = pendingArticles.length + pendingProjects.length
+  const totalPending = pendingArticles.length + pendingProjects.length + pendingContests.length
     + sectionRequestArticles.length + sectionRequestProjects.length;
   // Everything waiting for the super admin (the Admin badge in the header).
   const totalAttention = totalPending + newProposals + galleryPending;
@@ -77,6 +85,7 @@ export const PendingReviewProvider = ({ children }) => {
   const value = {
     pendingArticles,
     pendingProjects,
+    pendingContests,
     sectionRequestArticles,
     sectionRequestProjects,
     totalPending,

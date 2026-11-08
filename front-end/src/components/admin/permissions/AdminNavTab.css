@@ -164,3 +164,23 @@
   .nav-item__meta { flex-direction: row; align-items: center; justify-content: space-between; }
   .nav-item__labels { flex: 1; }
 }
+
+/* A button's alternating text (CycleField). */
+.nav-item__cycle-add { margin-top: 0.1rem; }
+.nav-item__cycle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--color-border, rgba(255, 255, 255, 0.15));
+}
+.nav-item__cycle-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #999);
+}
+.nav-item__cycle .nav-icon-btn { width: 28px; height: 28px; }

@@ -24,3 +24,7 @@
 .admin-workshops-item-actions button { background: none; border: 1px solid #ccc; border-radius: 6px; padding: 6px; cursor: pointer; color: #444; }
 .admin-workshops-item-actions button:hover { background: #efefef; }
 .admin-workshops-empty { color: #777; }
+
+/* Create a workshop / a contest; and what each one is. */
+.admin-workshops-head__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.admin-workshops-item-tags { display: inline-flex; flex-wrap: wrap; gap: 0.35rem; }

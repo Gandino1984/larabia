@@ -1,4 +1,7 @@
 // magazine-front/src/components/workshops/WorkshopDetail.jsx
+//
+// A workshop's page — or a contest's (utils/contests.js): its days, prizes
+// and winners, and «Inscribirme» while sign-ups are open.
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { localDate } from '../../utils/locale';
@@ -13,7 +16,10 @@ import WorkshopOptions from './WorkshopOptions';
 import WorkshopParticipantsPanel from './WorkshopParticipantsPanel';
 import WorkshopAccessTag from './WorkshopAccessTag';
 import WorkshopExtraSpot from './WorkshopExtraSpot';
+import WorkshopKindTag, { WorkshopReviewTag } from './WorkshopKindTag';
+import { ContestDates, ContestAwards } from './ContestInfo';
 import { isPastWorkshop } from '../../utils/workshopFilters';
+import { isContest, contestPhase, formatDay, reviewStateOf } from '../../utils/contests';
 import '../magazine/ArticleCard.css';
 import '../magazine/ProjectDetail.css';
 import './Workshops.css';
@@ -79,7 +85,7 @@ function WorkshopDetail() {
   const backButton = (
     <button type="button" className="workshop-back-btn" onClick={navigateToTalleres}>
       <ArrowLeft size={18} />
-      <span>{t('workshops.backToList', 'Volver a talleres')}</span>
+      <span>{t('workshops.backToList', 'Volver a talleres y concursos')}</span>
     </button>
   );
 
@@ -96,6 +102,9 @@ function WorkshopDetail() {
 
   const cover = resolveImg(w.cover_image_workshop);
   const dateStr = formatDate(w.date_workshop);
+  const contest = isContest(w);
+  const phase = contest ? contestPhase(w) : null;
+  const review = reviewStateOf(w);
 
   const handleReserve = async () => {
     if (bookingCode === 'login_required') { guard('login'); return; }
@@ -141,21 +150,45 @@ function WorkshopDetail() {
 
         <h1 className="workshop-detail-title">{w.title_workshop}</h1>
 
+        {/* A contest its managers see before it's published: where its
+            review stands (sent back: why). */}
+        {canManage && review !== 'approved' && (
+          <p className={`workshop-review-note workshop-review-note--${review}`} role="status">
+            {review === 'rejected'
+              ? t('contests.review.rejectedNote', { reason: w.rejection_reason_workshop || t('contests.review.noReason', 'sin motivo'), defaultValue: 'Un super admin lo ha devuelto: {{reason}}. Edítalo y guárdalo para enviarlo de nuevo a revisión.' })
+              : t('contests.review.pendingNote', 'En revisión: la gente lo verá cuando lo apruebe un super admin.')}
+          </p>
+        )}
+
         <div className="workshop-detail-meta">
-          <WorkshopAccessTag workshop={w} />
-          {dateStr && <span className="workshop-meta"><Calendar size={16} /> {dateStr}</span>}
-          <span className="workshop-meta"><MapPin size={16} /> {w.location_workshop || t('workshops.map.defaultPlace', 'Matiko, Uribarri')}</span>
-          <span className="workshop-meta">
-            <Users size={16} />{' '}
-            {w.capacity_workshop != null
-              ? t('workshops.spots', { left: w.spots_left, total: w.capacity_workshop })
-              : t('workshops.participants', { count: w.reservation_count })}
-          </span>
+          <WorkshopKindTag workshop={w} />
+          {!contest && <WorkshopAccessTag workshop={w} />}
+          <WorkshopReviewTag workshop={w} />
+          {contest ? (
+            <>
+              <ContestDates workshop={w} as="span" />
+              <span className="workshop-meta">
+                <Users size={16} />{' '}
+                {t('contests.signedUp', { count: w.reservation_count || 0 })}
+              </span>
+            </>
+          ) : (
+            <>
+              {dateStr && <span className="workshop-meta"><Calendar size={16} /> {dateStr}</span>}
+              <span className="workshop-meta"><MapPin size={16} /> {w.location_workshop || t('workshops.map.defaultPlace', 'Matiko, Uribarri')}</span>
+              <span className="workshop-meta">
+                <Users size={16} />{' '}
+                {w.capacity_workshop != null
+                  ? t('workshops.spots', { left: w.spots_left, total: w.capacity_workshop })
+                  : t('workshops.participants', { count: w.reservation_count })}
+              </span>
+            </>
+          )}
         </div>
 
         {w.authors?.length > 0 && (
           <div className="workshop-detail-authors">
-            <span className="workshop-detail-label">{t('workshops.instructors')}:</span>
+            <span className="workshop-detail-label">{contest ? t('contests.organizers', 'Organizan') : t('workshops.instructors')}:</span>
             <div className="workshop-detail-authors-list">
               {w.authors.map(a => (
                 <AuthorChip key={a.id_user} author={a} tone="light" />
@@ -168,12 +201,55 @@ function WorkshopDetail() {
           <p className="workshop-detail-description">{w.description_workshop}</p>
         )}
 
-        {/* Where it takes place (set by its creator on the map). */}
-        <WorkshopMap lat={w.lat_workshop} lng={w.lng_workshop} label={w.location_workshop || w.title_workshop} />
+        {/* A contest's prizes; its winners from the jury's day on (its
+            managers, who fill them in, see them before — said so). */}
+        {contest && (
+          <>
+            <ContestAwards workshop={w} showWinners={phase === 'resolved' || canManage} />
+            {canManage && phase !== 'resolved' && w.awards_workshop && Object.values(w.awards_workshop).some((a) => a?.winner) && (
+              <p className="workshop-booking-note">{t('contests.winnersHidden', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las ganadoras y los ganadores solo los ves tú (y quien gestiona el concurso) hasta el día del fallo: {{day}}.' })}</p>
+            )}
+          </>
+        )}
 
-        {/* Reservation action */}
+        {/* Where it takes place (set by its creator on the map). */}
+        {!contest && <WorkshopMap lat={w.lat_workshop} lng={w.lng_workshop} label={w.location_workshop || w.title_workshop} />}
+
+        {/* Reservation action (a contest: its sign-up) */}
         <div className="workshop-reserve-box">
-          {isPastWorkshop(w) ? (
+          {contest ? (
+            review !== 'approved' ? (
+              <p className="workshop-contest-note">{t('contests.signup.unpublished', 'Las inscripciones se abrirán cuando se publique el concurso.')}</p>
+            ) : isPastWorkshop(w) ? (
+              <p className="workshop-full-note">{t('contests.signup.finished', 'Este concurso ya ha terminado.')}</p>
+            ) : isReserved ? (
+              <>
+                <p className="workshop-reserved-note">{t('contests.signup.done', 'Estás inscrita/o en este concurso.')}</p>
+                {phase !== 'resolved' && (
+                  <button className="workshop-btn workshop-btn--cancel" onClick={handleCancel} disabled={loading}>
+                    {t('contests.signup.cancel', 'Cancelar la inscripción')}
+                  </button>
+                )}
+              </>
+            ) : bookingCode === 'blocked' ? (
+              <p className="workshop-full-note">{t('contests.signup.blocked', 'No puedes inscribirte en este concurso.')}</p>
+            ) : phase === 'soon' ? (
+              <p className="workshop-contest-note">{t('contests.signup.soon', { day: formatDay(w.registration_start_workshop), defaultValue: 'Las inscripciones se abren el {{day}}.' })}</p>
+            ) : phase === 'closed' ? (
+              <p className="workshop-contest-note">{t('contests.signup.closed', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las inscripciones están cerradas. El jurado dará a conocer a las ganadoras y los ganadores el {{day}}.' })}</p>
+            ) : phase === 'resolved' ? (
+              <p className="workshop-contest-note">{t('contests.signup.resolved', 'El jurado ya ha decidido.')}</p>
+            ) : (
+              <>
+                <button className="workshop-btn workshop-btn--reserve" onClick={handleReserve} disabled={loading}>
+                  {t('contests.signup.button', 'Inscribirme')}
+                </button>
+                <p className="workshop-booking-note">
+                  {t('contests.signup.until', { day: formatDay(w.registration_end_workshop), defaultValue: 'Inscripciones abiertas hasta el {{day}}, para cualquier persona con cuenta en la revista.' })}
+                </p>
+              </>
+            )
+          ) : isPastWorkshop(w) ? (
             // Finished: no booking, no extra places (the server says so too).
             <p className="workshop-full-note">{t('workshops.finishedNote', 'Este taller ya ha terminado.')}</p>
           ) : invitation ? (

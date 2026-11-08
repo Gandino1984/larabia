@@ -7,9 +7,10 @@ import {
   ACTION_TYPE_OPTIONS,
   SECTION_OPTIONS,
   MODAL_OPTIONS,
-  ROLE_OPTIONS
+  ROLE_OPTIONS,
+  withDefaultCycles
 } from '../../../app_context/navConfig';
-import { ChevronUp, ChevronDown, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
+import { ChevronUp, ChevronDown, Trash2, Plus, Eye, EyeOff, X } from 'lucide-react';
 import './AdminNavTab.css';
 
 const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -81,6 +82,48 @@ const LABEL_FIELDS = [
   ['eu', 'admin.nav.labelEu', 'Etiqueta (EU)']
 ];
 
+/** For a button: a second text it alternates with every 3 s (es/en/eu —
+    the Talleres button: «Concursos»). Folded until it's used; empty = none. */
+function CycleField({ item, onChange }) {
+  const { t } = useTranslation();
+  const cycle = item.cycle || null;
+  const [open, setOpen] = useState(!!(cycle && (cycle.es || cycle.en || cycle.eu)));
+  const setCycle = (lang, v) => onChange({ ...item, cycle: { ...(item.cycle || {}), [lang]: v } });
+  if (!open) {
+    return (
+      <button type="button" className="admin-nav__add-child nav-item__cycle-add" onClick={() => setOpen(true)}>
+        <Plus size={14} /> {t('admin.nav.cycleAdd', 'Alternar con otro texto')}
+      </button>
+    );
+  }
+  return (
+    <div className="nav-item__cycle">
+      <span className="nav-item__cycle-title">
+        {t('admin.nav.cycleTitle', 'Alterna cada 3 segundos con')}
+        <button
+          type="button"
+          className="nav-icon-btn nav-icon-btn--danger"
+          onClick={() => { onChange({ ...item, cycle: null }); setOpen(false); }}
+          title={t('admin.nav.cycleRemove', 'Quitar el texto alterno')}
+          aria-label={t('admin.nav.cycleRemove', 'Quitar el texto alterno')}
+        >
+          <X size={14} />
+        </button>
+      </span>
+      <div className="nav-item__labels">
+        {LABEL_FIELDS.map(([lang]) => (
+          <label key={lang} className="nav-item__label-field">
+            <span className="nav-item__lang" aria-hidden="true">{lang.toUpperCase()}</span>
+            <input className="nav-item__label" type="text" maxLength={40} lang={lang}
+              aria-label={`${t('admin.nav.cycleTitle', 'Alterna cada 3 segundos con')} (${lang.toUpperCase()})`}
+              value={cycle?.[lang] || ''} onChange={(e) => setCycle(lang, e.target.value)} />
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** Shared row controls: label (es/en/eu, each tagged with its language —
     once filled, the placeholder no longer says which), visibility, role,
     reorder, delete. */
@@ -114,6 +157,7 @@ function ItemMeta({ item, onChange, onMove, onDelete, canDelete, isFirst, isLast
           <button type="button" className="nav-icon-btn nav-icon-btn--danger" onClick={onDelete} title={t('common.buttons.delete', 'Eliminar')}><Trash2 size={16} /></button>
         )}
       </div>
+      {item.kind === 'link' && <CycleField item={item} onChange={onChange} />}
     </div>
   );
 }
@@ -166,7 +210,7 @@ function AdminNavTab() {
 
   useEffect(() => {
     if (!loaded) return;
-    setItems(clone(isCustom ? rawConfig : DEFAULT_NAV));
+    setItems(withDefaultCycles(clone(isCustom ? rawConfig : DEFAULT_NAV)));
   }, [loaded, isCustom, rawConfig]);
 
   const move = (arr, idx, dir) => {
@@ -204,7 +248,7 @@ function AdminNavTab() {
     const result = await updateNav(null); // null = back to built-in default
     setSaving(false);
     if (result.error) showError(result.error);
-    else { showSuccess(t('admin.nav.restored', 'Navegación restaurada')); setItems(clone(DEFAULT_NAV)); }
+    else { showSuccess(t('admin.nav.restored', 'Navegación restaurada')); setItems(withDefaultCycles(clone(DEFAULT_NAV))); }
   };
 
   return (

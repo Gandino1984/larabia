@@ -6,6 +6,7 @@
 // month, instructor, availability, access (free / for socios/as) and order.
 // Pure functions — the UI lives in components/workshops/WorkshopFilters.jsx.
 import { serverDate } from './locale';
+import { isContest, contestLastDay } from './contests';
 
 export const EMPTY_WORKSHOP_FILTERS = {
   q: '',
@@ -19,8 +20,10 @@ export const EMPTY_WORKSHOP_FILTERS = {
 
 const normalize = (s) => (s || '').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-/** The workshop's date, or null when it has none ("fecha por confirmar"). */
+/** The workshop's date, or null when it has none ("fecha por confirmar");
+ *  a contest's, the jury's day (it's finished once that day is over). */
 export function workshopDate(w) {
+  if (isContest(w)) return contestLastDay(w);
   if (!w?.date_workshop) return null;
   return serverDate(w.date_workshop);
 }
@@ -77,6 +80,9 @@ export function applyWorkshopFilters(workshops, f, now = new Date()) {
       if (!d || monthKey(d) !== f.month) return false;
     }
     if (f.author && !(w.authors || []).some((a) => String(a.id_user) === f.author)) return false;
+    // Places and access are workshops' (anyone with an account signs up to
+    // a contest).
+    if (isContest(w)) return true;
     if (f.availability === 'free' && !hasFreeSpots(w)) return false;
     const free = w.free_workshop === true || w.free_workshop === 1;
     if (f.access === 'free' && !free) return false;

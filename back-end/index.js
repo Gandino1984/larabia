@@ -129,6 +129,23 @@ Promise.all([
             await qi.addColumn('magazine_workshops', 'free_workshop', { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false });
             console.log('>>> Added magazine_workshops.free_workshop');
         }
+        // Contests (migration 034): kind, sign-up and jury days, awards, review.
+        const contestColumns = {
+            kind_workshop: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'workshop' },
+            registration_start_workshop: { type: DataTypes.DATEONLY, allowNull: true },
+            registration_end_workshop: { type: DataTypes.DATEONLY, allowNull: true },
+            resolution_date_workshop: { type: DataTypes.DATEONLY, allowNull: true },
+            awards_workshop: { type: DataTypes.JSON, allowNull: true },
+            review_status_workshop: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'approved' },
+            rejection_reason_workshop: { type: DataTypes.TEXT, allowNull: true },
+            review_seen_workshop: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
+        };
+        for (const [col, spec] of Object.entries(contestColumns)) {
+            if (!workshops[col]) {
+                await qi.addColumn('magazine_workshops', col, spec);
+                console.log(`>>> Added magazine_workshops.${col}`);
+            }
+        }
         // Paisajes sonoros (migration 016): block type 'paisaje' + the piece JSON.
         const blocks = await qi.describeTable('article_blocks');
         if (!String(blocks.block_type?.type || '').includes("'paisaje'")) {

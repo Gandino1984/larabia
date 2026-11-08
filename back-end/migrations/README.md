@@ -64,6 +64,7 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `031` | `magazine_articles.subtitle_article`, `magazine_projects.subtitle_project` (up to 100 characters) |
 | `032` | `gallery_work_comments`, `gallery_work_likes`, `gallery_piece_likes` — readers' comments on illustrations and likes on illustrations and obras (in `syncGalleryTables`) |
 | `033` | `artist_seen` on `gallery_work_comments`, `gallery_work_likes`, `gallery_piece_likes` — the artist's bell (in `syncGalleryTables`) |
+| `034` | Contests on `magazine_workshops`: `kind_workshop`, `registration_start_workshop`, `registration_end_workshop`, `resolution_date_workshop`, `awards_workshop` (JSON), `review_status_workshop`, `rejection_reason_workshop`, `review_seen_workshop` (also added at boot); `user.receives_newsletter` defaults to 1 |
 
 The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are created at boot with Sequelize `sync()` when missing (the gallery's in order, as they reference each other). The SQL files stay the reference for a fresh database.
 
@@ -82,7 +83,7 @@ The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are crea
 | `magazine_metadata` | Singleton: name, slogan, description, logos |
 | `magazine_theme` | Singleton: theme preset, colours, front page background, animations |
 | `magazine_nav` | Singleton: the top-bar menu (`nav_config` JSON; NULL = default) |
-| `magazine_workshops` | Workshops (date, place, map location, capacity, audience) |
+| `magazine_workshops` | Workshops (date, place, map location, capacity, audience) and contests (`kind_workshop = 'contest'`: sign-up and jury days, awards, super-admin review) |
 | `workshop_authors` | M:N — who leads a workshop |
 | `workshop_reservations` | Bookings |
 | `workshop_blocks` | People blocked from a workshop |

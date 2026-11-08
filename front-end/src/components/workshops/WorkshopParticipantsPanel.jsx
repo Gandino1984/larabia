@@ -6,8 +6,11 @@
 // the magazine team; they answer from their notifications, and a pending
 // invitation holds a place); withdraw an invitation; block someone for this
 // workshop (they lose their place / invitation and can't book it) and unblock.
+// A contest: its sign-ups — no invitations (each person signs up), but
+// removing and blocking work the same.
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { isContest } from '../../utils/contests';
 import { Users, UserPlus, UserMinus, Ban, LockOpen, Search, Send, Undo2, Hourglass, Check, X } from 'lucide-react';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
@@ -112,13 +115,16 @@ function WorkshopParticipantsPanel({ workshop }) {
     </button>
   );
 
+  const contest = isContest(workshop);
   return (
     <section className="workshop-people" aria-labelledby="workshop-people-title">
       <header className="workshop-people__header">
         <h3 id="workshop-people-title">
-          <Users size={18} /> {t('workshops.manage.title', 'Participantes')} ({participants.length})
+          <Users size={18} /> {contest ? t('contests.manage.title', 'Inscritas/os') : t('workshops.manage.title', 'Participantes')} ({participants.length})
         </h3>
-        <p className="workshop-people__hint">{t('workshops.manage.subtitle', 'Solo lo ven quienes gestionan el taller.')}</p>
+        <p className="workshop-people__hint">
+          {contest ? t('contests.manage.subtitle', 'Solo lo ven quienes gestionan el concurso.') : t('workshops.manage.subtitle', 'Solo lo ven quienes gestionan el taller.')}
+        </p>
       </header>
 
       {spotRequests.length > 0 && (
@@ -148,7 +154,7 @@ function WorkshopParticipantsPanel({ workshop }) {
       )}
 
       {participants.length === 0 ? (
-        <p className="workshop-people__empty">{t('workshops.manage.empty', 'Todavía no se ha apuntado nadie.')}</p>
+        <p className="workshop-people__empty">{contest ? t('contests.manage.empty', 'Todavía no se ha inscrito nadie.') : t('workshops.manage.empty', 'Todavía no se ha apuntado nadie.')}</p>
       ) : (
         <ul className="workshop-people__list">
           {participants.map(p => (
@@ -203,10 +209,12 @@ function WorkshopParticipantsPanel({ workshop }) {
       {/* Invite someone (or block them before they book). */}
       <div className="workshop-people__add">
         <label className="workshop-people__label" htmlFor="workshop-people-search">
-          {t('workshops.manage.addTitle', 'Invitar a alguien')}
+          {contest ? t('contests.manage.blockTitle', 'Bloquear a alguien') : t('workshops.manage.addTitle', 'Invitar a alguien')}
         </label>
         <p className="workshop-people__hint workshop-people__hint--add">
-          {isFreeWorkshop(workshop)
+          {contest
+            ? t('contests.manage.blockHint', 'En los concursos no hay invitaciones: cada persona se inscribe. Busca a alguien por su nombre para impedir que se inscriba.')
+            : isFreeWorkshop(workshop)
             ? t('workshops.manage.inviteHintFree', 'Cualquier persona con cuenta en la revista: el taller es gratuito. Recibirán una notificación para aceptar o rechazar.')
             : t('workshops.manage.inviteHint', 'Solo socios/as de la revista (o del equipo). Recibirán una notificación para aceptar o rechazar.')}
         </p>
@@ -221,7 +229,7 @@ function WorkshopParticipantsPanel({ workshop }) {
             autoComplete="off"
           />
         </div>
-        {workshop.is_full && (
+        {!contest && workshop.is_full && (
           <p className="workshop-people__note">{t('workshops.manage.full', 'Taller completo: amplía el aforo para invitar a más personas.')}</p>
         )}
         {term.length > 0 && term.length < 2 && (
@@ -249,7 +257,7 @@ function WorkshopParticipantsPanel({ workshop }) {
                       <span className="workshop-people__tag workshop-people__tag--pending">{t('workshops.manage.invited', 'Invitación pendiente')}</span>
                       {btn('withdraw', u, { icon: Undo2, label: t('workshops.manage.withdraw', 'Retirar') })}
                     </>
-                  ) : u.id_user === me ? null : !u.can_book ? (
+                  ) : u.id_user === me || contest ? null : !u.can_book ? (
                     <span className="workshop-people__tag workshop-people__tag--muted">{t('workshops.manage.notSubscriber', 'No es socio/a')}</span>
                   ) : (
                     btn('invite', u, {
@@ -274,7 +282,7 @@ function WorkshopParticipantsPanel({ workshop }) {
           <h4>
             <Ban size={16} /> {t('workshops.manage.blockedTitle', 'Bloqueadas/os')} ({blocked.length})
           </h4>
-          <p className="workshop-people__hint">{t('workshops.manage.blockedHint', 'No pueden reservar plaza en este taller.')}</p>
+          <p className="workshop-people__hint">{contest ? t('contests.manage.blockedHint', 'No pueden inscribirse en este concurso.') : t('workshops.manage.blockedHint', 'No pueden reservar plaza en este taller.')}</p>
           <ul className="workshop-people__list">
             {blocked.map(b => (
               <li key={b.id_user} className="workshop-people__row">
