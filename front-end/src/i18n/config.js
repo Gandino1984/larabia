@@ -37,7 +37,11 @@ i18n
 
 // The page says which language it's in (<html lang>): screen readers pronounce
 // it right and the browser doesn't offer to translate it "from Spanish".
-const setHtmlLang = (lng) => { document.documentElement.lang = String(lng || 'es').slice(0, 2); };
+// The page's language and the tab's title follow the chosen language.
+const setHtmlLang = (lng) => {
+  document.documentElement.lang = String(lng || 'es').slice(0, 2);
+  document.title = i18n.t('app.title', 'Revista La Rabia');
+};
 setHtmlLang(i18n.language);
 i18n.on('languageChanged', setHtmlLang);
 

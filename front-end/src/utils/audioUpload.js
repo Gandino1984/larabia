@@ -57,6 +57,6 @@ export async function waitForAudio(audioId, userId, isCancelled = () => false) {
 export async function uploadAndProcessAudio(file, userId, onProgress) {
   const audioId = await uploadAudio(file, userId, onProgress);
   const s = await waitForAudio(audioId, userId);
-  if (!s || s.status !== 'ready') throw new Error(s?.message || 'No se pudo procesar el audio');
+  if (!s || s.status !== 'ready') throw new Error(s?.message || i18n.t('paisaje.editor.audio.failed', 'No se pudo procesar el audio.'));
   return s.audioUrl;
 }

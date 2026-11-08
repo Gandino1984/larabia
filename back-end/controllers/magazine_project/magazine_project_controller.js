@@ -1091,7 +1091,10 @@ async function buildFilesManifest(id_project) {
 
         const files = [];
         const seen = new Set();
-        const addFile = (type, label, rawPath) => {
+        // label: in Spanish (older fronts); `named` — label_key, title,
+        // article_id: the front says it in the reader's language
+        // (ProjectFilesPanel, project.files.item.<label_key>).
+        const addFile = (type, label, rawPath, named = {}) => {
             if (!rawPath || typeof rawPath !== 'string') return;
             const value = rawPath.trim();
             if (!value) return;
@@ -1101,34 +1104,37 @@ async function buildFilesManifest(id_project) {
             if (seen.has(key)) return;
             seen.add(key);
             const filename = external ? value : decodeURIComponent(norm.split('/').pop() || 'archivo');
-            files.push({ type, label, path: norm, filename, external });
+            files.push({ type, label, ...named, path: norm, filename, external });
         };
 
         if (project.cover_image_project) {
-            addFile('image', 'Portada del proyecto', project.cover_image_project);
+            addFile('image', 'Portada del proyecto', project.cover_image_project, { label_key: 'projectCover' });
         }
 
         for (const a of articles) {
             const atitle = a.title_article || `Artículo ${a.id_article}`;
-            if (a.cover_image_article) addFile('image', `Portada · ${atitle}`, a.cover_image_article);
+            const named = (kind) => ({ label_key: kind, title: a.title_article || null, article_id: a.id_article });
+            if (a.cover_image_article) addFile('image', `Portada · ${atitle}`, a.cover_image_article, named('cover'));
             if (a.content_article && a.content_article.trim()) {
                 files.push({
                     type: 'text',
                     label: `Texto · ${atitle}`,
+                    ...named('text'),
                     filename: `${slugify(atitle)}.txt`,
                     text: a.content_article
                 });
             }
             for (const b of (a.blocks || [])) {
-                if (b.image_url) addFile('image', `Imagen · ${atitle}`, b.image_url);
+                if (b.image_url) addFile('image', `Imagen · ${atitle}`, b.image_url, named('image'));
                 if (b.interaction_type === 'audio' && typeof b.interaction_data === 'string' && /\/?uploads\//i.test(b.interaction_data)) {
-                    addFile('audio', `Audio · ${atitle}`, b.interaction_data);
+                    addFile('audio', `Audio · ${atitle}`, b.interaction_data, named('audio'));
                 }
-                if (b.iframe_url) addFile('video', `Vídeo · ${atitle}`, b.iframe_url);
+                if (b.iframe_url) addFile('video', `Vídeo · ${atitle}`, b.iframe_url, named('video'));
                 if (b.block_type === 'text' && b.content && b.content.trim()) {
                     files.push({
                         type: 'text',
                         label: `Texto · ${atitle}`,
+                        ...named('text'),
                         filename: `${slugify(atitle)}-bloque-${b.block_order ?? ''}.txt`,
                         text: b.content
                     });

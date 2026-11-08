@@ -6,6 +6,7 @@
 import multer from "multer";
 import fs from "fs";
 import { getRequestUser, roleSnapshot } from "../../utils/authHelper.js";
+import { translateMessage, requestLang } from "../../i18n/translateResponses.js";
 import {
     TMP_DIR,
     AUDIO_FORMATS,
@@ -131,7 +132,8 @@ async function getAudioStatus(req, res) {
                 loudnessBefore: s.loudnessBefore ?? null,
                 loudnessAfter: s.loudnessAfter ?? null,
                 audioUrl: s.status === "ready" ? audioUrl(req.params.id) : null,
-                message: s.error ?? null
+                // Nested (the middleware translates top-level messages only).
+                message: s.error ? translateMessage(s.error, requestLang(req)) : null
             }
         });
     } catch (err) {

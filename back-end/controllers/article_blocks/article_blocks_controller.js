@@ -15,6 +15,7 @@ const WEBP_MAX = 16383;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Callers send back the first error only: one message translates (i18n/messages.js).
 function validateBlockData(blockData) {
     const errors = [];
 
@@ -131,7 +132,7 @@ async function create(blockData) {
         // Validate block data
         const validation = validateBlockData(blockData);
         if (!validation.isValid) {
-            return { error: validation.errors.join(", ") };
+            return { error: validation.errors[0] };
         }
 
         // If no block_order specified, add to end
@@ -173,7 +174,7 @@ async function update(id_block, blockData) {
             const dataToValidate = { ...block.toJSON(), ...blockData };
             const validation = validateBlockData(dataToValidate);
             if (!validation.isValid) {
-                return { error: validation.errors.join(", ") };
+                return { error: validation.errors[0] };
             }
         }
 

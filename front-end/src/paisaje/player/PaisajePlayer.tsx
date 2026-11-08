@@ -40,6 +40,8 @@ export interface PlayerLabels {
   volume: string;
   svgLabel: string;
   audioError: string;
+  /** [La Rabia] El JSON de la pieza no carga; `{status}` = el código HTTP. */
+  jsonError: string;
 }
 
 export const DEFAULT_PLAYER_LABELS: PlayerLabels = {
@@ -54,6 +56,7 @@ export const DEFAULT_PLAYER_LABELS: PlayerLabels = {
   volume: "Volumen",
   svgLabel: "Visualización puntillista del audio",
   audioError: "No se pudo cargar el audio.",
+  jsonError: "No se pudo cargar el JSON (HTTP {status}).",
 };
 export type PeakMode = "amplitude" | "spectrum";
 
@@ -450,7 +453,7 @@ export default function PaisajePlayer({
     setLoadError(null);
     fetch(jsonUrl)
       .then((r) => {
-        if (!r.ok) throw new Error(`No se pudo cargar el JSON (HTTP ${r.status}).`);
+        if (!r.ok) throw new Error(L.jsonError.replace("{status}", String(r.status)));
         return r.json();
       })
       .then((raw: unknown) => {

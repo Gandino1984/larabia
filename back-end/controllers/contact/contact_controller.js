@@ -24,7 +24,8 @@ async function sendContactMessage(contactData) {
     try {
         const validation = validateContactData(contactData);
         if (!validation.isValid) {
-            return { error: "Datos inválidos", details: validation.errors.join(', ') };
+            // What's wrong, in the reader's language (one message: i18n/messages.js).
+            return { error: validation.errors[0], details: validation.errors.join(', ') };
         }
 
         const result = await sendContactToDevelopersEmail(

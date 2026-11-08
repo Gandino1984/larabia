@@ -218,15 +218,17 @@ The interface is fully translated into **es / en / eu**. There are three layers:
    - Every visible string goes through `t('key', 'default in Spanish')`. The keys live in `front-end/src/i18n/locales/{es,en,eu}.json` (flat dotted keys; plurals use `_one` / `_other`).
    - Contexts and utilities use `i18n.t` from `src/i18n/config`.
    - The menu labels are stored with `es` / `en` / `eu` and are edited in Admin › Menú.
+   - The page's `lang` and the browser tab's title (`app.title`) follow the language (`src/i18n/config.js`).
 2. **Server messages:**
    - The front-end sends the header language as `Accept-Language`.
    - `back-end/i18n/translateResponses.js` translates the `error`, `success` and `message` strings of every JSON answer, using `back-end/i18n/messages.js`.
    - The code keeps writing messages in Spanish. A new message needs an entry there (exact text, or a pattern when it carries values).
+   - Send one message, not several joined with commas (it wouldn't match), and never compare a message's text in the front (it arrives translated). A message nested inside `data` isn't translated by the middleware: translate it where it's built (`translateMessage(text, requestLang(req))`, as the audio status does). Labels the server builds for the interface go as a key plus values for the front to say (`label_key` + `title` in a project's files).
 3. **Content:** the versions of articles and projects described above.
 
 **Dates** go through `front-end/src/utils/locale.js` (`localDate`). Chrome has no Basque dates (its `Intl` falls back to Spanish), so Basque is formatted by hand there («2026ko urriaren 19a»).
 
-**Not translated:** the soundscape engine's own interface texts (the engine is kept as delivered) and the magazine's own content in the database (name, slogan, author bios).
+**Not translated:** the soundscape engine's own interface texts — its image converters' controls, which only creators see (the engine is kept as delivered) —, the magazine's own content in the database (name, slogan, author bios) and the e-mails (in Spanish; the invitations in Spanish and English).
 
 ## Local development
 

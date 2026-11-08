@@ -510,7 +510,7 @@ function Header({ ready = true }) {
                   ? (resolveLogoUrl(metadata.logo_dark) || '/logoLaRabiaBlack.png')
                   : (resolveLogoUrl(metadata.logo_light) || '/LogoLaRabiaWhite.png')
               }
-              alt={`${metadata.name || 'La Rabia'}${metadata.slogan ? ' — ' + metadata.slogan : ''}`}
+              alt={metadata.name || 'La Rabia'}
               className="logo-image"
             />
           </div>

@@ -51,5 +51,7 @@ export const playerLabels = (t) => ({
   unmute: t('paisaje.player.unmute', 'Activar sonido'),
   volume: t('paisaje.player.volume', 'Volumen'),
   svgLabel: t('paisaje.player.svgLabel', 'Paisaje sonoro'),
-  audioError: t('paisaje.player.audioError', 'No se pudo cargar el audio.')
+  audioError: t('paisaje.player.audioError', 'No se pudo cargar el audio.'),
+  // {status} (one brace): the player puts the HTTP code there.
+  jsonError: t('paisaje.player.jsonError', 'No se pudo cargar el paisaje sonoro (HTTP {status}).')
 });

@@ -20,6 +20,14 @@ const TYPE_META = {
 };
 const TYPE_ORDER = ['image', 'audio', 'video', 'text'];
 
+// What a file is, in the reader's language: the server says which (label_key)
+// and of which article (title; none: «Artículo 7»). Older answers: its label.
+function fileLabel(file, t) {
+  if (!file.label_key) return file.label;
+  const title = file.title || t('project.files.untitledArticle', { id: file.article_id, defaultValue: 'Artículo {{id}}' });
+  return t(`project.files.item.${file.label_key}`, { title, defaultValue: file.label });
+}
+
 function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
   const { t } = useTranslation();
   const [state, setState] = useState({ loading: true, error: '', files: [] });
@@ -149,7 +157,7 @@ function ProjectFilesPanel({ projectId, projectTitle, userId, onClose }) {
                   {items.map((file, i) => (
                     <li className="project-files-item" key={`${type}-${i}`}>
                       <div className="project-files-item-info">
-                        <span className="project-files-item-label">{file.label}</span>
+                        <span className="project-files-item-label">{fileLabel(file, t)}</span>
                         <span className="project-files-item-name">{file.filename}</span>
                       </div>
                       <button

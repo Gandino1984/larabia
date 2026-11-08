@@ -224,8 +224,10 @@ async function getAll(filters = {}, roleCtx = EMPTY_ROLE_CTX) {
             order: [['date_published', 'DESC']]
         });
 
+        // None is an empty list, not an error (the reader would get an error
+        // toast — in its own language, so the front can't tell it apart).
         if (!articles || articles.length === 0) {
-            return { error: "No hay artículos disponibles", data: [] };
+            return { error: null, data: [] };
         }
 
         const articleIds = articles.map(a => a.id_article);
@@ -815,7 +817,9 @@ async function removeById(id_article) {
 
         return {
             data: id_article,
-            message: `Artículo eliminado exitosamente (${deletionSummary} eliminados)`
+            message: "Artículo eliminado exitosamente",
+            // What went with it (the logs; the reader gets the message in their language).
+            deleted: deletionSummary
         };
     } catch (err) {
         console.error("-> magazine_article_controller.js - removeById() - Error =", err);

@@ -218,15 +218,17 @@ La interfaz está traducida entera al **castellano, inglés y euskera**, en tres
    - Todo texto visible pasa por `t('clave', 'texto por defecto en castellano')`. Las claves están en `front-end/src/i18n/locales/{es,en,eu}.json` (claves planas con puntos; los plurales con `_one` / `_other`).
    - Contextos y utilidades usan `i18n.t` de `src/i18n/config`.
    - Las etiquetas del menú se guardan con `es` / `en` / `eu` y se editan en Admin › Menú.
+   - El `lang` de la página y el título de la pestaña (`app.title`) siguen al idioma (`src/i18n/config.js`).
 2. **Mensajes del servidor:**
    - La web manda el idioma de la cabecera como `Accept-Language`.
    - `back-end/i18n/translateResponses.js` traduce los textos `error`, `success` y `message` de cada respuesta JSON con `back-end/i18n/messages.js`.
    - El código sigue escribiendo los mensajes en castellano. Un mensaje nuevo necesita su entrada ahí (texto exacto, o patrón si lleva valores).
+   - Hay que mandar un solo mensaje, no varios unidos por comas (no coincidiría), y nunca comparar en la web el texto de un mensaje (llega traducido). Un mensaje dentro de `data` no lo traduce el middleware: se traduce donde se construye (`translateMessage(texto, requestLang(req))`, como el estado del audio). Las etiquetas que el servidor arma para la interfaz van como clave más valores para que las diga la web (`label_key` + `title` en los archivos de un proyecto).
 3. **Contenido:** las versiones de artículos y proyectos descritas arriba.
 
 **Las fechas** pasan por `front-end/src/utils/locale.js` (`localDate`). Chrome no trae fechas en euskera (su `Intl` recurre al castellano), así que ahí el euskera se escribe a mano («2026ko urriaren 19a»).
 
-**Sin traducir:** los textos de la propia interfaz del motor de paisajes sonoros (el motor se mantiene como se entregó) y el contenido propio de la revista en la base de datos (nombre, eslogan, biografías).
+**Sin traducir:** los textos de la propia interfaz del motor de paisajes sonoros —los controles de sus conversores de imagen, que solo ve quien crea— (el motor se mantiene como se entregó), el contenido propio de la revista en la base de datos (nombre, eslogan, biografías) y los correos (en castellano; las invitaciones, en castellano e inglés).
 
 ## Desarrollo en local
 

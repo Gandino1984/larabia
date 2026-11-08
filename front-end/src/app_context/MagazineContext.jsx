@@ -52,12 +52,9 @@ export const MagazineProvider = ({ children }) => {
 
         setArticles(articlesList);
       } else {
-        // Only show error if it's not just "no articles available"
+        // No articles comes as an empty list; an error is a real one.
         setArticles([]);
-        const errorMsg = response.data.error.toLowerCase();
-        if (!errorMsg.includes('no hay artículos') && !errorMsg.includes('no articles')) {
-          showError(response.data.error);
-        }
+        showError(response.data.error);
       }
     } catch (err) {
       console.error('Error fetching articles:', err);
