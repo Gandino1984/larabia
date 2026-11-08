@@ -23,9 +23,21 @@
   display: flex; flex-direction: column;
 }
 .workshop-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
-.workshop-card-image { position: relative; aspect-ratio: 16/9; background: #f0f0f0; }
-.workshop-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.workshop-card-image--placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#aaa; }
+.workshop-card-image { position: relative; aspect-ratio: 4/3; overflow: hidden; background: #f0f0f0; }
+/* Covers are mostly posters (square, portrait, with text): shown whole over a
+   blurred, darker copy filling the frame. The frame keeps its shape whatever
+   the image's (a portrait poster used to stretch it, so on phones those
+   cards were taller than the screen and taller than the rest). */
+.workshop-card-image::before {
+  content: ''; position: absolute; inset: -16px;
+  background: var(--cover) center / cover no-repeat;
+  filter: blur(14px) brightness(0.55);
+}
+.workshop-card--past .workshop-card-image::before {
+  filter: blur(14px) brightness(0.55) grayscale(1);
+}
+.workshop-card-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+.workshop-card-image--placeholder { position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; color:#aaa; }
 .workshop-badge { position: absolute; top: 8px; right: 8px; padding: 3px 9px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; }
 .workshop-card-body { padding: 0.9rem 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.3rem; }
 .workshop-card-title { margin: 0 0 0.2rem; font-size: 1.05rem; color: #1a1a1a; }

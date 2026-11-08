@@ -155,7 +155,8 @@ function WorkshopsList() {
         className={`workshop-card workshop-card--${status} ${sharedId === w.id_workshop ? 'is-shared' : ''}`}
         onClick={() => openWorkshop(w)}
       >
-        <div className="workshop-card-image">
+        {/* --cover: the blurred copy that fills the frame around the poster. */}
+        <div className="workshop-card-image" style={cover ? { '--cover': `url("${cover}")` } : undefined}>
           {cover
             ? <img src={cover} alt={w.title_workshop} onError={(e) => { e.target.style.display = 'none'; }} />
             : <div className="workshop-card-image--placeholder"><Users size={32} /></div>}
