@@ -2,10 +2,11 @@
 //
 // A workshop's page — or a contest's (utils/contests.js): its days, prizes
 // and winners, and «Inscribirme» while sign-ups are open.
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { localDate } from '../../utils/locale';
-import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Send, Pencil, Undo2, Paperclip } from 'lucide-react';
+import axiosInstance from '../../utils/axiosConfig';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
@@ -18,6 +19,8 @@ import WorkshopAccessTag from './WorkshopAccessTag';
 import WorkshopExtraSpot from './WorkshopExtraSpot';
 import WorkshopKindTag, { WorkshopReviewTag, WorkshopFinishedTag } from './WorkshopKindTag';
 import { ContestDates, ContestAwards } from './ContestInfo';
+import ContestEntryModal from './ContestEntryModal';
+import ContestEntriesPanel from './ContestEntriesPanel';
 import { isPastWorkshop } from '../../utils/workshopFilters';
 import { isContest, contestPhase, formatDay, reviewStateOf } from '../../utils/contests';
 import '../magazine/ArticleCard.css';
@@ -41,7 +44,9 @@ const formatDate = (d) => {
 
 function WorkshopDetail() {
   const { t } = useTranslation();
-  const { navigateToTalleres } = useUI();
+  const { navigateToTalleres, showSuccess, showError } = useUI();
+  // A contest: the entry form (sending the work = taking part).
+  const [entryForm, setEntryForm] = useState(false);
   const { currentUser, isSuperAdmin, canCreateContent } = useAuth();
   const {
     selectedWorkshop, fetchWorkshopById, reserveWorkshop, cancelWorkshopReservation, loading,
@@ -123,6 +128,18 @@ function WorkshopDetail() {
     if (res.code) guard(res.code === 'login_required' ? 'login' : 'subscribe');
   };
 
+  // A contest: withdraw their work (and sign-up) while sign-ups are open.
+  const withdrawEntry = async () => {
+    if (!window.confirm(t('contests.entry.confirmWithdraw', '¿Retirar tu obra? Dejarás de participar en el concurso (podrás volver a enviarla mientras sigan abiertas las inscripciones).'))) return;
+    try {
+      const res = await axiosInstance.delete(`/magazine-workshop/contests/${id}/entry`, { headers: { 'x-user-id': currentUser?.id_user } });
+      showSuccess(res.data?.success || t('contests.entry.withdrawn', 'Has retirado tu obra'));
+      fetchWorkshopById(id);
+    } catch (err) {
+      showError(err.response?.data?.error || t('contests.entry.withdrawError', 'No se pudo retirar la obra'));
+    }
+  };
+
   const handleCancel = async () => {
     const res = await cancelWorkshopReservation(id);
     if (res.success) fetchWorkshopById(id);
@@ -175,7 +192,7 @@ function WorkshopDetail() {
             </>
           ) : (
             <>
-              {dateStr && <span className="workshop-meta"><Calendar size={16} /> {dateStr}</span>}
+              <span className="workshop-meta"><Calendar size={16} /> {dateStr || t('workshops.dateTbd', 'Fecha por definir')}</span>
               <span className="workshop-meta"><MapPin size={16} /> {w.location_workshop || t('workshops.map.defaultPlace', 'Matiko, Uribarri')}</span>
               <span className="workshop-meta">
                 <Users size={16} />{' '}
@@ -223,30 +240,47 @@ function WorkshopDetail() {
               <p className="workshop-contest-note">{t('contests.signup.unpublished', 'Las inscripciones se abrirán cuando se publique el concurso.')}</p>
             ) : isPastWorkshop(w) ? (
               <p className="workshop-full-note">{t('contests.signup.finished', 'Este concurso ya ha terminado.')}</p>
-            ) : isReserved ? (
-              <>
-                <p className="workshop-reserved-note">{t('contests.signup.done', 'Estás inscrita/o en este concurso.')}</p>
-                {phase !== 'resolved' && (
-                  <button className="workshop-btn workshop-btn--cancel" onClick={handleCancel} disabled={loading}>
-                    {t('contests.signup.cancel', 'Cancelar la inscripción')}
-                  </button>
+            ) : w.my_entry ? (
+              // Their work is in: change or withdraw it while sign-ups are open.
+              <div className="contest-my-entry">
+                <p className="workshop-reserved-note">
+                  {t('contests.entry.yours', { title: w.my_entry.title_entry, defaultValue: 'Has enviado «{{title}}»: ya participas en el concurso.' })}
+                </p>
+                {w.my_entry.has_file && (
+                  <span className="contest-my-entry__file"><Paperclip size={14} aria-hidden="true" /> {w.my_entry.file_name_entry}</span>
                 )}
-              </>
+                {phase === 'open' ? (
+                  <div className="contest-my-entry__actions">
+                    <button className="workshop-btn workshop-btn--reserve" onClick={() => setEntryForm(true)}>
+                      <Pencil size={16} aria-hidden="true" /> {t('contests.entry.change', 'Cambiar mi obra')}
+                    </button>
+                    <button className="workshop-btn workshop-btn--cancel" onClick={withdrawEntry} disabled={loading}>
+                      <Undo2 size={16} aria-hidden="true" /> {t('contests.entry.withdraw', 'Retirar mi obra')}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="workshop-booking-note">
+                    {phase === 'closed'
+                      ? t('contests.entry.lockedClosed', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las inscripciones están cerradas: tu obra ya no se puede cambiar. El jurado dará a conocer a las ganadoras y los ganadores el {{day}}.' })
+                      : t('contests.signup.resolved', 'El jurado ya ha decidido.')}
+                  </p>
+                )}
+              </div>
             ) : bookingCode === 'blocked' ? (
               <p className="workshop-full-note">{t('contests.signup.blocked', 'No puedes inscribirte en este concurso.')}</p>
             ) : phase === 'soon' ? (
-              <p className="workshop-contest-note">{t('contests.signup.soon', { day: formatDay(w.registration_start_workshop), defaultValue: 'Las inscripciones se abren el {{day}}.' })}</p>
+              <p className="workshop-contest-note">{t('contests.signup.soon', { day: formatDay(w.registration_start_workshop), defaultValue: 'Las inscripciones se abren el {{day}}: desde ese día podrás enviar tu obra aquí.' })}</p>
             ) : phase === 'closed' ? (
               <p className="workshop-contest-note">{t('contests.signup.closed', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las inscripciones están cerradas. El jurado dará a conocer a las ganadoras y los ganadores el {{day}}.' })}</p>
             ) : phase === 'resolved' ? (
               <p className="workshop-contest-note">{t('contests.signup.resolved', 'El jurado ya ha decidido.')}</p>
             ) : (
               <>
-                <button className="workshop-btn workshop-btn--reserve" onClick={handleReserve} disabled={loading}>
-                  {t('contests.signup.button', 'Inscribirme')}
+                <button className="workshop-btn workshop-btn--reserve" onClick={() => setEntryForm(true)}>
+                  <Send size={16} aria-hidden="true" /> {t('contests.entry.participate', 'Participar: enviar mi obra')}
                 </button>
                 <p className="workshop-booking-note">
-                  {t('contests.signup.until', { day: formatDay(w.registration_end_workshop), defaultValue: 'Inscripciones abiertas hasta el {{day}}, para cualquier persona con cuenta en la revista.' })}
+                  {t('contests.signup.until', { day: formatDay(w.registration_end_workshop), defaultValue: 'Puedes enviar tu obra hasta el {{day}}. Para participar hace falta una cuenta en la revista.' })}
                 </p>
               </>
             )
@@ -297,8 +331,20 @@ function WorkshopDetail() {
           )}
         </div>
 
+        {/* A contest: the works that came in (its managers). */}
+        {contest && canManage && <ContestEntriesPanel key={w.entry_count} contest={w} />}
+
         {/* Participants: the workshop's managers only. */}
         {canManage && w.participants && <WorkshopParticipantsPanel workshop={w} />}
+
+        {entryForm && (
+          <ContestEntryModal
+            contest={w}
+            entry={w.my_entry || null}
+            onClose={() => setEntryForm(false)}
+            onSent={() => fetchWorkshopById(id)}
+          />
+        )}
       </div>
     </div>
   );

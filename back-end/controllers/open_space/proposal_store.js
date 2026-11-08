@@ -20,8 +20,12 @@ export function ensureDir() {
     fs.mkdirSync(PROPOSALS_DIR, { recursive: true });
 }
 
+// Folders under /uploads that are never served (their files go through the
+// API): these proposals and the contests' entries (contest_entry_store.js).
+const PRIVATE_FOLDERS = ['proposals', 'contest-entries'];
+
 /**
- * Whether a path under /uploads points into the proposals folder. Checked on
+ * Whether a path under /uploads points into a private folder. Checked on
  * the path as express.static will read it (decoded and normalised), so
  * «/%70roposals/…», «//proposals/…» or «/x/../proposals/…» are caught too.
  */
@@ -33,7 +37,7 @@ export function isPrivateUploadPath(reqPath) {
         return true; // malformed: let it be refused
     }
     const first = p.replace(/^\/+/, '').split('/')[0].toLowerCase();
-    return first === 'proposals';
+    return PRIVATE_FOLDERS.includes(first);
 }
 
 /** Absolute path of a stored file, or null if the name would leave the folder. */

@@ -210,7 +210,8 @@ function WorkshopsList() {
             </>
           ) : (
             <>
-              {dateStr && <p className="workshop-meta"><Calendar size={15} /> {dateStr}</p>}
+              {/* Created without a date: it's still to be set. */}
+              <p className="workshop-meta"><Calendar size={15} /> {dateStr || t('workshops.dateTbd', 'Fecha por definir')}</p>
               <p className="workshop-meta"><MapPin size={15} /> {w.location_workshop || t('workshops.map.defaultPlace', 'Matiko, Uribarri')}</p>
               {/* Where: small map preview (the workshop's place or the default). */}
               <WorkshopMap lat={w.lat_workshop} lng={w.lng_workshop} compact />

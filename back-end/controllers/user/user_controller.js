@@ -4,6 +4,7 @@ import { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, sen
 import { isSuperAdminEmail } from "../../config/environment.js";
 import { Op } from "sequelize";
 import { removeFilesOfUser as removeProposalFilesOf } from "../open_space/proposal_store.js";
+import { removeEntryFilesOfUser } from "../magazine_workshop/contest_entry_store.js";
 
 /**
  * Idempotent super-admin auto-promotion. If the user's email is in the
@@ -556,6 +557,8 @@ async function removeById(id_user) {
 
         // Files of their «Espacio abierto» proposals (the rows go with the FK cascade).
         await removeProposalFilesOf(id_user).catch((err) => console.error('Error deleting proposal files:', err));
+        // …and of their contest entries.
+        await removeEntryFilesOfUser(id_user).catch((err) => console.error('Error deleting contest entry files:', err));
 
         // FK cascades handle article_authors, article_author_invitations, project_authors, author_profiles, open_space_proposals
         await user.destroy();

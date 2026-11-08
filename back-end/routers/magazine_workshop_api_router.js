@@ -2,6 +2,7 @@
 import { Router } from "express";
 import magazineWorkshopApiController from "../controllers/magazine_workshop/magazine_workshop_api_controller.js";
 import { handleWorkshopImageUpload } from "../middleware/MagazineUploadMiddleware.js";
+import contestEntryApiController from "../controllers/magazine_workshop/contest_entry_api_controller.js";
 
 const router = Router();
 
@@ -11,6 +12,15 @@ router.get("/by-id/:id_workshop", magazineWorkshopApiController.getById);       
 router.get("/manage/:id_workshop/users", magazineWorkshopApiController.searchUsers); // managers: find people (?q=)
 router.get("/invitations/feed", magazineWorkshopApiController.invitationFeed);       // signed-in: invitations + answers (+ their contests' review)
 router.get("/review/pending", magazineWorkshopApiController.pendingContests);       // super admins: contests waiting for approval
+
+// Contests' entries: a contestant sends / changes / withdraws their work
+// while sign-ups are open (sending it signs them up); its managers list and
+// download them.
+router.get("/contests/:id_workshop/entry", contestEntryApiController.mine);
+router.post("/contests/:id_workshop/entry", contestEntryApiController.canSend, contestEntryApiController.upload, contestEntryApiController.submit);
+router.delete("/contests/:id_workshop/entry", contestEntryApiController.withdraw);
+router.get("/contests/:id_workshop/entries", contestEntryApiController.list);
+router.get("/contests/:id_workshop/entries/:id_entry/file", contestEntryApiController.download);
 
 // POST
 router.post("/create", magazineWorkshopApiController.create);                       // admins / super-admin

@@ -26,7 +26,7 @@ async function requireWorkshopCreator(req, res) {
  * created or teach — its talleristas. `workshop` is a model instance or the
  * plain object getById returns (its `authors` list saves a query).
  */
-async function isWorkshopManager(user, workshop) {
+export async function isWorkshopManager(user, workshop) {
     if (!user || !workshop) return false;
     const role = roleSnapshot(user);
     if (role.isSuperAdmin) return true;
@@ -205,6 +205,11 @@ async function getById(req, res) {
             request: out.my_spot_request?.status || null,
             isMember: out.is_member
         });
+        // A contest: the reader's own work, and how many works came in (managers).
+        if (isContest(data)) {
+            out.my_entry = await magazineWorkshopController.myEntry(id_workshop, user.id_user);
+            if (canManage) out.entry_count = await magazineWorkshopController.countEntries(id_workshop);
+        }
         if (canManage) {
             if (answersSpotRequests(user, data)) out.spot_requests = await magazineWorkshopController.loadWorkshopSpotRequests(id_workshop);
             out.invitations = await magazineWorkshopController.loadWorkshopInvitations(id_workshop);

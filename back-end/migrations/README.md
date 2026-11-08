@@ -66,6 +66,7 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `033` | `artist_seen` on `gallery_work_comments`, `gallery_work_likes`, `gallery_piece_likes` — the artist's bell (in `syncGalleryTables`) |
 | `034` | Contests on `magazine_workshops`: `kind_workshop`, `registration_start_workshop`, `registration_end_workshop`, `resolution_date_workshop`, `awards_workshop` (JSON), `review_status_workshop`, `rejection_reason_workshop`, `review_seen_workshop` (also added at boot); `user.receives_newsletter` defaults to 1 |
 | `035` | `bug_reports` — «Reportar un error»: what happened, where (address, view, what was open), device, status new / seen / fixed (also created at boot) |
+| `036` | `contest_entries` — contestants' works (title, note, text, private file in uploads/contest-entries), one per person and contest (also created at boot) |
 
 The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are created at boot with Sequelize `sync()` when missing (the gallery's in order, as they reference each other). The SQL files stay the reference for a fresh database.
 
@@ -101,6 +102,7 @@ The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are crea
 | `gallery_messages` | (No longer used: copied into `chat_messages`, `029`) |
 | `chat_conversations` | The chat: one per member ↔ author / artist pair, its status (requested, active, declined, ended), origin, what each side has read and seen |
 | `chat_messages` | Its messages |
+| `contest_entries` | A contest's works: one per contestant, with their title, note, text and private file |
 | `bug_reports` | «Reportar un error»: what someone reported, where they were and their device; new / seen / fixed |
 
 ## Differences from uribarri.online

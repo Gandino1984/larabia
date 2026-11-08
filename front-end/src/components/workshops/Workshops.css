@@ -985,3 +985,36 @@
 
 /* A finished workshop / contest on its page: the cover greyed, as its card. */
 .workshop-detail-cover.is-past img { filter: grayscale(1); opacity: 0.7; }
+
+/* A contest's works, for its managers (ContestEntriesPanel). */
+.contest-entries__list { list-style: none; margin: 0.75rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.contest-entry {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  background: #ffffff;
+  min-width: 0;
+}
+.contest-entry__title { display: block; font-size: 1rem; color: #1a1a1a; overflow-wrap: anywhere; }
+.contest-entry__meta { display: block; margin-top: 0.15rem; font-size: 0.8rem; color: #555555; overflow-wrap: anywhere; }
+.contest-entry__note { margin: 0.5rem 0 0; font-size: 0.9rem; color: #2a2a2a; white-space: pre-line; }
+.contest-entry__actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+.contest-entry__actions .workshop-people-btn span { overflow-wrap: anywhere; text-align: left; }
+.contest-entry__actions svg.is-open { transform: rotate(180deg); }
+.contest-entry__text {
+  margin-top: 0.6rem;
+  max-height: 22rem;
+  overflow: auto;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: #1a1a1a;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+/* The contestant's own work, on the contest page. */
+.contest-my-entry { margin: 0 0 0.75rem; color: #1a1a1a; }
+.contest-my-entry__file { display: inline-flex; align-items: center; gap: 0.3rem; color: #555555; font-size: 0.88rem; }
+.contest-my-entry__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }

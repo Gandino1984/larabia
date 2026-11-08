@@ -71,6 +71,7 @@ Desde la `012`, el back-end comprueba al arrancar (`back-end/index.js`) las colu
 | `033` | `artist_seen` en `gallery_work_comments`, `gallery_work_likes`, `gallery_piece_likes`: la campana de la o el artista (en `syncGalleryTables`) |
 | `034` | Concursos en `magazine_workshops`: `kind_workshop`, `registration_start_workshop`, `registration_end_workshop`, `resolution_date_workshop`, `awards_workshop` (JSON), `review_status_workshop`, `rejection_reason_workshop`, `review_seen_workshop` (también al arrancar); `user.receives_newsletter` pasa a valer 1 por defecto |
 | `035` | `bug_reports`: «Reportar un error» — qué ha pasado, dónde (dirección, vista, lo que estaba abierto), el dispositivo y el estado nuevo / visto / arreglado (también al arrancar) |
+| `036` | `contest_entries`: las obras de quien concursa (título, nota, texto, archivo privado en uploads/contest-entries), una por persona y concurso (también al arrancar) |
 
 Las tablas de `009`, `010`, `011`, `014`, `015`, `020`, `023` y `027` se crean al arrancar con `sync()` de Sequelize si no existen (las de la galería en orden, porque se referencian entre sí). Los archivos SQL siguen siendo la referencia para una base nueva.
 
@@ -106,6 +107,7 @@ Las tablas de `009`, `010`, `011`, `014`, `015`, `020`, `023` y `027` se crean a
 | `gallery_messages` | (Ya no se usa: copiada en `chat_messages`, `029`) |
 | `chat_conversations` | Las charlas: una por pareja socia/o ↔ autora/or o artista, su estado (pendiente, abierta, rechazada, terminada), su origen, lo que ha leído y visto cada parte |
 | `chat_messages` | Sus mensajes |
+| `contest_entries` | Las obras de un concurso: una por concursante, con su título, nota, texto y archivo privado |
 | `bug_reports` | «Reportar un error»: lo que alguien ha reportado, dónde estaba y su dispositivo; nuevo / visto / arreglado |
 
 ## Diferencias con uribarri.online

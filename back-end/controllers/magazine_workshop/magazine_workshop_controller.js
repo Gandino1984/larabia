@@ -11,6 +11,8 @@ import user_model from "../../models/user_model.js";
 import { Op } from "sequelize";
 
 import { deleteFile } from "../../utils/file_cleanup.js";
+import contest_entry_model from "../../models/contest_entry_model.js";
+import { removeEntries } from "./contest_entry_store.js";
 
 // The API's dates are UTC strings without a zone («2026-11-20 17:00:00»).
 const utcDate = (v) => (v instanceof Date ? v : v ? new Date(String(v).replace(' ', 'T') + 'Z') : null);
@@ -449,6 +451,8 @@ async function removeById(id_workshop) {
         const workshop = await magazine_workshop_model.findByPk(id_workshop);
         if (!workshop) return { error: "Taller no encontrado" };
         if (workshop.cover_image_workshop) deleteFile(workshop.cover_image_workshop);
+        // A contest's entries: their files (the rows go with the cascade too).
+        if (isContest(workshop)) await removeEntries({ workshop_id: workshop.id_workshop });
         await workshop.destroy(); // cascade removes authors + reservations
         return { data: id_workshop, message: isContest(workshop) ? "Concurso eliminado" : "Taller eliminado" };
     } catch (err) {
@@ -484,6 +488,8 @@ async function reserve(id_workshop, userId) {
             const phase = contestPhase(workshop);
             if (phase === 'soon') return { error: "Las inscripciones de este concurso todavía no están abiertas", code: 'not_open' };
             if (phase !== 'open') return { error: "Las inscripciones de este concurso están cerradas", code: 'closed' };
+            // Taking part = sending the work (contest_entry_api_controller.js).
+            return { error: "Para participar en el concurso, envía tu obra", code: 'entry_required' };
         } else if (isPastWorkshop(workshop)) return { error: "Este taller ya ha terminado", code: 'finished' };
 
         if (await isBlocked(id_workshop, userId)) {
@@ -528,6 +534,7 @@ async function cancelReservation(id_workshop, userId) {
         const contest = isContest(workshop);
         const deleted = await workshop_reservation_model.destroy({ where: { workshop_id: id_workshop, user_id: userId } });
         if (!deleted) return { error: contest ? "No estabas inscrito/a en este concurso" : "No tenías una reserva en este taller" };
+        if (contest) await removeEntries({ workshop_id: id_workshop, user_id: userId });
         const count = await workshop_reservation_model.count({ where: { workshop_id: id_workshop } });
         const pending = await countPendingInvitations(id_workshop);
         return {
@@ -695,7 +702,9 @@ async function markResponsesSeen(userId, ids) {
 async function removeParticipant(id_workshop, userId) {
     try {
         const deleted = await workshop_reservation_model.destroy({ where: { workshop_id: id_workshop, user_id: userId } });
-        if (!deleted) return { error: "Esta persona no participa en el taller" };
+        // A contest: their work goes too.
+        const entries = await removeEntries({ workshop_id: id_workshop, user_id: userId });
+        if (!deleted && !entries) return { error: "Esta persona no participa en el taller" };
         return { success: "Participante eliminado", data: await managementState(id_workshop) };
     } catch (err) {
         console.error("-> workshop removeParticipant() - Error =", err);
@@ -717,6 +726,7 @@ async function blockUser(id_workshop, userId, blockedBy) {
         });
         await workshop_reservation_model.destroy({ where: { workshop_id: id_workshop, user_id: userId } });
         await workshop_invitation_model.destroy({ where: { workshop_id: id_workshop, invitee_user_id: userId } });
+        await removeEntries({ workshop_id: id_workshop, user_id: userId });
         return { success: "Usuario bloqueado en este taller", data: await managementState(id_workshop) };
     } catch (err) {
         console.error("-> workshop blockUser() - Error =", err);
@@ -946,6 +956,18 @@ async function spotRequestsByWorkshop(workshopIds) {
     return out;
 }
 
+// The contestant's own entry on a contest (title, file name, dates), or null.
+async function myEntry(workshopId, userId) {
+    if (!userId) return null;
+    const e = await contest_entry_model.findOne({ where: { workshop_id: workshopId, user_id: userId } });
+    return e ? {
+        id_entry: e.id_entry, title_entry: e.title_entry, note_entry: e.note_entry, text_entry: e.text_entry,
+        file_name_entry: e.file_name_entry, has_file: !!e.file_entry, created_at: e.created_at, updated_at: e.updated_at
+    } : null;
+}
+
+const countEntries = (workshopId) => contest_entry_model.count({ where: { workshop_id: workshopId } });
+
 // ── Contests' review (super admins) ──
 
 async function pendingContests() {
@@ -1054,6 +1076,8 @@ export default {
     spotRequestsByWorkshop,
     isPastWorkshop,
     markSpotAnswersSeen,
+    myEntry,
+    countEntries,
     pendingContests,
     reviewContest,
     reviewFeed,

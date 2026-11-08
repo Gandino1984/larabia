@@ -34,6 +34,7 @@ import workshopBlockModel from './models/workshop_block_model.js';
 import workshopInvitationModel from './models/workshop_invitation_model.js';
 import openSpaceProposalModel from './models/open_space_proposal_model.js';
 import bugReportModel from './models/bug_report_model.js';
+import contestEntryModel from './models/contest_entry_model.js';
 import workshopSpotRequestModel from './models/workshop_spot_request_model.js';
 import { syncGalleryTables } from './models/gallery_models.js';
 import { syncChatTables } from './models/chat_models.js';
@@ -97,7 +98,8 @@ Promise.all([
     workshopInvitationModel.sync(),
     openSpaceProposalModel.sync(),
     workshopSpotRequestModel.sync(),
-    bugReportModel.sync()
+    bugReportModel.sync(),
+    contestEntryModel.sync()
 ])
     // The Galería's tables reference each other: created one after another.
     .then(() => syncGalleryTables())
