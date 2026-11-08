@@ -25,7 +25,7 @@ It began as part of [uribarri.online](https://github.com/Gandino1984/uribarri.on
 
 **Reading**
 
-- **Home:** a hero slider of featured stories (its title, excerpt and project follow the language chosen in the header; the story's category and, when it's in that section, «Internacional» go on its image), followed by previews of the sections.
+- **Home:** a hero slider of featured stories (its title, excerpt and project follow the language chosen in the header; the story's category and, when it's in that section, «Internacional» go on its image), followed by previews of the sections. In the Barrio row, which gathers several sections, each card also says in a light grey badge where it comes from — Espacio abierto, Micro-perfiles, Galería, Talleres or Concursos, named as in the menu (workshops and contests carry only that one).
 - **Sections:** the top-bar buttons (Articles, Projects, Workshops, More › Fiction, International…). Any article or project can also appear in other sections, if a super admin approves it.
 - **Projects page:** «Projects» in the top bar opens the page of every published project, newest first, with a search bar (title, description or author, ignoring case and accents); each card shows its authors and how many publications it has.
 - **Publications** can belong to a **project** (a series, a zine, a book…) or stand on their own. Articles and projects can have a **subtitle** (optional, up to 100 characters, translatable): a line under the title on the page, in the hero and on the cards. Each one is one of these types:

@@ -20,16 +20,22 @@ function PreviewCard({ item, onClick }) {
       <div className="section-preview__img" style={{ backgroundImage: `url(${bg})` }}>
         {/* Hidden img to detect broken covers and fall back to the logo. */}
         <img src={item.image} alt="" style={{ display: 'none' }} onError={() => setBroken(true)} />
-        <span className="section-preview__kind">
-          {item.kind === 'project'
-            ? t('sectionPreviews.project')
-            : item.kind === 'workshop'
-              ? t('sectionPreviews.workshop')
-              : item.kind === 'contest'
-              ? t('contests.kind', 'Concurso')
-              : item.kind === 'exhibition'
-                ? t('sectionPreviews.exhibition', 'Exposición')
-                : t('sectionPreviews.article')}
+        {/* What it is, and (Barrio) the section it comes from — light grey. */}
+        <span className="section-preview__badges">
+          {!item.hideKind && (
+            <span className="section-preview__kind">
+              {item.kind === 'project'
+                ? t('sectionPreviews.project')
+                : item.kind === 'workshop'
+                  ? t('sectionPreviews.workshop')
+                  : item.kind === 'contest'
+                  ? t('contests.kind', 'Concurso')
+                  : item.kind === 'exhibition'
+                    ? t('sectionPreviews.exhibition', 'Exposición')
+                    : t('sectionPreviews.article')}
+            </span>
+          )}
+          {item.section && <span className="section-preview__section">{item.section}</span>}
         </span>
       </div>
 

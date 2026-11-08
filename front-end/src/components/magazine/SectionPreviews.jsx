@@ -13,6 +13,8 @@ import { useTranslation } from 'react-i18next';
 import { useMagazine } from '../../app_context/MagazineContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
 import { useUI } from '../../app_context/UIContext';
+import { useNav } from '../../app_context/NavContext';
+import { DEFAULT_NAV, navLabel, navCycleLabel } from '../../app_context/navConfig';
 import SectionPreviewRow from './SectionPreviewRow';
 import axiosInstance from '../../utils/axiosConfig';
 import { exhibitionTitle } from '../gallery/galleryUtils';
@@ -41,6 +43,30 @@ const BARRIO_CATEGORIES = ['micro-perfiles', 'terrenito en pluton', 'micro abier
 const BARRIO_SECTIONS = ['microperfiles', 'openmic', 'galeria'];
 const inAnySection = (pub, keys) => keys.some((key) => inSection(pub, key));
 
+// Which part of Barrio a card comes from (its grey badge): the menu section
+// ('openmic', 'microperfiles', 'gallery', 'talleres') or 'contests'.
+function barrioSectionOf(kind, raw) {
+  if (kind === 'workshop') return 'talleres';
+  if (kind === 'contest') return 'contests';
+  if (kind === 'exhibition') return 'gallery';
+  if (inSection(raw, 'openmic')) return 'openmic';
+  if (inSection(raw, 'microperfiles')) return 'microperfiles';
+  if (inSection(raw, 'galeria')) return 'gallery';
+  if (norm(raw?.category_article) === 'talleres') return 'talleres';
+  return null;
+}
+
+// The menu button that opens a section ({ type: 'section', value }), in the
+// live menu or else the default one.
+function findSectionItem(items, value) {
+  for (const item of items || []) {
+    if (item?.action?.type === 'section' && item.action.value === value) return item;
+    const found = findSectionItem(item?.children, value);
+    if (found) return found;
+  }
+  return null;
+}
+
 // Each section declares which projects/articles belong to it, and whether it
 // also pulls in workshops.
 const PREVIEW_SECTIONS = [
@@ -49,6 +75,8 @@ const PREVIEW_SECTIONS = [
     titleKey: 'sectionPreviews.barrio',
     matchProject: (p) => inAnySection(p, BARRIO_SECTIONS),
     matchArticle: (a) => BARRIO_CATEGORIES.includes(norm(a.category_article)) || inAnySection(a, BARRIO_SECTIONS),
+    // Barrio gathers several sections: each card says which it comes from.
+    sectionOf: barrioSectionOf,
     includeWorkshops: true,
     // The Galería's exhibitions (Galería is under Barrio in the menu).
     includeExhibitions: true,
@@ -63,7 +91,20 @@ const PREVIEW_SECTIONS = [
 ];
 
 function SectionPreviews() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { navConfig } = useNav();
+  const lang = i18n.language;
+  // A section's name as its menu button says it (Concursos: the alternate
+  // text of the Talleres button).
+  const sectionName = useCallback((key) => {
+    if (!key) return null;
+    if (key === 'contests') {
+      const talleres = findSectionItem(navConfig, 'talleres') || findSectionItem(DEFAULT_NAV, 'talleres');
+      return (talleres && navCycleLabel(talleres, lang)) || t('contests.tab', 'Concursos');
+    }
+    const item = findSectionItem(navConfig, key) || findSectionItem(DEFAULT_NAV, key);
+    return item ? navLabel(item, lang) : null;
+  }, [navConfig, lang, t]);
   const { projects, allArticles, fetchProjects, setSelectedArticle, fetchArticleById, setSelectedProject } = useMagazine();
   const { workshops, fetchWorkshops, setSelectedWorkshop } = useWorkshop();
   const { navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToExhibition } = useUI();
@@ -148,9 +189,15 @@ function SectionPreviews() {
           }))
         : [];
 
-      return { id: sec.id, title: t(sec.titleKey), items: [...projectItems, ...articleItems, ...workshopItems, ...exhibitionItems] };
+      // Where each card comes from (Barrio); a workshop's or contest's kind
+      // badge would only repeat it.
+      const items = [...projectItems, ...articleItems, ...workshopItems, ...exhibitionItems].map((item) => {
+        const section = sec.sectionOf ? sectionName(sec.sectionOf(item.kind, item.raw)) : null;
+        return section ? { ...item, section, hideKind: item.kind === 'workshop' || item.kind === 'contest' } : item;
+      });
+      return { id: sec.id, title: t(sec.titleKey), items };
     });
-  }, [projects, allArticles, workshops, exhibitions, t]);
+  }, [projects, allArticles, workshops, exhibitions, t, sectionName]);
 
   const visibleSections = sections.filter((s) => s.items.length > 0);
   if (visibleSections.length === 0) return null;

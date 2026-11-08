@@ -25,7 +25,7 @@ Nació dentro de [uribarri.online](https://github.com/Gandino1984/uribarri.onlin
 
 **Lectura**
 
-- **Portada:** un hero con las historias destacadas (su título, entradilla y proyecto siguen el idioma elegido en la cabecera; sobre su imagen van su categoría y, si está en esa sección, «Internacional») y, debajo, avances de las secciones.
+- **Portada:** un hero con las historias destacadas (su título, entradilla y proyecto siguen el idioma elegido en la cabecera; sobre su imagen van su categoría y, si está en esa sección, «Internacional») y, debajo, avances de las secciones. En la fila Barrio, que reúne varias secciones, cada tarjeta dice además en una etiqueta gris clara de dónde viene: Espacio abierto, Micro-perfiles, Galería, Talleres o Concursos, con el nombre del menú (los talleres y concursos llevan solo esa).
 - **Secciones:** los botones de la barra superior (Artículos, Proyectos, Talleres, Más › Ficción, Internacional…). Cualquier artículo o proyecto puede aparecer también en otras secciones si un super admin lo aprueba.
 - **Página de proyectos:** «Proyectos» en la barra superior abre la página con todos los proyectos publicados, del más nuevo al más antiguo, con buscador (título, descripción o autora/or, sin importar mayúsculas ni tildes); cada tarjeta muestra sus autoras/es y cuántas publicaciones tiene.
 - **Las publicaciones** pueden pertenecer a un **proyecto** (una serie, un fanzine, un libro…) o ir sueltas. Los artículos y los proyectos pueden llevar un **subtítulo** (opcional, hasta 100 caracteres, traducible): una línea bajo el título en su página, en la portada y en las tarjetas. Cada una es de uno de estos tipos:
