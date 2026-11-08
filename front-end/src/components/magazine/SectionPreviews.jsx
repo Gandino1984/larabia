@@ -17,6 +17,7 @@ import SectionPreviewRow from './SectionPreviewRow';
 import axiosInstance from '../../utils/axiosConfig';
 import { exhibitionTitle } from '../gallery/galleryUtils';
 import { inSection } from '../../utils/sections';
+import { isPastWorkshop } from '../../utils/workshopFilters';
 import './SectionPreviews.css';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
@@ -122,10 +123,11 @@ function SectionPreviews() {
           raw: a,
         }));
 
-      // Workshops and contests (only published ones: a super admin's list
-      // also brings those waiting for review).
+      // Workshops and contests: published (a super admin's list also brings
+      // those waiting for review) and not finished — those stay in Talleres,
+      // marked «Finalizado».
       const workshopItems = sec.includeWorkshops
-        ? (workshops || []).filter((w) => (w.review_status_workshop || 'approved') === 'approved').map((w) => ({
+        ? (workshops || []).filter((w) => (w.review_status_workshop || 'approved') === 'approved' && !isPastWorkshop(w)).map((w) => ({
             key: `workshop-${w.id_workshop}`,
             kind: w.kind_workshop === 'contest' ? 'contest' : 'workshop',
             title: w.title_workshop,

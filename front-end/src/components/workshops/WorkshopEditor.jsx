@@ -27,7 +27,7 @@ import LocationPicker from '../maps/LocationPicker';
 import { localDate, serverDate } from '../../utils/locale';
 import { toForm, toAuthors, toPayload, formDate, resolveCover } from './workshopForm';
 import WorkshopAccessTag from './WorkshopAccessTag';
-import WorkshopKindTag, { WorkshopReviewTag } from './WorkshopKindTag';
+import WorkshopKindTag, { WorkshopReviewTag, WorkshopFinishedTag } from './WorkshopKindTag';
 import { isContest, formatDay, signupRange, AWARD_PLACES, awardLabel, reviewStateOf } from '../../utils/contests';
 import { workshopDate, isPastWorkshop } from '../../utils/workshopFilters';
 import '../admin/ArticleEditorBlocks.css';
@@ -865,6 +865,7 @@ function WorkshopEditor() {
                         <h4>{w.title_workshop}</h4>
                         <p className="article-meta">
                           <WorkshopKindTag workshop={w} />
+                          <WorkshopFinishedTag workshop={w} />
                           {!contestItem && <WorkshopAccessTag workshop={w} />}
                           <WorkshopReviewTag workshop={w} />
                           <span>{spots}</span>

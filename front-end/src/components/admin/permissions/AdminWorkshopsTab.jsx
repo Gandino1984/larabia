@@ -8,7 +8,7 @@ import { useWorkshop } from '../../../app_context/WorkshopContext';
 import { useUI } from '../../../app_context/UIContext';
 import { localDate } from '../../../utils/locale';
 import WorkshopAccessTag from '../../workshops/WorkshopAccessTag';
-import WorkshopKindTag, { WorkshopReviewTag } from '../../workshops/WorkshopKindTag';
+import WorkshopKindTag, { WorkshopReviewTag, WorkshopFinishedTag } from '../../workshops/WorkshopKindTag';
 import { isContest, signupRange } from '../../../utils/contests';
 import './AdminWorkshopsTab.css';
 
@@ -49,6 +49,7 @@ function AdminWorkshopsTab() {
                 <strong>{w.title_workshop}</strong>
                 <span className="admin-workshops-item-tags">
                   <WorkshopKindTag workshop={w} />
+                  <WorkshopFinishedTag workshop={w} />
                   {!isContest(w) && <WorkshopAccessTag workshop={w} />}
                   <WorkshopReviewTag workshop={w} />
                 </span>

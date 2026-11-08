@@ -16,7 +16,7 @@ import WorkshopOptions from './WorkshopOptions';
 import WorkshopParticipantsPanel from './WorkshopParticipantsPanel';
 import WorkshopAccessTag from './WorkshopAccessTag';
 import WorkshopExtraSpot from './WorkshopExtraSpot';
-import WorkshopKindTag, { WorkshopReviewTag } from './WorkshopKindTag';
+import WorkshopKindTag, { WorkshopReviewTag, WorkshopFinishedTag } from './WorkshopKindTag';
 import { ContestDates, ContestAwards } from './ContestInfo';
 import { isPastWorkshop } from '../../utils/workshopFilters';
 import { isContest, contestPhase, formatDay, reviewStateOf } from '../../utils/contests';
@@ -143,7 +143,7 @@ function WorkshopDetail() {
           />
         </div>
         {cover && (
-          <div className="workshop-detail-cover">
+          <div className={`workshop-detail-cover ${isPastWorkshop(w) ? 'is-past' : ''}`}>
             <img src={cover} alt={w.title_workshop} onError={(e) => { e.target.style.display = 'none'; }} />
           </div>
         )}
@@ -162,6 +162,7 @@ function WorkshopDetail() {
 
         <div className="workshop-detail-meta">
           <WorkshopKindTag workshop={w} />
+          <WorkshopFinishedTag workshop={w} />
           {!contest && <WorkshopAccessTag workshop={w} />}
           <WorkshopReviewTag workshop={w} />
           {contest ? (

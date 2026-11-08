@@ -1,12 +1,14 @@
 // magazine-front/src/components/workshops/WorkshopKindTag.jsx
 //
 // What it is — «Taller», «Taller infantil» or «Concurso» — on the cards, the
-// page, «Mis talleres y concursos» and Admin › Talleres; and, for a contest
+// page, «Mis talleres y concursos» and Admin › Talleres; «Finalizado» once
+// it's over (a workshop's day / a contest's jury day); and, for a contest
 // its managers see before it's published, its review: «En revisión» or
 // «Devuelto». Same pill as WorkshopAccessTag (labels, they keep their case).
 import { useTranslation } from 'react-i18next';
-import { Users, Baby, Trophy, Hourglass, Undo2 } from 'lucide-react';
+import { Users, Baby, Trophy, Hourglass, Undo2, History } from 'lucide-react';
 import { isContest, reviewStateOf } from '../../utils/contests';
+import { isPastWorkshop } from '../../utils/workshopFilters';
 import './WorkshopAccessTag.css';
 
 function WorkshopKindTag({ workshop }) {
@@ -24,6 +26,17 @@ function WorkshopKindTag({ workshop }) {
     <span className="workshop-access workshop-kind--workshop">
       {kids ? <Baby size={13} aria-hidden="true" /> : <Users size={13} aria-hidden="true" />}
       {kids ? t('workshops.form.audienceKids', 'Taller infantil') : t('workshops.form.audienceGeneral', 'Taller')}
+    </span>
+  );
+}
+
+export function WorkshopFinishedTag({ workshop }) {
+  const { t } = useTranslation();
+  if (!isPastWorkshop(workshop)) return null;
+  return (
+    <span className="workshop-access workshop-status--past">
+      <History size={13} aria-hidden="true" />
+      {t('workshops.status.past', 'Finalizado')}
     </span>
   );
 }
