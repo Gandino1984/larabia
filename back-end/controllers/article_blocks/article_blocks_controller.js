@@ -65,6 +65,46 @@ function validateBlockData(blockData) {
  * reference image (previews, comic preload, cover fallback). Mutates
  * blockData; returns an error message or null.
  */
+// ── Micro-perfiles: the person's web and Instagram, the audio's caption ──
+const AUDIO_CAPTION_MAX = 300;
+
+/**
+ * Normalise them in place (only those present): the web gets https:// if it
+ * has no scheme and must be an http(s) address; Instagram is kept as the user
+ * name, whether written «@user», «user» or as a link to the profile; empty
+ * ones are cleared. Returns the first problem, or null.
+ */
+function applyProfileFields(blockData) {
+    if (blockData.profile_website !== undefined) {
+        let web = String(blockData.profile_website || '').trim();
+        if (web) {
+            if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(web)) web = `https://${web}`;
+            let url;
+            try { url = new URL(web); } catch { url = null; }
+            if (!url || !['http:', 'https:'].includes(url.protocol) || !url.hostname.includes('.') || web.length > 500) {
+                return "La web no es una dirección válida";
+            }
+            web = url.href;
+        }
+        blockData.profile_website = web || null;
+    }
+    if (blockData.profile_instagram !== undefined) {
+        let ig = String(blockData.profile_instagram || '').trim();
+        if (ig) {
+            const fromUrl = ig.match(/instagram\.com\/([^/?#]+)/i);
+            ig = (fromUrl ? fromUrl[1] : ig).replace(/^@/, '');
+            if (!/^[A-Za-z0-9._]{1,30}$/.test(ig)) return "El usuario de Instagram no es válido";
+        }
+        blockData.profile_instagram = ig || null;
+    }
+    if (blockData.audio_caption !== undefined) {
+        const caption = String(blockData.audio_caption || '').trim();
+        if (caption.length > AUDIO_CAPTION_MAX) return `El pie del audio es demasiado largo (máximo ${AUDIO_CAPTION_MAX} caracteres)`;
+        blockData.audio_caption = caption || null;
+    }
+    return null;
+}
+
 function applySoundscape(blockData) {
     if (blockData.soundscape_data === undefined) return null;
     if (blockData.soundscape_data === null || blockData.soundscape_data === '') {
@@ -124,6 +164,8 @@ async function create(blockData) {
 
         const soundscapeError = applySoundscape(blockData);
         if (soundscapeError) return { error: soundscapeError };
+        const profileError = applyProfileFields(blockData);
+        if (profileError) return { error: profileError };
         // Text / caption / alt in other languages.
         if (blockData.translations_block !== undefined) {
             blockData.translations_block = normalizeTranslations('block', blockData.translations_block);
@@ -165,6 +207,8 @@ async function update(id_block, blockData) {
 
         const soundscapeError = applySoundscape(blockData);
         if (soundscapeError) return { error: soundscapeError };
+        const profileError = applyProfileFields(blockData);
+        if (profileError) return { error: profileError };
         if (blockData.translations_block !== undefined) {
             blockData.translations_block = normalizeTranslations('block', blockData.translations_block);
         }

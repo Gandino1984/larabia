@@ -1967,5 +1967,16 @@
   "contests.entry.consent": "The work is mine and I accept the contest's rules.",
   "contests.entry.replyTo": "If needed, we'll write to your account's email: {{email}}.",
   "contests.entry.save": "Save the changes",
-  "contests.entry.submit": "Send my work"
+  "contests.entry.submit": "Send my work",
+  "editor.microperfil.audioCaptionTooLong": "The audio caption is too long ({{max}} characters at most)",
+  "editor.microperfil.badWebsite": "The website isn't a valid address (for example, www.example.com)",
+  "editor.microperfil.badInstagram": "The Instagram user isn't valid: write @user or the link to their profile",
+  "editor.microperfil.audioCaptionLabel": "Audio caption (optional)",
+  "editor.microperfil.audioCaptionPlaceholder": "What you hear: who's speaking, where it was recorded…",
+  "editor.microperfil.audioCaptionHint": "It's shown under the audio, when there is one.",
+  "editor.microperfil.websiteLabel": "Website (optional)",
+  "editor.microperfil.websitePlaceholder": "www.example.com",
+  "editor.microperfil.instagramLabel": "Instagram (optional)",
+  "editor.microperfil.instagramPlaceholder": "@user",
+  "editor.microperfil.instagramHint": "The user (@user) or the link to their profile."
 }

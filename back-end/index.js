@@ -163,6 +163,17 @@ Promise.all([
             await qi.addColumn('article_blocks', 'soundscape_data', { type: DataTypes.TEXT, allowNull: true });
             console.log('>>> Added article_blocks.soundscape_data');
         }
+        // Micro-perfiles (migration 037): web, Instagram, the audio's caption.
+        for (const [col, spec] of Object.entries({
+            profile_website: { type: DataTypes.STRING(500), allowNull: true },
+            profile_instagram: { type: DataTypes.STRING(100), allowNull: true },
+            audio_caption: { type: DataTypes.TEXT, allowNull: true }
+        })) {
+            if (!blocks[col]) {
+                await qi.addColumn('article_blocks', col, spec);
+                console.log(`>>> Added article_blocks.${col}`);
+            }
+        }
         // Authors signed up by a super admin, waiting to accept (migration 018).
         const users = await qi.describeTable('user');
         for (const [col, type] of [

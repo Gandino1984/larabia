@@ -16,7 +16,7 @@ import LangSwitch from '../common/LangSwitch';
 import { PROJECT_TYPES, PROJECT_FORMATS } from '../../utils/projectKinds';
 import { CONTENT_LANGS, LANG_NAMES, parseTranslations, hasText, hasLang, withTranslation } from '../../utils/contentLang';
 import HScrollEditor from './HScrollEditor';
-import MicroPerfilEditor from './MicroPerfilEditor';
+import MicroPerfilEditor, { AUDIO_CAPTION_MAX } from './MicroPerfilEditor';
 import { isPieceComplete, pieceForSave } from '../../paisaje/integration/soundscape';
 // Paisaje sonoro editor (engine + 4 converters + d3-geo): loaded on demand.
 const PaisajeEditor = lazy(() => import('../../paisaje/integration/PaisajeEditor'));
@@ -883,6 +883,25 @@ function ArticleEditorBlocks() {
       const caption = (blocks[0]?.image_caption || '').trim();
       if (!caption) return t('editor.microperfil.needCaption');
       if (caption.length > 700) return t('editor.microperfil.captionTooLong', { count: caption.length });
+      // The audio's caption, web and Instagram (the server checks them too).
+      if ((blocks[0]?.audio_caption || '').trim().length > AUDIO_CAPTION_MAX) {
+        return t('editor.microperfil.audioCaptionTooLong', { max: AUDIO_CAPTION_MAX, defaultValue: 'El pie del audio es demasiado largo (máximo {{max}} caracteres)' });
+      }
+      const web = (blocks[0]?.profile_website || '').trim();
+      if (web) {
+        let url = null;
+        try { url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(web) ? web : `https://${web}`); } catch { url = null; }
+        if (!url || !['http:', 'https:'].includes(url.protocol) || !url.hostname.includes('.')) {
+          return t('editor.microperfil.badWebsite', 'La web no es una dirección válida (por ejemplo, www.ejemplo.com)');
+        }
+      }
+      const ig = (blocks[0]?.profile_instagram || '').trim();
+      if (ig) {
+        const handle = (ig.match(/instagram\.com\/([^/?#]+)/i)?.[1] || ig).replace(/^@/, '');
+        if (!/^[A-Za-z0-9._]{1,30}$/.test(handle)) {
+          return t('editor.microperfil.badInstagram', 'El usuario de Instagram no es válido: escribe @usuario o el enlace a su perfil');
+        }
+      }
     }
     return null;
   };
@@ -1214,6 +1233,12 @@ function ArticleEditorBlocks() {
         audio_mode: block.audio_mode || null,
         // Text / caption / alt in other languages.
         translations_block: block.translations_block || null,
+        // Micro-perfiles: the audio's caption, the person's web and Instagram.
+        ...(block.block_type === 'image' && {
+          audio_caption: block.audio_caption ?? null,
+          profile_website: block.profile_website ?? null,
+          profile_instagram: block.profile_instagram ?? null
+        }),
         // Paisaje sonoro (article format / comic panel): the server checks
         // and normalises it (and sets image_url to its reference image).
         ...(block.soundscape_data && {

@@ -67,6 +67,7 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `034` | Contests on `magazine_workshops`: `kind_workshop`, `registration_start_workshop`, `registration_end_workshop`, `resolution_date_workshop`, `awards_workshop` (JSON), `review_status_workshop`, `rejection_reason_workshop`, `review_seen_workshop` (also added at boot); `user.receives_newsletter` defaults to 1 |
 | `035` | `bug_reports` — «Reportar un error»: what happened, where (address, view, what was open), device, status new / seen / fixed (also created at boot) |
 | `036` | `contest_entries` — contestants' works (title, note, text, private file in uploads/contest-entries), one per person and contest (also created at boot) |
+| `037` | `article_blocks.profile_website`, `profile_instagram`, `audio_caption` — micro-perfiles: the person's web and Instagram, the audio's caption (also added at boot) |
 
 The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are created at boot with Sequelize `sync()` when missing (the gallery's in order, as they reference each other). The SQL files stay the reference for a fresh database.
 

@@ -1967,5 +1967,16 @@
   "contests.entry.consent": "La obra es mía y acepto las bases del concurso.",
   "contests.entry.replyTo": "Si hace falta, te escribiremos al email de tu cuenta: {{email}}.",
   "contests.entry.save": "Guardar los cambios",
-  "contests.entry.submit": "Enviar mi obra"
+  "contests.entry.submit": "Enviar mi obra",
+  "editor.microperfil.audioCaptionTooLong": "El pie del audio es demasiado largo (máximo {{max}} caracteres)",
+  "editor.microperfil.badWebsite": "La web no es una dirección válida (por ejemplo, www.ejemplo.com)",
+  "editor.microperfil.badInstagram": "El usuario de Instagram no es válido: escribe @usuario o el enlace a su perfil",
+  "editor.microperfil.audioCaptionLabel": "Pie del audio (opcional)",
+  "editor.microperfil.audioCaptionPlaceholder": "Qué se escucha: quién habla, dónde se grabó…",
+  "editor.microperfil.audioCaptionHint": "Se muestra bajo el audio, cuando lo hay.",
+  "editor.microperfil.websiteLabel": "Web (opcional)",
+  "editor.microperfil.websitePlaceholder": "www.ejemplo.com",
+  "editor.microperfil.instagramLabel": "Instagram (opcional)",
+  "editor.microperfil.instagramPlaceholder": "@usuario",
+  "editor.microperfil.instagramHint": "El usuario (@usuario) o el enlace a su perfil."
 }

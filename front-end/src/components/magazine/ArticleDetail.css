@@ -1253,3 +1253,47 @@
     max-height: none;
   }
 }
+
+/* Micro-perfiles: the portrait always whole on screen — never taller than
+   the window (no scrolling to see all of it), its proportions kept. The
+   header bar is hidden in the reader: the window's height, less a margin. */
+.article-detail--microperfil .image-content .article-image {
+  width: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100svh - 2rem);
+  object-fit: contain;
+}
+
+/* Under the audio: what it is (its caption), and the person's web and
+   Instagram. */
+.image-audio-caption {
+  max-width: 480px;
+  margin: 0.5rem auto 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #777;
+  font-style: italic;
+}
+
+.microperfil-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  margin-top: 0.9rem;
+}
+
+.microperfil-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  color: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.microperfil-link:hover { text-decoration-thickness: 2px; }

@@ -1967,5 +1967,16 @@
   "contests.entry.consent": "Lana nirea da eta lehiaketaren oinarriak onartzen ditut.",
   "contests.entry.replyTo": "Behar izanez gero, zure kontuko helbidera idatziko dizugu: {{email}}.",
   "contests.entry.save": "Gorde aldaketak",
-  "contests.entry.submit": "Bidali nire lana"
+  "contests.entry.submit": "Bidali nire lana",
+  "editor.microperfil.audioCaptionTooLong": "Audioaren oina luzeegia da (gehienez {{max}} karaktere)",
+  "editor.microperfil.badWebsite": "Webgunea ez da helbide baliozkoa (adibidez, www.adibidea.eus)",
+  "editor.microperfil.badInstagram": "Instagrameko erabiltzailea ez da baliozkoa: idatzi @erabiltzailea edo bere profilaren esteka",
+  "editor.microperfil.audioCaptionLabel": "Audioaren oina (aukerakoa)",
+  "editor.microperfil.audioCaptionPlaceholder": "Zer entzuten den: nork hitz egiten duen, non grabatu zen…",
+  "editor.microperfil.audioCaptionHint": "Audioaren azpian erakusten da, baldin badago.",
+  "editor.microperfil.websiteLabel": "Webgunea (aukerakoa)",
+  "editor.microperfil.websitePlaceholder": "www.adibidea.eus",
+  "editor.microperfil.instagramLabel": "Instagram (aukerakoa)",
+  "editor.microperfil.instagramPlaceholder": "@erabiltzailea",
+  "editor.microperfil.instagramHint": "Erabiltzailea (@erabiltzailea) edo bere profilaren esteka."
 }

@@ -6,7 +6,7 @@ import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useAuthor } from '../../app_context/AuthorContext';
 import { useEngagement } from '../../app_context/EngagementContext';
-import { Calendar, Eye, X, Trash2, Minimize, Edit, ArrowLeft, Share2, ThumbsUp, Bookmark, MessageCircle } from 'lucide-react';
+import { Calendar, Eye, X, Trash2, Minimize, Edit, ArrowLeft, Share2, ThumbsUp, Bookmark, MessageCircle, Globe, Instagram } from 'lucide-react';
 import HScrollViewer from './HScrollViewer';
 import CommentsModal from './CommentsModal';
 import OptionsReveal from './OptionsReveal';
@@ -204,6 +204,10 @@ function ArticleDetail({ previewMode = false }) {
 
   const authorHasProfile = (author) => !!authorProfiles?.find(p => p.user_id === author.id_user);
 
+  // A micro-perfil: one portrait (always whole on screen), its caption, its
+  // audio with its own caption, and the person's web and Instagram.
+  const isMicroPerfil = (selectedArticle.category_article || '').toLowerCase() === 'micro-perfiles';
+
   // Detect if this is a comic article
   const isComicArticle = useMemo(() => {
     return selectedArticle.blocks?.some(block => block.block_type === 'comic_panel') || false;
@@ -249,7 +253,7 @@ function ArticleDetail({ previewMode = false }) {
   }
 
   return (
-    <div className={`article-detail ${isComicArticle ? 'article-detail--comic' : ''}`}>
+    <div className={`article-detail ${isComicArticle ? 'article-detail--comic' : ''} ${isMicroPerfil ? 'article-detail--microperfil' : ''}`}>
       <article className={`article-detail-container ${isComicArticle ? 'article-detail-container--comic' : ''}`}>
         {/* Top right controls: a ⋯ button grouping the engagement actions,
             share and (authors/admins) edit + delete — same reveal as the article
@@ -405,6 +409,26 @@ function ArticleDetail({ previewMode = false }) {
                                 ? block.interaction_data
                                 : `${apiUrl}/${block.interaction_data.startsWith('/') ? block.interaction_data.substring(1) : block.interaction_data}`}
                             />
+                          )}
+                          {/* Micro-perfiles: what the audio is, and where to find the person. */}
+                          {block.interaction_type === 'audio' && block.interaction_data && block.audio_caption && (
+                            <p className="image-audio-caption">{block.audio_caption}</p>
+                          )}
+                          {(block.profile_website || block.profile_instagram) && (
+                            <div className="microperfil-links">
+                              {block.profile_website && (
+                                <a href={block.profile_website} target="_blank" rel="noopener noreferrer" className="microperfil-link">
+                                  <Globe size={16} aria-hidden="true" />
+                                  <span>{block.profile_website.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '')}</span>
+                                </a>
+                              )}
+                              {block.profile_instagram && (
+                                <a href={`https://www.instagram.com/${block.profile_instagram}/`} target="_blank" rel="noopener noreferrer" className="microperfil-link">
+                                  <Instagram size={16} aria-hidden="true" />
+                                  <span>@{block.profile_instagram}</span>
+                                </a>
+                              )}
+                            </div>
                           )}
                         </div>
                       )}

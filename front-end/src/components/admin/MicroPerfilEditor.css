@@ -17,7 +17,10 @@
   gap: 0.5rem;
 }
 
-.mp-field-label {
+.mp-field-label,
+.form-group .microperfil-editor label.mp-field-label {
+  margin-bottom: 0;
+  font-family: inherit;
   font-weight: 700;
   font-size: 0.9rem;
   color: #1a1a1a;
@@ -102,4 +105,24 @@
   color: #666666;
   font-size: 0.8rem;
   line-height: 1.45;
+}
+
+/* Web and Instagram: an input with its icon. */
+.mp-input-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+.mp-input-icon svg { flex-shrink: 0; color: #555; }
+.mp-input-icon input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+  font-family: inherit;
 }

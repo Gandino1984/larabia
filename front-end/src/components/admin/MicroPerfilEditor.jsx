@@ -1,16 +1,20 @@
 // magazine-front/src/components/admin/MicroPerfilEditor.jsx
 //
 // Dedicated creation UI for the "micro-perfil" article format: a single image,
-// a caption (max 700 chars) and an optional audio clip. It edits one image
-// block (block_type='image'); the optional audio is stored on that same block
-// via the interaction_* fields, exactly like comic-panel audio.
+// a caption (max 700 chars) and an optional audio clip with its own caption
+// (what it is, max 300), plus the person's web and Instagram (optional). It
+// edits one image block (block_type='image'); the optional audio is stored on
+// that same block via the interaction_* fields, exactly like comic-panel
+// audio, and the rest in audio_caption / profile_website / profile_instagram
+// (the server checks and normalises them).
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, X, Music } from 'lucide-react';
+import { Plus, X, Music, Globe, Instagram } from 'lucide-react';
 import { AUDIO_ACCEPT, isAcceptedAudio } from '../../utils/audioUpload';
 import './MicroPerfilEditor.css';
 
 const CAPTION_MAX = 700;
+export const AUDIO_CAPTION_MAX = 300;
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
 const resolveUrl = (u) => {
@@ -29,6 +33,7 @@ function MicroPerfilEditor({ block, onChange, onUploadImage, onUploadAudio }) {
   const imagePreview = resolveUrl(b.image_url);
   const hasAudio = b.interaction_type === 'audio' && !!b.interaction_data;
   const caption = b.image_caption || '';
+  const audioCaption = b.audio_caption || '';
 
   const update = (patch) => onChange({ ...b, block_type: 'image', block_order: 0, ...patch });
 
@@ -155,6 +160,59 @@ function MicroPerfilEditor({ block, onChange, onUploadImage, onUploadAudio }) {
             <p className="mp-audio-hint">{t('audio.upload.hint')}</p>
           </>
         )}
+      </div>
+
+      {/* The audio's caption: what it is (shown under it). */}
+      <div className="mp-field">
+        <label className="mp-field-label" htmlFor="mp-audio-caption">{t('editor.microperfil.audioCaptionLabel', 'Pie del audio (opcional)')}</label>
+        <textarea
+          id="mp-audio-caption"
+          className="mp-caption"
+          rows="2"
+          maxLength={AUDIO_CAPTION_MAX}
+          value={audioCaption}
+          placeholder={t('editor.microperfil.audioCaptionPlaceholder', 'Qué se escucha: quién habla, dónde se grabó…')}
+          onChange={(e) => update({ audio_caption: e.target.value })}
+        />
+        <span className={`mp-counter ${audioCaption.length >= AUDIO_CAPTION_MAX ? 'mp-counter--max' : ''}`}>
+          {audioCaption.length}/{AUDIO_CAPTION_MAX}
+        </span>
+        {!hasAudio && <p className="mp-audio-hint">{t('editor.microperfil.audioCaptionHint', 'Se muestra bajo el audio, cuando lo hay.')}</p>}
+      </div>
+
+      {/* Where to find the person (optional). */}
+      <div className="mp-field">
+        <label className="mp-field-label" htmlFor="mp-website">{t('editor.microperfil.websiteLabel', 'Web (opcional)')}</label>
+        <div className="mp-input-icon">
+          <Globe size={16} aria-hidden="true" />
+          <input
+            id="mp-website"
+            type="url"
+            inputMode="url"
+            maxLength={500}
+            value={b.profile_website || ''}
+            placeholder={t('editor.microperfil.websitePlaceholder', 'www.ejemplo.com')}
+            onChange={(e) => update({ profile_website: e.target.value })}
+          />
+        </div>
+      </div>
+      <div className="mp-field">
+        <label className="mp-field-label" htmlFor="mp-instagram">{t('editor.microperfil.instagramLabel', 'Instagram (opcional)')}</label>
+        <div className="mp-input-icon">
+          <Instagram size={16} aria-hidden="true" />
+          <input
+            id="mp-instagram"
+            type="text"
+            maxLength={100}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            value={b.profile_instagram || ''}
+            placeholder={t('editor.microperfil.instagramPlaceholder', '@usuario')}
+            onChange={(e) => update({ profile_instagram: e.target.value })}
+          />
+        </div>
+        <p className="mp-audio-hint">{t('editor.microperfil.instagramHint', 'El usuario (@usuario) o el enlace a su perfil.')}</p>
       </div>
     </div>
   );

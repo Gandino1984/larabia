@@ -108,6 +108,20 @@ const article_block_model = sequelize.define(
             type: DataTypes.JSON,
             allowNull: true,
             comment: '{ en: { content, caption, alt }, eu: { … } } — the original is Spanish'
+        },
+        // Micro-perfiles (migration 037): the person's web and Instagram user
+        // (without @), and a caption for the audio — what it is.
+        profile_website: {
+            type: DataTypes.STRING(500),
+            allowNull: true
+        },
+        profile_instagram: {
+            type: DataTypes.STRING(100),
+            allowNull: true
+        },
+        audio_caption: {
+            type: DataTypes.TEXT,
+            allowNull: true
         }
     },
     {
