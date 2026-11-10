@@ -1269,6 +1269,13 @@
   object-fit: contain;
 }
 
+/* The micro-perfil's text (the portrait's caption) is the article itself:
+   upright and in the text's black, not an italic grey photo caption. */
+.article-detail--microperfil .image-content .image-caption {
+  font-style: normal;
+  color: inherit;
+}
+
 /* Under the audio: what it is (its caption), and the person's web and
    Instagram. */
 .image-audio-caption {
