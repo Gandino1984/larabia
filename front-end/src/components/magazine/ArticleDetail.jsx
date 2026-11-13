@@ -246,7 +246,7 @@ function ArticleDetail({ previewMode = false }) {
           )}
         </div>
         <div className="fullscreen-viewer">
-          <HScrollViewer panels={comicPanels} articleId={selectedArticle.id_article} />
+          <HScrollViewer panels={comicPanels} articleId={selectedArticle.id_article} title={articleTitle(selectedArticle, readLang)} />
         </div>
       </div>
     );
@@ -374,7 +374,7 @@ function ArticleDetail({ previewMode = false }) {
 
         <div className="article-detail-content">
           {isComicArticle ? (
-            <HScrollViewer panels={comicPanels} articleId={selectedArticle.id_article} onFullscreen={() => setIsFullscreen(true)} optionsActions={detailActions} />
+            <HScrollViewer panels={comicPanels} articleId={selectedArticle.id_article} title={articleTitle(selectedArticle, readLang)} onFullscreen={() => setIsFullscreen(true)} optionsActions={detailActions} />
           ) : (
             <>
               {selectedArticle.blocks && selectedArticle.blocks.length > 0 ? (
@@ -435,7 +435,7 @@ function ArticleDetail({ previewMode = false }) {
                       {block.block_type === 'paisaje' && (
                         <LoadFailBoundary>
                           <Suspense fallback={null}>
-                            <PaisajePiece soundscape={block.soundscape_data} title={selectedArticle.title_article} variant="minimal" />
+                            <PaisajePiece soundscape={block.soundscape_data} title={articleTitle(selectedArticle, readLang)} variant="minimal" />
                           </Suspense>
                         </LoadFailBoundary>
                       )}

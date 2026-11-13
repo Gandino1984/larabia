@@ -101,6 +101,7 @@ export const MESSAGES = {
     "El taller está completo. Amplía el aforo para invitar a más personas": { en: "The workshop is full. Raise the capacity to invite more people", eu: "Tailerra beteta dago. Handitu edukiera jende gehiago gonbidatzeko" },
     "El tipo de bloque es obligatorio": { en: "The block type is required", eu: "Blokearen mota derrigorrezkoa da" },
     "El tipo es obligatorio": { en: "The type is required", eu: "Mota derrigorrezkoa da" },
+    "El título del audio es demasiado largo (máximo 120 caracteres)": { en: "The audio title is too long (120 characters at most)", eu: "Audioaren izenburua luzeegia da (gehienez 120 karaktere)" },
     "El título es obligatorio": { en: "The title is required", eu: "Izenburua derrigorrezkoa da" },
     "El título no puede exceder 255 caracteres": { en: "The title can’t be longer than 255 characters", eu: "Izenburuak ezin ditu 255 karaktere baino gehiago izan" },
     "El título y el contenido son obligatorios": { en: "The title and the content are required", eu: "Izenburua eta edukia derrigorrezkoak dira" },

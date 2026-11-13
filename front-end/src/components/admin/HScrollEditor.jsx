@@ -11,7 +11,8 @@ import './HScrollEditor.css';
 // Paisaje sonoro panels (engine by Cristian Vergara): editor loaded on demand.
 const PaisajeEditor = lazy(() => import('../../paisaje/integration/PaisajeEditor'));
 
-function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio }) {
+// articleTitle: the default title of a paisaje panel's audio (shown in its field).
+function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio, articleTitle }) {
   const { t } = useTranslation();
   const [draggingIndex, setDraggingIndex] = useState(null);
   // Paisaje sonoro panel being created (index null) or edited.
@@ -565,6 +566,7 @@ function HScrollEditor({ panels, onPanelsChange, onUploadPanel, onUploadAudio })
                 <Suspense fallback={<p>{t('paisaje.editor.loadingEditor', 'Cargando editor…')}</p>}>
                   <PaisajeEditor
                     variant="panel"
+                    title={articleTitle}
                     value={paisajeModal.draft}
                     onChange={(draft) => setPaisajeModal((m) => (m ? { ...m, draft } : m))}
                   />

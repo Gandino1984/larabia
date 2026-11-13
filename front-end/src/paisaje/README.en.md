@@ -29,7 +29,7 @@ by comparing folder by folder:
 **The magazine's code** (not part of the original) is in `integration/`:
 
 - **`PaisajeEditor`:** replaces the demo's wizard with a three-step wizard of its own (image and style → sound and player → framing and summary). It is used as an article format and in the comic creator's «Panel paisaje sonoro» modal.
-- **`PaisajePiece`:** what the reader sees — the circle, in an article or in a square comic panel; only one audio plays at a time.
+- **`PaisajePiece`:** what the reader sees — the circle, in an article or in a square comic panel; only one audio plays at a time. The audio's title (`audioTitle`, optional, or else the article's) goes in the engine's title slot in an article and, in a comic panel, unfolds to the right of the play button while it plays.
 - **The upload API** (`paisajeApi.js`) and the utilities for the piece stored in a block (`soundscape.js`).
 
 The server side is in `back-end/controllers/paisaje/`.

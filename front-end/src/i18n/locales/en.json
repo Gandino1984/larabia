@@ -1978,5 +1978,10 @@
   "editor.microperfil.websitePlaceholder": "www.example.com",
   "editor.microperfil.instagramLabel": "Instagram (optional)",
   "editor.microperfil.instagramPlaceholder": "@user",
-  "editor.microperfil.instagramHint": "The user (@user) or the link to their profile."
+  "editor.microperfil.instagramHint": "The user (@user) or the link to their profile.",
+  "paisaje.editor.audio.titleLabel": "Audio title (optional)",
+  "paisaje.editor.audio.titlePlaceholder": "For example: Kerman, on Mount Artxanda",
+  "paisaje.editor.audio.titleHint": "It appears to the right of the play button while it plays. If you leave it empty, the article's title is used.",
+  "paisaje.editor.summary.audioTitle": "Audio title",
+  "paisaje.editor.summary.audioTitleFallback": "The article's: “{{title}}”"
 }

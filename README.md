@@ -74,7 +74,7 @@ See [Languages (i18n)](#languages-i18n).
 - **The creator** is a six-step wizard: project (new, existing or none) → classification, authors and sections → cover, title and excerpt → type → content → review and publish.
 - **Review:** everything is a draft until it's published. Everyone below super admin sends their work for review. A super admin approves it, or sends it back with a reason; authors can move their work back to draft.
 - **The workshop editor** works like the creator: a full page with four steps (the workshop → when and where → cover and talleristas → review and save) and «Mis talleres», the workshops you manage. Admins and super admins create workshops; their talleristas on the team edit them.
-- **Soundscape editor:** a three-step wizard (image and style → sound and player → framing and summary), used both in articles and in comic panels.
+- **Soundscape editor:** a three-step wizard (image and style → sound and player → framing and summary), used both in articles and in comic panels. Step 2 has an optional title for the audio (up to 120 characters; empty, the article's title is used): in a comic panel it unfolds to the right of the play button while the audio plays.
 - **Invited authors:** a super admin can sign up an author who has no account yet and publish on their behalf. The person accepts or declines when they first sign in (see below).
 
 **Administration** (*Admin*, super admins) — its tabs are pills that wrap, so all of them are in sight on a phone too:

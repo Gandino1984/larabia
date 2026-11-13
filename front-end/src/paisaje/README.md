@@ -28,7 +28,10 @@ Copiado del original **sin cambios en la lógica**, con su misma estructura
 `PaisajeEditor` (sustituye al asistente de la demo; se usa como formato de
 artículo y en el modal «Panel paisaje sonoro» del creador de cómics),
 `PaisajePiece` (lo que ve el lector: el círculo, en el artículo y en una
-viñeta cuadrada del cómic; un solo audio a la vez), la API de subidas (`paisajeApi.js`) y las
+viñeta cuadrada del cómic; un solo audio a la vez; el título del audio
+—`audioTitle`, opcional, o si no el del artículo— va en el sitio del título
+del motor en el artículo y, en la viñeta, se despliega a la derecha del play
+mientras suena), la API de subidas (`paisajeApi.js`) y las
 utilidades de la pieza guardada en el bloque (`soundscape.js`). El servidor
 está en `back-end/controllers/paisaje/`.
 

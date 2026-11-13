@@ -74,7 +74,7 @@ Ver [Idiomas (i18n)](#idiomas-i18n).
 - **El creador** es un asistente de seis pasos: proyecto (nuevo, existente o ninguno) → clasificación, autoras/es y secciones → portada, título y entradilla → tipo → contenido → revisar y publicar.
 - **Revisión:** todo es borrador hasta publicarse. Quien no es super admin envía su trabajo a revisión. Un super admin lo aprueba o lo devuelve con un motivo; la autora o autor puede volver a pasarlo a borrador.
 - **El editor de talleres** funciona como el creador: una página completa con cuatro pasos (el taller → cuándo y dónde → portada y talleristas → revisar y guardar) y «Mis talleres», los que gestionas. Los crean admins y super admins; los editan también sus talleristas del equipo.
-- **Editor de paisajes sonoros:** asistente de tres pasos (imagen y estilo → sonido y reproductor → encuadre y resumen), para artículos y para paneles de cómic.
+- **Editor de paisajes sonoros:** asistente de tres pasos (imagen y estilo → sonido y reproductor → encuadre y resumen), para artículos y para paneles de cómic. El paso 2 tiene un título opcional para el audio (hasta 120 caracteres; si se deja vacío, se usa el del artículo): en una viñeta del cómic se despliega a la derecha del botón de play mientras suena.
 - **Autoras invitadas:** un super admin puede dar de alta a una autora o autor que aún no tiene cuenta y publicar en su nombre. La persona acepta o rechaza al iniciar sesión por primera vez (ver más abajo).
 
 **Administración** (*Admin*, super admins) — sus pestañas son píldoras que bajan de línea, así que se ven todas también en el móvil:

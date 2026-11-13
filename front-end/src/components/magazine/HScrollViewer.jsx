@@ -52,7 +52,8 @@ const centredScrollLeft = (el, box) => {
 
 // optionsActions: the reader's ⋯ actions (engagement, share, edit/delete),
 // repeated at the right of the bottom bar when provided.
-function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
+// title: the article's, for paisaje panels whose audio has no title of its own.
+function HScrollViewer({ panels, articleId, title, onFullscreen, optionsActions }) {
   const { t } = useTranslation();
   const { showInfo, showSuccess } = useUI();
   const { currentUser, loading: authLoading } = useAuth();
@@ -1109,6 +1110,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
                         <PaisajePiece
                           soundscape={panel.soundscape_data}
                           variant="panel"
+                          title={title}
                           onEnter={() => announceAudioPanel(panel.id_block)}
                         />
                       </Suspense>

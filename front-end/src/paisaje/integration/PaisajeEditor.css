@@ -299,6 +299,20 @@
   font-weight: 400;
 }
 .lpe-field input[type="range"] { accent-color: #000000; }
+/* The audio's title: a text field across the whole row. */
+.lpe-field--wide { grid-column: 1 / -1; }
+.lpe-field input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #cfcfcf;
+  border-radius: 6px;
+  background: #ffffff;
+  font: inherit;
+  font-weight: 400;
+}
 .lpe-field small { font-weight: 400; }
 .lpe-preview { display: flex; flex-direction: column; gap: 0.5rem; }
 .lpe-preview .paisaje-svg { height: auto; max-height: 60vh; width: 100%; }

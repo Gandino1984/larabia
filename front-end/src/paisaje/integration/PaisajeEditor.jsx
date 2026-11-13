@@ -25,7 +25,7 @@ import { Image as ImageIcon, Upload, RotateCcw, Check, RefreshCw, ChevronLeft, C
 import PaisajePlayer from '../player/PaisajePlayer';
 import { STYLES, DEFAULT_STYLE_ID, getStyle } from '../styles/registry';
 import { useAuth } from '../../app_context/AuthContext';
-import { apiFile, parseSoundscape, pieceAudioUrl, playerLabels } from './soundscape';
+import { AUDIO_TITLE_MAX, apiFile, parseSoundscape, pieceAudioUrl, playerLabels } from './soundscape';
 import { AUDIO_ACCEPT, uploadAudio, uploadDrawing, waitForAudio } from './paisajeApi';
 import { isAcceptedAudio, AUDIO_EXTENSIONS } from '../../utils/audioUpload';
 import LoadFailBoundary from '../../components/common/LoadFailBoundary';
@@ -57,6 +57,9 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
     loudnessBefore: initial.loudnessBefore ?? null,
     loudnessAfter: initial.loudnessAfter ?? null
   } : null));
+  // The audio's title, shown with the play button while it plays (empty: the
+  // article's title).
+  const [audioTitle, setAudioTitle] = useState(initial?.audioTitle || '');
   const [mode, setMode] = useState(initial?.mode === 'spectrum' ? 'spectrum' : 'amplitude');
   const [veil, setVeil] = useState(typeof initial?.veil === 'number' ? initial.veil : 0.35);
   const [offset, setOffset] = useState([initial?.offsetX || 0, initial?.offsetY || 0]);
@@ -230,9 +233,10 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
       mode,
       veil,
       offsetX: offset[0],
-      offsetY: offset[1]
+      offsetY: offset[1],
+      audioTitle: audioTitle.trim() || null
     } : null);
-  }, [drawing, audio, mode, veil, offset]);
+  }, [drawing, audio, mode, veil, offset, audioTitle]);
 
   // ---- render ------------------------------------------------------------
   const labels = playerLabels(t);
@@ -263,6 +267,15 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
         <span>{t('paisaje.editor.summary.image', 'Imagen')}</span>
         <strong>{styleName(drawing.style)}</strong>
         {drawing.width && drawing.height ? ` · ${drawing.width}×${drawing.height}` : ''}
+      </li>
+      <li>
+        <span>{t('paisaje.editor.summary.audioTitle', 'Título del audio')}</span>
+        {audioTitle.trim()
+          ? <strong>{audioTitle.trim()}</strong>
+          : t('paisaje.editor.summary.audioTitleFallback', {
+            title: title?.trim() || '—',
+            defaultValue: 'El del artículo: «{{title}}»'
+          })}
       </li>
       <li>
         <span>{t('paisaje.editor.summary.audio', 'Audio')}</span>
@@ -426,6 +439,19 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
                 })}
               </p>
               <div className="lpe-config">
+                <label className="lpe-field lpe-field--wide">
+                  <span>{t('paisaje.editor.audio.titleLabel', 'Título del audio (opcional)')}</span>
+                  <input
+                    type="text"
+                    value={audioTitle}
+                    maxLength={AUDIO_TITLE_MAX}
+                    placeholder={title?.trim() || t('paisaje.editor.audio.titlePlaceholder', 'Por ejemplo: Kerman, en el monte de Artxanda')}
+                    onChange={(e) => setAudioTitle(e.target.value)}
+                  />
+                  <small className="lpe-muted">
+                    {t('paisaje.editor.audio.titleHint', 'Aparece a la derecha del botón de play mientras suena. Si lo dejas vacío, se usa el título del artículo.')}
+                  </small>
+                </label>
                 <label className="lpe-field">
                   <span>{t('paisaje.editor.audio.mode', 'Cómo reacciona la imagen')}</span>
                   <select value={mode} onChange={(e) => setMode(e.target.value)}>
@@ -482,7 +508,7 @@ function PaisajeEditor({ value, onChange, variant = 'article', title }) {
                 locked
                 staticPreview
                 offset={offset}
-                title={variant === 'article' ? title || undefined : undefined}
+                title={variant === 'article' ? audioTitle.trim() || title || undefined : undefined}
                 labels={labels}
               />
             </div>

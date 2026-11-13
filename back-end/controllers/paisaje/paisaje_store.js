@@ -257,6 +257,8 @@ export function imageUrls(id, meta) {
 // ─── A piece on a block ─────────────────────────────────────────────────
 
 const MODES = ["amplitude", "spectrum"];
+// The audio's title (optional; the reader falls back to the article's).
+export const AUDIO_TITLE_MAX = 120;
 const clampOffset = (v) => {
     const n = Number(v);
     return Number.isFinite(n) ? Math.round(Math.min(20000, Math.max(-20000, n)) * 10) / 10 : 0;
@@ -264,9 +266,10 @@ const clampOffset = (v) => {
 
 /**
  * Check and normalise the soundscape stored on a block (`soundscape_data`):
- * the client sends { imageId, audioId, mode, veil, offsetX, offsetY }; the
- * drawing and the processed audio must exist. Returns { value (JSON string),
- * imageUrl } or { error }. Everything else is derived here, never trusted.
+ * the client sends { imageId, audioId, mode, veil, offsetX, offsetY,
+ * audioTitle }; the drawing and the processed audio must exist. Returns
+ * { value (JSON string), imageUrl } or { error }. Everything else is derived
+ * here, never trusted.
  */
 export function sanitizeSoundscape(raw) {
     let s = raw;
@@ -274,6 +277,10 @@ export function sanitizeSoundscape(raw) {
         try { s = JSON.parse(s); } catch { return { error: "Datos del paisaje sonoro inválidos" }; }
     }
     if (!s || typeof s !== "object") return { error: "Datos del paisaje sonoro inválidos" };
+    const audioTitle = typeof s.audioTitle === "string" ? s.audioTitle.replace(/\s+/g, " ").trim() : "";
+    if (audioTitle.length > AUDIO_TITLE_MAX) {
+        return { error: `El título del audio es demasiado largo (máximo ${AUDIO_TITLE_MAX} caracteres)` };
+    }
     const meta = imageMeta(s.imageId);
     if (!meta) return { error: "La imagen del paisaje sonoro no existe" };
     const audio = audioStatus(s.audioId);
@@ -292,7 +299,8 @@ export function sanitizeSoundscape(raw) {
         offsetY: clampOffset(s.offsetY),
         audioFormat: audio.originalFormat ?? null,
         loudnessBefore: audio.loudnessBefore ?? null,
-        loudnessAfter: audio.loudnessAfter ?? null
+        loudnessAfter: audio.loudnessAfter ?? null,
+        audioTitle: audioTitle || null
     };
     return { value: JSON.stringify(value), imageUrl: imageUrls(s.imageId, meta).imageUrl };
 }

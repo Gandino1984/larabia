@@ -1990,6 +1990,7 @@ function ArticleEditorBlocks() {
         {articleContentType === 'cómic' ? (
           // H-Scroll Editor for Comics
           <HScrollEditor
+            articleTitle={formData.title_article}
             panels={blocks.filter(b => b.block_type === 'comic_panel')}
             onPanelsChange={(newPanels) => {
               // An array, or an update of the current panels (uploads).

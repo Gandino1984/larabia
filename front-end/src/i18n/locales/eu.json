@@ -1978,5 +1978,10 @@
   "editor.microperfil.websitePlaceholder": "www.adibidea.eus",
   "editor.microperfil.instagramLabel": "Instagram (aukerakoa)",
   "editor.microperfil.instagramPlaceholder": "@erabiltzailea",
-  "editor.microperfil.instagramHint": "Erabiltzailea (@erabiltzailea) edo bere profilaren esteka."
+  "editor.microperfil.instagramHint": "Erabiltzailea (@erabiltzailea) edo bere profilaren esteka.",
+  "paisaje.editor.audio.titleLabel": "Audioaren izenburua (aukerakoa)",
+  "paisaje.editor.audio.titlePlaceholder": "Adibidez: Kerman, Artxanda mendian",
+  "paisaje.editor.audio.titleHint": "Play botoiaren eskuinean agertzen da entzuten den bitartean. Hutsik uzten baduzu, artikuluaren izenburua erabiltzen da.",
+  "paisaje.editor.summary.audioTitle": "Audioaren izenburua",
+  "paisaje.editor.summary.audioTitleFallback": "Artikuluarena: «{{title}}»"
 }

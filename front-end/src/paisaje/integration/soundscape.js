@@ -36,8 +36,19 @@ export const pieceForSave = (s) => s && ({
   mode: s.mode,
   veil: s.veil,
   offsetX: s.offsetX ?? 0,
-  offsetY: s.offsetY ?? 0
+  offsetY: s.offsetY ?? 0,
+  audioTitle: s.audioTitle || null
 });
+
+/** The audio's title (optional, same limit as the server's). */
+export const AUDIO_TITLE_MAX = 120;
+
+/** The title shown with the audio: the author's, or else `fallback` (the
+ *  article's title). */
+export const audioTitleOf = (raw, fallback) => {
+  const own = parseSoundscape(raw)?.audioTitle;
+  return (typeof own === 'string' && own.trim()) || fallback || '';
+};
 
 /** Player texts in the reader's language (PaisajePlayer `labels`). */
 export const playerLabels = (t) => ({

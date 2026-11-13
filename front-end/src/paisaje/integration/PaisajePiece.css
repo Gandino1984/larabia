@@ -168,3 +168,55 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.85);
 }
+
+/* Comic panel: the audio's title (or the article's) unfolds to the right of
+   the play button while it plays, and folds back when it stops. PaisajePiece
+   sets data-playing and the position (--title-x / --title-y: just right of
+   the button, level with its middle; --title-max: the room left). */
+.larabia-paisaje--panel {
+  position: relative;
+}
+.larabia-paisaje__title {
+  position: absolute;
+  left: var(--title-x, 68px);
+  top: var(--title-y, calc(100% - 60px));
+  z-index: 3;
+  max-width: var(--title-max, 60%);
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  color: #1a1a1a;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: left;
+  transform: translateY(-50%);
+  pointer-events: none;
+  /* Folded into the button's side. */
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.35s ease-in, opacity 0.2s ease 0.15s;
+}
+.larabia-paisaje__title span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.larabia-paisaje--panel[data-playing='true'] .larabia-paisaje__title {
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+  transition:
+    clip-path 0.55s cubic-bezier(0.22, 1, 0.36, 1) var(--title-delay, 0ms),
+    opacity 0.15s ease var(--title-delay, 0ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .larabia-paisaje__title,
+  .larabia-paisaje--panel[data-playing='true'] .larabia-paisaje__title {
+    clip-path: none;
+    transition: opacity 0.2s ease;
+  }
+}
