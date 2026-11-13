@@ -17,6 +17,38 @@ import ComicAudioPlay from './ComicAudioPlay';
 const COMIC_AUDIO_SOURCE = 'comic-panel-audio';
 // Interactive panels with a sound (simple panels have only their image).
 const hasPanelAudio = (panel) => !!(panel.is_interactive && panel.interaction_type === 'audio' && panel.interaction_data);
+// A paisaje sonoro panel (square: the piece's circle).
+const isPaisajePanel = (panel) => !!(panel?.soundscape_data && parseSoundscape(panel.soundscape_data));
+
+// Reaching a paisaje panel, the viewer glides it to the middle. "Reached" =
+// this share of it on screen (as for its play button, PaisajePiece); it
+// counts as left (and is centred again on coming back) below LEAVE.
+const PAISAJE_ENTER_SHARE = 0.6;
+const PAISAJE_LEAVE_SHARE = 0.3;
+// The reader has stopped: no scrolling for this long.
+const SCROLL_SETTLE_MS = 160;
+const reducedMotion = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+/** How much of `el` is on screen in the viewer `box`, out of what can be. */
+const shareInView = (el, box) => {
+  const r = el.getBoundingClientRect();
+  const b = box.getBoundingClientRect();
+  const seen = Math.max(0, Math.min(r.right, b.right) - Math.max(r.left, b.left));
+  return seen / Math.max(1, Math.min(r.width, b.width));
+};
+
+/** Panels that fit in the viewer can be centred (wider ones — a square
+ *  panel on a phone held upright — show their left side first, where the
+ *  play button is). */
+const fitsInView = (el, box) => el.getBoundingClientRect().width <= box.clientWidth + 1;
+
+/** The viewer's scroll position with `el` in its middle. */
+const centredScrollLeft = (el, box) => {
+  const r = el.getBoundingClientRect();
+  const b = box.getBoundingClientRect();
+  const left = box.scrollLeft + (r.left + r.width / 2) - (b.left + box.clientLeft + box.clientWidth / 2);
+  return Math.min(box.scrollWidth - box.clientWidth, Math.max(0, Math.round(left)));
+};
 
 // optionsActions: the reader's ⋯ actions (engagement, share, edit/delete),
 // repeated at the right of the bottom bar when provided.
@@ -243,6 +275,66 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
     showInfo(t('hscroll.audioPanel.notice', 'Esta viñeta tiene sonido: pulsa play para escucharlo.'), 'audio');
   }, [showInfo, t]);
 
+  // Paisaje sonoro panels in the middle of the screen: when the reader stops
+  // with one mostly on screen, the viewer glides until it's centred. Once per
+  // visit to the panel — from there it scrolls freely; leaving it and coming
+  // back centres it again. Never mid-swipe or with a finger / the mouse down.
+  useEffect(() => {
+    const box = scrollContainerRef.current;
+    if (!box || isLoading) return undefined;
+    const centred = new Set();
+    let timer = null;
+    let held = false;
+
+    const settle = () => {
+      timer = null;
+      if (held) return;
+      const els = [...box.querySelectorAll('.hscroll-viewer-panel--paisaje')];
+      // Already at one (centred and still there): that's where the reader is.
+      if (els.some((el) => centred.has(el) && shareInView(el, box) >= PAISAJE_ENTER_SHARE)) return;
+      const b = box.getBoundingClientRect();
+      const middle = b.left + box.clientLeft + box.clientWidth / 2;
+      let best = null;
+      let bestDistance = Infinity;
+      els.forEach((el) => {
+        if (centred.has(el) || !fitsInView(el, box) || shareInView(el, box) < PAISAJE_ENTER_SHARE) return;
+        const r = el.getBoundingClientRect();
+        const distance = Math.abs(r.left + r.width / 2 - middle);
+        if (distance < bestDistance) { best = el; bestDistance = distance; }
+      });
+      if (!best) return;
+      centred.add(best);
+      const left = centredScrollLeft(best, box);
+      if (Math.abs(left - box.scrollLeft) > 1) {
+        box.scrollTo({ left, behavior: reducedMotion() ? 'auto' : 'smooth' });
+      }
+    };
+    const later = () => { clearTimeout(timer); timer = setTimeout(settle, SCROLL_SETTLE_MS); };
+
+    const onScroll = () => {
+      centred.forEach((el) => { if (shareInView(el, box) < PAISAJE_LEAVE_SHARE) centred.delete(el); });
+      later();
+    };
+    const hold = () => { held = true; clearTimeout(timer); };
+    const release = () => { if (held) { held = false; later(); } };
+
+    box.addEventListener('scroll', onScroll, { passive: true });
+    box.addEventListener('touchstart', hold, { passive: true });
+    box.addEventListener('touchend', release);
+    box.addEventListener('touchcancel', release);
+    box.addEventListener('mousedown', hold);
+    window.addEventListener('mouseup', release);
+    return () => {
+      clearTimeout(timer);
+      box.removeEventListener('scroll', onScroll);
+      box.removeEventListener('touchstart', hold);
+      box.removeEventListener('touchend', release);
+      box.removeEventListener('touchcancel', release);
+      box.removeEventListener('mousedown', hold);
+      window.removeEventListener('mouseup', release);
+    };
+  }, [panels, isLoading]);
+
   // Monitor current visible panel and stop audio at stop panel
   useEffect(() => {
     if (!audioConfig.stopPanel || !isPlaying) return;
@@ -417,7 +509,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
           console.log(`✅ Restored to panel ${panelNumber}`);
           hasRestoredRef.current = true;
           // Use instant scroll for better UX when restoring position
-          targetPanel.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
+          showPanel(targetPanel, 'auto');
           // Tell the reader why the comic didn't open at the start (not when the
           // saved position is the first panel — that's just the beginning).
           if (panelNumber > 1) {
@@ -592,21 +684,38 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
     }
   };
 
-  // Panel by panel (bottom bar): the left edge of the next / previous panel,
-  // counted from where the reader is now.
+  // Where the viewer goes to show a panel: its left edge — a paisaje panel,
+  // in the middle (when it fits).
+  const panelScrollLeft = (el, box) => {
+    if (el.classList.contains('hscroll-viewer-panel--paisaje') && fitsInView(el, box)) return centredScrollLeft(el, box);
+    return el.getBoundingClientRect().left - box.getBoundingClientRect().left - box.clientLeft + box.scrollLeft;
+  };
+
+  // Panel by panel (bottom bar): the next / previous panel, counted from
+  // where the reader is now.
   const goToPanel = (direction) => {
     const box = scrollContainerRef.current;
     if (!box) return;
-    const boxLeft = box.getBoundingClientRect().left;
-    const edges = [...box.querySelectorAll('.hscroll-viewer-panel')]
-      .map((el) => el.getBoundingClientRect().left - boxLeft + box.scrollLeft);
+    const stops = [...box.querySelectorAll('.hscroll-viewer-panel')]
+      .map((el) => panelScrollLeft(el, box))
+      .sort((a, b) => a - b);
     const here = box.scrollLeft;
     const max = box.scrollWidth - box.clientWidth;
     const target = direction > 0
-      ? edges.find((x) => x > here + 2)
-      : [...edges].reverse().find((x) => x < here - 2);
+      ? stops.find((x) => x > here + 2)
+      : [...stops].reverse().find((x) => x < here - 2);
     const left = target ?? (direction > 0 ? max : 0);
-    box.scrollTo({ left: Math.min(max, Math.max(0, left)), behavior: 'smooth' });
+    box.scrollTo({ left: Math.min(max, Math.max(0, left)), behavior: reducedMotion() ? 'auto' : 'smooth' });
+  };
+
+  // Back to a saved panel (on opening, or «Recuperar»).
+  const showPanel = (el, behavior) => {
+    const box = scrollContainerRef.current;
+    if (el.classList.contains('hscroll-viewer-panel--paisaje') && box && fitsInView(el, box)) {
+      el.scrollIntoView({ behavior, block: 'nearest', inline: 'center' });
+    } else {
+      el.scrollIntoView({ behavior, block: 'nearest', inline: 'start' });
+    }
   };
 
   const goToStart = () => {
@@ -717,7 +826,7 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
       );
 
       if (targetPanel) {
-        targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        showPanel(targetPanel, 'smooth');
         showSuccess(t('hscroll.restoringToPanel', { panel: panelNumber }));
       } else {
         showInfo(t('hscroll.panelNotFound'));
@@ -965,11 +1074,11 @@ function HScrollViewer({ panels, articleId, onFullscreen, optionsActions }) {
             role="list"
             aria-label={t('hscroll.panelsAriaLabel')}
           >
-            <div className="hscroll-viewer-panels">
+            <div className={`hscroll-viewer-panels${isPaisajePanel(sortedPanels[0]) ? ' starts-with-paisaje' : ''}${isPaisajePanel(sortedPanels[sortedPanels.length - 1]) ? ' ends-with-paisaje' : ''}`}>
               {sortedPanels.map((panel, index) => (
                 <div
                   key={panel.id_block}
-                  className={`hscroll-viewer-panel ${panel.is_interactive ? 'interactive-panel' : ''} ${panel.interaction_type === 'iframe' ? 'iframe-panel' : ''} ${panel.soundscape_data ? 'paisaje-panel' : ''} ${hasPanelAudio(panel) ? 'audio-panel' : ''}`}
+                  className={`hscroll-viewer-panel ${panel.is_interactive ? 'interactive-panel' : ''} ${panel.interaction_type === 'iframe' ? 'iframe-panel' : ''} ${isPaisajePanel(panel) ? 'hscroll-viewer-panel--paisaje' : ''} ${hasPanelAudio(panel) ? 'audio-panel' : ''}`}
                   data-interaction-type={panel.interaction_type}
                   data-panel-number={index + 1}
                   data-panel-id={panel.id_block}

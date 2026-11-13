@@ -326,6 +326,16 @@
   width: max-content;
 }
 
+/* A paisaje sonoro panel first or last in the comic: room on that side, so
+   it too can sit in the middle of the viewer (HScrollViewer centres it on
+   reaching it). The panel is a square, var(--ph) wide; 50% = the viewer. */
+.hscroll-viewer-panels.starts-with-paisaje {
+  padding-left: max(0px, calc(50% - var(--ph) / 2));
+}
+.hscroll-viewer-panels.ends-with-paisaje {
+  padding-right: max(0px, calc(50% - var(--ph) / 2));
+}
+
 .hscroll-viewer-panel {
   position: relative;
   height: var(--ph);
