@@ -35,6 +35,7 @@ import workshopInvitationModel from './models/workshop_invitation_model.js';
 import openSpaceProposalModel from './models/open_space_proposal_model.js';
 import bugReportModel from './models/bug_report_model.js';
 import contestEntryModel from './models/contest_entry_model.js';
+import callVoteModel from './models/call_vote_model.js';
 import workshopSpotRequestModel from './models/workshop_spot_request_model.js';
 import { syncGalleryTables } from './models/gallery_models.js';
 import { syncChatTables } from './models/chat_models.js';
@@ -250,6 +251,42 @@ Promise.all([
                 }
             }
         }
+        // Convocatorias (migration 038): a call's prizes flag and section,
+        // the works' review and the call a published work belongs to.
+        const calls = await qi.describeTable('magazine_workshops');
+        if (!calls.with_prizes_workshop) {
+            await qi.addColumn('magazine_workshops', 'with_prizes_workshop', { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false });
+            // The contests made so far were contests.
+            await sequelize.query("UPDATE magazine_workshops SET with_prizes_workshop = 1 WHERE kind_workshop = 'contest'");
+            console.log('>>> Added magazine_workshops.with_prizes_workshop');
+        }
+        if (!calls.section_workshop) {
+            await qi.addColumn('magazine_workshops', 'section_workshop', { type: DataTypes.STRING(100), allowNull: true });
+            console.log('>>> Added magazine_workshops.section_workshop');
+        }
+        if (!(await qi.describeTable('magazine_articles')).call_id_article) {
+            await qi.addColumn('magazine_articles', 'call_id_article', { type: DataTypes.INTEGER.UNSIGNED, allowNull: true });
+            await qi.addIndex('magazine_articles', ['call_id_article'], { name: 'idx_article_call' });
+            console.log('>>> Added magazine_articles.call_id_article');
+        }
+        // contest_entries may still be being created by its sync (a new
+        // database gets the columns from the model).
+        const entries = await qi.describeTable('contest_entries').catch(() => null);
+        if (entries) {
+            for (const [col, spec] of Object.entries({
+                status_entry: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'sent' },
+                decline_reason_entry: { type: DataTypes.TEXT, allowNull: true },
+                article_id_entry: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true }
+            })) {
+                if (!entries[col]) {
+                    await qi.addColumn('contest_entries', col, spec);
+                    console.log(`>>> Added contest_entries.${col}`);
+                }
+            }
+        }
+        // Their votes: created here, after the columns above — creating its
+        // foreign keys while those tables were being altered deadlocked.
+        await callVoteModel.sync();
     } catch (err) {
         console.error('Error ensuring added columns:', err.message);
     }

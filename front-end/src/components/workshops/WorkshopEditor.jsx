@@ -15,8 +15,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   X, Plus, Edit, Check, ChevronLeft, ChevronRight, Save, Eye, Trash2,
-  CalendarDays, Users, Baby, User, MapPin, Gift, Lock, Trophy, Medal, Send
+  CalendarDays, Users, Baby, User, MapPin, Gift, Lock, Trophy, Medal, Send, Megaphone
 } from 'lucide-react';
+import { useSectionCatalog } from '../../app_context/useSectionCatalog';
+import { sameKey, sectionLabel } from '../../utils/sections';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
 import { useWorkshop } from '../../app_context/WorkshopContext';
@@ -56,6 +58,8 @@ function WorkshopEditor() {
   } = useWorkshop();
   const { editors, fetchEditors } = useMagazine();
   const canCreate = isAdmin || isSuperAdmin;
+  // A convocatoria's section: where the works it accepts are published.
+  const sectionCatalog = useSectionCatalog();
 
   const initial = workshopEditor?.workshop || null;
   const [view, setView] = useState(workshopEditor?.view === 'mine' || (!initial && !canCreate) ? 'mine' : 'wizard');
@@ -115,6 +119,8 @@ function WorkshopEditor() {
     setErrors((e) => ({ ...e, [field]: undefined }));
   };
   const contest = form.kind_workshop === 'contest';
+  // A convocatoria that's also a contest: prizes and a jury.
+  const prizes = contest && !!form.with_prizes_workshop;
   const setAward = (place, key, value) => {
     setForm((f) => ({ ...f, awards_workshop: { ...f.awards_workshop, [place]: { ...f.awards_workshop[place], [key]: value } } }));
     setDirty(true);
@@ -125,14 +131,15 @@ function WorkshopEditor() {
     if (n === 1) {
       if (!form.title_workshop.trim()) return { field: 'title_workshop', message: t('workshops.editor.need.title', 'Escribe el título del taller') };
       if (form.title_workshop.length > TITLE_MAX) return { field: 'title_workshop', message: t('workshops.editor.need.titleLong', { max: TITLE_MAX, defaultValue: 'El título es demasiado largo (máximo {{max}} caracteres)' }) };
+      if (contest && !form.section_workshop) return { field: 'section_workshop', message: t('calls.editor.need.section', 'Elige la sección donde se publicarán los trabajos') };
     }
     if (n === 2 && contest) {
       const { registration_start_workshop: start, registration_end_workshop: end, resolution_date_workshop: jury } = form;
       if (!start) return { field: 'registration_start_workshop', message: t('contests.editor.need.start', 'Pon el día en que se abren las inscripciones') };
       if (!end) return { field: 'registration_end_workshop', message: t('contests.editor.need.end', 'Pon el último día de inscripciones') };
-      if (!jury) return { field: 'resolution_date_workshop', message: t('contests.editor.need.jury', 'Pon el día del fallo del jurado') };
+      if (!jury) return { field: 'resolution_date_workshop', message: prizes ? t('contests.editor.need.jury', 'Pon el día del fallo del jurado') : t('calls.editor.need.resolution', 'Pon el día de resolución (cierre de la votación)') };
       if (end < start) return { field: 'registration_end_workshop', message: t('contests.editor.need.endAfterStart', 'Las inscripciones no pueden cerrarse antes de abrirse') };
-      if (jury < end) return { field: 'resolution_date_workshop', message: t('contests.editor.need.juryAfterEnd', 'El fallo del jurado no puede ser antes del cierre de inscripciones') };
+      if (jury < end) return { field: 'resolution_date_workshop', message: prizes ? t('contests.editor.need.juryAfterEnd', 'El fallo del jurado no puede ser antes del cierre de inscripciones') : t('calls.editor.need.resolutionAfterEnd', 'La resolución no puede ser antes del cierre de inscripciones') };
       return null;
     }
     if (n === 2) {
@@ -148,7 +155,7 @@ function WorkshopEditor() {
     return null;
   };
   const FIELD_IDS = {
-    title_workshop: 'ws-title', capacity_workshop: 'ws-capacity', date_day: 'ws-date', date_time: 'ws-time',
+    title_workshop: 'ws-title', section_workshop: 'ws-section', capacity_workshop: 'ws-capacity', date_day: 'ws-date', date_time: 'ws-time',
     registration_start_workshop: 'ct-start', registration_end_workshop: 'ct-end', resolution_date_workshop: 'ct-jury'
   };
   const showProblem = (p) => {
@@ -231,7 +238,7 @@ function WorkshopEditor() {
 
   const removeWorkshop = async (w) => {
     const sure = isContest(w)
-      ? t('contests.confirmDelete', '¿Eliminar este concurso? Se borrarán también sus inscripciones. Esta acción no se puede deshacer.')
+      ? t('contests.confirmDelete', '¿Eliminar esta convocatoria? Se borrarán también sus inscripciones y sus votos. Esta acción no se puede deshacer.')
       : t('workshops.confirmDelete', '¿Eliminar este taller? Se borrarán también sus reservas. Esta acción no se puede deshacer.');
     if (!window.confirm(sure)) return;
     const res = await deleteWorkshop(w.id_workshop);
@@ -294,8 +301,8 @@ function WorkshopEditor() {
   }
 
   const STEPS = contest ? [
-    { n: 1, short: t('contests.editor.step.contest', 'Concurso'), long: t('contests.editor.step.contestLong', 'El concurso') },
-    { n: 2, short: t('contests.editor.step.dates', 'Fechas y premios'), long: t('contests.editor.step.datesLong', 'Fechas y premios') },
+    { n: 1, short: t('contests.editor.step.contest', 'Convocatoria'), long: t('contests.editor.step.contestLong', 'La convocatoria') },
+    { n: 2, short: prizes ? t('contests.editor.step.dates', 'Fechas y premios') : t('calls.editor.step.dates', 'Fechas'), long: prizes ? t('contests.editor.step.datesLong', 'Fechas y premios') : t('calls.editor.step.datesLong', 'Fechas') },
     { n: 3, short: t('contests.editor.step.people', 'Portada y organización'), long: t('contests.editor.step.peopleLong', 'Portada y organización') },
     { n: 4, short: t('workshops.editor.step.review', 'Guardar'), long: t('workshops.editor.step.reviewLong', 'Revisar y guardar') }
   ] : [
@@ -317,7 +324,7 @@ function WorkshopEditor() {
     <>
       {editingId ? (
         <p className="pub-step-hint workshop-editor__kind-fixed">
-          <WorkshopKindTag workshop={editing} /> {t('contests.editor.kindFixed', 'Lo que es (taller o concurso) no se cambia una vez creado.')}
+          <WorkshopKindTag workshop={editing} /> {t('contests.editor.kindFixed', 'Lo que es (taller o convocatoria) no se cambia una vez creado.')}
         </p>
       ) : (
         <fieldset className="pub-fieldset">
@@ -325,7 +332,7 @@ function WorkshopEditor() {
           <div className="pub-choice-grid">
             {[
               { key: 'workshop', Icon: Users, title: t('workshops.form.audienceGeneral', 'Taller'), desc: t('contests.editor.kindWorkshopDesc', 'Con fecha, lugar y plazas: la gente reserva la suya.') },
-              { key: 'contest', Icon: Trophy, title: t('contests.kind', 'Concurso'), desc: t('contests.editor.kindContestDesc', 'Con días de inscripción y de fallo del jurado, y premios. Sin aforo: se inscribe cualquiera con cuenta.') }
+              { key: 'contest', Icon: Megaphone, title: t('contests.kind', 'Convocatoria'), desc: t('calls.editor.kindDesc', 'Una llamada a enviar obras: participa quien tenga cuenta, las aceptadas se publican en la sección que elijas y el público las vota. También puede ser un concurso, con premios.') }
             ].map(({ key, Icon, title, desc }) => (
               <button
                 key={key}
@@ -340,7 +347,7 @@ function WorkshopEditor() {
               </button>
             ))}
           </div>
-          {needsReview && <p className="pub-step-hint">{t('contests.editor.reviewHint', 'Un super admin revisará el concurso antes de publicarlo.')}</p>}
+          {needsReview && <p className="pub-step-hint">{t('contests.editor.reviewHint', 'Un super admin revisará la convocatoria antes de publicarla.')}</p>}
         </fieldset>
       )}
 
@@ -352,12 +359,58 @@ function WorkshopEditor() {
           value={form.title_workshop}
           maxLength={TITLE_MAX}
           onChange={(e) => set('title_workshop', e.target.value)}
-          placeholder={contest ? t('contests.editor.titlePlaceholder', 'Título del concurso') : t('workshops.form.titlePlaceholder', 'Título del taller')}
+          placeholder={contest ? t('contests.editor.titlePlaceholder', 'Título de la convocatoria') : t('workshops.form.titlePlaceholder', 'Título del taller')}
           className={errors.title_workshop ? 'input-error' : ''}
           aria-invalid={!!errors.title_workshop}
         />
         {errorOf('title_workshop')}
       </div>
+
+      {contest && (<>
+      <div className="form-group full-width">
+        <label htmlFor="ws-section">{t('calls.editor.section', 'Sección donde se publican los trabajos *')}</label>
+        <select
+          id="ws-section"
+          value={form.section_workshop}
+          onChange={(e) => set('section_workshop', e.target.value)}
+          className={errors.section_workshop ? 'input-error' : ''}
+          aria-invalid={!!errors.section_workshop}
+          aria-describedby="ws-section-hint"
+        >
+          <option value="">{t('calls.editor.sectionPick', 'Elige una sección…')}</option>
+          {sectionCatalog.map((sec) => (
+            <option key={sec.key} value={sec.key}>{[...sec.path, sec.label].join(' › ')}</option>
+          ))}
+          {form.section_workshop && !sectionCatalog.some((sec) => sameKey(sec.key, form.section_workshop)) && (
+            <option value={form.section_workshop}>{form.section_workshop}</option>
+          )}
+        </select>
+        <p className="pub-step-hint" id="ws-section-hint">{t('calls.editor.sectionHint', 'Un super admin revisa cada obra recibida: las que acepta se publican en esta sección, con su autor/a, y el público puede votarlas.')}</p>
+        {errorOf('section_workshop')}
+      </div>
+
+      <fieldset className="pub-fieldset">
+        <legend>{t('calls.editor.prizes', '¿Es también un concurso?')}</legend>
+        <div className="pub-choice-grid">
+          {[
+            { value: false, Icon: Megaphone, title: t('calls.editor.plain', 'Solo convocatoria'), desc: t('calls.editor.plainDesc', 'Se publican las obras aceptadas y el público las vota. Sin premios.') },
+            { value: true, Icon: Trophy, title: t('calls.editor.withPrizes', 'Concurso con premios'), desc: t('calls.editor.withPrizesDesc', 'Además, premios (1.º, 2.º y 3.º puesto y mención) que decide un jurado el día de resolución.') }
+          ].map(({ value, Icon, title, desc }) => (
+            <button
+              key={String(value)}
+              type="button"
+              className={`pub-choice ${!!form.with_prizes_workshop === value ? 'is-selected' : ''}`}
+              onClick={() => set('with_prizes_workshop', value)}
+              aria-pressed={!!form.with_prizes_workshop === value}
+            >
+              <Icon size={28} />
+              <span className="pub-choice__title">{title}</span>
+              <span className="pub-choice__desc">{desc}</span>
+            </button>
+          ))}
+        </div>
+      </fieldset>
+      </>)}
 
       {!contest && (<>
       <fieldset className="pub-fieldset">
@@ -424,12 +477,16 @@ function WorkshopEditor() {
   // ---- Step 2 (a contest): its days and awards ----
   const stepContestDates = (
     <>
-      <p className="pub-step-hint">{t('contests.editor.datesHint', 'Las inscripciones se abren el primer día y se cierran al acabar el último. El día del fallo se publican las ganadoras y los ganadores.')}</p>
+      <p className="pub-step-hint">
+        {prizes
+          ? t('calls.editor.datesHintPrizes', 'Las inscripciones se abren el primer día y se cierran al acabar el último. El público vota las obras publicadas hasta el día del fallo: ese día se publican las ganadoras y los ganadores y los resultados de la votación.')
+          : t('calls.editor.datesHint', 'Las inscripciones se abren el primer día y se cierran al acabar el último. El público vota las obras publicadas hasta el día de resolución: ese día se cierra la votación y se publican sus resultados.')}
+      </p>
       <div className="workshop-editor__row workshop-editor__row--three">
         {[
           { field: 'registration_start_workshop', id: 'ct-start', label: t('contests.editor.start', 'Se abren las inscripciones') },
           { field: 'registration_end_workshop', id: 'ct-end', label: t('contests.editor.end', 'Último día de inscripción') },
-          { field: 'resolution_date_workshop', id: 'ct-jury', label: t('contests.editor.jury', 'Fallo del jurado') }
+          { field: 'resolution_date_workshop', id: 'ct-jury', label: prizes ? t('contests.editor.jury', 'Fallo del jurado') : t('calls.editor.resolution', 'Resolución (fin de la votación)') }
         ].map(({ field, id, label }) => (
           <div className="form-group" key={field}>
             <label htmlFor={id}>{label}</label>
@@ -446,6 +503,7 @@ function WorkshopEditor() {
         ))}
       </div>
 
+      {prizes && (
       <fieldset className="pub-fieldset">
         <legend>{t('contests.editor.awards', 'Premios')}</legend>
         <p className="pub-step-hint">{t('contests.editor.awardsHint', 'Opcional. El premio de cada puesto se ve desde el principio; las ganadoras y los ganadores, a partir del día del fallo (escríbelos cuando el jurado decida).')}</p>
@@ -497,6 +555,7 @@ function WorkshopEditor() {
           ))}
         </div>
       </fieldset>
+      )}
     </>
   );
 
@@ -595,7 +654,7 @@ function WorkshopEditor() {
         <legend>{contest ? t('contests.editor.organizers', 'Organizan') : t('workshops.form.hosts', 'Autoras/es (talleristas)')}</legend>
         <p className="pub-step-hint">
           {contest
-            ? t('contests.editor.organizersHint', 'Quien organiza el concurso. Las personas del equipo que lo organizan también pueden editarlo y ver las inscripciones.')
+            ? t('contests.editor.organizersHint', 'Quien organiza la convocatoria. Las personas del equipo que la organizan también pueden editarla y ver las inscripciones.')
             : t('workshops.editor.hostsHint', 'Quien imparte el taller. Sus talleristas del equipo también pueden editarlo y gestionar las plazas.')}
         </p>
         <div className="workshop-editor__hosts">
@@ -632,11 +691,14 @@ function WorkshopEditor() {
         <dd>{form.title_workshop || '—'} {change(1)}</dd>
         {contest ? (<>
         <dt>{t('contests.editor.kind', '¿Qué vas a crear?')}</dt>
-        <dd>{t('contests.kind', 'Concurso')} {!editingId && change(1)}</dd>
+        <dd>{prizes ? t('contests.kindPrizes', 'Convocatoria con premios') : t('contests.kind', 'Convocatoria')} {change(1)}</dd>
+        <dt>{t('calls.editor.sectionShort', 'Se publica en')}</dt>
+        <dd>{form.section_workshop ? sectionLabel(form.section_workshop, sectionCatalog) : '—'} {change(1)}</dd>
         <dt>{t('contests.editor.signups', 'Inscripciones')}</dt>
         <dd>{t('contests.editor.range', { from: signupRange(form.registration_start_workshop, form.registration_end_workshop).from || '—', to: formatDay(form.registration_end_workshop) || '—', defaultValue: 'Del {{from}} al {{to}}' })} {change(2)}</dd>
-        <dt>{t('contests.editor.jury', 'Fallo del jurado')}</dt>
+        <dt>{prizes ? t('contests.editor.jury', 'Fallo del jurado') : t('calls.editor.resolution', 'Resolución (fin de la votación)')}</dt>
         <dd>{formatDay(form.resolution_date_workshop) || '—'} {change(2)}</dd>
+        {prizes && (<>
         <dt>{t('contests.editor.awards', 'Premios')}</dt>
         <dd>
           {AWARD_PLACES.filter((p) => form.awards_workshop[p].prize || form.awards_workshop[p].winner).map((p) => (
@@ -647,6 +709,7 @@ function WorkshopEditor() {
           ))}
           {!AWARD_PLACES.some((p) => form.awards_workshop[p].prize || form.awards_workshop[p].winner) && '—'} {change(2)}
         </dd>
+        </>)}
         <dt>{t('contests.editor.organizers', 'Organizan')}</dt>
         <dd>{authors.map((a) => a.name_user).join(', ') || '—'} {change(3)}</dd>
         <dt>{t('workshops.form.cover', 'Imagen de portada')}</dt>
@@ -677,7 +740,7 @@ function WorkshopEditor() {
         {editingId && (
           <button type="button" className="pub-btn pub-btn--ghost" onClick={() => openWorkshop(editing)}>
             <Eye size={18} />
-            <span>{contest ? t('contests.editor.view', 'Ver el concurso') : t('workshops.editor.view', 'Ver el taller')}</span>
+            <span>{contest ? t('contests.editor.view', 'Ver la convocatoria') : t('workshops.editor.view', 'Ver el taller')}</span>
           </button>
         )}
         <button type="button" className="pub-btn pub-btn--primary" onClick={save} disabled={saving}>
@@ -689,7 +752,7 @@ function WorkshopEditor() {
               : editingId ? t('editor.wizard.saveChanges', 'Guardar cambios')
               : !contest ? t('workshops.create', 'Crear taller')
               : needsReview ? t('contests.editor.submit', 'Enviar a revisión')
-              : t('contests.create', 'Crear concurso')}
+              : t('contests.create', 'Crear convocatoria')}
           </span>
         </button>
       </div>
@@ -704,9 +767,9 @@ function WorkshopEditor() {
         <header className="pub-editor-header">
           <div className="pub-editor-toolbar">
             {view === 'wizard' ? (
-              <button type="button" className="pub-btn pub-btn--ghost" onClick={() => setView('mine')} title={t('workshops.editor.mine.button', 'Mis talleres y concursos')}>
+              <button type="button" className="pub-btn pub-btn--ghost" onClick={() => setView('mine')} title={t('workshops.editor.mine.button', 'Mis talleres y convocatorias')}>
                 <CalendarDays size={18} />
-                <span className="pub-btn__text">{t('workshops.editor.mine.button', 'Mis talleres y concursos')}</span>
+                <span className="pub-btn__text">{t('workshops.editor.mine.button', 'Mis talleres y convocatorias')}</span>
               </button>
             ) : (
               <>
@@ -717,9 +780,9 @@ function WorkshopEditor() {
                   </button>
                 )}
                 {canCreate && (
-                  <button type="button" className="pub-btn pub-btn--primary" onClick={startNew} title={t('workshops.editor.mine.new', 'Nuevo taller o concurso')}>
+                  <button type="button" className="pub-btn pub-btn--primary" onClick={startNew} title={t('workshops.editor.mine.new', 'Nuevo taller o convocatoria')}>
                     <Plus size={18} />
-                    <span className="pub-btn__text">{t('workshops.editor.mine.new', 'Nuevo taller o concurso')}</span>
+                    <span className="pub-btn__text">{t('workshops.editor.mine.new', 'Nuevo taller o convocatoria')}</span>
                   </button>
                 )}
               </>
@@ -737,9 +800,9 @@ function WorkshopEditor() {
 
           <h1 className="pub-editor-title">
             {view === 'mine'
-              ? t('workshops.editor.mine.button', 'Mis talleres y concursos')
+              ? t('workshops.editor.mine.button', 'Mis talleres y convocatorias')
               : contest
-              ? (editingId ? t('contests.edit', 'Editar concurso') : t('contests.editor.createTitle', 'Crea un concurso'))
+              ? (editingId ? t('contests.edit', 'Editar convocatoria') : t('contests.editor.createTitle', 'Crea una convocatoria'))
               : editingId ? t('workshops.edit', 'Editar taller') : t('workshops.editor.createTitle', 'Crea un taller')}
           </h1>
 
@@ -827,8 +890,8 @@ function WorkshopEditor() {
           <div className="pub-mine">
             <p className="list-subtitle">
               {isSuperAdmin
-                ? t('workshops.editor.mine.subtitleAll', 'Como super-administrador ves todos los talleres y concursos. Edítalos, elimínalos o ábrelos.')
-                : t('workshops.editor.mine.subtitle', 'Los talleres y concursos que impartes, organizas o creaste. Edítalos, elimínalos o ábrelos.')}
+                ? t('workshops.editor.mine.subtitleAll', 'Como super-administrador ves todos los talleres y convocatorias. Edítalos, elimínalos o ábrelos.')
+                : t('workshops.editor.mine.subtitle', 'Los talleres y convocatorias que impartes, organizas o creaste. Edítalos, elimínalos o ábrelos.')}
             </p>
             <div className="articles-filter">
               {MINE_FILTERS.map((f) => (
@@ -845,7 +908,7 @@ function WorkshopEditor() {
             {mineShown.length === 0 ? (
               <div className="empty-state">
                 <p>{t('workshops.editor.mine.empty', 'No hay talleres aquí.')}</p>
-                {canCreate && <p>{t('workshops.editor.mine.emptyHint', 'Crea uno con «Nuevo taller o concurso».')}</p>}
+                {canCreate && <p>{t('workshops.editor.mine.emptyHint', 'Crea uno con «Nuevo taller o convocatoria».')}</p>}
               </div>
             ) : (
               <div className="articles-grid">
@@ -883,9 +946,9 @@ function WorkshopEditor() {
                         )}
                       </div>
                       <div className="article-item-actions">
-                        <button type="button" className="btn-view-article" onClick={() => openWorkshop(w)} title={contestItem ? t('contests.editor.view', 'Ver el concurso') : t('workshops.editor.view', 'Ver el taller')}>
+                        <button type="button" className="btn-view-article" onClick={() => openWorkshop(w)} title={contestItem ? t('contests.editor.view', 'Ver la convocatoria') : t('workshops.editor.view', 'Ver el taller')}>
                           <Eye size={16} />
-                          <span>{contestItem ? t('contests.editor.view', 'Ver el concurso') : t('workshops.editor.view', 'Ver el taller')}</span>
+                          <span>{contestItem ? t('contests.editor.view', 'Ver la convocatoria') : t('workshops.editor.view', 'Ver el taller')}</span>
                         </button>
                         <button type="button" className="btn-edit" onClick={() => editFromList(w)} title={t('common.buttons.edit', 'Editar')} aria-label={t('common.buttons.edit', 'Editar')}>
                           <Edit size={18} />

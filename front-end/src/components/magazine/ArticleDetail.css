@@ -1308,3 +1308,17 @@
   overflow-wrap: anywhere;
 }
 .microperfil-link:hover { text-decoration-thickness: 2px; }
+
+/* A work of a convocatoria: its vote button beside the title (below it
+   when the title is long or the screen narrow). CallVoting.css. */
+.article-detail-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  margin: 0 0 0.875rem;
+}
+.article-detail-title-row .article-detail-title {
+  margin: 0;
+}

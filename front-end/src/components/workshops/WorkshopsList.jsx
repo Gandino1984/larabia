@@ -122,7 +122,7 @@ function WorkshopsList() {
         ?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
       const shared = workshops.find((x) => x.id_workshop === sharedId);
       showInfo(isContest(shared)
-        ? t('contests.sharedSignIn', 'Te han compartido este concurso. Inicia sesión para abrirlo e inscribirte.')
+        ? t('contests.sharedSignIn', 'Te han compartido esta convocatoria. Inicia sesión para abrirla y participar.')
         : t('workshops.sharedSignIn', 'Te han compartido este taller. Inicia sesión para abrirlo y reservar plaza.'));
     }, 400);
     return () => clearTimeout(timer);
@@ -285,12 +285,12 @@ function WorkshopsList() {
             <div className="workshops-header-actions">
               <button type="button" className="workshops-create-btn workshops-create-btn--ghost" onClick={() => navigateToMyWorkshops('talleres')}>
                 <CalendarDays size={18} />
-                <span>{t('workshops.editor.mine.button', 'Mis talleres y concursos')}</span>
+                <span>{t('workshops.editor.mine.button', 'Mis talleres y convocatorias')}</span>
               </button>
               {canCreateWorkshop && (
                 <button type="button" className="workshops-create-btn" onClick={() => navigateToWorkshopEditor(null, 'talleres', contestsTab ? 'contest' : 'workshop')}>
                   <Plus size={18} />
-                  <span>{contestsTab ? t('contests.create', 'Crear concurso') : t('workshops.create', 'Crear taller')}</span>
+                  <span>{contestsTab ? t('contests.create', 'Crear convocatoria') : t('workshops.create', 'Crear taller')}</span>
                 </button>
               )}
             </div>
@@ -302,7 +302,7 @@ function WorkshopsList() {
 
         {/* Sections (general / children's) + grid/carousel toggle */}
             <div className="workshops-toolbar">
-            <div className="workshops-tabs" role="tablist" aria-label={t('workshops.tabsLabel', 'Talleres o concursos')}>
+            <div className="workshops-tabs" role="tablist" aria-label={t('workshops.tabsLabel', 'Talleres o convocatorias')}>
               {AUDIENCE_TABS.map(key => (
                 <button
                   key={key}
@@ -313,7 +313,7 @@ function WorkshopsList() {
                   onClick={() => setAudience(key)}
                 >
                   {key === 'contests'
-                    ? t('contests.tab', 'Concursos')
+                    ? t('contests.tab', 'Convocatorias')
                     : key === 'infantil'
                     ? t('workshops.tabKids', 'Talleres infantiles')
                     : t('workshops.tabGeneral', 'Talleres')}
@@ -357,8 +357,8 @@ function WorkshopsList() {
                 <span>
                   {contestsTab
                     ? (showPast
-                      ? t('contests.past.hide', 'Ocultar concursos finalizados')
-                      : t('contests.past.show', { count: pastCount, defaultValue: 'Mostrar concursos finalizados ({{count}})' }))
+                      ? t('contests.past.hide', 'Ocultar convocatorias finalizadas')
+                      : t('contests.past.show', { count: pastCount, defaultValue: 'Mostrar convocatorias finalizadas ({{count}})' }))
                     : showPast
                     ? t('workshops.past.hide', 'Ocultar talleres finalizados')
                     : t('workshops.past.show', { count: pastCount, defaultValue: 'Mostrar talleres finalizados ({{count}})' })}
@@ -376,12 +376,12 @@ function WorkshopsList() {
                 <p>
                   {filtersActive
                     ? (contestsTab
-                      ? t('contests.noResults', 'Ningún concurso coincide con los filtros.')
+                      ? t('contests.noResults', 'Ninguna convocatoria coincide con los filtros.')
                       : t('workshops.filters.noResults', 'Ningún taller coincide con los filtros.'))
                     : contestsTab
                     ? (filters.when === 'upcoming'
-                      ? t('contests.emptyUpcoming', 'No hay concursos abiertos ni próximos.')
-                      : t('contests.empty', 'Todavía no hay concursos.'))
+                      ? t('contests.emptyUpcoming', 'No hay convocatorias abiertas ni próximas.')
+                      : t('contests.empty', 'Todavía no hay convocatorias.'))
                     : filters.when === 'upcoming'
                     ? (audience === 'infantil'
                       ? t('workshops.emptyKidsUpcoming', 'No hay talleres infantiles próximos.')

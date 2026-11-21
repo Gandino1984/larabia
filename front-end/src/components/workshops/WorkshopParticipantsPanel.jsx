@@ -123,7 +123,7 @@ function WorkshopParticipantsPanel({ workshop }) {
           <Users size={18} /> {contest ? t('contests.manage.title', 'Inscritas/os') : t('workshops.manage.title', 'Participantes')} ({participants.length})
         </h3>
         <p className="workshop-people__hint">
-          {contest ? t('contests.manage.subtitle', 'Solo lo ven quienes gestionan el concurso.') : t('workshops.manage.subtitle', 'Solo lo ven quienes gestionan el taller.')}
+          {contest ? t('contests.manage.subtitle', 'Solo lo ven quienes gestionan la convocatoria.') : t('workshops.manage.subtitle', 'Solo lo ven quienes gestionan el taller.')}
         </p>
       </header>
 
@@ -213,7 +213,7 @@ function WorkshopParticipantsPanel({ workshop }) {
         </label>
         <p className="workshop-people__hint workshop-people__hint--add">
           {contest
-            ? t('contests.manage.blockHint', 'En los concursos no hay invitaciones: cada persona se inscribe. Busca a alguien por su nombre para impedir que se inscriba.')
+            ? t('contests.manage.blockHint', 'En las convocatorias no hay invitaciones: cada persona se inscribe. Busca a alguien por su nombre para impedir que se inscriba.')
             : isFreeWorkshop(workshop)
             ? t('workshops.manage.inviteHintFree', 'Cualquier persona con cuenta en la revista: el taller es gratuito. Recibirán una notificación para aceptar o rechazar.')
             : t('workshops.manage.inviteHint', 'Solo socios/as de la revista (o del equipo). Recibirán una notificación para aceptar o rechazar.')}
@@ -282,7 +282,7 @@ function WorkshopParticipantsPanel({ workshop }) {
           <h4>
             <Ban size={16} /> {t('workshops.manage.blockedTitle', 'Bloqueadas/os')} ({blocked.length})
           </h4>
-          <p className="workshop-people__hint">{contest ? t('contests.manage.blockedHint', 'No pueden inscribirse en este concurso.') : t('workshops.manage.blockedHint', 'No pueden reservar plaza en este taller.')}</p>
+          <p className="workshop-people__hint">{contest ? t('contests.manage.blockedHint', 'No pueden inscribirse en esta convocatoria.') : t('workshops.manage.blockedHint', 'No pueden reservar plaza en este taller.')}</p>
           <ul className="workshop-people__list">
             {blocked.map(b => (
               <li key={b.id_user} className="workshop-people__row">

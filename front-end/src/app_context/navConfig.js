@@ -17,10 +17,10 @@ export const DEFAULT_NAV = [
   { id: 'projects', kind: 'projects', visible: true, min_role: 'all',
     label: { es: 'Proyectos', en: 'Projects', eu: 'Proiektuak' } },
   // The section holds workshops and contests: the button alternates its
-  // label with «Concursos» every 3 s (`cycle`, navCycleLabel).
+  // label with «Convocatorias» every 3 s (`cycle`, navCycleLabel).
   { id: 'talleres', kind: 'link', visible: true, min_role: 'all',
     label: { es: 'Talleres', en: 'Workshops', eu: 'Tailerrak' },
-    cycle: { es: 'Concursos', en: 'Contests', eu: 'Lehiaketak' },
+    cycle: { es: 'Convocatorias', en: 'Open calls', eu: 'Deialdiak' },
     action: { type: 'section', value: 'talleres' } },
   { id: 'more', kind: 'group', visible: true, min_role: 'all',
     label: { es: 'Más', en: 'More', eu: 'Gehiago' },

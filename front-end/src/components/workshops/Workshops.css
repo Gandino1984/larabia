@@ -1018,3 +1018,85 @@
 .contest-my-entry { margin: 0 0 0.75rem; color: #1a1a1a; }
 .contest-my-entry__file { display: inline-flex; align-items: center; gap: 0.3rem; color: #555555; font-size: 0.88rem; }
 .contest-my-entry__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+
+/* Convocatorias: where the works are published, and the participant's work
+   under review (WorkshopDetail). */
+.workshop-call-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: #f2f2f2;
+  color: #1a1a1a;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.workshop-call-section svg { flex-shrink: 0; margin-top: 0.15rem; }
+.contest-entry-review {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0.6rem 0 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: #f2f2f2;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.contest-entry-review svg { flex-shrink: 0; margin-top: 0.15rem; }
+.contest-entry-review--accepted,
+.contest-entry-review--published { background: #e8f5ec; color: #145a24; }
+.contest-entry-review--declined { background: #fdecec; color: #8e1c1c; }
+.contest-entry-review__link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-transform: none;
+  cursor: pointer;
+}
+
+/* A work's review (ContestEntriesPanel): its state, the super admins'
+   actions. Grey tones; accepted / published green, declined red. */
+.contest-entry__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 0.4rem 0.75rem; }
+.contest-entry__status {
+  flex-shrink: 0;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #ececec;
+  color: #333333;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.contest-entry__status--accepted { background: #fff3d6; color: #6b4a00; }
+.contest-entry__status--published { background: #e8f5ec; color: #145a24; }
+.contest-entry__status--declined { background: #fdecec; color: #8e1c1c; }
+.contest-entry__reason { margin: 0.4rem 0 0; font-size: 0.85rem; color: #8e1c1c; white-space: pre-line; }
+.contest-entry__review {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed #d6d6d6;
+}
+.workshop-people-btn--primary { background: #1e7e34; }
+.workshop-people-btn--primary:hover:not(:disabled),
+.workshop-people-btn--primary:focus-visible { background: #196b2c; }
+.contest-entries__warning {
+  margin: 0.6rem 0 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  background: #fff3d6;
+  color: #6b4a00;
+  font-size: 0.88rem;
+  font-weight: 600;
+}

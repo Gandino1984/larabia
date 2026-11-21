@@ -21,7 +21,7 @@ function AdminWorkshopsTab() {
 
   const handleDelete = async (w) => {
     if (!confirm(isContest(w)
-      ? t('contests.confirmDelete', '¿Eliminar este concurso? Se borrarán también sus inscripciones. Esta acción no se puede deshacer.')
+      ? t('contests.confirmDelete', '¿Eliminar esta convocatoria? Se borrarán también sus inscripciones y sus votos. Esta acción no se puede deshacer.')
       : t('admin.workshops.confirmDelete', '¿Eliminar este taller? Se borrarán también sus reservas. Esta acción no se puede deshacer.'))) return;
     await deleteWorkshop(w.id_workshop);
   };
@@ -29,18 +29,18 @@ function AdminWorkshopsTab() {
   return (
     <section className="admin-workshops">
       <div className="admin-workshops-head">
-        <h2 className="admin-workshops-list-title">{t('admin.workshops.title', 'Talleres y concursos')} ({workshops.length})</h2>
+        <h2 className="admin-workshops-list-title">{t('admin.workshops.title', 'Talleres y convocatorias')} ({workshops.length})</h2>
         <div className="admin-workshops-head__actions">
           <button type="button" className="admin-workshops-btn admin-workshops-btn--save" onClick={() => navigateToWorkshopEditor(null, 'admin')}>
             <Plus size={16} /> {t('admin.workshops.create', 'Crear taller')}
           </button>
           <button type="button" className="admin-workshops-btn admin-workshops-btn--save" onClick={() => navigateToWorkshopEditor(null, 'admin', 'contest')}>
-            <Plus size={16} /> {t('contests.create', 'Crear concurso')}
+            <Plus size={16} /> {t('contests.create', 'Crear convocatoria')}
           </button>
         </div>
       </div>
       {workshops.length === 0 ? (
-        <p className="admin-workshops-empty">{t('admin.workshops.empty', 'Todavía no hay talleres ni concursos.')}</p>
+        <p className="admin-workshops-empty">{t('admin.workshops.empty', 'Todavía no hay talleres ni convocatorias.')}</p>
       ) : (
         <ul className="admin-workshops-list">
           {workshops.map(w => (

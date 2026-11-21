@@ -48,6 +48,9 @@ export const toForm = (w, kind = 'workshop') => ({
   registration_end_workshop: dayOf(w?.registration_end_workshop) || '',
   resolution_date_workshop: dayOf(w?.resolution_date_workshop) || '',
   awards_workshop: toAwardsForm(w?.awards_workshop),
+  // A convocatoria: also a contest (prizes), and the section its works go to.
+  with_prizes_workshop: !!w?.with_prizes_workshop,
+  section_workshop: w?.section_workshop || '',
   title_workshop: w?.title_workshop || '',
   description_workshop: w?.description_workshop || '',
   location_workshop: w?.location_workshop || '',
@@ -75,6 +78,8 @@ export const toPayload = (form, authors) => (form.kind_workshop === 'contest' ? 
   registration_start_workshop: form.registration_start_workshop || null,
   registration_end_workshop: form.registration_end_workshop || null,
   resolution_date_workshop: form.resolution_date_workshop || null,
+  with_prizes_workshop: !!form.with_prizes_workshop,
+  section_workshop: form.section_workshop || null,
   awards_workshop: Object.fromEntries(AWARD_PLACES.map((p) => [p, {
     prize: form.awards_workshop[p].prize.trim(),
     winner: form.awards_workshop[p].winner.trim()

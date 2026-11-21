@@ -573,8 +573,8 @@ export const NotificationProvider = ({ children }) => {
           type: 'contest-review',
           ts: r.updated_at ? tsOf(r.updated_at) : Date.now(),
           title: approved
-            ? t('notifications.contestApproved.title', 'Tu concurso ya está publicado')
-            : t('notifications.contestRejected.title', 'Un super admin ha devuelto tu concurso'),
+            ? t('notifications.contestApproved.title', 'Tu convocatoria ya está publicada')
+            : t('notifications.contestRejected.title', 'Un super admin ha devuelto tu convocatoria'),
           message: approved || !r.rejection_reason_workshop
             ? `«${title}»`
             : t('notifications.contestRejected.message', { title, reason: r.rejection_reason_workshop, defaultValue: '«{{title}}»: {{reason}}' }),

@@ -1,12 +1,13 @@
 // magazine-front/src/components/workshops/WorkshopKindTag.jsx
 //
-// What it is — «Taller», «Taller infantil» or «Concurso» — on the cards, the
+// What it is — «Taller», «Taller infantil», «Convocatoria» or «Convocatoria
+// con premios» (a contest) — on the cards, the
 // page, «Mis talleres y concursos» and Admin › Talleres; «Finalizado» once
 // it's over (a workshop's day / a contest's jury day); and, for a contest
 // its managers see before it's published, its review: «En revisión» or
 // «Devuelto». Same pill as WorkshopAccessTag (labels, they keep their case).
 import { useTranslation } from 'react-i18next';
-import { Users, Baby, Trophy, Hourglass, Undo2, History } from 'lucide-react';
+import { Users, Baby, Trophy, Hourglass, Undo2, History, Megaphone } from 'lucide-react';
 import { isContest, reviewStateOf } from '../../utils/contests';
 import { isPastWorkshop } from '../../utils/workshopFilters';
 import './WorkshopAccessTag.css';
@@ -16,8 +17,8 @@ function WorkshopKindTag({ workshop }) {
   if (isContest(workshop)) {
     return (
       <span className="workshop-access workshop-kind--contest">
-        <Trophy size={13} aria-hidden="true" />
-        {t('contests.kind', 'Concurso')}
+        {workshop.with_prizes_workshop ? <Trophy size={13} aria-hidden="true" /> : <Megaphone size={13} aria-hidden="true" />}
+        {workshop.with_prizes_workshop ? t('contests.kindPrizes', 'Convocatoria con premios') : t('contests.kind', 'Convocatoria')}
       </span>
     );
   }

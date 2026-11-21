@@ -14,7 +14,7 @@ async function requireWorkshopCreator(req, res) {
     const user = await getRequestUser(req);
     const role = roleSnapshot(user);
     if (!user || !(role.isAdmin || role.isSuperAdmin)) {
-        res.status(403).json({ error: 'Solo admins y super-admins pueden crear talleres y concursos' });
+        res.status(403).json({ error: 'Solo admins y super-admins pueden crear talleres y convocatorias' });
         return null;
     }
     return user;
@@ -169,7 +169,7 @@ async function getById(req, res) {
         if (!user) {
             const kind = await magazine_workshop_model.findByPk(id_workshop, { attributes: ['kind_workshop'] });
             return res.status(403).json({
-                error: isContest(kind) ? 'Inicia sesión para ver el concurso' : 'Inicia sesión para ver el taller',
+                error: isContest(kind) ? 'Inicia sesión para ver la convocatoria' : 'Inicia sesión para ver el taller',
                 code: 'login_required'
             });
         }
@@ -179,7 +179,7 @@ async function getById(req, res) {
         const canManage = await isWorkshopManager(user, data);
         // A contest not approved yet: its managers only.
         if (isContest(data) && data.review_status_workshop !== 'approved' && !canManage) {
-            return res.status(404).json({ error: 'Concurso no encontrado' });
+            return res.status(404).json({ error: 'Convocatoria no encontrada' });
         }
         const participants = data.participants || [];
         let bookingCode = null;
@@ -231,7 +231,8 @@ async function create(req, res) {
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
             cover_image_workshop, capacity_workshop, audience_workshop, free_workshop, lat_workshop, lng_workshop, authors, author_name,
-            kind_workshop, registration_start_workshop, registration_end_workshop, resolution_date_workshop, awards_workshop } = req.body;
+            kind_workshop, registration_start_workshop, registration_end_workshop, resolution_date_workshop, awards_workshop,
+            with_prizes_workshop, section_workshop } = req.body;
 
         // A contest by anyone but a super admin waits for one to approve it.
         const contest = kind_workshop === 'contest';
@@ -241,6 +242,8 @@ async function create(req, res) {
             registration_end_workshop,
             resolution_date_workshop,
             awards_workshop,
+            with_prizes_workshop,
+            section_workshop,
             review_status_workshop: contest && !roleSnapshot(admin).isSuperAdmin ? 'pending' : 'approved',
             title_workshop,
             description_workshop,
@@ -275,7 +278,8 @@ async function update(req, res) {
 
         const { title_workshop, description_workshop, location_workshop, date_workshop,
             cover_image_workshop, capacity_workshop, audience_workshop, free_workshop, lat_workshop, lng_workshop, authors, author_name,
-            registration_start_workshop, registration_end_workshop, resolution_date_workshop, awards_workshop } = req.body;
+            registration_start_workshop, registration_end_workshop, resolution_date_workshop, awards_workshop,
+            with_prizes_workshop, section_workshop } = req.body;
 
         // A contest sent back goes to the review again once it's edited.
         const data = { resubmit: true };
@@ -283,6 +287,8 @@ async function update(req, res) {
         if (registration_end_workshop !== undefined) data.registration_end_workshop = registration_end_workshop;
         if (resolution_date_workshop !== undefined) data.resolution_date_workshop = resolution_date_workshop;
         if (awards_workshop !== undefined) data.awards_workshop = awards_workshop;
+        if (with_prizes_workshop !== undefined) data.with_prizes_workshop = with_prizes_workshop;
+        if (section_workshop !== undefined) data.section_workshop = section_workshop;
         if (title_workshop !== undefined) data.title_workshop = title_workshop;
         if (description_workshop !== undefined) data.description_workshop = description_workshop;
         if (location_workshop !== undefined) data.location_workshop = location_workshop;
@@ -590,7 +596,7 @@ async function pendingContests(req, res) {
         res.json({ error: null, data: result.data });
     } catch (err) {
         console.error("-> workshop api pendingContests() - Error =", err);
-        res.status(500).json({ error: "Error al obtener los concursos pendientes", details: err.message });
+        res.status(500).json({ error: "Error al obtener las convocatorias pendientes", details: err.message });
     }
 }
 
@@ -603,7 +609,7 @@ const reviewContest = (decision) => async (req, res) => {
         res.json({ error: null, ...result });
     } catch (err) {
         console.error("-> workshop api reviewContest() - Error =", err);
-        res.status(500).json({ error: "Error al revisar el concurso", details: err.message });
+        res.status(500).json({ error: "Error al revisar la convocatoria", details: err.message });
     }
 };
 

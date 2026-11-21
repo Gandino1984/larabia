@@ -50,6 +50,23 @@ const contest_entry_model = sequelize.define(
         file_name_entry: {
             type: DataTypes.STRING(255),
             allowNull: true
+        },
+        // A super admin's review (migration 038): 'sent' (waiting), 'accepted'
+        // (a draft article was made from it: article_id_entry — published from
+        // the editor) or 'declined' (with an optional reason). Changing the
+        // work sends it back to 'sent'.
+        status_entry: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+            defaultValue: 'sent'
+        },
+        decline_reason_entry: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        article_id_entry: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            allowNull: true
         }
     },
     {

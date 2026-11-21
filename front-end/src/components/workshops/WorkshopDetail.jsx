@@ -1,11 +1,14 @@
 // magazine-front/src/components/workshops/WorkshopDetail.jsx
 //
-// A workshop's page — or a contest's (utils/contests.js): its days, prizes
-// and winners, and «Inscribirme» while sign-ups are open.
+// A workshop's page — or a convocatoria's (kind 'contest', utils/contests.js):
+// its days, the section its works are published in, its prizes and winners
+// (when it's also a contest), «Participar» while sign-ups are open, the
+// participant's work and its review, and the published works to vote
+// (CallVoting.jsx).
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { localDate } from '../../utils/locale';
-import { ArrowLeft, Calendar, MapPin, Users, Send, Pencil, Undo2, Paperclip } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Send, Pencil, Undo2, Paperclip, BookOpen, Hourglass, CheckCircle2, XCircle } from 'lucide-react';
 import axiosInstance from '../../utils/axiosConfig';
 import { useUI } from '../../app_context/UIContext';
 import { useAuth } from '../../app_context/AuthContext';
@@ -21,6 +24,10 @@ import WorkshopKindTag, { WorkshopReviewTag, WorkshopFinishedTag } from './Works
 import { ContestDates, ContestAwards } from './ContestInfo';
 import ContestEntryModal from './ContestEntryModal';
 import ContestEntriesPanel from './ContestEntriesPanel';
+import { CallWorks } from './CallVoting';
+import { useMagazine } from '../../app_context/MagazineContext';
+import { useSectionCatalog } from '../../app_context/useSectionCatalog';
+import { sectionLabel } from '../../utils/sections';
 import { isPastWorkshop } from '../../utils/workshopFilters';
 import { isContest, contestPhase, formatDay, reviewStateOf } from '../../utils/contests';
 import '../magazine/ArticleCard.css';
@@ -42,9 +49,39 @@ const formatDate = (d) => {
   } catch { return null; }
 };
 
+/** The participant's work: where its review stands (and its article, once accepted). */
+function EntryReview({ entry, section, onOpen }) {
+  const { t } = useTranslation();
+  const status = entry.status_entry || 'sent';
+  const published = entry.article?.status_article === 'published';
+  return (
+    <div className={`contest-entry-review contest-entry-review--${published ? 'published' : status}`} role="status">
+      {status === 'declined' ? <XCircle size={16} aria-hidden="true" />
+        : status === 'accepted' ? <CheckCircle2 size={16} aria-hidden="true" />
+          : <Hourglass size={16} aria-hidden="true" />}
+      <span>
+        {status === 'declined'
+          ? (entry.decline_reason_entry
+            ? t('calls.entry.declinedReason', { reason: entry.decline_reason_entry, defaultValue: 'Tu obra no ha sido seleccionada: {{reason}}' })
+            : t('calls.entry.declined', 'Tu obra no ha sido seleccionada.'))
+          : status === 'accepted'
+            ? (published
+              ? t('calls.entry.published', { section, defaultValue: '¡Tu obra está publicada en {{section}}!' })
+              : t('calls.entry.accepted', { section, defaultValue: '¡Tu obra ha sido aceptada! La estamos preparando para publicarla en {{section}}.' }))
+            : t('calls.entry.review', { section, defaultValue: 'En revisión: un super admin la leerá antes de publicarla en {{section}}.' })}
+        {published && (
+          <> <button type="button" className="contest-entry-review__link" onClick={() => onOpen(entry.article.id_article)}>{t('calls.entry.openWork', 'Ver tu obra')}</button></>
+        )}
+      </span>
+    </div>
+  );
+}
+
 function WorkshopDetail() {
   const { t } = useTranslation();
-  const { navigateToTalleres, showSuccess, showError } = useUI();
+  const { navigateToTalleres, navigateToArticle, showSuccess, showError } = useUI();
+  const { fetchArticleById } = useMagazine();
+  const sectionCatalog = useSectionCatalog();
   // A contest: the entry form (sending the work = taking part).
   const [entryForm, setEntryForm] = useState(false);
   const { currentUser, isSuperAdmin, canCreateContent } = useAuth();
@@ -90,7 +127,7 @@ function WorkshopDetail() {
   const backButton = (
     <button type="button" className="workshop-back-btn" onClick={navigateToTalleres}>
       <ArrowLeft size={18} />
-      <span>{t('workshops.backToList', 'Volver a talleres y concursos')}</span>
+      <span>{t('workshops.backToList', 'Volver a talleres y convocatorias')}</span>
     </button>
   );
 
@@ -129,8 +166,14 @@ function WorkshopDetail() {
   };
 
   // A contest: withdraw their work (and sign-up) while sign-ups are open.
+  // The participant's published work.
+  const openWork = async (articleId) => {
+    const r = await fetchArticleById(articleId);
+    if (r?.success) navigateToArticle();
+  };
+
   const withdrawEntry = async () => {
-    if (!window.confirm(t('contests.entry.confirmWithdraw', '¿Retirar tu obra? Dejarás de participar en el concurso (podrás volver a enviarla mientras sigan abiertas las inscripciones).'))) return;
+    if (!window.confirm(t('contests.entry.confirmWithdraw', '¿Retirar tu obra? Dejarás de participar en la convocatoria (podrás volver a enviarla mientras sigan abiertas las inscripciones).'))) return;
     try {
       const res = await axiosInstance.delete(`/magazine-workshop/contests/${id}/entry`, { headers: { 'x-user-id': currentUser?.id_user } });
       showSuccess(res.data?.success || t('contests.entry.withdrawn', 'Has retirado tu obra'));
@@ -219,13 +262,21 @@ function WorkshopDetail() {
           <p className="workshop-detail-description">{w.description_workshop}</p>
         )}
 
+        {/* A convocatoria: where the works it accepts are published. */}
+        {contest && w.section_workshop && (
+          <p className="workshop-call-section">
+            <BookOpen size={16} aria-hidden="true" />
+            <span>{t('calls.section', { section: sectionLabel(w.section_workshop, sectionCatalog), defaultValue: 'Las obras aceptadas se publican en {{section}} y se someten a votación.' })}</span>
+          </p>
+        )}
+
         {/* A contest's prizes; its winners from the jury's day on (its
             managers, who fill them in, see them before — said so). */}
         {contest && (
           <>
             <ContestAwards workshop={w} showWinners={phase === 'resolved' || canManage} />
             {canManage && phase !== 'resolved' && w.awards_workshop && Object.values(w.awards_workshop).some((a) => a?.winner) && (
-              <p className="workshop-booking-note">{t('contests.winnersHidden', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las ganadoras y los ganadores solo los ves tú (y quien gestiona el concurso) hasta el día del fallo: {{day}}.' })}</p>
+              <p className="workshop-booking-note">{t('contests.winnersHidden', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las ganadoras y los ganadores solo los ves tú (y quien gestiona la convocatoria) hasta el día del fallo: {{day}}.' })}</p>
             )}
           </>
         )}
@@ -237,19 +288,20 @@ function WorkshopDetail() {
         <div className="workshop-reserve-box">
           {contest ? (
             review !== 'approved' ? (
-              <p className="workshop-contest-note">{t('contests.signup.unpublished', 'Las inscripciones se abrirán cuando se publique el concurso.')}</p>
+              <p className="workshop-contest-note">{t('contests.signup.unpublished', 'Las inscripciones se abrirán cuando se publique la convocatoria.')}</p>
             ) : isPastWorkshop(w) ? (
-              <p className="workshop-full-note">{t('contests.signup.finished', 'Este concurso ya ha terminado.')}</p>
+              <p className="workshop-full-note">{t('contests.signup.finished', 'Esta convocatoria ya ha terminado.')}</p>
             ) : w.my_entry ? (
               // Their work is in: change or withdraw it while sign-ups are open.
               <div className="contest-my-entry">
                 <p className="workshop-reserved-note">
-                  {t('contests.entry.yours', { title: w.my_entry.title_entry, defaultValue: 'Has enviado «{{title}}»: ya participas en el concurso.' })}
+                  {t('contests.entry.yours', { title: w.my_entry.title_entry, defaultValue: 'Has enviado «{{title}}»: ya participas en la convocatoria.' })}
                 </p>
                 {w.my_entry.has_file && (
                   <span className="contest-my-entry__file"><Paperclip size={14} aria-hidden="true" /> {w.my_entry.file_name_entry}</span>
                 )}
-                {phase === 'open' ? (
+                <EntryReview entry={w.my_entry} section={sectionLabel(w.section_workshop, sectionCatalog)} onOpen={openWork} />
+                {phase === 'open' && w.my_entry.status_entry !== 'accepted' ? (
                   <div className="contest-my-entry__actions">
                     <button className="workshop-btn workshop-btn--reserve" onClick={() => setEntryForm(true)}>
                       <Pencil size={16} aria-hidden="true" /> {t('contests.entry.change', 'Cambiar mi obra')}
@@ -259,21 +311,29 @@ function WorkshopDetail() {
                     </button>
                   </div>
                 ) : (
+                  phase !== 'open' && (
                   <p className="workshop-booking-note">
                     {phase === 'closed'
-                      ? t('contests.entry.lockedClosed', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las inscripciones están cerradas: tu obra ya no se puede cambiar. El jurado dará a conocer a las ganadoras y los ganadores el {{day}}.' })
-                      : t('contests.signup.resolved', 'El jurado ya ha decidido.')}
+                      ? (w.with_prizes_workshop
+                        ? t('contests.entry.lockedClosed', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las inscripciones están cerradas: tu obra ya no se puede cambiar. El jurado dará a conocer a las ganadoras y los ganadores el {{day}}.' })
+                        : t('calls.entry.lockedClosed', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las inscripciones están cerradas: tu obra ya no se puede cambiar. Los resultados de la votación se publicarán el {{day}}.' }))
+                      : (w.with_prizes_workshop ? t('contests.signup.resolved', 'El jurado ya ha decidido.') : t('calls.signup.resolved', 'La votación ha terminado: mira los resultados.'))}
                   </p>
+                  )
                 )}
               </div>
             ) : bookingCode === 'blocked' ? (
-              <p className="workshop-full-note">{t('contests.signup.blocked', 'No puedes inscribirte en este concurso.')}</p>
+              <p className="workshop-full-note">{t('contests.signup.blocked', 'No puedes inscribirte en esta convocatoria.')}</p>
             ) : phase === 'soon' ? (
               <p className="workshop-contest-note">{t('contests.signup.soon', { day: formatDay(w.registration_start_workshop), defaultValue: 'Las inscripciones se abren el {{day}}: desde ese día podrás enviar tu obra aquí.' })}</p>
             ) : phase === 'closed' ? (
-              <p className="workshop-contest-note">{t('contests.signup.closed', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las inscripciones están cerradas. El jurado dará a conocer a las ganadoras y los ganadores el {{day}}.' })}</p>
+              <p className="workshop-contest-note">
+                {w.with_prizes_workshop
+                  ? t('contests.signup.closed', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las inscripciones están cerradas. El jurado dará a conocer a las ganadoras y los ganadores el {{day}}.' })
+                  : t('calls.signup.closed', { day: formatDay(w.resolution_date_workshop), defaultValue: 'Las inscripciones están cerradas. Los resultados de la votación se publicarán el {{day}}.' })}
+              </p>
             ) : phase === 'resolved' ? (
-              <p className="workshop-contest-note">{t('contests.signup.resolved', 'El jurado ya ha decidido.')}</p>
+              <p className="workshop-contest-note">{w.with_prizes_workshop ? t('contests.signup.resolved', 'El jurado ya ha decidido.') : t('calls.signup.resolved', 'La votación ha terminado: mira los resultados.')}</p>
             ) : (
               <>
                 <button className="workshop-btn workshop-btn--reserve" onClick={() => setEntryForm(true)}>
@@ -331,8 +391,11 @@ function WorkshopDetail() {
           )}
         </div>
 
-        {/* A contest: the works that came in (its managers). */}
-        {contest && canManage && <ContestEntriesPanel key={w.entry_count} contest={w} />}
+        {/* A convocatoria: its published works, to vote (anyone). */}
+        {contest && review === 'approved' && <CallWorks key={`works-${w.id_workshop}`} call={w} />}
+
+        {/* The works that came in, and their review (its managers). */}
+        {contest && canManage && <ContestEntriesPanel key={w.entry_count} contest={w} onChange={() => fetchWorkshopById(id)} />}
 
         {/* Participants: the workshop's managers only. */}
         {canManage && w.participants && <WorkshopParticipantsPanel workshop={w} />}

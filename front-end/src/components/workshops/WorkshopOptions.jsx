@@ -30,13 +30,13 @@ function WorkshopOptions({ workshop, align = 'start', className = '', onDeleted 
       showSuccess(t('hero.linkCopied', '¡Enlace copiado!'));
     } catch {
       // No clipboard access (old browser, permissions): let them copy it.
-      window.prompt(contest ? t('contests.shareCopy', 'Copia el enlace del concurso:') : t('workshops.shareCopy', 'Copia el enlace del taller:'), url);
+      window.prompt(contest ? t('contests.shareCopy', 'Copia el enlace de la convocatoria:') : t('workshops.shareCopy', 'Copia el enlace del taller:'), url);
     }
   };
 
   const handleDelete = async () => {
     if (!confirm(contest
-      ? t('contests.confirmDelete', '¿Eliminar este concurso? Se borrarán también sus inscripciones. Esta acción no se puede deshacer.')
+      ? t('contests.confirmDelete', '¿Eliminar esta convocatoria? Se borrarán también sus inscripciones y sus votos. Esta acción no se puede deshacer.')
       : t('workshops.confirmDelete', '¿Eliminar este taller? Se borrarán también sus reservas. Esta acción no se puede deshacer.'))) return;
     const res = await deleteWorkshop(workshop.id_workshop);
     if (!res?.error) onDeleted?.();
@@ -46,7 +46,7 @@ function WorkshopOptions({ workshop, align = 'start', className = '', onDeleted 
     {
       key: 'share',
       onClick: handleShare,
-      title: contest ? t('contests.share', 'Compartir el concurso') : t('workshops.share', 'Compartir el taller'),
+      title: contest ? t('contests.share', 'Compartir la convocatoria') : t('workshops.share', 'Compartir el taller'),
       label: t('engagement.label.share', 'Compartir'),
       icon: <Share2 size={18} />,
     },
@@ -56,7 +56,7 @@ function WorkshopOptions({ workshop, align = 'start', className = '', onDeleted 
       {
         key: 'edit',
         onClick: () => navigateToWorkshopEditor(workshop, showWorkshopDetail ? 'workshopDetail' : 'talleres'),
-        title: contest ? t('contests.edit', 'Editar concurso') : t('workshops.edit', 'Editar taller'),
+        title: contest ? t('contests.edit', 'Editar convocatoria') : t('workshops.edit', 'Editar taller'),
         label: t('engagement.label.edit', 'Editar'),
         icon: <Edit size={18} />,
       },
@@ -64,7 +64,7 @@ function WorkshopOptions({ workshop, align = 'start', className = '', onDeleted 
         key: 'delete',
         className: 'engagement-btn--danger',
         onClick: handleDelete,
-        title: contest ? t('contests.delete', 'Eliminar concurso') : t('workshops.delete', 'Eliminar taller'),
+        title: contest ? t('contests.delete', 'Eliminar convocatoria') : t('workshops.delete', 'Eliminar taller'),
         label: t('engagement.label.delete', 'Eliminar'),
         icon: <Trash2 size={18} />,
       },

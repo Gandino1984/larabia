@@ -3,6 +3,7 @@ import { Router } from "express";
 import magazineWorkshopApiController from "../controllers/magazine_workshop/magazine_workshop_api_controller.js";
 import { handleWorkshopImageUpload } from "../middleware/MagazineUploadMiddleware.js";
 import contestEntryApiController from "../controllers/magazine_workshop/contest_entry_api_controller.js";
+import callVoteApiController from "../controllers/magazine_workshop/call_vote_api_controller.js";
 
 const router = Router();
 
@@ -21,6 +22,18 @@ router.post("/contests/:id_workshop/entry", contestEntryApiController.canSend, c
 router.delete("/contests/:id_workshop/entry", contestEntryApiController.withdraw);
 router.get("/contests/:id_workshop/entries", contestEntryApiController.list);
 router.get("/contests/:id_workshop/entries/:id_entry/file", contestEntryApiController.download);
+// Convocatorias: a super admin reviews each work — accept (a draft article
+// in the call's section) or decline { reason }.
+router.post("/contests/:id_workshop/entries/:id_entry/accept", contestEntryApiController.accept);
+router.post("/contests/:id_workshop/entries/:id_entry/decline", contestEntryApiController.decline);
+
+// Convocatorias' votes on their published works: anyone with an account one
+// per call, super admins three (apart); results for super admins, and for
+// everyone from the resolution day.
+router.get("/calls/:id_workshop/voting", callVoteApiController.voting);
+router.get("/calls/:id_workshop/results", callVoteApiController.results);
+router.post("/calls/:id_workshop/votes", callVoteApiController.vote);
+router.delete("/calls/:id_workshop/votes/:id_article", callVoteApiController.unvote);
 
 // POST
 router.post("/create", magazineWorkshopApiController.create);                       // admins / super-admin

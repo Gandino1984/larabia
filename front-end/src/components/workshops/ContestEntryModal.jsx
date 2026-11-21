@@ -237,7 +237,7 @@ function ContestEntryModal({ contest, entry = null, onClose, onSent }) {
                   onChange={(e) => set('consent', e.target.checked)}
                 />
                 <label htmlFor="entry-consent">
-                  {t('contests.entry.consent', 'La obra es mía y acepto las bases del concurso.')}
+                  {t('contests.entry.consent', 'La obra es mía y acepto las bases de la convocatoria.')}
                 </label>
               </div>
               {errorOf('consent')}

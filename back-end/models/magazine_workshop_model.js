@@ -101,6 +101,20 @@ const magazine_workshop_model = sequelize.define(
             type: DataTypes.JSON,
             allowNull: true
         },
+        // Convocatorias (the 'contest' kind, migration 038): it's also a
+        // contest — prizes and a jury — or just a call for works. Either way
+        // the works it accepts are published in one magazine section (a nav
+        // section key, as in sections_article) and the public votes on them
+        // until the resolution day.
+        with_prizes_workshop: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
+        section_workshop: {
+            type: DataTypes.STRING(100),
+            allowNull: true
+        },
         // Contests by anyone but a super admin wait for one: 'approved' |
         // 'pending' | 'rejected' (with a reason). Workshops are 'approved'.
         // review_seen_workshop: its creator has seen the latest decision (bell).

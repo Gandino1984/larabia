@@ -171,6 +171,8 @@ export const UIProvider = ({ children }) => {
     else if (showArticlesList) setPreviousView('articlesList');
     else if (showEditor) setPreviousView('editor');
     else if (showProjectDetail) setPreviousView('projectDetail');
+    // A convocatoria's page (its published works).
+    else if (showWorkshopDetail) setPreviousView('workshopDetail');
     resetAllViews();
     setShowArticleDetail(true);
   };
@@ -228,6 +230,10 @@ export const UIProvider = ({ children }) => {
       case 'myGallery':
         resetAllViews();
         setShowMyGallery(true);
+        break;
+      case 'workshopDetail':
+        resetAllViews();
+        setShowWorkshopDetail(true);
         break;
       case 'home':
       default:

@@ -83,7 +83,7 @@ const LABEL_FIELDS = [
 ];
 
 /** For a button: a second text it alternates with every 3 s (es/en/eu —
-    the Talleres button: «Concursos»). Folded until it's used; empty = none. */
+    the Talleres button: «Convocatorias»). Folded until it's used; empty = none. */
 function CycleField({ item, onChange }) {
   const { t } = useTranslation();
   const cycle = item.cycle || null;

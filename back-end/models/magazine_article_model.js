@@ -119,6 +119,13 @@ const magazine_article_model = sequelize.define(
             allowNull: false,
             defaultValue: true,
             comment: 'Soft delete - inactive articles are hidden'
+        },
+        // A work sent to a convocatoria (magazine_workshops, kind 'contest')
+        // and published from it: the public votes on it (call_votes).
+        // Migration 038.
+        call_id_article: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            allowNull: true
         }
     },
     {

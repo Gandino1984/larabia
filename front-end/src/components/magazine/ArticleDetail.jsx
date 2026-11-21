@@ -8,6 +8,7 @@ import { useAuthor } from '../../app_context/AuthorContext';
 import { useEngagement } from '../../app_context/EngagementContext';
 import { Calendar, Eye, X, Trash2, Minimize, Edit, ArrowLeft, Share2, ThumbsUp, Bookmark, MessageCircle, Globe, Instagram } from 'lucide-react';
 import HScrollViewer from './HScrollViewer';
+import { useCallVoting, CallVoteButton, CallVoteEnd } from '../workshops/CallVoting';
 import CommentsModal from './CommentsModal';
 import OptionsReveal from './OptionsReveal';
 import AuthorChip from '../common/AuthorChip';
@@ -33,6 +34,8 @@ function ArticleDetail({ previewMode = false }) {
   const { authorProfiles, fetchAllProfiles } = useAuthor();
   const { isLiked, isFavorited, toggleLike, toggleFavorite } = useEngagement();
   const [showComments, setShowComments] = useState(false);
+  // A work published from a convocatoria: its vote, next to the title and at the end.
+  const callVoting = useCallVoting(selectedArticle?.call_id_article || null);
 
   // The language the article is read in (utils/contentLang.js): the one chosen
   // in the header when the article has a version in it, else the original. The
@@ -306,7 +309,14 @@ function ArticleDetail({ previewMode = false }) {
                 {t('article.projectLabel', { title: articleProjectTitle(selectedArticle, readLang), defaultValue: 'Proyecto: {{title}}' })}
               </span>
             )}
-            <h1 className="article-detail-title">{articleTitle(selectedArticle, readLang)}</h1>
+            {callVoting.state ? (
+              <div className="article-detail-title-row">
+                <h1 className="article-detail-title">{articleTitle(selectedArticle, readLang)}</h1>
+                <CallVoteButton voting={callVoting} articleId={selectedArticle.id_article} />
+              </div>
+            ) : (
+              <h1 className="article-detail-title">{articleTitle(selectedArticle, readLang)}</h1>
+            )}
             {articleSubtitle(selectedArticle, readLang) && (
               <p className="article-detail-subtitle">{articleSubtitle(selectedArticle, readLang)}</p>
             )}
@@ -462,6 +472,7 @@ function ArticleDetail({ previewMode = false }) {
               )}
             </>
           )}
+          <CallVoteEnd voting={callVoting} articleId={selectedArticle.id_article} />
         </div>
 
         {selectedArticle.tags_article && selectedArticle.tags_article.length > 0 && (

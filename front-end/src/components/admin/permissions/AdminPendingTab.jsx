@@ -322,10 +322,10 @@ function AdminPendingTab() {
           )}
 
           <h3 className="admin-pending__section-title">
-            {t('admin.pending.contests', 'Concursos')} <span className="admin-pending__count">{pendingContests.length}</span>
+            {t('admin.pending.contests', 'Convocatorias')} <span className="admin-pending__count">{pendingContests.length}</span>
           </h3>
           {pendingContests.length === 0 ? (
-            <p className="admin-pending__empty">{t('admin.pending.noContests', 'No hay concursos pendientes.')}</p>
+            <p className="admin-pending__empty">{t('admin.pending.noContests', 'No hay convocatorias pendientes.')}</p>
           ) : (
             <ul className="admin-pending__list">
               {pendingContests.map((contest) => {
@@ -335,7 +335,7 @@ function AdminPendingTab() {
                     <div className="admin-pending-card__body">
                       <h3 className="admin-pending-card__title">{contest.title_workshop}</h3>
                       <p className="admin-pending-card__author">
-                        {t('contests.kind', 'Concurso')} · {t('article.detail.by', 'Por')} {authorLabelOf(contest)}
+                        {t('contests.kind', 'Convocatoria')} · {t('article.detail.by', 'Por')} {authorLabelOf(contest)}
                       </p>
                       {contest.description_workshop && (
                         <p className="admin-pending-card__excerpt">{contest.description_workshop}</p>

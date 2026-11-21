@@ -100,7 +100,7 @@ function SectionPreviews() {
     if (!key) return null;
     if (key === 'contests') {
       const talleres = findSectionItem(navConfig, 'talleres') || findSectionItem(DEFAULT_NAV, 'talleres');
-      return (talleres && navCycleLabel(talleres, lang)) || t('contests.tab', 'Concursos');
+      return (talleres && navCycleLabel(talleres, lang)) || t('contests.tab', 'Convocatorias');
     }
     const item = findSectionItem(navConfig, key) || findSectionItem(DEFAULT_NAV, key);
     return item ? navLabel(item, lang) : null;

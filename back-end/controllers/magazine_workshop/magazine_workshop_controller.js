@@ -13,6 +13,8 @@ import { Op } from "sequelize";
 import { deleteFile } from "../../utils/file_cleanup.js";
 import contest_entry_model from "../../models/contest_entry_model.js";
 import { removeEntries } from "./contest_entry_store.js";
+import { entryArticles } from "./call_works.js";
+import magazine_article_model from "../../models/magazine_article_model.js";
 
 // The API's dates are UTC strings without a zone («2026-11-20 17:00:00»).
 const utcDate = (v) => (v instanceof Date ? v : v ? new Date(String(v).replace(' ', 'T') + 'Z') : null);
@@ -246,6 +248,12 @@ function validate(data) {
     return { isValid: errors.length === 0, errors };
 }
 
+// A convocatoria's section: where the works it accepts are published (a
+// nav section key, as in sections_article). Required.
+const SECTION_MAX = 100;
+const cleanSection = (v) => String(v ?? '').trim().slice(0, SECTION_MAX) || null;
+const NO_SECTION = "Elige la sección de la revista donde se publicarán los trabajos";
+
 // A contest's three days: all of them, in order (sign-ups open ≤ close ≤
 // the jury's day). Returns the first problem, or null.
 function contestDaysProblem(start, end, jury) {
@@ -354,6 +362,7 @@ async function create(data) {
         if (contest) {
             const problem = contestDaysProblem(dayOf(data.registration_start_workshop), dayOf(data.registration_end_workshop), dayOf(data.resolution_date_workshop));
             if (problem) return { error: problem };
+            if (!cleanSection(data.section_workshop)) return { error: NO_SECTION };
         }
 
         const workshop = await magazine_workshop_model.create({
@@ -376,7 +385,10 @@ async function create(data) {
                 registration_start_workshop: dayOf(data.registration_start_workshop),
                 registration_end_workshop: dayOf(data.registration_end_workshop),
                 resolution_date_workshop: dayOf(data.resolution_date_workshop),
-                awards_workshop: cleanAwards(data.awards_workshop),
+                // A contest (prizes and a jury) or just a call: no prizes then.
+                with_prizes_workshop: data.with_prizes_workshop === true,
+                awards_workshop: data.with_prizes_workshop === true ? cleanAwards(data.awards_workshop) : null,
+                section_workshop: cleanSection(data.section_workshop),
                 review_status_workshop: data.review_status_workshop === 'pending' ? 'pending' : 'approved'
             } : { kind_workshop: 'workshop', review_status_workshop: 'approved' })
         });
@@ -384,8 +396,8 @@ async function create(data) {
         if (Array.isArray(data.authors)) await syncAuthors(workshop.id_workshop, data.authors);
 
         const success = !contest ? "Taller creado"
-            : workshop.review_status_workshop === 'pending' ? "Concurso enviado a revisión: se publicará cuando lo apruebe un super admin"
-            : "Concurso creado";
+            : workshop.review_status_workshop === 'pending' ? "Convocatoria enviada a revisión: se publicará cuando la apruebe un super admin"
+            : "Convocatoria creada";
         return { success, data: await decorate(workshop) };
     } catch (err) {
         console.error("-> workshop create() - Error =", err);
@@ -426,6 +438,11 @@ async function update(id_workshop, data) {
             const problem = contestDaysProblem(...days);
             if (problem) return { error: problem };
             if (data.awards_workshop !== undefined) fields.awards_workshop = cleanAwards(data.awards_workshop);
+            if (data.with_prizes_workshop !== undefined) fields.with_prizes_workshop = data.with_prizes_workshop === true;
+            const withPrizes = 'with_prizes_workshop' in fields ? fields.with_prizes_workshop : !!workshop.with_prizes_workshop;
+            if (!withPrizes) fields.awards_workshop = null;
+            if (data.section_workshop !== undefined) fields.section_workshop = cleanSection(data.section_workshop);
+            if (!('section_workshop' in fields ? fields.section_workshop : workshop.section_workshop)) return { error: NO_SECTION };
             // Edited after being sent back: it goes to the review again.
             if (data.resubmit && workshop.review_status_workshop === 'rejected') {
                 Object.assign(fields, { review_status_workshop: 'pending', rejection_reason_workshop: null, review_seen_workshop: true });
@@ -437,8 +454,8 @@ async function update(id_workshop, data) {
         if (Array.isArray(data.authors)) await syncAuthors(id_workshop, data.authors);
 
         const success = !contest ? "Taller actualizado"
-            : resubmitted ? "Concurso enviado de nuevo a revisión"
-            : "Concurso actualizado";
+            : resubmitted ? "Convocatoria enviada de nuevo a revisión"
+            : "Convocatoria actualizada";
         return { success, data: await decorate(workshop) };
     } catch (err) {
         console.error("-> workshop update() - Error =", err);
@@ -452,9 +469,14 @@ async function removeById(id_workshop) {
         if (!workshop) return { error: "Taller no encontrado" };
         if (workshop.cover_image_workshop) deleteFile(workshop.cover_image_workshop);
         // A contest's entries: their files (the rows go with the cascade too).
-        if (isContest(workshop)) await removeEntries({ workshop_id: workshop.id_workshop });
-        await workshop.destroy(); // cascade removes authors + reservations
-        return { data: id_workshop, message: isContest(workshop) ? "Concurso eliminado" : "Taller eliminado" };
+        if (isContest(workshop)) {
+            await removeEntries({ workshop_id: workshop.id_workshop });
+            // Its published works stay in the magazine, no longer in a call
+            // (their votes go with the cascade).
+            await magazine_article_model.update({ call_id_article: null }, { where: { call_id_article: workshop.id_workshop } });
+        }
+        await workshop.destroy(); // cascade removes authors + reservations + votes
+        return { data: id_workshop, message: isContest(workshop) ? "Convocatoria eliminada" : "Taller eliminado" };
     } catch (err) {
         console.error("-> workshop removeById() - Error =", err);
         return { error: "Error al eliminar el taller" };
@@ -484,22 +506,22 @@ async function reserve(id_workshop, userId) {
         if (!workshop || !workshop.active_workshop) return { error: "Taller no encontrado" };
         const contest = isContest(workshop);
         if (contest) {
-            if (workshop.review_status_workshop !== 'approved') return { error: "Concurso no encontrado" };
+            if (workshop.review_status_workshop !== 'approved') return { error: "Convocatoria no encontrada" };
             const phase = contestPhase(workshop);
-            if (phase === 'soon') return { error: "Las inscripciones de este concurso todavía no están abiertas", code: 'not_open' };
-            if (phase !== 'open') return { error: "Las inscripciones de este concurso están cerradas", code: 'closed' };
+            if (phase === 'soon') return { error: "Las inscripciones de esta convocatoria todavía no están abiertas", code: 'not_open' };
+            if (phase !== 'open') return { error: "Las inscripciones de esta convocatoria están cerradas", code: 'closed' };
             // Taking part = sending the work (contest_entry_api_controller.js).
-            return { error: "Para participar en el concurso, envía tu obra", code: 'entry_required' };
+            return { error: "Para participar en la convocatoria, envía tu obra", code: 'entry_required' };
         } else if (isPastWorkshop(workshop)) return { error: "Este taller ya ha terminado", code: 'finished' };
 
         if (await isBlocked(id_workshop, userId)) {
             return contest
-                ? { error: "No puedes inscribirte en este concurso", code: 'blocked' }
+                ? { error: "No puedes inscribirte en esta convocatoria", code: 'blocked' }
                 : { error: "No puedes reservar plaza en este taller", code: 'blocked' };
         }
 
         const existing = await workshop_reservation_model.findOne({ where: { workshop_id: id_workshop, user_id: userId } });
-        if (existing) return { error: contest ? "Ya estás inscrito/a en este concurso" : "Ya tienes una reserva en este taller" };
+        if (existing) return { error: contest ? "Ya estás inscrito/a en esta convocatoria" : "Ya tienes una reserva en este taller" };
 
         // Places held for other people's invitations count as taken; the
         // reader's own invitation (if any) holds this place for them.
@@ -533,7 +555,7 @@ async function cancelReservation(id_workshop, userId) {
         const workshop = await magazine_workshop_model.findByPk(id_workshop);
         const contest = isContest(workshop);
         const deleted = await workshop_reservation_model.destroy({ where: { workshop_id: id_workshop, user_id: userId } });
-        if (!deleted) return { error: contest ? "No estabas inscrito/a en este concurso" : "No tenías una reserva en este taller" };
+        if (!deleted) return { error: contest ? "No estabas inscrito/a en esta convocatoria" : "No tenías una reserva en este taller" };
         if (contest) await removeEntries({ workshop_id: id_workshop, user_id: userId });
         const count = await workshop_reservation_model.count({ where: { workshop_id: id_workshop } });
         const pending = await countPendingInvitations(id_workshop);
@@ -570,7 +592,7 @@ async function inviteUser(id_workshop, inviteeId, inviterId) {
     try {
         const workshop = await magazine_workshop_model.findByPk(id_workshop);
         if (!workshop || !workshop.active_workshop) return { error: "Taller no encontrado" };
-        if (isContest(workshop)) return { error: "En los concursos no hay invitaciones: cada persona se inscribe" };
+        if (isContest(workshop)) return { error: "En las convocatorias no hay invitaciones: cada persona se inscribe" };
         const user = await user_model.findByPk(inviteeId, { attributes: ['id_user', 'is_editor', 'is_admin', 'is_super_admin'] });
         if (!user) return { error: "Usuario no encontrado" };
         if (await isBlocked(id_workshop, inviteeId)) {
@@ -960,10 +982,16 @@ async function spotRequestsByWorkshop(workshopIds) {
 async function myEntry(workshopId, userId) {
     if (!userId) return null;
     const e = await contest_entry_model.findOne({ where: { workshop_id: workshopId, user_id: userId } });
-    return e ? {
+    if (!e) return null;
+    const article = e.article_id_entry ? (await entryArticles([e])).get(e.article_id_entry) || null : null;
+    return {
         id_entry: e.id_entry, title_entry: e.title_entry, note_entry: e.note_entry, text_entry: e.text_entry,
-        file_name_entry: e.file_name_entry, has_file: !!e.file_entry, created_at: e.created_at, updated_at: e.updated_at
-    } : null;
+        file_name_entry: e.file_name_entry, has_file: !!e.file_entry, created_at: e.created_at, updated_at: e.updated_at,
+        // Its review: 'sent' | 'accepted' (article: the draft or the published work) | 'declined'.
+        status_entry: e.status_entry || 'sent',
+        decline_reason_entry: e.status_entry === 'declined' ? e.decline_reason_entry : null,
+        article
+    };
 }
 
 const countEntries = (workshopId) => contest_entry_model.count({ where: { workshop_id: workshopId } });
@@ -981,7 +1009,7 @@ async function pendingContests() {
         return { data };
     } catch (err) {
         console.error("-> workshop pendingContests() - Error =", err);
-        return { error: "Error al obtener los concursos pendientes" };
+        return { error: "Error al obtener las convocatorias pendientes" };
     }
 }
 
@@ -990,7 +1018,7 @@ async function pendingContests() {
 async function reviewContest(id_workshop, decision, reason) {
     try {
         const workshop = await magazine_workshop_model.findByPk(id_workshop);
-        if (!workshop || !workshop.active_workshop || !isContest(workshop)) return { error: "Concurso no encontrado" };
+        if (!workshop || !workshop.active_workshop || !isContest(workshop)) return { error: "Convocatoria no encontrada" };
         const approve = decision === 'approve';
         await workshop.update({
             review_status_workshop: approve ? 'approved' : 'rejected',
@@ -998,12 +1026,12 @@ async function reviewContest(id_workshop, decision, reason) {
             review_seen_workshop: false
         });
         return {
-            success: approve ? "Concurso aprobado y publicado" : "Concurso devuelto a quien lo creó",
+            success: approve ? "Convocatoria aprobada y publicada" : "Convocatoria devuelta a quien la creó",
             data: await decorate(workshop)
         };
     } catch (err) {
         console.error("-> workshop reviewContest() - Error =", err);
-        return { error: "Error al revisar el concurso" };
+        return { error: "Error al revisar la convocatoria" };
     }
 }
 

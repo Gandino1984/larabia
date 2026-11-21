@@ -29,7 +29,7 @@ function PreviewCard({ item, onClick }) {
                 : item.kind === 'workshop'
                   ? t('sectionPreviews.workshop')
                   : item.kind === 'contest'
-                  ? t('contests.kind', 'Concurso')
+                  ? t('contests.kind', 'Convocatoria')
                   : item.kind === 'exhibition'
                     ? t('sectionPreviews.exhibition', 'Exposición')
                     : t('sectionPreviews.article')}
