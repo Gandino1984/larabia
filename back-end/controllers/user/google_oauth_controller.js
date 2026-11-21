@@ -3,6 +3,7 @@ import user_model from '../../models/user_model.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { isSuperAdminEmail } from '../../config/environment.js';
+import { syncUserPhoto } from '../../utils/userPhoto.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -24,6 +25,16 @@ async function ensureSuperAdminPromotion(user) {
     return true;
 }
 
+/** Keeps the Google picture and brings the photo in use up to date (utils/userPhoto.js). Never blocks a sign-in. */
+async function rememberGooglePicture(user, picture) {
+    try {
+        const fresh = picture && picture !== user.google_picture_user ? { google_picture_user: picture } : {};
+        await syncUserPhoto(user, fresh);
+    } catch (err) {
+        console.error('[auth] could not update the Google picture:', err.message);
+    }
+}
+
 function sanitizeUserData(user) {
     return {
         id_user: user.id_user,
@@ -40,6 +51,7 @@ function sanitizeUserData(user) {
         is_artist: user.is_artist,
         receives_newsletter: user.receives_newsletter,
         auth_provider: user.auth_provider,
+        photo_choice_user: user.photo_choice_user ?? null,
         has_password: !!user.pass_user,
         google_id: user.google_id
     };
@@ -88,6 +100,8 @@ async function googleLogin(idToken, isRegisterMode = false) {
         const linked = await user_model.findOne({ where: { google_id: googleUser.sub } });
         if (linked) {
             await ensureSuperAdminPromotion(linked);
+            // Their Google picture as it is now (one of the photos they can use).
+            await rememberGooglePicture(linked, googleUser.picture);
             return {
                 data: sanitizeUserData(linked),
                 message: 'Login exitoso con Google', code: 'signed_in'
@@ -109,6 +123,9 @@ async function googleLogin(idToken, isRegisterMode = false) {
                     ...(firstSignIn ? { receives_newsletter: true } : {})
                 });
                 await ensureSuperAdminPromotion(existingByEmail);
+                // A prepared account (invited author / artist) had no photo of
+                // its own: from now on it has their Google picture too.
+                await rememberGooglePicture(existingByEmail, googleUser.picture);
                 return {
                     data: sanitizeUserData(existingByEmail),
                     message: firstSignIn ? 'Cuenta creada exitosamente con Google' : 'Login exitoso con Google',
@@ -239,6 +256,7 @@ async function completeGoogleRegistration(googleId, email, name, picture) {
             email_verified: true,
             location_user: '',
             image_user: picture || null,
+            google_picture_user: picture || null,
             age_user: 18,
             is_editor: promoteToSuperAdmin,
             is_admin: promoteToSuperAdmin,

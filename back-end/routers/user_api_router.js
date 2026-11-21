@@ -9,6 +9,7 @@ import magazine_article_model from '../models/magazine_article_model.js';
 import { sendNewsletterEmail } from '../services/emailService.js';
 import authorInvitation from '../controllers/user/author_invitation_controller.js';
 import { Op } from 'sequelize';
+import { PHOTO_CHOICES, photoOptions, syncUserPhoto } from '../utils/userPhoto.js';
 import crypto from 'node:crypto';
 import dotenv from 'dotenv';
 
@@ -229,7 +230,10 @@ const handleUpload = async (req, res) => {
         }
         const result = await userApiController.updateProfileImage(userName);
         if (result.error) return res.status(400).json(result);
-        return res.json({ ...result, data: { ...result.data, image_user: userName } });
+        // The photo they just uploaded is the one they use (utils/userPhoto.js).
+        const owner = await user_model.findOne({ where: { name_user: userName } });
+        const synced = owner ? await syncUserPhoto(owner, { photo_choice_user: 'own' }) : null;
+        return res.json({ ...result, data: { ...result.data, image_user: synced?.image_user ?? userName, photo_choice_user: 'own' } });
     } catch (error) {
         console.error('Error handling upload:', error);
         return res.status(500).json({ error: 'Error en la carga de la imagen de perfil', details: error.message });
@@ -239,6 +243,35 @@ const handleUpload = async (req, res) => {
 router.post('/upload-image', handleProfileImageUpload, handleUpload);
 router.post('/upload-profile-image', handleProfileImageUpload, handleUpload);
 router.get('/image/:userName', userApiController.getUserImage);
+
+// The photo used everywhere (utils/userPhoto.js): the photos this person has
+// — Google, their author profile's, one uploaded on their card — and which
+// one they use. Only their own.
+router.get('/photo', async (req, res) => {
+    try {
+        const user = await getRequestUser(req);
+        if (!user) return res.status(403).json({ error: 'Inicia sesión para cambiar tu foto', code: 'login_required' });
+        res.json({ error: null, data: { choice: user.photo_choice_user || null, image_user: user.image_user, options: await photoOptions(user) } });
+    } catch (err) {
+        console.error('-> user photo GET - Error =', err);
+        res.status(500).json({ error: 'Error al cargar tus fotos' });
+    }
+});
+router.put('/photo', async (req, res) => {
+    try {
+        const user = await getRequestUser(req);
+        if (!user) return res.status(403).json({ error: 'Inicia sesión para cambiar tu foto', code: 'login_required' });
+        const choice = req.body?.choice;
+        if (!PHOTO_CHOICES.includes(choice)) return res.status(400).json({ error: 'Elige una de tus fotos' });
+        const options = await photoOptions(user);
+        if (!options[choice]) return res.status(400).json({ error: 'No tienes esa foto' });
+        await syncUserPhoto(user, { photo_choice_user: choice });
+        res.json({ error: null, success: 'Foto actualizada', data: { choice, image_user: user.image_user, options } });
+    } catch (err) {
+        console.error('-> user photo PUT - Error =', err);
+        res.status(500).json({ error: 'Error al cambiar tu foto' });
+    }
+});
 
 // ============================================================
 // Newsletter (kept under /user/* for back-compat with magazine-front)

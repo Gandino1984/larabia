@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../app_context/AuthContext';
 import { useUI } from '../../app_context/UIContext';
 import { useAuthor } from '../../app_context/AuthorContext';
-import { ArrowLeft, Upload } from 'lucide-react';
+import { ArrowLeft, Upload, Images } from 'lucide-react';
 import AuthorInvitationBox from './AuthorInvitationBox';
 import './AuthorProfileEditor.css';
+import { userPhotoUrl } from '../../utils/userPhoto';
+import PhotoChooser from '../user/PhotoChooser';
 
 // The team or a Galería artist: they can have a profile whatever they answered to an author invitation.
 const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin, u?.is_artist].some((v) => v === true || v === 1);
@@ -47,6 +49,8 @@ function AuthorProfileEditor() {
   // (typing "audio, " collapsed back to "audio"), merging all the tags.
   const [tagsInput, setTagsInput] = useState('');
   const [imageError, setImageError] = useState(false);
+  // «Tu foto»: which one the whole magazine shows (PhotoChooser).
+  const [choosingPhoto, setChoosingPhoto] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -156,9 +160,10 @@ function AuthorProfileEditor() {
     ? `${apiUrl}/uploads/author-profiles/${encodeURIComponent(targetProfile.profile_image)}`
     : null;
 
-  const googleImageUrl = targetUser?.image_user
-    ? `${apiUrl}/user/image/${encodeURIComponent(targetUser.image_user)}`
-    : null;
+  // Without a profile photo: the photo they use (utils/userPhoto.js).
+  const googleImageUrl = userPhotoUrl(targetUser?.image_user);
+  // Their own profile: which photo the whole magazine shows is theirs to choose.
+  const ownProfile = !!targetProfile && targetUser?.id_user === currentUser?.id_user;
 
   const profileImageUrl = imagePreviewUrl || existingCustomImageUrl || googleImageUrl;
 
@@ -181,6 +186,8 @@ function AuthorProfileEditor() {
         {(inviteStatus === 'pending' || declined) && targetUser?.id_user && (
           <AuthorInvitationBox userId={targetUser.id_user} />
         )}
+
+        {choosingPhoto && <PhotoChooser onClose={() => setChoosingPhoto(false)} />}
 
         <form onSubmit={handleSubmit} className="profile-form">
           {/* Profile image preview + upload */}
@@ -225,6 +232,15 @@ function AuthorProfileEditor() {
                 )}
                 {existingCustomImageUrl && !selectedImageFile && (
                   <p className="image-info-text">{t('authors.editor.customImage', 'Imagen personalizada activa.')}</p>
+                )}
+                {ownProfile && (
+                  <>
+                    <button type="button" className="btn-upload-image btn-choose-photo" onClick={() => setChoosingPhoto(true)}>
+                      <Images size={16} />
+                      <span>{t('photo.choose', 'Elegir qué foto usar')}</span>
+                    </button>
+                    <p className="image-info-text">{t('photo.chooseHint', 'Tu foto de Google, la de tu perfil o una nueva: la que elijas sale en toda la revista.')}</p>
+                  </>
                 )}
               </div>
             </div>

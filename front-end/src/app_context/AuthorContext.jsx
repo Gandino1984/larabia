@@ -4,6 +4,7 @@ import i18n from '../i18n/config';
 import axiosInstance from '../utils/axiosConfig';
 import { useUI } from './UIContext';
 import { useAuth } from './AuthContext';
+import { userPhotoUrl, personPhotoUrl } from '../utils/userPhoto';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
@@ -11,7 +12,7 @@ const AuthorContext = createContext();
 
 export const AuthorProvider = ({ children }) => {
   const { showSuccess, showError } = useUI();
-  const { currentUser } = useAuth();
+  const { currentUser, setCurrentUser } = useAuth();
   const callerId = currentUser?.id_user;
 
   const [authorProfiles, setAuthorProfiles] = useState([]);
@@ -241,6 +242,16 @@ export const AuthorProvider = ({ children }) => {
 
       if (!response.data.error) {
         showSuccess(response.data.success || i18n.t('messages.success.imageUpdated', 'Imagen actualizada correctamente'));
+        // A new photo is the one used everywhere (utils/userPhoto.js): their own session shows it now.
+        const fresh = response.data.data;
+        if (fresh?.image_user !== undefined && String(userId) === String(currentUser?.id_user)) {
+          setCurrentUser((prev) => {
+            if (!prev) return prev;
+            const next = { ...prev, image_user: fresh.image_user, photo_choice_user: fresh.photo_choice_user ?? prev.photo_choice_user };
+            try { localStorage.setItem('currentUser', JSON.stringify(next)); } catch { /* ignore */ }
+            return next;
+          });
+        }
         return { success: true, data: response.data.data };
       } else {
         showError(response.data.error);
@@ -252,7 +263,7 @@ export const AuthorProvider = ({ children }) => {
       showError(errorMsg);
       return { error: errorMsg };
     }
-  }, [showSuccess, showError]);
+  }, [showSuccess, showError, currentUser?.id_user, setCurrentUser]);
 
   /**
    * Delete an author profile
@@ -297,21 +308,21 @@ export const AuthorProvider = ({ children }) => {
       .catch(() => { /* the avatars fall back to the account images */ });
   }, []);
 
+  // A person's photo is the one they chose (image_user, kept by the server —
+  // utils/userPhoto.js); their profile's, for whoever comes without it.
   const profilePhotoByUser = useMemo(() => {
     const byUser = new Map();
     for (const p of authorProfiles) {
-      if (p.profile_image) byUser.set(String(p.user_id), `${apiUrl}/uploads/author-profiles/${encodeURIComponent(p.profile_image)}`);
+      const url = personPhotoUrl(p.user, p.profile_image);
+      if (url) byUser.set(String(p.user_id), url);
     }
     return byUser;
   }, [authorProfiles]);
   const authorPhotoOf = useCallback((person) => {
     if (!person) return null;
-    const own = person.id_user != null ? profilePhotoByUser.get(String(person.id_user)) : null;
-    if (own) return own;
-    const img = person.image_user;
-    if (!img) return null;
-    if (img.startsWith('http://') || img.startsWith('https://')) return img;
-    return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
+    return userPhotoUrl(person.image_user)
+      || (person.id_user != null ? profilePhotoByUser.get(String(person.id_user)) : null)
+      || null;
   }, [profilePhotoByUser]);
 
   // The Galería's exhibitions by artist (id_user → id_exhibition): an

@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 import ArticleCard from '../magazine/ArticleCard';
 import axiosInstance from '../../utils/axiosConfig';
 import './AuthorPublications.css';
+import { personPhotoUrl } from '../../utils/userPhoto';
 
 function AuthorPublications() {
   const { t } = useTranslation();
@@ -52,11 +53,8 @@ function AuthorPublications() {
   }, [allArticles, selectedAuthorId]);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
-  const authorImageUrl = authorProfile?.profile_image
-    ? `${apiUrl}/uploads/author-profiles/${encodeURIComponent(authorProfile.profile_image)}`
-    : authorProfile?.user?.image_user
-      ? `${apiUrl}/user/image/${encodeURIComponent(authorProfile.user.image_user)}`
-      : null;
+  // The photo they chose (the same everywhere), else the profile's.
+  const authorImageUrl = authorProfile ? personPhotoUrl(authorProfile.user, authorProfile.profile_image) : null;
 
   if (!selectedAuthorId) {
     return (

@@ -33,6 +33,18 @@ const user_model = sequelize.define("user", {
         type: DataTypes.STRING(255),
         allowNull: true
     },
+    // The photo used everywhere is image_user (utils/userPhoto.js): their
+    // Google picture, their author profile's photo or one they uploaded —
+    // their choice (photo_choice_user: 'google' | 'magazine' | 'own'; null =
+    // magazine, own, google, the first there is). Migration 039.
+    google_picture_user: {
+        type: DataTypes.STRING(1000),
+        allowNull: true
+    },
+    photo_choice_user: {
+        type: DataTypes.STRING(10),
+        allowNull: true
+    },
     location_user: {
         type: DataTypes.STRING(100),
         allowNull: false,

@@ -28,6 +28,7 @@ import { sectionsOf, requestedSectionsOf, sameKey, sectionList } from '../../uti
 import { CATEGORIES, EMPTY_ARTICLE_FILTERS, applyArticleFilters, categoryLabelKey, categoryLabel as categoryName } from '../../utils/articleFilters';
 import axios from 'axios';
 import './ArticleEditorBlocks.css';
+import { userPhotoUrl } from '../../utils/userPhoto';
 
 // Decide which editor UI to show for an article: comic panels win, then the
 // category-driven micro-perfil format, otherwise the regular block editor.
@@ -1404,11 +1405,7 @@ function ArticleEditorBlocks() {
 
   // Google-auth users store a full avatar URL in image_user; local uploads store
   // a filename served by the API. Resolve both so the thumbnail never breaks.
-  const resolveUserImage = (img) => {
-    if (!img) return null;
-    if (img.startsWith('http://') || img.startsWith('https://')) return img;
-    return `${import.meta.env.VITE_API_URL}/user/image/${img}`;
-  };
+  const resolveUserImage = (img) => userPhotoUrl(img);
 
   if (!canCreateContent) {
     return (

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useSpring, animated } from '@react-spring/web';
 import { X, User, Camera, Eye, Upload, Loader, LogOut, MessagesSquare } from 'lucide-react';
@@ -10,6 +10,8 @@ import { useSubscription } from '../../app_context/SubscriptionContext';
 import { useChat } from '../../app_context/ChatContext';
 import ChatButton from '../chat/ChatButton';
 import '../common/SubscriberMark.css';
+import PhotoChooser from './PhotoChooser';
+import { userPhotoUrl } from '../../utils/userPhoto';
 import './UserInfoCard.css';
 
 // imageUrl: the photo to show instead of the account image (an author's
@@ -37,7 +39,6 @@ const UserInfoCard = ({ user, imageUrl: photoUrl, bioText, chatHost, onClose, is
   const isSubscriber = isOwner ? !!subscription?.isSubscriber : otherIsSubscriber;
 
   const {
-    getImageUrl,
     handleImageUpload,
     uploadProgress,
     localImageUrl
@@ -74,7 +75,11 @@ const UserInfoCard = ({ user, imageUrl: photoUrl, bioText, chatHost, onClose, is
     fileInputRef.current?.click();
   };
 
-  const imageUrl = photoUrl || getImageUrl(user?.image_user);
+  const [choosingPhoto, setChoosingPhoto] = useState(false);
+  // Their photo (utils/userPhoto.js); a new stamp each time it changes, so an
+  // upload under the same name isn't served from the cache.
+  const photoStamp = useMemo(() => Date.now(), [user?.image_user]); // eslint-disable-line react-hooks/exhaustive-deps
+  const imageUrl = photoUrl || userPhotoUrl(user?.image_user, /^https?:/.test(user?.image_user || '') ? null : photoStamp);
   const displayImageUrl = localImageUrl || imageUrl;
 
   return createPortal(
@@ -150,15 +155,15 @@ const UserInfoCard = ({ user, imageUrl: photoUrl, bioText, chatHost, onClose, is
                     <span className="action-text">{t('user.card.viewImage', 'Ver imagen')}</span>
                   </button>
                 )}
+                {/* Which photo is theirs everywhere — Google, their profile's
+                    or a new one (PhotoChooser). */}
                 <button
                   className="action-button"
-                  onClick={handleUploadClick}
+                  onClick={() => { setShowActionsPopup(false); setChoosingPhoto(true); }}
                   type="button"
                 >
                   <Upload className="action-icon" />
-                  <span className="action-text">
-                    {user?.image_user ? t('user.card.changeImage', 'Cambiar') : t('user.card.uploadImage', 'Subir')}
-                  </span>
+                  <span className="action-text">{t('photo.change', 'Cambiar foto')}</span>
                 </button>
               </div>
             )}
@@ -277,6 +282,7 @@ const UserInfoCard = ({ user, imageUrl: photoUrl, bioText, chatHost, onClose, is
           document.body
         )}
       </animated.div>
+      {choosingPhoto && <PhotoChooser onClose={() => setChoosingPhoto(false)} />}
     </>,
     document.body
   );

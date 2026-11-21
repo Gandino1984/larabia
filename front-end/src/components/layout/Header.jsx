@@ -26,15 +26,13 @@ import NewsletterModal from '../newsletter/NewsletterModal';
 import RecommendationsModal from '../admin/RecommendationsModal';
 import SubscriberMark from '../common/SubscriberMark';
 import './Header.css';
+import { userPhotoUrl, personPhotoUrl } from '../../utils/userPhoto';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
 function AuthorResultAvatar({ profile }) {
   const [imgError, setImgError] = useState(false);
-  const img = profile.user?.image_user;
-  const src = img
-    ? (img.startsWith('http://') || img.startsWith('https://') ? img : `${apiBaseUrl}/user/image/${encodeURIComponent(img)}`)
-    : null;
+  const src = personPhotoUrl(profile.user, profile.profile_image);
 
   if (!src || imgError) {
     return (
@@ -153,11 +151,8 @@ function Header({ ready = true }) {
   // a filename served by the API. Use the URL as-is when it's already absolute,
   // otherwise it stays broken and the button falls back to the default icon.
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
-  const userImageUrl = currentUser?.image_user
-    ? (/^https?:\/\//.test(currentUser.image_user)
-        ? currentUser.image_user
-        : `${apiUrl}/user/image/${encodeURIComponent(currentUser.image_user)}?_t=${imageTimestamp}`)
-    : null;
+  // The photo they chose (utils/userPhoto.js).
+  const userImageUrl = userPhotoUrl(currentUser?.image_user, /^https?:/.test(currentUser?.image_user || '') ? null : imageTimestamp);
 
   const handleLogoClick = () => {
     navigateToHome();

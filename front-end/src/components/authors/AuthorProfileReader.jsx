@@ -7,6 +7,7 @@ import { useAuthor } from '../../app_context/AuthorContext';
 import { Globe, Twitter, Instagram, BookOpen, Edit, Images } from 'lucide-react';
 import ChatButton from '../chat/ChatButton';
 import './AuthorProfileReader.css';
+import { personPhotoUrl } from '../../utils/userPhoto';
 
 const flag = (v) => v === true || v === 1;
 const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin].some(flag);
@@ -35,12 +36,8 @@ function AuthorProfileReader() {
   const profile = selectedAuthorProfile;
   const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
-  // Construct profile image URL: prefer custom uploaded image, fall back to Google account image
-  const profileImageUrl = profile.profile_image
-    ? `${apiUrl}/uploads/author-profiles/${encodeURIComponent(profile.profile_image)}`
-    : profile.user?.image_user
-      ? `${apiUrl}/user/image/${encodeURIComponent(profile.user.image_user)}`
-      : '/default-avatar.png';
+  // The photo they chose (the same everywhere), else the profile's.
+  const profileImageUrl = personPhotoUrl(profile.user, profile.profile_image) || '/default-avatar.png';
 
   const handleViewPublications = () => {
     navigateToAuthorPublications(profile.user_id);

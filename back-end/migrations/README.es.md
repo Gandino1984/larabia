@@ -74,6 +74,7 @@ Desde la `012`, el back-end comprueba al arrancar (`back-end/index.js`) las colu
 | `036` | `contest_entries`: las obras de quien concursa (título, nota, texto, archivo privado en uploads/contest-entries), una por persona y concurso (también al arrancar) |
 | `037` | `article_blocks.profile_website`, `profile_instagram`, `audio_caption`: micro-perfiles — la web y el Instagram de la persona, el pie del audio (también al arrancar) |
 | `038` | Convocatorias (los concursos, con otro nombre): `magazine_workshops.with_prizes_workshop` (es también un concurso; los que ya había, sí) y `section_workshop` (dónde se publican sus obras); `contest_entries.status_entry`, `decline_reason_entry`, `article_id_entry` (la revisión de un super admin: el borrador de artículo hecho con la obra); `magazine_articles.call_id_article`; tabla `call_votes` (el voto del público, uno por cuenta y convocatoria, y el de los super admins, tres cada uno, aparte) — también al arrancar |
+| `039` | `user.google_picture_user` (la foto de Google, aparte y renovada en cada inicio de sesión con Google) y `photo_choice_user` ('google' \| 'magazine' \| 'own'): una foto por persona, la misma en todas partes — `image_user` guarda la elegida (`utils/userPhoto.js`; al arrancar se ajusta la de todo el mundo una vez) |
 
 Las tablas de `009`, `010`, `011`, `014`, `015`, `020`, `023` y `027` se crean al arrancar con `sync()` de Sequelize si no existen (las de la galería en orden, porque se referencian entre sí). Los archivos SQL siguen siendo la referencia para una base nueva.
 

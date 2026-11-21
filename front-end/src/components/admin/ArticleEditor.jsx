@@ -8,6 +8,7 @@ import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import NewsletterTab from './NewsletterTab';
 import './ArticleEditor.css';
+import { userPhotoUrl } from '../../utils/userPhoto';
 
 // Register Image format with custom attributes for captions
 const ImageBlot = Quill.import('formats/image');
@@ -569,7 +570,7 @@ function ArticleEditor() {
                       <span className="author-order">{index + 1}.</span>
                       {author?.image_user && (
                         <img
-                          src={`${import.meta.env.VITE_API_URL}/user/image/${author.image_user}`}
+                          src={userPhotoUrl(author.image_user)}
                           alt={author.name_user}
                           className="author-avatar-small"
                         />

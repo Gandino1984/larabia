@@ -15,13 +15,10 @@ import { useAuth } from '../../app_context/AuthContext';
 import { useEngagement } from '../../app_context/EngagementContext';
 import './CommentsModal.css';
 import SubscriberMark from '../common/SubscriberMark';
+import { userPhotoUrl } from '../../utils/userPhoto';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
-const resolveAvatar = (img) => {
-  if (!img) return null;
-  if (img.startsWith('http://') || img.startsWith('https://')) return img;
-  return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
-};
+// Their photo — the one they chose (utils/userPhoto.js).
+const resolveAvatar = (img) => userPhotoUrl(img);
 
 const DELETE_DELAY = 5; // seconds
 

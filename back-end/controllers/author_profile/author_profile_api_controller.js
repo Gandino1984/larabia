@@ -2,6 +2,7 @@
 import authorProfileController from "./author_profile_controller.js";
 import author_profile_model from "../../models/author_profile_model.js";
 import { requireOwnerOrSuperAdmin, roleSnapshot } from "../../utils/authHelper.js";
+import { syncUserPhoto } from "../../utils/userPhoto.js";
 
 // A profile is created / changed only by its person or a super admin (sends the 403).
 const MINE_ONLY = 'Solo puedes editar tu propio perfil';
@@ -215,11 +216,14 @@ async function deleteProfile(req, res) {
         }
         if (!(await ownProfileOnly(req, res, id))) return;
 
+        const owner = await author_profile_model.findByPk(id, { attributes: ['user_id'] });
         const { error, data, success } = await authorProfileController.deleteProfile(id);
 
         if (error) {
             return res.status(404).json({ error });
         }
+        // Without the profile, its photo isn't one of theirs any more.
+        if (owner) await syncUserPhoto(owner.user_id);
 
         res.json({ error, data, success });
     } catch (err) {
@@ -261,10 +265,12 @@ async function uploadProfileImage(req, res) {
         }
 
         await profile.update({ profile_image: req.file.filename });
+        // The photo they just uploaded is the one they use, everywhere (utils/userPhoto.js).
+        const synced = await syncUserPhoto(profile.user_id, { photo_choice_user: 'magazine' });
 
         res.json({
             error: null,
-            data: { profile_image: req.file.filename },
+            data: { profile_image: req.file.filename, image_user: synced?.image_user ?? null, photo_choice_user: 'magazine' },
             success: 'Imagen de perfil actualizada correctamente'
         });
     } catch (err) {

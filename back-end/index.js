@@ -36,6 +36,8 @@ import openSpaceProposalModel from './models/open_space_proposal_model.js';
 import bugReportModel from './models/bug_report_model.js';
 import contestEntryModel from './models/contest_entry_model.js';
 import callVoteModel from './models/call_vote_model.js';
+import userModelForPhotos from './models/user_model.js';
+import { syncUserPhoto } from './utils/userPhoto.js';
 import workshopSpotRequestModel from './models/workshop_spot_request_model.js';
 import { syncGalleryTables } from './models/gallery_models.js';
 import { syncChatTables } from './models/chat_models.js';
@@ -287,6 +289,26 @@ Promise.all([
         // Their votes: created here, after the columns above — creating its
         // foreign keys while those tables were being altered deadlocked.
         await callVoteModel.sync();
+        // One photo per person (migration 039, utils/userPhoto.js): their
+        // Google picture kept apart, and their choice.
+        const userCols = await qi.describeTable('user');
+        if (!userCols.google_picture_user) {
+            await qi.addColumn('user', 'google_picture_user', { type: DataTypes.STRING(1000), allowNull: true });
+            await sequelize.query("UPDATE user SET google_picture_user = image_user WHERE image_user LIKE 'http%'");
+            console.log('>>> Added user.google_picture_user');
+        }
+        if (!userCols.photo_choice_user) {
+            await qi.addColumn('user', 'photo_choice_user', { type: DataTypes.STRING(10), allowNull: true });
+            // The first time: everyone's photo lined up with what they have
+            // (an author's profile photo first — what readers already saw).
+            let changed = 0;
+            for (const u of await userModelForPhotos.findAll()) {
+                const before = u.image_user;
+                await syncUserPhoto(u);
+                if ((u.image_user || null) !== (before || null)) changed += 1;
+            }
+            console.log(`>>> Added user.photo_choice_user (${changed} photos lined up)`);
+        }
     } catch (err) {
         console.error('Error ensuring added columns:', err.message);
     }

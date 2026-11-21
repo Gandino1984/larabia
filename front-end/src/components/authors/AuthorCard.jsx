@@ -7,6 +7,7 @@ import { useAuthor } from '../../app_context/AuthorContext';
 import { Globe, Twitter, Instagram, ChevronDown, ChevronUp, BookOpen, Edit, UserPlus, Images } from 'lucide-react';
 import ChatButton from '../chat/ChatButton';
 import './AuthorCard.css';
+import { userPhotoUrl, personPhotoUrl } from '../../utils/userPhoto';
 
 const flag = (v) => v === true || v === 1;
 const isCreator = (u) => [u?.is_editor, u?.is_admin, u?.is_super_admin].some(flag);
@@ -31,9 +32,7 @@ function AuthorCard({ profile, editorUser }) {
 
   // "No profile" card for an editor without an author profile (super admin view)
   if (editorUser) {
-    const editorImageUrl = editorUser.image_user
-      ? `${apiUrl}/user/image/${encodeURIComponent(editorUser.image_user)}`
-      : null;
+    const editorImageUrl = userPhotoUrl(editorUser.image_user);
     const invited = inviteStatusOf(editorUser) === 'pending';
     return (
       <article className="author-card no-profile-card">
@@ -75,12 +74,8 @@ function AuthorCard({ profile, editorUser }) {
     );
   }
 
-  // Construct profile image URL: prefer custom uploaded image, fall back to Google account image
-  const profileImageUrl = profile.profile_image
-    ? `${apiUrl}/uploads/author-profiles/${encodeURIComponent(profile.profile_image)}`
-    : profile.user?.image_user
-      ? `${apiUrl}/user/image/${encodeURIComponent(profile.user.image_user)}`
-      : '/default-avatar.png';
+  // The photo they chose (the same everywhere), else the profile's.
+  const profileImageUrl = personPhotoUrl(profile.user, profile.profile_image) || '/default-avatar.png';
 
   // Truncate bio for preview
   const bioPreview = profile.bio_text?.length > 150

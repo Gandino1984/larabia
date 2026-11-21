@@ -10,21 +10,17 @@ import { useUI } from '../../app_context/UIContext';
 import { useAuthorPhoto } from '../../app_context/AuthorContext';
 import './AuthorChip.css';
 import SubscriberMark from './SubscriberMark';
+import { userPhotoUrl } from '../../utils/userPhoto';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.uribarri.online';
 
-export const getAuthorImageUrl = (author) => {
-  const img = author?.image_user;
-  if (!img) return null;
-  if (img.startsWith('http://') || img.startsWith('https://')) return img;
-  return `${apiUrl}/user/image/${encodeURIComponent(img)}`;
-};
+export const getAuthorImageUrl = (author) => userPhotoUrl(author?.image_user);
 
 function AuthorChip({ author, name, clickable = true, tone = 'light' }) {
   const { openAuthorCard } = useUI();
   const [imgError, setImgError] = useState(false);
   const displayName = author?.name_user || name || '';
-  // Their author profile's photo first (as in «Autoras/es»), else the account image.
+  // The photo they chose (the same everywhere), else their profile's.
   const url = useAuthorPhoto()(author);
   const canOpen = clickable && !!author?.id_user;
 
