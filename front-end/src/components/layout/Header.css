@@ -1756,3 +1756,68 @@
 @media (prefers-reduced-motion: reduce) {
   .roll--cycle .roll__track { transition: none; }
 }
+
+/* Notifications stay until deleted (NotificationContext): unread ones bold
+   with a dot, read ones greyed; «×» deletes one, «Borrar todas» the lot. */
+.notif-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.notif-clear-all {
+  padding: 3px 8px;
+  border: 1px solid #d6d6d6;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.notif-clear-all:hover,
+.notif-clear-all:focus-visible { background: #000000; border-color: #000000; color: #ffffff; }
+.notif-entry-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid #f2f2f2;
+}
+.notif-entry-row .notif-item {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  border-bottom: none;
+  padding-left: 22px;
+}
+.notif-entry--actions .notif-entry-row { border-bottom: none; }
+.notif-unread-dot {
+  position: absolute;
+  left: 9px;
+  top: 17px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #dc2626;
+}
+.notif-entry.is-read .notif-item-title { font-weight: 400; color: #555555; }
+.notif-entry.is-read .notif-item-message { color: #8a8a8a; }
+.notif-delete {
+  flex-shrink: 0;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-right: 6px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #8a8a8a;
+  cursor: pointer;
+}
+.notif-delete:hover,
+.notif-delete:focus-visible { background: #000000; color: #ffffff; }
+.notif-item-title,
+.notif-item-message { overflow-wrap: anywhere; }

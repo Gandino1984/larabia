@@ -2083,5 +2083,10 @@
   "photo.uploadNote": "Berria zure egile-profileko argazkia ere izango da.",
   "photo.change": "Aldatu argazkia",
   "photo.choose": "Aukeratu zein argazki erabili",
-  "photo.chooseHint": "Zure Googleko argazkia, profilekoa edo berri bat: aukeratzen duzuna aldizkari osoan agertzen da."
+  "photo.chooseHint": "Zure Googleko argazkia, profilekoa edo berri bat: aukeratzen duzuna aldizkari osoan agertzen da.",
+  "notifications.clearAll": "Ezabatu guztiak",
+  "notifications.clearAllConfirm": "Jakinarazpen guztiak ezabatu? Zure erantzunaren zain daudenak geratuko dira.",
+  "notifications.delete": "Ezabatu",
+  "notifications.deleteNamed": "Ezabatu «{{title}}»",
+  "notifications.bugReport.titleSomeone": "Norbaitek akats baten berri eman du"
 }

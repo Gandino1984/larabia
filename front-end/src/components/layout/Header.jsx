@@ -57,7 +57,7 @@ function Header({ ready = true }) {
   const lang = i18n.language;
   const { currentUser, canCreateContent, isEditor, isAdmin, isSuperAdmin, logout } = useAuth();
   const { totalAttention } = usePendingReview();
-  const { notifications, count: notifCount, markAllSeen } = useNotifications();
+  const { notifications, count: notifCount, markAllSeen, dismiss: dismissNotification, clearAll: clearNotifications } = useNotifications();
   const { showArticleDetail, showAuthors, showHome, showProjectDetail, showWorkshopDetail, showArticlesList, showTalleres, showProjectsList, showGallery, showExhibition, showMyGallery, navigateToGallery, navigateToHome, navigateToArticlesList, navigateToLogin, navigateBack, navigateBackFromProject, navigateToTalleres, navigateToEditor, navigateToAuthors, navigateToProjectDetail, navigateToOpenMic, navigateToAdmin, showSuccess, showError, navigateToArticle, currentLanguage, changeLanguage, showContactModal, openContactModal, closeContactModal, showNewsletterModal, openNewsletterModal, closeNewsletterModal, showRecommendationsModal, closeRecommendationsModal, navigateToAuthorProfile, showReportModal, closeReportModal } = useUI();
   const { selectedArticle, deleteArticle, allArticles, projects, fetchProjects, setSelectedProject, setSelectedArticle, setFilters } = useMagazine();
   const { setAuthorSearch, authorProfiles, fetchAllProfiles } = useAuthor();
@@ -431,20 +431,46 @@ function Header({ ready = true }) {
         className="notif-dropdown"
         onMouseLeave={() => { markAllSeen(); setShowNotifications(false); }}
       >
-        <div className="notif-dropdown-header">{t('notifications.title')}</div>
+        <div className="notif-dropdown-header">
+          <span>{t('notifications.title')}</span>
+          {/* They stay until deleted: one by one («×») or all at once. */}
+          {notifications.some((n) => n.deletable) && (
+            <button
+              type="button"
+              className="notif-clear-all"
+              onClick={() => { if (window.confirm(t('notifications.clearAllConfirm', '¿Borrar todas las notificaciones? Las que esperan tu respuesta se quedan.'))) clearNotifications(); }}
+            >
+              {t('notifications.clearAll', 'Borrar todas')}
+            </button>
+          )}
+        </div>
         {notifications.length === 0 ? (
           <div className="notif-empty">{t('notifications.empty')}</div>
         ) : (
           <ul className="notif-list">
             {notifications.map((n) => (
-              <li key={n.id} className={n.actions ? 'notif-entry notif-entry--actions' : 'notif-entry'}>
-                <button
-                  className="notif-item"
-                  onClick={() => { markAllSeen(); setShowNotifications(false); n.onClick?.(); }}
-                >
-                  <span className="notif-item-title">{n.title}</span>
-                  <span className="notif-item-message">{n.message}</span>
-                </button>
+              <li key={n.id} className={`notif-entry${n.actions ? ' notif-entry--actions' : ''}${n.read ? ' is-read' : ''}`}>
+                <div className="notif-entry-row">
+                  <button
+                    className="notif-item"
+                    onClick={() => { markAllSeen(); setShowNotifications(false); n.onClick?.(); }}
+                  >
+                    {!n.read && <span className="notif-unread-dot" aria-hidden="true" />}
+                    <span className="notif-item-title">{n.title}</span>
+                    <span className="notif-item-message">{n.message}</span>
+                  </button>
+                  {n.deletable && (
+                    <button
+                      type="button"
+                      className="notif-delete"
+                      onClick={(e) => { e.stopPropagation(); dismissNotification(n.id); }}
+                      title={t('notifications.delete', 'Borrar')}
+                      aria-label={t('notifications.deleteNamed', { title: n.title, defaultValue: 'Borrar «{{title}}»' })}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
                 {/* Answer right here (e.g. a workshop invitation). */}
                 {n.actions && (
                   <div className="notif-item-actions">

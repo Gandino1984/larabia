@@ -33,6 +33,7 @@ export default defineConfig(({ mode }) => {
     '/bug-reports',
     '/gallery',
     '/chat',
+    '/notifications',
     '/health'
   ];
   const proxy = Object.fromEntries(

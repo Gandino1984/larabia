@@ -70,6 +70,7 @@ Since `012`, the back-end checks at boot (`back-end/index.js`) for the columns i
 | `037` | `article_blocks.profile_website`, `profile_instagram`, `audio_caption` — micro-perfiles: the person's web and Instagram, the audio's caption (also added at boot) |
 | `038` | Convocatorias (the contests, renamed): `magazine_workshops.with_prizes_workshop` (it's also a contest; the existing ones are) and `section_workshop` (where its works are published); `contest_entries.status_entry`, `decline_reason_entry`, `article_id_entry` (a super admin's review: the draft article made from the work); `magazine_articles.call_id_article`; table `call_votes` (the public vote, one per account and call, and the super admins', three each, apart) — also at boot |
 | `039` | `user.google_picture_user` (the Google picture, kept apart and refreshed at each Google sign-in) and `photo_choice_user` ('google' \| 'magazine' \| 'own'): one photo per person, the same everywhere — `image_user` keeps the chosen one (`utils/userPhoto.js`; at boot, everyone's is lined up once) |
+| `040` | Table `user_notifications`: the bell's informational notifications kept until their person deletes them (`notif_key`, payload with title / message as translation keys and what it opens, `read_at`, `dismissed_at` — forgotten 120 days after) — also at boot |
 
 The tables of `009`, `010`, `011`, `014`, `015`, `020`, `023` and `027` are created at boot with Sequelize `sync()` when missing (the gallery's in order, as they reference each other). The SQL files stay the reference for a fresh database.
 

@@ -38,6 +38,8 @@ import contestEntryModel from './models/contest_entry_model.js';
 import callVoteModel from './models/call_vote_model.js';
 import userModelForPhotos from './models/user_model.js';
 import { syncUserPhoto } from './utils/userPhoto.js';
+import userNotificationModel from './models/user_notification_model.js';
+import { forgetOldDismissed } from './controllers/notification/notification_api_controller.js';
 import workshopSpotRequestModel from './models/workshop_spot_request_model.js';
 import { syncGalleryTables } from './models/gallery_models.js';
 import { syncChatTables } from './models/chat_models.js';
@@ -309,6 +311,9 @@ Promise.all([
             }
             console.log(`>>> Added user.photo_choice_user (${changed} photos lined up)`);
         }
+        // The bell's kept notifications (migration 040): after the user
+        // table's changes (its foreign key).
+        await userNotificationModel.sync();
     } catch (err) {
         console.error('Error ensuring added columns:', err.message);
     }
@@ -321,6 +326,8 @@ const runPaisajeCleanup = () =>
     cleanupPaisajeOrphans().catch((err) => console.error('[paisaje] cleanup failed:', err.message));
 setTimeout(runPaisajeCleanup, 60 * 1000).unref();
 setInterval(runPaisajeCleanup, 24 * 60 * 60 * 1000).unref();
+// Notifications deleted long ago are forgotten (daily).
+setInterval(() => forgetOldDismissed().catch((err) => console.error('[notifications] cleanup failed:', err.message)), 24 * 60 * 60 * 1000).unref();
 
 app.listen(INTERNAL_PORT, '0.0.0.0', () => {
     console.log('');

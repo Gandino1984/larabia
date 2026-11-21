@@ -17,6 +17,7 @@ import openSpaceApiRouter from "./open_space_api_router.js";
 import bugReportApiRouter from "./bug_report_api_router.js";
 import galleryApiRouter from "./gallery_api_router.js";
 import chatApiRouter from "./chat_api_router.js";
+import notificationApiRouter from "./notification_api_router.js";
 
 const router = Router();
 
@@ -36,6 +37,7 @@ router.use("/open-space", openSpaceApiRouter);
 router.use("/bug-reports", bugReportApiRouter);
 router.use("/gallery", galleryApiRouter);
 router.use("/chat", chatApiRouter);
+router.use("/notifications", notificationApiRouter);
 
 // Author profile routes are defined with their full prefix (/author-profile/*) inside the router
 router.use("/", authorProfileApiRouter);

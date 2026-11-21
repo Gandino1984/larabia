@@ -44,7 +44,19 @@
 // "New content" notifications accumulate (persist as unread) until the user
 // opens the bell — the last-seen timestamp is stored per user in localStorage,
 // so unread items survive reloads and pile up over time.
-import { createContext, useContext, useCallback, useEffect, useMemo, useState } from 'react';
+//
+// KEPT UNTIL DELETED (user request 2026-11-21: «las notificaciones deberían
+// mantenerse hasta que el usuario decida borrarlas»): every informational
+// notification (`keep: true` — new content, answers, reviews, comments,
+// likes, chat news, reported errors) is copied to the server the first time
+// it's seen (/notifications, back-end user_notification_model.js) with its
+// texts as translation keys (`tx`: shown in the reader's language) and what
+// it opens (`target`, see openTarget). Opening the bell marks them read; they
+// stay, greyed, until the person deletes them («×» or «Borrar todas»). Ones
+// that need an answer (invitations, requests) go when answered; the
+// remaining ones without an answer (the profile reminder, counts) can be
+// deleted too (hidden for good).
+import { createContext, useContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../utils/axiosConfig';
 import { useAuth } from './AuthContext';
@@ -65,6 +77,9 @@ const NotificationContext = createContext(null);
 // A date from the API as a timestamp (read as UTC: serverDate), 0 if none.
 const tsOf = (v) => serverDate(v)?.getTime() ?? 0;
 const MAX_CONTENT_NOTIFS = 30;
+// A text to show again later: a translation key (+ values) — in the reader's
+// language whenever it's shown — or plain text (a title, a comment).
+const tx = (k, o) => (o ? { k, o } : { k });
 
 export const NotificationProvider = ({ children }) => {
   const { t } = useTranslation();
@@ -73,10 +88,10 @@ export const NotificationProvider = ({ children }) => {
   const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToExhibition, navigateToAdmin, navigateToWorkshopEditor } = useUI();
   const {
     invitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen, setSelectedWorkshop,
-    respondExtraSpot, markSpotAnswersSeen, markContestReviewsSeen
+    respondExtraSpot, markSpotAnswersSeen, markContestReviewsSeen, fetchWorkshopById
   } = useWorkshop();
   const { newReports, latestReports } = usePendingReview();
-  const { setSelectedArticle, setSelectedProject } = useMagazine();
+  const { setSelectedArticle, setSelectedProject, fetchArticleById } = useMagazine();
   const { subscribedProjectIds } = useEngagement();
   const subscription = useSubscription();
   const membership = subscription?.mine;
@@ -162,11 +177,104 @@ export const NotificationProvider = ({ children }) => {
     return dt ? localDate(dt, { day: 'numeric', month: 'short' }) : null;
   };
 
+  // ── Kept notifications (the server's copy: /notifications) ──
+  const [inbox, setInbox] = useState({ items: [], dismissed: [] });
+  const sentKeys = useRef(new Set());
+  const liveKeepRef = useRef([]);
+  const userHeaders = useMemo(() => (currentUser?.id_user ? { headers: { 'x-user-id': currentUser.id_user } } : null), [currentUser?.id_user]);
+  const loadInbox = useCallback(async () => {
+    if (!userHeaders) { setInbox({ items: [], dismissed: [] }); return; }
+    try {
+      const res = await axiosInstance.get('/notifications', userHeaders);
+      setInbox(res.data.data || { items: [], dismissed: [] });
+    } catch { /* keep what's shown */ }
+  }, [userHeaders]);
+  useEffect(() => {
+    sentKeys.current = new Set();
+    loadInbox();
+    // Another device may have read or deleted some.
+    window.addEventListener('focus', loadInbox);
+    return () => window.removeEventListener('focus', loadInbox);
+  }, [loadInbox]);
+  // Saves the ones not kept yet (once each per session); the answer is the whole list.
+  const saveToInbox = useCallback(async (items) => {
+    if (!userHeaders) return;
+    const fresh = items.filter((n) => !sentKeys.current.has(n.id));
+    if (fresh.length === 0) return;
+    fresh.forEach((n) => sentKeys.current.add(n.id));
+    try {
+      const res = await axiosInstance.post('/notifications/sync', {
+        items: fresh.map((n) => ({
+          key: n.id,
+          type: n.type,
+          payload: { title: n.title, message: n.message, target: n.target || null },
+          event_at: new Date(n.ts || Date.now()).toISOString()
+        }))
+      }, userHeaders);
+      setInbox(res.data.data);
+    } catch {
+      fresh.forEach((n) => sentKeys.current.delete(n.id));
+    }
+  }, [userHeaders]);
+  const markInboxRead = useCallback(async () => {
+    if (!userHeaders) return;
+    await saveToInbox(liveKeepRef.current);
+    try {
+      const res = await axiosInstance.post('/notifications/read', {}, userHeaders);
+      setInbox(res.data.data);
+    } catch { /* stays unread */ }
+  }, [userHeaders, saveToInbox]);
+  const dismiss = useCallback(async (key) => {
+    if (!userHeaders) return;
+    // Gone from the list at once.
+    setInbox((b) => ({ items: b.items.filter((i) => i.key !== key), dismissed: [...b.dismissed, key] }));
+    try {
+      const res = await axiosInstance.delete(`/notifications/${encodeURIComponent(key)}`, userHeaders);
+      setInbox(res.data.data);
+    } catch { loadInbox(); }
+  }, [userHeaders, loadInbox]);
+
+  // What a kept notification opens (its `target`).
+  const openTarget = useCallback(async (target) => {
+    if (!target) return;
+    switch (target.kind) {
+      case 'article': {
+        const r = await fetchArticleById(target.id);
+        if (r?.success) navigateToArticle();
+        break;
+      }
+      case 'project': {
+        try {
+          const res = await axiosInstance.get(`/magazine-project/by-id/${target.id}`, userHeaders || {});
+          if (res.data?.data) { setSelectedProject(res.data.data); navigateToProjectDetail(); }
+        } catch { /* it isn't there any more */ }
+        break;
+      }
+      case 'workshop':
+      case 'workshop-edit': {
+        const r = await fetchWorkshopById(target.id);
+        if (!r?.success) break;
+        if (target.kind === 'workshop') navigateToWorkshopDetail();
+        else navigateToWorkshopEditor(r.data, 'talleres');
+        break;
+      }
+      case 'my-gallery': navigateToMyGallery(); break;
+      case 'exhibition': navigateToExhibition(target.id, { work: target.work ?? null, piece: target.piece ?? null, comments: !!target.comments }); break;
+      case 'admin': navigateToAdmin(target.tab); break;
+      case 'chat': chat?.openChats(target.id); break;
+      case 'membership': subscription?.openPortal?.(); break;
+      case 'author-editor': navigateToAuthorEditor(); break;
+      default: break;
+    }
+  }, [fetchArticleById, navigateToArticle, userHeaders, setSelectedProject, navigateToProjectDetail, fetchWorkshopById, navigateToWorkshopDetail, navigateToWorkshopEditor, navigateToMyGallery, navigateToExhibition, navigateToAdmin, chat, subscription, navigateToAuthorEditor]);
+
   // Mark every current notification as seen (called when the user opens/closes
   // the bell). Only affects the time-based content notifications and the
   // answers to the user's workshop invitations; the profile reminder and
   // pending invitations persist until acted on.
   const markAllSeen = useCallback(() => {
+    // The kept ones: those on screen now saved first, then all read.
+    markInboxRead();
     const now = Date.now();
     if (seenKey) { try { localStorage.setItem(seenKey, String(now)); } catch { /* ignore */ } }
     setLastSeen(now);
@@ -184,7 +292,7 @@ export const NotificationProvider = ({ children }) => {
     gallery.markReviewsSeen();
     gallery.markActivitySeen();
     if (chat?.conversations.some((c) => c.unseen_change)) chat.markSeen();
-  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, invitationFeed?.spot_answers, invitationFeed?.contest_reviews, markInvitationResponsesSeen, markSpotAnswersSeen, markContestReviewsSeen, gallery, chat]);
+  }, [seenKey, membershipKey, membership?.active, membership?.since, invitationFeed?.responses, invitationFeed?.spot_answers, invitationFeed?.contest_reviews, markInvitationResponsesSeen, markSpotAnswersSeen, markContestReviewsSeen, gallery, chat, markInboxRead]);
 
   const notifications = useMemo(() => {
     const list = [];
@@ -280,18 +388,21 @@ export const NotificationProvider = ({ children }) => {
         if (c.unseen_change) {
           const vars = { name };
           list.push({
-            id: `chat-answer-${c.id_conversation}-${c.status}-${c.changed_at}`,
+            id: `chat-answer-${c.id_conversation}-${c.status}-${tsOf(c.changed_at)}`,
             type: 'chat-answer',
+            keep: true,
+            ts: tsOf(c.changed_at),
+            target: { kind: 'chat', id: c.id_conversation },
             title: c.status === 'active'
-              ? t('notifications.chatAccepted.title', { ...vars, defaultValue: '{{name}} ha aceptado charlar contigo' })
+              ? tx('notifications.chatAccepted.title', vars)
               : c.status === 'declined'
-                ? t('notifications.chatDeclined.title', { ...vars, defaultValue: '{{name}} no ha aceptado charlar contigo' })
-                : t('notifications.chatEnded.title', { ...vars, defaultValue: '{{name}} ha terminado la conversación' }),
+                ? tx('notifications.chatDeclined.title', vars)
+                : tx('notifications.chatEnded.title', vars),
             message: c.status === 'active'
-              ? t('notifications.chatAccepted.message', 'Ya puedes escribirle.')
+              ? tx('notifications.chatAccepted.message')
               : c.status === 'declined'
-                ? t('notifications.chatDeclined.message', 'Puedes volver a pedirlo más adelante.')
-                : t('notifications.chatEnded.message', 'Si quieres seguir hablando, vuelve a pedirlo.'),
+                ? tx('notifications.chatDeclined.message')
+                : tx('notifications.chatEnded.message'),
             onClick: () => { chat.markSeen([c.id_conversation]); open(); }
           });
         }
@@ -300,7 +411,10 @@ export const NotificationProvider = ({ children }) => {
           list.push({
             id: `chat-message-${c.id_conversation}-${c.last_message?.id_message || 0}`,
             type: 'chat-message',
-            title: t('notifications.chatMessage.title', { name, defaultValue: '{{name}} te ha escrito' }),
+            keep: true,
+            ts: tsOf(c.last_message?.created_at),
+            target: { kind: 'chat', id: c.id_conversation },
+            title: tx('notifications.chatMessage.title', { name }),
             message: body.length > 120 ? `${body.slice(0, 117)}…` : body,
             onClick: open
           });
@@ -317,12 +431,15 @@ export const NotificationProvider = ({ children }) => {
         list.push({
           id: `gallery-review-${w.id_work}-${w.status_work}`,
           type: 'gallery-review',
+          keep: true,
+          ts: tsOf(w.reviewed_at || w.updated_at),
+          target: { kind: 'my-gallery' },
           title: approved
-            ? t('notifications.galleryApproved.title', 'Tu obra ya está en la galería')
-            : t('notifications.galleryRejected.title', 'Una obra tuya no se ha publicado'),
+            ? tx('notifications.galleryApproved.title')
+            : tx('notifications.galleryRejected.title'),
           message: approved || !w.rejection_reason
             ? `«${title}»`
-            : t('notifications.galleryRejected.message', { title, reason: w.rejection_reason, defaultValue: '«{{title}}»: {{reason}}' }),
+            : tx('notifications.galleryRejected.message', { title, reason: w.rejection_reason }),
           onClick: () => navigateToMyGallery()
         });
       }
@@ -335,8 +452,11 @@ export const NotificationProvider = ({ children }) => {
           list.push({
             id: `gallery-comment-${a.target_id}-${a.ids[0]}`,
             type: 'gallery-comment',
-            title: t('notifications.galleryComment.title', { count: a.count, name, title }),
-            message: t('notifications.galleryComment.message', { name, text: a.last_text }),
+            keep: true,
+            ts: tsOf(a.last_at),
+            target: { kind: 'exhibition', id: activity.exhibition_id, work: a.target_id, comments: true },
+            title: tx('notifications.galleryComment.title', { count: a.count, name, title }),
+            message: tx('notifications.galleryComment.message', { name, text: a.last_text }),
             onClick: () => navigateToExhibition(activity.exhibition_id, { work: a.target_id, comments: true })
           });
         } else {
@@ -344,10 +464,11 @@ export const NotificationProvider = ({ children }) => {
           list.push({
             id: `gallery-like-${a.kind}-${a.target_id}-${a.ids[0]}`,
             type: 'gallery-like',
-            title: t('notifications.galleryLike.title', { count: a.count, name, title }),
-            message: piece
-              ? t('notifications.galleryLike.piece', 'Una obra de tu exposición')
-              : t('notifications.galleryLike.work', 'Una ilustración de tu exposición'),
+            keep: true,
+            ts: tsOf(a.last_at),
+            target: { kind: 'exhibition', id: activity.exhibition_id, ...(piece ? { piece: a.target_id } : { work: a.target_id }) },
+            title: tx('notifications.galleryLike.title', { count: a.count, name, title }),
+            message: piece ? tx('notifications.galleryLike.piece') : tx('notifications.galleryLike.work'),
             onClick: () => navigateToExhibition(activity.exhibition_id, piece ? { piece: a.target_id } : { work: a.target_id })
           });
         }
@@ -372,7 +493,12 @@ export const NotificationProvider = ({ children }) => {
         list.push({
           id: `bug-report-${r.id_report}`,
           type: 'bug-report',
-          title: t('notifications.bugReport.title', { name: r.user?.name_user || t('notifications.someone', 'Alguien'), defaultValue: '{{name}} ha reportado un error' }),
+          keep: true,
+          ts: tsOf(r.created_at),
+          target: { kind: 'admin', tab: 'reports' },
+          title: r.user?.name_user
+            ? tx('notifications.bugReport.title', { name: r.user.name_user })
+            : tx('notifications.bugReport.titleSomeone'),
           message: `«${excerpt}»`,
           onClick: () => navigateToAdmin('reports')
         });
@@ -454,8 +580,10 @@ export const NotificationProvider = ({ children }) => {
         content.push({
           id: `article-${a.id_article}`,
           type: 'article',
+          keep: true,
+          target: { kind: 'article', id: a.id_article },
           ts,
-          title: t('notifications.newArticle.title'),
+          title: tx('notifications.newArticle.title'),
           message: a.title_article,
           onClick: () => { setSelectedArticle(a); navigateToArticle(); }
         });
@@ -466,8 +594,10 @@ export const NotificationProvider = ({ children }) => {
           content.push({
             id: `project-${p.id_project}`,
             type: 'project',
+            keep: true,
+            target: { kind: 'project', id: p.id_project },
             ts,
-            title: t('notifications.newProject.title'),
+            title: tx('notifications.newProject.title'),
             message: p.title_project,
             onClick: () => { setSelectedProject(p); navigateToProjectDetail(); }
           });
@@ -484,8 +614,10 @@ export const NotificationProvider = ({ children }) => {
         content.push({
           id: `sub-article-${a.id_article}`,
           type: 'subscription',
+          keep: true,
+          target: { kind: 'article', id: a.id_article },
           ts,
-          title: t('notifications.projectNewContent.title'),
+          title: tx('notifications.projectNewContent.title'),
           message: proj ? `${proj.title_project}: ${a.title_article}` : a.title_article,
           onClick: () => { setSelectedArticle(a); navigateToArticle(); }
         });
@@ -499,8 +631,10 @@ export const NotificationProvider = ({ children }) => {
           content.push({
             id: `sub-project-${p.id_project}-${updatedTs}`,
             type: 'subscription',
+            keep: true,
+            target: { kind: 'project', id: p.id_project },
             ts: updatedTs,
-            title: t('notifications.projectUpdated.title'),
+            title: tx('notifications.projectUpdated.title'),
             message: p.title_project,
             onClick: () => { setSelectedProject(p); navigateToProjectDetail(); }
           });
@@ -517,11 +651,13 @@ export const NotificationProvider = ({ children }) => {
           content.push({
             id: `membership-${ts}`,
             type: 'membership',
+            keep: true,
+            target: { kind: 'membership' },
             ts,
-            title: t('notifications.membership.title', 'Ya eres socio/a'),
+            title: tx('notifications.membership.title'),
             message: renews
-              ? t('notifications.membership.messageRenews', { date: renews, defaultValue: 'Gracias por apoyar La Rabia. Próxima renovación: {{date}}' })
-              : t('notifications.membership.message', 'Gracias por apoyar La Rabia.'),
+              ? tx('notifications.membership.messageRenews', { date: renews })
+              : tx('notifications.membership.message'),
             onClick: () => subscription?.openPortal?.()
           });
         }
@@ -534,13 +670,13 @@ export const NotificationProvider = ({ children }) => {
         content.push({
           id: `workshop-invite-response-${r.id_invitation}`,
           type: 'workshop-invite-response',
+          keep: true,
+          target: { kind: 'workshop', id: r.workshop?.id_workshop },
           ts: r.responded_at ? tsOf(r.responded_at) : Date.now(),
-          title: accepted
-            ? t('notifications.workshopInviteAccepted.title', 'Invitación aceptada')
-            : t('notifications.workshopInviteDeclined.title', 'Invitación rechazada'),
+          title: accepted ? tx('notifications.workshopInviteAccepted.title') : tx('notifications.workshopInviteDeclined.title'),
           message: accepted
-            ? t('notifications.workshopInviteAccepted.message', { ...vars, defaultValue: '{{name}} ha aceptado tu invitación a «{{title}}» y tiene plaza.' })
-            : t('notifications.workshopInviteDeclined.message', { ...vars, defaultValue: '{{name}} ha rechazado tu invitación a «{{title}}». Su plaza vuelve a estar libre.' }),
+            ? tx('notifications.workshopInviteAccepted.message', vars)
+            : tx('notifications.workshopInviteDeclined.message', vars),
           onClick: () => openWorkshop(r.workshop)
         });
       }
@@ -552,13 +688,11 @@ export const NotificationProvider = ({ children }) => {
         content.push({
           id: `workshop-spot-answer-${a.id_spot_request}`,
           type: 'workshop-spot-answer',
+          keep: true,
+          target: { kind: 'workshop', id: a.workshop?.id_workshop },
           ts: a.responded_at ? tsOf(a.responded_at) : Date.now(),
-          title: accepted
-            ? t('notifications.spotAccepted.title', 'Tienes plaza')
-            : t('notifications.spotDeclined.title', 'Sin plaza extra'),
-          message: accepted
-            ? t('notifications.spotAccepted.message', { ...vars, defaultValue: 'Te han abierto una plaza en «{{title}}». ¡Nos vemos allí!' })
-            : t('notifications.spotDeclined.message', { ...vars, defaultValue: 'No se ha podido abrir una plaza más en «{{title}}».' }),
+          title: accepted ? tx('notifications.spotAccepted.title') : tx('notifications.spotDeclined.title'),
+          message: accepted ? tx('notifications.spotAccepted.message', vars) : tx('notifications.spotDeclined.message', vars),
           onClick: () => openWorkshop(a.workshop)
         });
       }
@@ -571,13 +705,13 @@ export const NotificationProvider = ({ children }) => {
         content.push({
           id: `contest-review-${r.id_workshop}-${r.review_status_workshop}`,
           type: 'contest-review',
+          keep: true,
+          target: { kind: approved ? 'workshop' : 'workshop-edit', id: r.id_workshop },
           ts: r.updated_at ? tsOf(r.updated_at) : Date.now(),
-          title: approved
-            ? t('notifications.contestApproved.title', 'Tu convocatoria ya está publicada')
-            : t('notifications.contestRejected.title', 'Un super admin ha devuelto tu convocatoria'),
+          title: approved ? tx('notifications.contestApproved.title') : tx('notifications.contestRejected.title'),
           message: approved || !r.rejection_reason_workshop
             ? `«${title}»`
-            : t('notifications.contestRejected.message', { title, reason: r.rejection_reason_workshop, defaultValue: '«{{title}}»: {{reason}}' }),
+            : tx('notifications.contestRejected.message', { title, reason: r.rejection_reason_workshop }),
           onClick: () => (approved ? openWorkshop(r) : navigateToWorkshopEditor(r, 'talleres'))
         });
       }
@@ -597,10 +731,57 @@ export const NotificationProvider = ({ children }) => {
     setSelectedArticle, setSelectedProject, t
   ]);
 
+  // The live informational ones are kept as soon as they show up.
+  const liveKeep = useMemo(() => notifications.filter((n) => n.keep), [notifications]);
+  liveKeepRef.current = liveKeep;
+  useEffect(() => { saveToInbox(liveKeep); }, [liveKeep, saveToInbox]);
+
+  // What the bell shows: first what's waiting for an answer (and reminders),
+  // then everything kept, newest first — the not-yet-saved ones as unread.
+  const say = useCallback((x) => (x && typeof x === 'object' && x.k ? t(x.k, x.o) : (x ?? '')), [t]);
+  const shown = useMemo(() => {
+    const dismissed = new Set(inbox.dismissed);
+    const keptKeys = new Set(inbox.items.map((i) => i.key));
+    const live = notifications
+      .filter((n) => !n.keep && !dismissed.has(n.id))
+      .map((n) => ({ ...n, title: say(n.title), message: say(n.message), read: false, deletable: !n.actions }));
+    const pending = notifications
+      .filter((n) => n.keep && !keptKeys.has(n.id) && !dismissed.has(n.id))
+      .map((n) => ({ ...n, title: say(n.title), message: say(n.message), read: false, deletable: true }));
+    const kept = inbox.items.map((i) => ({
+      id: i.key,
+      type: i.type,
+      ts: tsOf(i.event_at),
+      title: say(i.payload?.title),
+      message: say(i.payload?.message),
+      onClick: () => openTarget(i.payload?.target),
+      read: i.read,
+      deletable: true
+    }));
+    const dated = [...pending, ...kept].sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    return [...live, ...dated];
+  }, [notifications, inbox, say, openTarget]);
+  const unread = shown.filter((n) => !n.read).length;
+
+  // «Borrar todas»: the kept ones and the reminders shown (not what's waiting for an answer).
+  const clearAll = useCallback(async () => {
+    if (!userHeaders) return;
+    const keys = shown.filter((n) => n.deletable && !n.keep && !inbox.items.some((i) => i.key === n.id)).map((n) => n.id);
+    const pendingKeys = shown.filter((n) => n.keep && !inbox.items.some((i) => i.key === n.id)).map((n) => n.id);
+    setInbox((b) => ({ items: [], dismissed: [...b.dismissed, ...b.items.map((i) => i.key), ...keys, ...pendingKeys] }));
+    try {
+      const res = await axiosInstance.post('/notifications/clear', { keys: [...keys, ...pendingKeys] }, userHeaders);
+      setInbox(res.data.data);
+    } catch { loadInbox(); }
+  }, [userHeaders, shown, inbox.items, loadInbox]);
+
   const value = {
-    notifications,
-    count: notifications.length,
-    markAllSeen
+    notifications: shown,
+    count: unread,
+    unread,
+    markAllSeen,
+    dismiss,
+    clearAll
   };
 
   return (

@@ -2083,5 +2083,10 @@
   "photo.uploadNote": "The new one will also be your author profile's photo.",
   "photo.change": "Change photo",
   "photo.choose": "Choose which photo to use",
-  "photo.chooseHint": "Your Google photo, your profile's or a new one: the one you choose is shown across the magazine."
+  "photo.chooseHint": "Your Google photo, your profile's or a new one: the one you choose is shown across the magazine.",
+  "notifications.clearAll": "Delete all",
+  "notifications.clearAllConfirm": "Delete all notifications? Those waiting for your answer stay.",
+  "notifications.delete": "Delete",
+  "notifications.deleteNamed": "Delete “{{title}}”",
+  "notifications.bugReport.titleSomeone": "Someone reported a problem"
 }

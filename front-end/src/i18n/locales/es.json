@@ -2083,5 +2083,10 @@
   "photo.uploadNote": "La nueva será también la foto de tu perfil de autor/a.",
   "photo.change": "Cambiar foto",
   "photo.choose": "Elegir qué foto usar",
-  "photo.chooseHint": "Tu foto de Google, la de tu perfil o una nueva: la que elijas sale en toda la revista."
+  "photo.chooseHint": "Tu foto de Google, la de tu perfil o una nueva: la que elijas sale en toda la revista.",
+  "notifications.clearAll": "Borrar todas",
+  "notifications.clearAllConfirm": "¿Borrar todas las notificaciones? Las que esperan tu respuesta se quedan.",
+  "notifications.delete": "Borrar",
+  "notifications.deleteNamed": "Borrar «{{title}}»",
+  "notifications.bugReport.titleSomeone": "Alguien ha reportado un error"
 }
