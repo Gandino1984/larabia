@@ -446,6 +446,113 @@ export const sendOpenSpaceProposalEmail = async ({ senderName, senderEmail, titl
   }
 };
 
+// «Propón una actividad»: a new proposal, for the team (Spanish, like the
+// other notices to the team). Replies go to whoever proposed it.
+export const sendActivityProposalEmail = async ({ senderName, senderEmail, kindLabel, title, description, details }) => {
+  try {
+    const transporter = createTransporter();
+    const magazineUrl = config.urls.frontend;
+    const { name: BRAND } = await getBrand();
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const html = `
+      <!DOCTYPE html><html><head><style>${baseStyles}</style></head><body>
+        <div class="container">
+          <div class="header">Propón una actividad</div>
+          <div class="content">
+            <p>Ha llegado una propuesta nueva:</p>
+            <div style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <strong>De:</strong> ${esc(senderName)} (${esc(senderEmail)})<br>
+              <strong>Tipo:</strong> ${esc(kindLabel)}<br>
+              <strong>Título:</strong> ${esc(title)}
+            </div>
+            <div style="background-color: #f8f9fa; padding: 20px; border-left: 4px solid ${ACCENT_COLOR}; border-radius: 5px; margin: 20px 0;">
+              ${esc(description).replace(/\n/g, '<br>')}
+            </div>
+            ${details ? `<p><strong>Detalles:</strong><br>${esc(details).replace(/\n/g, '<br>')}</p>` : ''}
+            <p>Apruébala o descártala en Barrio › Propón una actividad (o en Administración › Propuestas). Al aprobarla, le escribimos para decirle que la estamos considerando.</p>
+            <div style="text-align: center;"><a href="${magazineUrl}" class="button">Ir a ${BRAND}</a></div>
+          </div>
+        </div>
+      </body></html>
+    `;
+    await transporter.sendMail({
+      from: `"${BRAND}" <${process.env.EMAIL_USER}>`,
+      to: process.env.CONTACT_EMAIL || process.env.EMAIL_USER,
+      replyTo: senderEmail,
+      subject: `Propuesta de ${kindLabel.toLowerCase()}: «${title}», de ${senderName}`,
+      text: `De: ${senderName} (${senderEmail})\nTipo: ${kindLabel}\nTítulo: ${title}\n\n${description}${details ? `\n\nDetalles:\n${details}` : ''}\n\nApruébala o descártala en Barrio › Propón una actividad: ${magazineUrl}`,
+      html
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending activity proposal email:', error);
+    return false;
+  }
+};
+
+// «Propón una actividad»: the team approved the proposal — we've received it
+// and we're considering it. In the language the person wrote from (es | en |
+// eu). False if it couldn't go out.
+export const sendActivityProposalConsideredEmail = async ({ userEmail, userName, title, kind, lang = 'es' }) => {
+  try {
+    const magazineUrl = config.urls.frontend;
+    const { name: BRAND } = await getBrand();
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const KIND = {
+      es: { workshop: 'tu propuesta de taller', call: 'tu propuesta de convocatoria' },
+      en: { workshop: 'your workshop proposal', call: 'your open call proposal' },
+      eu: { workshop: 'zure tailer-proposamena', call: 'zure deialdi-proposamena' }
+    };
+    const COPY = {
+      es: {
+        subject: `Hemos recibido tu propuesta «${title}»`,
+        hello: `Hola, ${userName}:`,
+        paragraphs: [
+          `Hemos recibido ${KIND.es[kind] || 'tu propuesta'}, «${title}», y la estamos considerando.`,
+          `Gracias por pensar en ${BRAND}. Nos pondremos en contacto contigo para hablar de ella.`
+        ],
+        button: `Ir a ${BRAND}`
+      },
+      en: {
+        subject: `We've received your proposal “${title}”`,
+        hello: `Hi, ${userName},`,
+        paragraphs: [
+          `We've received ${KIND.en[kind] || 'your proposal'}, “${title}”, and we're considering it.`,
+          `Thank you for thinking of ${BRAND}. We'll get in touch with you to talk about it.`
+        ],
+        button: `Go to ${BRAND}`
+      },
+      eu: {
+        subject: `Zure proposamena jaso dugu: «${title}»`,
+        hello: `Kaixo, ${userName}:`,
+        paragraphs: [
+          `${KIND.eu[kind] || 'Zure proposamena'} jaso dugu, «${title}», eta aztertzen ari gara.`.replace(/^./, (c) => c.toUpperCase()),
+          `Eskerrik asko ${BRAND} gogoan izateagatik. Zurekin harremanetan jarriko gara horri buruz hitz egiteko.`
+        ],
+        button: `Joan ${BRAND}ra`
+      }
+    };
+    const c = COPY[lang] || COPY.es;
+    const html = `
+      <!DOCTYPE html><html lang="${COPY[lang] ? lang : 'es'}"><head><style>${baseStyles}</style></head><body>
+        <div class="container">
+          <div class="header">${esc(BRAND)}</div>
+          <div class="content">
+            <h2>${esc(c.hello)}</h2>
+            ${c.paragraphs.map((p) => `<p>${esc(p)}</p>`).join('\n            ')}
+            <div style="text-align: center;"><a href="${magazineUrl}" class="button">${esc(c.button)}</a></div>
+          </div>
+        </div>
+      </body></html>
+    `;
+    const text = [c.hello, '', ...c.paragraphs.flatMap((p) => [p, '']), `${BRAND}: ${magazineUrl}`].join('\n');
+    return await sendInvitationEmail({ kind: 'Activity proposal', userEmail, subject: c.subject, html, text, BRAND });
+  } catch (error) {
+    console.error('Error sending activity proposal considered email:', error);
+    return false;
+  }
+};
+
 // unsubscribe: { unsubscribeUrl (a page of the magazine), oneClickUrl (the API,
 // for mail clients' own «unsubscribe» button) } — routers/user_api_router.js.
 export const sendNewsletterEmail = async (subscriberEmail, subscriberName, articles, introText, unsubscribe = {}) => {

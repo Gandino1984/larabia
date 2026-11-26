@@ -85,12 +85,12 @@ export const NotificationProvider = ({ children }) => {
   const { t } = useTranslation();
   const { currentUser, canHaveAuthorProfile } = useAuth();
   const { authorProfiles, fetchAllProfiles } = useAuthor();
-  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToExhibition, navigateToAdmin, navigateToWorkshopEditor } = useUI();
+  const { navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail, navigateToWorkshopDetail, navigateToMyGallery, navigateToExhibition, navigateToAdmin, navigateToWorkshopEditor, navigateToActivityProposals } = useUI();
   const {
     invitationFeed, respondToWorkshopInvitation, markInvitationResponsesSeen, setSelectedWorkshop,
     respondExtraSpot, markSpotAnswersSeen, markContestReviewsSeen, fetchWorkshopById
   } = useWorkshop();
-  const { newReports, latestReports } = usePendingReview();
+  const { newReports, latestReports, latestActivityProposals } = usePendingReview();
   const { setSelectedArticle, setSelectedProject, fetchArticleById } = useMagazine();
   const { subscribedProjectIds } = useEngagement();
   const subscription = useSubscription();
@@ -264,9 +264,10 @@ export const NotificationProvider = ({ children }) => {
       case 'chat': chat?.openChats(target.id); break;
       case 'membership': subscription?.openPortal?.(); break;
       case 'author-editor': navigateToAuthorEditor(); break;
+      case 'proposals': navigateToActivityProposals(); break;
       default: break;
     }
-  }, [fetchArticleById, navigateToArticle, userHeaders, setSelectedProject, navigateToProjectDetail, fetchWorkshopById, navigateToWorkshopDetail, navigateToWorkshopEditor, navigateToMyGallery, navigateToExhibition, navigateToAdmin, chat, subscription, navigateToAuthorEditor]);
+  }, [fetchArticleById, navigateToArticle, userHeaders, setSelectedProject, navigateToProjectDetail, fetchWorkshopById, navigateToWorkshopDetail, navigateToWorkshopEditor, navigateToMyGallery, navigateToExhibition, navigateToAdmin, chat, subscription, navigateToAuthorEditor, navigateToActivityProposals]);
 
   // Mark every current notification as seen (called when the user opens/closes
   // the bell). Only affects the time-based content notifications and the
@@ -514,6 +515,25 @@ export const NotificationProvider = ({ children }) => {
       }
     }
 
+    // Admins and super admins: workshops and open calls proposed from Barrio
+    // («Propón una actividad»), not decided yet — each kept until deleted.
+    if (currentUser) {
+      for (const pr of latestActivityProposals || []) {
+        list.push({
+          id: `activity-proposal-${pr.id_activity_proposal}`,
+          type: 'activity-proposal',
+          keep: true,
+          ts: tsOf(pr.created_at),
+          target: { kind: 'proposals' },
+          title: pr.kind_proposal === 'call'
+            ? tx('notifications.activityProposal.callTitle', { name: pr.user?.name_user || '' })
+            : tx('notifications.activityProposal.workshopTitle', { name: pr.user?.name_user || '' }),
+          message: `«${pr.title_proposal}»`,
+          onClick: () => navigateToActivityProposals()
+        });
+      }
+    }
+
     // Invitations to a workshop, waiting for an answer.
     if (currentUser) {
       for (const inv of invitationFeed?.invitations || []) {
@@ -726,7 +746,7 @@ export const NotificationProvider = ({ children }) => {
     publishedArticles, publishedProjects, subscribedProjectIds, membership, subscription, membershipSeen,
     invitationFeed, openWorkshop, answerInvitation, respondExtraSpot, authorInvite, brand,
     gallery, chat, navigateToMyGallery, navigateToExhibition, navigateToAdmin, navigateToWorkshopEditor,
-    newReports, latestReports,
+    newReports, latestReports, latestActivityProposals, navigateToActivityProposals,
     navigateToAuthorEditor, navigateToArticle, navigateToProjectDetail,
     setSelectedArticle, setSelectedProject, t
   ]);

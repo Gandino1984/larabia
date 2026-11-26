@@ -33,7 +33,7 @@ function AdminPage() {
   const { t } = useTranslation();
   const { isSuperAdmin } = useAuth();
   const { navigateToHome, adminTab } = useUI();
-  const { totalPending, newProposals, galleryPending, newReports } = usePendingReview();
+  const { totalPending, newProposals, galleryPending, newReports, newActivityProposals } = usePendingReview();
   const [activeTab, setActiveTab] = useState(adminTab || 'users');
   // Asked for a tab while already here (a bell notification: Errores…).
   useEffect(() => { if (adminTab) setActiveTab(adminTab); }, [adminTab]);
@@ -70,8 +70,8 @@ function AdminPage() {
             {tab.key === 'pending' && totalPending > 0 && (
               <span className="admin-page__tab-badge">{totalPending}</span>
             )}
-            {tab.key === 'proposals' && newProposals > 0 && (
-              <span className="admin-page__tab-badge">{newProposals}</span>
+            {tab.key === 'proposals' && newProposals + newActivityProposals > 0 && (
+              <span className="admin-page__tab-badge">{newProposals + newActivityProposals}</span>
             )}
             {tab.key === 'gallery' && galleryPending > 0 && (
               <span className="admin-page__tab-badge">{galleryPending}</span>

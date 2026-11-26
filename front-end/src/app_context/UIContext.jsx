@@ -20,6 +20,8 @@ export const UIProvider = ({ children }) => {
   const [showAuthorPublications, setShowAuthorPublications] = useState(false);
   const [showProjectDetail, setShowProjectDetail] = useState(false);
   const [showOpenMic, setShowOpenMic] = useState(false);
+  // «Propón una actividad» (Barrio): proposals of workshops and open calls.
+  const [showActivityProposals, setShowActivityProposals] = useState(false);
   const [showMicroPerfiles, setShowMicroPerfiles] = useState(false);
   const [showTalleres, setShowTalleres] = useState(false);
   // The Galería: the exhibitions, one exhibition (galleryView.exhibitionId;
@@ -150,6 +152,7 @@ export const UIProvider = ({ children }) => {
     setShowAuthorPublications(false);
     setShowProjectDetail(false);
     setShowOpenMic(false);
+    setShowActivityProposals(false);
     setShowMicroPerfiles(false);
     setShowTalleres(false);
     setShowWorkshopDetail(false);
@@ -350,6 +353,7 @@ export const UIProvider = ({ children }) => {
       showTalleres ? 'talleres' :
       showWorkshopDetail ? 'workshopDetail' :
       showOpenMic ? 'openmic' :
+      showActivityProposals ? 'activityProposals' :
       showMicroPerfiles ? 'microperfiles' :
       'home';
     setProjectBackView(origin);
@@ -379,6 +383,7 @@ export const UIProvider = ({ children }) => {
       case 'talleres': setShowTalleres(true); break;
       case 'workshopDetail': setShowWorkshopDetail(true); break;
       case 'openmic': setShowOpenMic(true); break;
+      case 'activityProposals': setShowActivityProposals(true); break;
       case 'microperfiles': setShowMicroPerfiles(true); break;
       case 'home':
       default: setShowHome(true); break;
@@ -389,6 +394,12 @@ export const UIProvider = ({ children }) => {
     setPreviousView('home');
     resetAllViews();
     setShowProjectsList(true);
+  };
+
+  const navigateToActivityProposals = () => {
+    setPreviousView('home');
+    resetAllViews();
+    setShowActivityProposals(true);
   };
 
   const navigateToOpenMic = () => {
@@ -563,6 +574,8 @@ export const UIProvider = ({ children }) => {
     navigateBackFromProject,
     showOpenMic,
     navigateToOpenMic,
+    showActivityProposals,
+    navigateToActivityProposals,
     showMicroPerfiles,
     navigateToMicroPerfiles,
     showTalleres,

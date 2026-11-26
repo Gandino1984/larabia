@@ -13,7 +13,7 @@ import { useAuth } from './AuthContext';
 const PendingReviewContext = createContext(null);
 
 export const PendingReviewProvider = ({ children }) => {
-  const { currentUser, isSuperAdmin } = useAuth();
+  const { currentUser, isSuperAdmin, isAdmin } = useAuth();
   const [pendingArticles, setPendingArticles] = useState([]);
   const [pendingProjects, setPendingProjects] = useState([]);
   // Contests (Talleres) by admins, waiting for a super admin.
@@ -29,6 +29,11 @@ export const PendingReviewProvider = ({ children }) => {
   // them (the bell). Refreshed every minute and when the tab gets focus.
   const [newReports, setNewReports] = useState(0);
   const [latestReports, setLatestReports] = useState([]);
+  // «Propón una actividad»: proposals of workshops and open calls nobody has
+  // decided on — for admins AND super admins (both review them).
+  const [newActivityProposals, setNewActivityProposals] = useState(0);
+  const [latestActivityProposals, setLatestActivityProposals] = useState([]);
+  const reviewsActivities = isAdmin || isSuperAdmin;
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -104,10 +109,30 @@ export const PendingReviewProvider = ({ children }) => {
     return () => { clearInterval(timer); window.removeEventListener('focus', onFocus); };
   }, [isSuperAdmin, refreshReports]);
 
+  const refreshActivityProposals = useCallback(async () => {
+    if (!reviewsActivities || !currentUser?.id_user) { setNewActivityProposals(0); setLatestActivityProposals([]); return; }
+    try {
+      const res = await axiosInstance.get('/activity-proposals/count', { headers: { 'x-user-id': currentUser.id_user } });
+      if (!res.data?.error) {
+        setNewActivityProposals(res.data?.data?.new || 0);
+        setLatestActivityProposals(res.data?.data?.latest || []);
+      }
+    } catch {
+      // Next time.
+    }
+  }, [reviewsActivities, currentUser]);
+  useEffect(() => {
+    refreshActivityProposals();
+    if (!reviewsActivities) return undefined;
+    const timer = setInterval(refreshActivityProposals, 60000);
+    window.addEventListener('focus', refreshActivityProposals);
+    return () => { clearInterval(timer); window.removeEventListener('focus', refreshActivityProposals); };
+  }, [reviewsActivities, refreshActivityProposals]);
+
   const totalPending = pendingArticles.length + pendingProjects.length + pendingContests.length
     + sectionRequestArticles.length + sectionRequestProjects.length;
   // Everything waiting for the super admin (the Admin badge in the header).
-  const totalAttention = totalPending + newProposals + galleryPending + newReports;
+  const totalAttention = totalPending + newProposals + galleryPending + newReports + (isSuperAdmin ? newActivityProposals : 0);
 
   const value = {
     pendingArticles,
@@ -120,6 +145,9 @@ export const PendingReviewProvider = ({ children }) => {
     galleryPending,
     newReports,
     latestReports,
+    newActivityProposals,
+    latestActivityProposals,
+    refreshActivityProposals,
     refreshReports,
     totalAttention,
     loading,

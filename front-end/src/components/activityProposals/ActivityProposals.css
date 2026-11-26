@@ -1,0 +1,263 @@
+/* «Propón una actividad» (ActivityProposalsPage / ActivityProposalsReview).
+   Mobile first; the form fields are the proposals' (OpenSpaceProposalModal.css). */
+.activity-page {
+  min-height: 100vh;
+  background: var(--surface-light, #ffffff);
+  color: var(--on-light, #1a1a1a);
+  padding: 9rem 0.75rem 2rem;
+}
+.activity-container {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.activity-header {
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--on-light, #000000);
+}
+.activity-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+.activity-subtitle {
+  margin: 0.6rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.activity-how,
+.activity-signin,
+.activity-sent,
+.activity-form,
+.activity-mine,
+.activity-review {
+  padding: 1.1rem 1rem 1.25rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  background: #fafafa;
+}
+.activity-how h2,
+.activity-signin h2,
+.activity-form h2,
+.activity-mine h2,
+.activity-review h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+}
+.activity-how ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  line-height: 1.5;
+}
+
+.activity-signin { border: 2px solid var(--on-light, #1a1a1a); background: #ffffff; }
+.activity-signin p { margin: 0 0 0.75rem; line-height: 1.5; }
+.activity-signin__button { display: flex; justify-content: flex-start; margin: 0.5rem 0 0.75rem; }
+.activity-note { color: #555555; font-size: 0.85rem; }
+
+.activity-sent {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: #e8f5ec;
+  border-color: #b9dfc4;
+  color: #145a24;
+}
+.activity-sent h2 { margin: 0; }
+.activity-sent p { margin: 0 0 0.5rem; line-height: 1.5; color: #1a1a1a; }
+
+.activity-full {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  background: #fff3d6;
+  color: #6b4a00;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* The form */
+.activity-form { background: #ffffff; }
+.activity-form__kinds {
+  margin: 0 0 1rem;
+  padding: 0;
+  border: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.6rem;
+}
+.activity-form__kinds legend { margin-bottom: 0.5rem; font-weight: 700; }
+.activity-kind-choice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.65rem;
+  row-gap: 0.15rem;
+  align-items: center;
+  padding: 0.75rem 0.85rem;
+  border: 2px solid #e2e2e2;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  text-align: left;
+  text-transform: none;
+  cursor: pointer;
+}
+.activity-kind-choice svg { grid-row: span 2; }
+.activity-kind-choice__title { font-weight: 700; }
+.activity-kind-choice__desc { font-size: 0.85rem; color: #555555; line-height: 1.4; }
+.activity-kind-choice:hover,
+.activity-kind-choice:focus-visible { border-color: #1a1a1a; }
+.activity-kind-choice.is-selected { border-color: #1a1a1a; background: #1a1a1a; color: #ffffff; }
+.activity-kind-choice.is-selected .activity-kind-choice__desc { color: #dddddd; }
+.activity-form__actions { display: flex; justify-content: flex-end; margin-top: 0.75rem; }
+
+/* Buttons */
+.activity-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.activity-btn:hover:not(:disabled),
+.activity-btn:focus-visible { background: #1a1a1a; color: #ffffff; }
+.activity-btn--primary { background: #1e7e34; border-color: #1e7e34; color: #ffffff; }
+.activity-btn--primary:hover:not(:disabled),
+.activity-btn--primary:focus-visible { background: #196b2c; border-color: #196b2c; }
+.activity-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* Kind tag */
+.activity-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: #ececec;
+  color: #333333;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Theirs */
+.activity-mine ul,
+.activity-review__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.activity-mine__item,
+.activity-review__item {
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  background: #ffffff;
+}
+.activity-mine__head,
+.activity-review__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+}
+.activity-mine__head strong { overflow-wrap: anywhere; }
+.activity-mine__status {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.activity-mine__item.is-considering .activity-mine__status { color: #145a24; }
+.activity-mine__item.is-declined .activity-mine__status { color: #6b6b6b; }
+.activity-mine__date { margin: 0.25rem 0 0; color: #666666; font-size: 0.8rem; }
+.activity-mine__withdraw {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #c62828;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #c62828;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.activity-mine__withdraw:hover,
+.activity-mine__withdraw:focus-visible { background: #c62828; color: #ffffff; }
+
+/* Received (admins) */
+.activity-review { background: #ffffff; border: 2px solid #1a1a1a; }
+.activity-review__header p { margin: 0 0 0.75rem; color: #555555; font-size: 0.9rem; line-height: 1.45; }
+.activity-review__filters { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+.activity-review__filters button {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #c4c4c4;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.activity-review__filters button.is-active { background: #1a1a1a; border-color: #1a1a1a; color: #ffffff; }
+.activity-review__empty { margin: 0; color: #666666; }
+.activity-review__item h3 { margin: 0.5rem 0 0.2rem; font-size: 1.05rem; overflow-wrap: anywhere; }
+.activity-review__meta { margin: 0; color: #555555; font-size: 0.82rem; overflow-wrap: anywhere; }
+.activity-review__text,
+.activity-review__details { margin: 0.6rem 0 0; white-space: pre-line; line-height: 1.5; overflow-wrap: anywhere; }
+.activity-review__details { font-size: 0.9rem; color: #333333; }
+.activity-review__status {
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: #ececec;
+  color: #333333;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.activity-review__status--new { background: #fff3d6; color: #6b4a00; }
+.activity-review__status--considering { background: #e8f5ec; color: #145a24; }
+.activity-review__mail { display: flex; align-items: center; gap: 0.35rem; margin: 0.6rem 0 0; font-size: 0.82rem; }
+.activity-review__mail.is-sent { color: #145a24; }
+.activity-review__mail.is-failed { color: #8e1c1c; font-weight: 700; }
+.activity-review__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+
+@media (min-width: 768px) {
+  .activity-page { padding: 9rem 1.5rem 3rem; }
+  .activity-header h1 { font-size: 2.1rem; }
+  .activity-form__kinds { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}

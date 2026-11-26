@@ -310,3 +310,6 @@
     margin-left: auto;
   }
 }
+
+/* «Propón una actividad»: the proposals of workshops and open calls, above. */
+.admin-proposals__activities { margin-bottom: 1.5rem; }

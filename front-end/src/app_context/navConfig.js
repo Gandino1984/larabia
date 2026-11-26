@@ -39,7 +39,10 @@ export const DEFAULT_NAV = [
           { id: 'microabierto', kind: 'link', visible: true, min_role: 'all',
             label: { es: 'Espacio abierto', en: 'Open space', eu: 'Gune irekia' }, action: { type: 'section', value: 'openmic' } },
           { id: 'galeria', kind: 'link', visible: true, min_role: 'all',
-            label: { es: 'Galería', en: 'Gallery', eu: 'Galeria' }, action: { type: 'section', value: 'gallery' } }
+            label: { es: 'Galería', en: 'Gallery', eu: 'Galeria' }, action: { type: 'section', value: 'gallery' } },
+          // Anyone proposes a workshop or an open call (ActivityProposalsPage).
+          { id: 'proponer', kind: 'link', visible: true, min_role: 'all',
+            label: { es: 'Propón una actividad', en: 'Propose an activity', eu: 'Proposatu jarduera bat' }, action: { type: 'section', value: 'proposals' } }
         ] },
       { id: 'internacional', kind: 'link', visible: true, min_role: 'all',
         label: { es: 'Internacional', en: 'International', eu: 'Nazioartea' }, action: { type: 'category', value: 'internacional' } },
@@ -79,6 +82,7 @@ export const SECTION_OPTIONS = [
   { value: 'microperfiles', key: 'admin.nav.section.microperfiles', label: 'Micro-perfiles' },
   { value: 'talleres', key: 'admin.nav.section.talleres', label: 'Talleres' },
   { value: 'gallery', key: 'admin.nav.section.gallery', label: 'Galería' },
+  { value: 'proposals', key: 'admin.nav.section.proposals', label: 'Propón una actividad' },
   { value: 'about', key: 'admin.nav.section.about', label: 'Sobre La Rabia' }
 ];
 

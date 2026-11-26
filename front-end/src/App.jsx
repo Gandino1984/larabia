@@ -25,6 +25,7 @@ import AuthorProfileReader from './components/authors/AuthorProfileReader';
 import AuthorPublications from './components/authors/AuthorPublications';
 import ProjectDetail from './components/magazine/ProjectDetail';
 import OpenMicPublications from './components/openmic/OpenMicPublications';
+import ActivityProposalsPage from './components/activityProposals/ActivityProposalsPage';
 import CategorySectionPage from './components/magazine/CategorySectionPage';
 import AboutRabia from './components/magazine/AboutRabia';
 import WorkshopsList from './components/workshops/WorkshopsList';
@@ -45,7 +46,7 @@ import { useAuthor } from './app_context/AuthorContext';
 import './App.css';
 
 function App() {
-  const { showHome, showArticleDetail, showArticlesList, showProjectsList, showGallery, showExhibition, showMyGallery, galleryView, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, navigateToExhibition, showSuccess, showError, authorCardUser, closeAuthorCard } = useUI();
+  const { showHome, showArticleDetail, showArticlesList, showProjectsList, showGallery, showExhibition, showMyGallery, galleryView, showEditor, showLogin, showForgotPassword, showAuthors, showAuthorEditor, showAuthorProfile, showAuthorPublications, showProjectDetail, showOpenMic, showActivityProposals, showMicroPerfiles, showTalleres, showWorkshopDetail, showWorkshopEditor, showAbout, showAdmin, isFullscreen, navigateToArticle, navigateToTalleres, navigateToWorkshopDetail, navigateToExhibition, showSuccess, showError, authorCardUser, closeAuthorCard } = useUI();
   const { fetchArticleById, featuredLoaded } = useMagazine();
   const { authorProfiles, fetchAllProfiles, authorPhotoOf } = useAuthor();
   const { currentUser, setUser, loading: authLoading } = useAuth();
@@ -181,6 +182,7 @@ function App() {
     if (showAdmin) return <AdminPage />;
     if (showProjectDetail) return <ProjectDetail />;
     if (showOpenMic) return <OpenMicPublications />;
+    if (showActivityProposals) return <ActivityProposalsPage />;
     if (showMicroPerfiles) return <CategorySectionPage category="micro-perfiles" sectionKey="microperfiles" titleKey="microperfiles.title" subtitleKey="microperfiles.subtitle" />;
     if (showWorkshopDetail) return <WorkshopDetail />;
     if (showTalleres) return <WorkshopsList />;
@@ -211,6 +213,7 @@ function App() {
     (showAdmin && 'admin') ||
     (showProjectDetail && 'projectDetail') ||
     (showOpenMic && 'openmic') ||
+    (showActivityProposals && 'activity-proposals') ||
     (showMicroPerfiles && 'microperfiles') ||
     (showWorkshopDetail && 'workshopDetail') ||
     (showTalleres && 'talleres') ||

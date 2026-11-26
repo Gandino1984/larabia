@@ -16,6 +16,7 @@ const SECTION_NAV = {
   microperfiles: 'navigateToMicroPerfiles',
   talleres: 'navigateToTalleres',
   gallery: 'navigateToGallery',
+  proposals: 'navigateToActivityProposals',
   about: 'navigateToAbout',
   projects: 'navigateToProjectsList'
 };

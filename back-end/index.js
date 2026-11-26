@@ -39,6 +39,7 @@ import callVoteModel from './models/call_vote_model.js';
 import userModelForPhotos from './models/user_model.js';
 import { syncUserPhoto } from './utils/userPhoto.js';
 import userNotificationModel from './models/user_notification_model.js';
+import activityProposalModel from './models/activity_proposal_model.js';
 import { forgetOldDismissed } from './controllers/notification/notification_api_controller.js';
 import workshopSpotRequestModel from './models/workshop_spot_request_model.js';
 import { syncGalleryTables } from './models/gallery_models.js';
@@ -314,6 +315,8 @@ Promise.all([
         // The bell's kept notifications (migration 040): after the user
         // table's changes (its foreign key).
         await userNotificationModel.sync();
+        // «Propón una actividad» (migration 041).
+        await activityProposalModel.sync();
     } catch (err) {
         console.error('Error ensuring added columns:', err.message);
     }

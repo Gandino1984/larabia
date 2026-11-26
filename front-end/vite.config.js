@@ -34,6 +34,7 @@ export default defineConfig(({ mode }) => {
     '/gallery',
     '/chat',
     '/notifications',
+    '/activity-proposals',
     '/health'
   ];
   const proxy = Object.fromEntries(

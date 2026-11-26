@@ -14,6 +14,7 @@ import { usePendingReview } from '../../../app_context/PendingReviewContext';
 import { localDate, serverDate } from '../../../utils/locale';
 import { proposalKindLabel, proposalAdminStatusLabel, downloadProposalFile } from '../../../utils/proposals';
 import './AdminProposalsTab.css';
+import ActivityProposalsReview from '../../activityProposals/ActivityProposalsReview';
 
 const STATUSES = ['new', 'read', 'accepted', 'declined'];
 
@@ -107,6 +108,9 @@ function AdminProposalsTab() {
   ];
 
   return (
+    <>
+    {/* Workshops and open calls proposed from Barrio › Propón una actividad. */}
+    <div className="admin-proposals__activities"><ActivityProposalsReview /></div>
     <section className="admin-proposals">
       <div className="admin-proposals__header">
         <h2>{t('admin.proposals.title', 'Propuestas de Espacio abierto')}</h2>
@@ -226,6 +230,7 @@ function AdminProposalsTab() {
         </ul>
       )}
     </section>
+    </>
   );
 }
 
